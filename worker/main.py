@@ -33,7 +33,7 @@ from notifications import router as notifications_router
 from referrals import router as referrals_router
 from badges import router as badges_router
 from admin import router as admin_router
-import ml_persist  # scoring programado de submissions ML (evaluate_ml_rounds)
+import ml_persist
 import scheduler as _scheduler  # torneos de codigo (create/evaluate/signals)
 import ml_scheduler  # reparto QP + consensus_signals tras el scoring ML
 
@@ -486,14 +486,14 @@ async def scheduler_run(
         except Exception:  # noqa: BLE001
             logger.exception("generate_weekly_signals falló")
 
-        # Rondas ML: puntuar submissions pendientes.
+        # Rondas ML: cerrar y puntuar únicamente después del plazo.
         # (la GENERACIÓN de datasets la hace GitHub Actions en ubuntu-latest,
         #  con 7GB de RAM; aquí solo servimos + puntuamos. create_ml_round no
         #  existe en este worker, por lo que no se crea nada aquí.)
         ml_evaluated = 0
         try:
             ml_evaluated = await loop.run_in_executor(
-                None, lambda: ml_persist.evaluate_ml_rounds(sb, now)
+                None, lambda: ml_scheduler.evaluate_ml_rounds(sb, now)
             )
         except Exception:  # noqa: BLE001
             logger.exception("Scheduler ML falló (evaluate)")
@@ -541,7 +541,7 @@ async def scheduler_run(
 async def scheduler_evaluate(
     x_scheduler_key: str | None = Header(None),
     sync: bool = Query(False, description="Si true, ejecuta el scoring SINCRONO dentro del request (no background). Necesario en Render plan free donde los background tasks no persisten."), ) -> dict:
-    """Evalua/puntua submissions ML en estado pending.
+    """Finaliza rondas ML cuyo plazo y disponibilidad de targets se cumplieron.
 
     La generacion de datasets se hace en GitHub Actions (mayor RAM, no se duerme)
     y se sube a Supabase Storage. Este endpoint solo puntua submissions pendientes.
@@ -580,37 +580,27 @@ async def scheduler_evaluate(
     now = datetime.now(timezone.utc)
 
     async def _score_and_distribute():
-        """Scoring (ml_persist) + reparto QP y consensus_signals (ml_scheduler)."""
+        """Scoring y premios idempotentes de rondas cerradas."""
         loop = asyncio.get_event_loop()
-        evaluated = await loop.run_in_executor(
-            None, lambda: ml_persist.evaluate_ml_rounds(sb, now)
+        ml_rounds = await loop.run_in_executor(
+            None, lambda: ml_scheduler.evaluate_ml_rounds(sb, now)
         )
-        ml_rounds = 0
-        try:
-            ml_rounds = await loop.run_in_executor(
-                None, lambda: ml_scheduler.evaluate_ml_rounds(sb, now)
-            )
-        except Exception:  # noqa: BLE001
-            logger.exception("Reparto QP ML falló (ml_scheduler.evaluate_ml_rounds)")
-        return evaluated, ml_rounds
+        return ml_rounds
 
     async def _run_eval():
         try:
-            evaluated, ml_rounds = await _score_and_distribute()
-            logger.info(
-                f"Evaluacion ML completada: {evaluated} submissions, "
-                f"{ml_rounds} rondas con reparto QP."
-            )
+            ml_rounds = await _score_and_distribute()
+            logger.info("Evaluacion ML completada: %s rondas finalizadas", ml_rounds)
         except Exception:  # noqa: BLE001
             logger.exception("Error en la evaluacion ML (background)")
 
     if sync:
         try:
-            evaluated, ml_rounds = await _score_and_distribute()
+            ml_rounds = await _score_and_distribute()
             return {
                 "status": "ok",
                 "mode": "sync",
-                "evaluated": evaluated,
+                "evaluated": ml_rounds,
                 "ml_rounds": ml_rounds,
                 "message": "Scoring ML ejecutado sincronamente.",
             }

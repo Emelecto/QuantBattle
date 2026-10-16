@@ -519,6 +519,7 @@ def _download_live(
     timeframe: str,
     start: Union[str, datetime, pd.Timestamp],
     end: Union[str, datetime, pd.Timestamp],
+    adjusted_close: bool = False,
 ) -> pd.DataFrame:
     """Descarga OHLCV REALES desde la fuente (sin cache)."""
     asset_type = asset_type.lower()
@@ -559,7 +560,8 @@ def _download_live(
     if asset_type == "stock":
         sym = _normalize_symbol("stock", symbol)
         raw = _fetch_yfinance(sym, timeframe, start, end)
-        wanted = ["Open", "High", "Low", "Close", "Volume"]
+        price_column = "Adj Close" if adjusted_close else "Close"
+        wanted = ["Open", "High", "Low", price_column, "Volume"]
         missing = [c for c in wanted if c not in raw.columns]
         if missing:
             raise ValueError(
@@ -570,7 +572,7 @@ def _download_live(
                 "open": raw["Open"].astype(float),
                 "high": raw["High"].astype(float),
                 "low": raw["Low"].astype(float),
-                "close": raw["Close"].astype(float),
+                "close": raw[price_column].astype(float),
                 "volume": raw["Volume"].astype(float),
             }
         )
@@ -582,7 +584,8 @@ def _download_live(
         # Los ETFs cotizan en Yahoo igual que las acciones (SPY, QQQ, VTI...).
         sym = _normalize_symbol("stock", symbol)
         raw = _fetch_yfinance(sym, timeframe, start, end)
-        wanted = ["Open", "High", "Low", "Close", "Volume"]
+        price_column = "Adj Close" if adjusted_close else "Close"
+        wanted = ["Open", "High", "Low", price_column, "Volume"]
         missing = [c for c in wanted if c not in raw.columns]
         if missing:
             raise ValueError(
@@ -593,7 +596,7 @@ def _download_live(
                 "open": raw["Open"].astype(float),
                 "high": raw["High"].astype(float),
                 "low": raw["Low"].astype(float),
-                "close": raw["Close"].astype(float),
+                "close": raw[price_column].astype(float),
                 "volume": raw["Volume"].astype(float),
             }
         )
@@ -613,6 +616,7 @@ def get_ohlcv(
     start: Union[str, datetime, pd.Timestamp],
     end: Union[str, datetime, pd.Timestamp],
     use_cache: bool = True,
+    adjusted_close: bool = False,
 ) -> pd.DataFrame:
     """Descarga OHLCV REALES, usando cache de Supabase Storage cuando es posible.
 
@@ -627,6 +631,10 @@ def get_ohlcv(
     Devuelve DataFrame con columnas [open, high, low, close, volume] y
     DatetimeIndex (nombre 'timestamp'). Lanza ValueError si la fuente falla.
     """
+    # El caché antiguo contiene Close sin ajustar y no identifica la variante.
+    # No usarlo en las rondas ML que solicitan Adj Close.
+    if adjusted_close:
+        use_cache = False
     if use_cache:
         try:
             cached = read_from_cache(asset_type, symbol, timeframe, start, end)
@@ -637,7 +645,8 @@ def get_ohlcv(
         except Exception as exc:  # pragma: no cover - defensa adicional
             logger.warning("Cache read falló; descarga en vivo: %s", exc)
 
-    df = _download_live(asset_type, symbol, timeframe, start, end)
+    df = _download_live(asset_type, symbol, timeframe, start, end,
+                        adjusted_close=adjusted_close)
 
     if use_cache and df is not None and not df.empty:
         try:

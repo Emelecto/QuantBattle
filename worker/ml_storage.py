@@ -1,8 +1,8 @@
 """Capa de Storage para datasets de torneos ML.
 
-Sube/baja archivos a Supabase Storage (bucket 'tournament-datasets', público).
-El holdout (target del live) NO se sube nunca: vive en dataset_targets en la DB
-y solo es legible por service_role.
+Sube/baja los Parquet públicos a 'tournament-datasets' y los holdouts,
+mapeos y predicciones a buckets privados. Los targets históricos anteriores
+pueden permanecer en dataset_targets por compatibilidad.
 
 Resiliencia:
   - Toda operación de red usa reintento con backoff exponencial + jitter
@@ -30,10 +30,14 @@ logger = logging.getLogger(__name__)
 # Siempre público: los usuarios descargan train/validation sin autenticación.
 DATASET_BUCKET = os.environ.get("DATASET_BUCKET", "tournament-datasets")
 
-# Bucket de predicciones de usuarios (CSV). Tras aplicar la migración
-# 0023_submissions_privadas.sql, fijar SUBMISSIONS_BUCKET=submissions en Render;
-# mientras tanto comparte el bucket público por compatibilidad.
-SUBMISSIONS_BUCKET = os.environ.get("SUBMISSIONS_BUCKET", "tournament-datasets")
+# Los archivos nuevos de usuarios y el holdout nunca comparten bucket público.
+SUBMISSIONS_BUCKET = os.environ.get("SUBMISSIONS_BUCKET", "submissions")
+TARGETS_BUCKET = os.environ.get("TARGETS_BUCKET", "tournament-targets")
+
+
+def require_private_buckets() -> None:
+    if SUBMISSIONS_BUCKET == DATASET_BUCKET or TARGETS_BUCKET == DATASET_BUCKET:
+        raise RuntimeError("Buckets de predicciones y targets deben ser privados")
 
 
 def _env_int(name: str, default: int) -> int:
@@ -59,6 +63,11 @@ _SIDECAR_SUFFIX = ".sha256"
 def _is_not_found(exc: Exception) -> bool:
     msg = str(exc).lower()
     return any(s in msg for s in ("not found", "notfound", "404", "does not exist", "no such"))
+
+
+def _is_conflict(exc: Exception) -> bool:
+    msg = str(exc).lower()
+    return any(s in msg for s in ("already exists", "duplicate", "409", "resource_already_exists"))
 
 
 def _with_retry(fn, *, op: str, attempts: int | None = None,
@@ -144,19 +153,33 @@ def _client():
     return create_client(url, key)
 
 
-def upload_csv(csv_text: str, path: str) -> str:
-    """Sube un CSV como texto plano al bucket de predicciones."""
-    sb = _client()
-    data = csv_text.encode("utf-8")
+def _upload_immutable(sb, bucket: str, path: str, data: bytes,
+                      content_type: str) -> None:
+    """Permite reintentar un upload perdido sin reemplazar objetos distintos."""
     digest = sha256_bytes(data)
 
-    def _do():
-        sb.storage.from_(SUBMISSIONS_BUCKET).upload(
-            path, data,
-            {"content-type": "text/csv", "upsert": "true"},
-        )
+    def operation():
+        try:
+            sb.storage.from_(bucket).upload(
+                path, data, {"content-type": content_type, "upsert": "false"}
+            )
+        except Exception as exc:
+            if not _is_conflict(exc):
+                raise
+            existing = sb.storage.from_(bucket).download(path)
+            verify_bytes(existing, digest)
 
-    _with_retry(_do, op=f"upload_csv {path}", fatal=_is_not_found)
+    _with_retry(operation, op=f"upload {bucket}/{path}", fatal=_is_not_found)
+
+
+def upload_csv(csv_text: str | bytes, path: str) -> str:
+    """Sube un CSV como texto plano al bucket de predicciones."""
+    require_private_buckets()
+    sb = _client()
+    data = csv_text.encode("utf-8") if isinstance(csv_text, str) else csv_text
+    digest = sha256_bytes(data)
+
+    _upload_immutable(sb, SUBMISSIONS_BUCKET, path, data, "text/csv")
     _write_sidecar_best_effort(sb, SUBMISSIONS_BUCKET, path, digest)
     return path
 
@@ -169,15 +192,25 @@ def upload_parquet(df: pd.DataFrame, path: str) -> str:
     digest = sha256_bytes(data)
     sb = _client()
 
-    def _do():
-        sb.storage.from_(DATASET_BUCKET).upload(
-            path, data,
-            {"content-type": "application/octet-stream", "upsert": "true"},
-        )
-
-    _with_retry(_do, op=f"upload_parquet {path}", fatal=_is_not_found)
+    _upload_immutable(sb, DATASET_BUCKET, path, data, "application/octet-stream")
     _write_sidecar_best_effort(sb, DATASET_BUCKET, path, digest)
     return path
+
+
+def upload_private_parquet(df: pd.DataFrame, path: str) -> str:
+    """Publica el holdout en Storage privado, sin permitir reemplazarlo."""
+    require_private_buckets()
+    buf = io.BytesIO()
+    df.to_parquet(buf, index=False, engine="pyarrow")
+    data = buf.getvalue()
+    sb = _client()
+    _upload_immutable(sb, TARGETS_BUCKET, path, data, "application/octet-stream")
+    return path
+
+
+def download_private_parquet(path: str) -> pd.DataFrame:
+    require_private_buckets()
+    return download_parquet(path, bucket=TARGETS_BUCKET)
 
 
 def download_parquet(path: str, bucket: str | None = None,
@@ -202,7 +235,8 @@ def download_parquet_verified(path: str, expected_sha256: str,
     return download_parquet(path, bucket=bucket, expected_sha256=expected_sha256)
 
 
-def download_csv(path: str, expected_sha256: str | None = None) -> bytes:
+def download_csv(path: str, expected_sha256: str | None = None,
+                 *, allow_legacy_fallback: bool = False) -> bytes:
     """Descarga un CSV de predicciones.
 
     Prueba el bucket privado primero y cae al de datasets por compatibilidad
@@ -216,7 +250,7 @@ def download_csv(path: str, expected_sha256: str | None = None) -> bytes:
             op=f"download_csv {path}", fatal=_is_not_found,
         )
     except Exception:
-        if SUBMISSIONS_BUCKET == DATASET_BUCKET:
+        if not allow_legacy_fallback:
             raise
         data = _with_retry(
             lambda: sb.storage.from_(DATASET_BUCKET).download(path),

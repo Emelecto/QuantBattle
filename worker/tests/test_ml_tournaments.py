@@ -1,398 +1,275 @@
-"""Tests de Fase 2: persistencia, endpoints y scheduler de torneos ML.
+"""Pruebas de contrato para una ronda ML, con Supabase y Storage simulados."""
+from __future__ import annotations
 
-Todo offline: se mockea Supabase (conftest.mock_supabase) y se stubbea ml_storage
-para no tocar Storage. El scoring sí usa datos REALES generados en memoria.
-"""
-import io
-import sys
-from unittest.mock import MagicMock, patch
+import hashlib
+from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
+from unittest.mock import patch
 
+import pytest
 import numpy as np
 import pandas as pd
-import pytest
+from fastapi.testclient import TestClient
 
-import dataset_builder as db
-import scoring_ml as sc
+import dataset_builder as builder
 import ml_persist
-import ml_endpoints
+import ml_protocol
+import ml_scheduler
 import ml_storage
+import ml_prospective
+
+USER = "00000000-0000-0000-0000-000000000001"
 
 
-class _Table:
-    """Mock de tabla Supabase con encadenamiento y filtros reales usados por el código.
+class Query:
+    def __init__(self, db, table):
+        self.db, self.table = db, table
+        self.filters = []
+        self.action, self.payload = "select", None
+        self.order_by, self.max_rows, self.start = None, None, 0
 
-    Soporta .select().eq().in_().gte().lte().neq().order().limit().execute() y
-    .insert()/.update()/.upsert()/.delete(). Los filtros se aplican sobre el
-    store en memoria para que los tests reflejen el comportamiento real.
-    """
-    def __init__(self, store, name):
-        self._store = store
-        self._name = name
-        self._reset()
-        self._last_insert = None
-
-    def _reset(self):
-        self._filters = []
-        self._order = None
-        self._limit = None
-        self._offset = None
-        self._pk = None
-        if self._name == "ml_datasets":
-            self._pk = ("tournament_id", "round_number", "kind")
-        elif self._name == "prediction_submissions":
-            self._pk = ("dataset_id", "user_id")
-
-    def select(self, *a, **k):
-        self._reset()
+    def select(self, *_args, **_kwargs):
         return self
 
     def insert(self, payload):
-        rows = payload if isinstance(payload, list) else [payload]
-        for r in rows:
-            r.setdefault("id", f"{self._name}-{len(self._store.get(self._name, [])) + 1}")
-        self._store.setdefault(self._name, []).extend(rows)
-        self._last_insert = rows
+        self.action, self.payload = "insert", payload
         return self
 
     def update(self, payload):
-        self._reset()  # limpia filtros de selects previos en la misma tabla
-        data = self._store.get(self._name, [])
-        target = self._apply_filters(data)
-        for row in (target if self._filters else data):
-            row.update(payload)
+        self.action, self.payload = "update", payload
         return self
 
-    def upsert(self, payload):
-        return self.insert(payload)
-
-    def delete(self):
-        self._reset()
-        data = self._store.get(self._name, [])
-        keep = [r for r in data if not self._matches(r)]
-        self._store[self._name] = keep
+    def eq(self, key, value):
+        self.filters.append(lambda row: row.get(key) == value)
         return self
 
-    def eq(self, col, val):
-        self._filters.append(("eq", col, val))
+    def neq(self, key, value):
+        self.filters.append(lambda row: row.get(key) != value)
         return self
 
-    def neq(self, col, val):
-        self._filters.append(("neq", col, val))
+    def in_(self, key, values):
+        self.filters.append(lambda row: row.get(key) in values)
         return self
 
-    def in_(self, col, vals):
-        self._filters.append(("in", col, vals))
+    def gte(self, key, value):
+        self.filters.append(lambda row: row.get(key) is not None and row[key] >= value)
         return self
 
-    def gte(self, col, val):
-        self._filters.append(("gte", col, val))
+    def order(self, key, desc=False):
+        self.order_by = (key, desc)
         return self
 
-    def lte(self, col, val):
-        self._filters.append(("lte", col, val))
+    def limit(self, value):
+        self.max_rows = value
         return self
 
-    def order(self, col, desc=False):
-        self._order = (col, desc)
+    def offset(self, value):
+        self.start = value
         return self
-
-    def limit(self, n):
-        self._limit = n
-        return self
-
-    def offset(self, n):
-        self._offset = n
-        return self
-
-    def _matches(self, row):
-        for op, col, val in self._filters:
-            if op == "eq" and row.get(col) != val:
-                return False
-            if op == "neq" and row.get(col) == val:
-                return False
-            if op == "in" and row.get(col) not in val:
-                return False
-            if op == "gte" and not (row.get(col) is not None and row.get(col) >= val):
-                return False
-            if op == "lte" and not (row.get(col) is not None and row.get(col) <= val):
-                return False
-        return True
-
-    def _apply_filters(self, data):
-        out = [r for r in data if self._matches(r)]
-        if self._order:
-            col, desc = self._order
-            out = sorted(out, key=lambda r: r.get(col) or 0, reverse=desc)
-        if self._offset:
-            out = out[self._offset:]
-        if self._limit:
-            out = out[: self._limit]
-        return out
 
     def execute(self):
-        if self._last_insert is not None and not self._filters and self._order is None:
-            data = list(self._last_insert)
-            self._last_insert = None
-            return MagicMock(data=data)
-        self._last_insert = None
-        data = self._store.get(self._name, [])
-        out = self._apply_filters(data)
-        return MagicMock(data=out)
+        rows = self.db.rows.setdefault(self.table, [])
+        if self.action == "insert":
+            values = self.payload if isinstance(self.payload, list) else [self.payload]
+            inserted = []
+            for item in values:
+                row = dict(item)
+                row.setdefault("id", f"{self.table}-{len(rows) + 1}")
+                row.setdefault("submitted_at", datetime.now(timezone.utc).isoformat())
+                rows.append(row)
+                inserted.append(dict(row))
+            return SimpleNamespace(data=inserted)
+        selected = [row for row in rows if all(fn(row) for fn in self.filters)]
+        if self.order_by:
+            key, descending = self.order_by
+            selected.sort(key=lambda row: row.get(key) or "", reverse=descending)
+        selected = selected[self.start:]
+        if self.max_rows is not None:
+            selected = selected[:self.max_rows]
+        if self.action == "update":
+            for row in selected:
+                row.update(self.payload)
+        return SimpleNamespace(data=[dict(row) for row in selected])
+
+
+class FakeSupabase:
+    def __init__(self):
+        self.rows = {}
+
+    def table(self, name):
+        return Query(self, name)
+
+    def rpc(self, name, payload):
+        def execute():
+            assert name == "activate_ml_submission"
+            sub = next(row for row in self.rows["prediction_submissions"]
+                       if row["id"] == payload["p_submission"])
+            ds = next(row for row in self.rows["ml_datasets"] if row["id"] == sub["dataset_id"])
+            assert ds["status"] == "ready" and sub["dataset_version"] == ds["version"]
+            assert datetime.fromisoformat(ds["closes_at"]) > datetime.now(timezone.utc)
+            for row in self.rows["prediction_submissions"]:
+                if row["dataset_id"] == sub["dataset_id"] and row["user_id"] == sub["user_id"]:
+                    row["is_selected"] = row["id"] == sub["id"]
+            return SimpleNamespace(data=True)
+        return SimpleNamespace(execute=execute)
 
 
 @pytest.fixture
-def sb(mock_supabase):
-    """Supabase mockeado con encadenamiento y filtros reales."""
-    store = {}
-    created = {}
+def backend(monkeypatch):
+    import main
+    import tournaments
 
-    def make_table(name):
-        if name not in created:
-            created[name] = _Table(store, name)
-        return created[name]
+    db, files = FakeSupabase(), {}
+    monkeypatch.setattr(tournaments, "get_supabase", lambda: db)
 
-    mock_supabase.table.side_effect = make_table
-    mock_supabase._store = store
-    yield mock_supabase
-
-
-@pytest.fixture
-def stub_storage(monkeypatch):
-    """ml_storage no toca red: guarda/lee archivos en memoria."""
-    mem = {}
-
-    def up_csv(csv_text, path):
-        # Almacenar como bytes para simular download_csv real
-        mem[path] = csv_text.encode("utf-8") if isinstance(csv_text, str) else csv_text
+    def save_frame(frame, path):
+        files[path] = frame.copy()
         return path
 
-    def up_parquet(df, path):
-        mem[path] = df
+    def save_csv(data, path):
+        files[path] = data.encode() if isinstance(data, str) else data
         return path
 
-    def down(path):
-        return mem[path]
+    def read_csv(path, expected_sha256=None, **_kwargs):
+        data = files[path]
+        if expected_sha256:
+            assert hashlib.sha256(data).hexdigest() == expected_sha256
+        return data
 
-    def url(path):
-        return f"https://fake.storage/{path}"
+    monkeypatch.setattr(ml_storage, "upload_parquet", save_frame)
+    monkeypatch.setattr(ml_storage, "download_parquet", lambda path, **_kw: files[path].copy())
+    monkeypatch.setattr(ml_storage, "upload_private_parquet", save_frame)
+    monkeypatch.setattr(ml_storage, "download_private_parquet", lambda path: files[path].copy())
+    monkeypatch.setattr(ml_storage, "upload_csv", save_csv)
+    monkeypatch.setattr(ml_storage, "download_csv", read_csv)
+    monkeypatch.setattr(ml_storage, "public_url", lambda path: f"https://fake.storage/{path}")
+    return db, files, TestClient(main.app)
 
-    monkeypatch.setattr(ml_storage, "upload_csv", up_csv)
-    monkeypatch.setattr(ml_storage, "upload_parquet", up_parquet)
-    monkeypatch.setattr(ml_storage, "download_parquet", down)
-    monkeypatch.setattr(ml_storage, "public_url", url)
-    return mem
 
-
-def _dataset_real(n_activos=120, n_eras=60, seed=1):
-    panel, cols, meta = db.generar_mercado_sintetico(
-        n_activos=n_activos, n_eras=n_eras, n_features=12, n_features_utiles=5,
-        ic_objetivo=0.06, seed=seed,
+def make_round(backend, *, number=1, seed=1):
+    _db, files, _client = backend
+    panel, cols, meta = builder.generar_mercado_sintetico(
+        n_activos=40, n_eras=60, n_features=10, n_features_utiles=5, seed=seed,
     )
-    return panel, cols, meta
+    with patch.object(builder, "generar_mercado_sintetico", return_value=(panel, cols, meta)):
+        live = ml_persist.crear_dataset(
+            "tournament-1", number, mode="sintetico",
+            closes_at=(datetime.now(timezone.utc) + timedelta(days=2)).isoformat(),
+            n_activos=40, n_eras=60, n_features=10, n_features_utiles=5, seed=seed,
+        )
+    return live, files[live["bucket_path"]]
 
 
-# ---------------------------------------------------------------------------
-def test_crear_dataset_guarda_holdout_y_no_sube_live(sb, stub_storage, monkeypatch):
-    """El live NO se sube a Storage; su holdout sí se guarda en dataset_targets."""
-    import tournaments as _t
-    monkeypatch.setattr(_t, "get_supabase", lambda: sb)
-    panel, cols, meta = _dataset_real()
-
-    with patch.object(db, "generar_mercado_sintetico", return_value=(panel, cols, meta)):
-        live = ml_persist.crear_dataset("tid", 1, mode="sintetico", n_activos=120,
-                                         n_eras=60, n_features=12, n_features_utiles=5,
-                                         ic_objetivo=0.06, seed=1)
-
-    # live registrado
-    lives = [r for r in sb._store.get("ml_datasets", []) if r["kind"] == "live"]
-    assert len(lives) == 1
-    assert lives[0]["bucket_path"] is None, "el live NO debe subirse a Storage"
-
-    # train/validation SÍ subidos
-    train_paths = [r["bucket_path"] for r in sb._store["ml_datasets"] if r["kind"] in ("train", "validation")]
-    assert len(train_paths) == 2
-    assert all(p in stub_storage for p in train_paths)
-    # El parquet público NO debe contener el target real
-    for p in train_paths:
-        assert "target" not in stub_storage[p].columns, "el target NO debe subirse a Storage"
-
-    # holdout guardado en dataset_targets (tantas filas como el live)
-    live_rec = [r for r in sb._store["ml_datasets"] if r["kind"] == "live"][0]
-    targets = sb._store.get("dataset_targets", [])
-    assert len(targets) == live_rec["row_count"]
-    assert targets[0]["dataset_id"] == live["id"]
+def test_round_publishes_features_but_seals_targets(backend):
+    db, files, client = backend
+    live, public = make_round(backend)
+    assert live["status"] == "ready"
+    assert live["quality_report"]["passed"]
+    assert "target" not in public.columns
+    assert "target" in files[live["target_path"]].columns
+    assert all(row["status"] == "ready" for row in db.rows["ml_datasets"])
+    result = client.get("/ml/datasets", params={"tournament_id": "tournament-1"})
+    assert result.status_code == 200 and len(result.json()["datasets"]) == 3
+    assert "target_path" not in result.text
 
 
-def test_endpoints_lista_datasets_no_expone_holdout(sb, monkeypatch):
-    import tournaments as _t
-    monkeypatch.setattr(_t, "get_supabase", lambda: sb)
-    monkeypatch.setattr(ml_storage, "public_url", lambda p: f"https://fake.storage/{p}")
-    sb._store.setdefault("ml_datasets", [
-        {"id": "d1", "tournament_id": "t", "round_number": 1, "mode": "sintetico",
-         "kind": "train", "status": "ready", "bucket_path": "s/train.parquet",
-         "n_assets": 10, "n_eras": 5, "n_features": 3, "row_count": 50,
-         "feature_cols": ["f1"], "closes_at": None},
-        {"id": "d2", "tournament_id": "t", "round_number": 1, "mode": "sintetico",
-         "kind": "live", "status": "ready", "bucket_path": None,
-         "n_assets": 10, "n_eras": 5, "n_features": 3, "row_count": 50,
-         "feature_cols": ["f1"], "closes_at": None},
-    ])
-    # Evita que descargue de Storage en list_datasets (usa public_url del stub ya)
-    from fastapi.testclient import TestClient
-    import main
-    client = TestClient(main.app)
-    r = client.get("/ml/datasets")
-    assert r.status_code == 200
-    ds = {d["kind"]: d for d in r.json()["datasets"]}
-    assert ds["train"]["download_url"].startswith("https://fake.storage/")
-    assert ds["live"]["download_url"] is None  # holdout nunca expuesto
+@pytest.mark.parametrize("bad", [
+    b"id,other\na,0.2\n", b"id,prediction\na,inf\n",
+    b"id,prediction\na,-0.1\n", b"id,prediction\na,0.1\na,0.2\n",
+    b"id,prediction\na,0.2,extra\n",
+])
+def test_invalid_files_rejected_before_scoring(backend, bad):
+    _db, _files, client = backend
+    live, _ = make_round(backend)
+    result = client.post(f"/ml/datasets/{live['id']}/predictions", content=bad,
+                         headers={"Content-Type": "text/csv", "Authorization": "Bearer x"})
+    assert result.status_code == 422
 
 
-def test_submit_csv_valida_columnas(sb, monkeypatch):
-    """CSV sin columna prediction -> 422."""
-    import tournaments as _t
-    monkeypatch.setattr(_t, "get_supabase", lambda: sb)
-    sb._store.setdefault("ml_datasets", [
-        {"id": "live1", "kind": "live", "status": "ready", "closes_at": None},
-    ])
-    from fastapi.testclient import TestClient
-    import main
-    client = TestClient(main.app)
-    bad = io.BytesIO(b"id,something\n1,0.3\n")
-    r = client.post("/ml/datasets/live1/predictions",
-                    files={"file": ("p.csv", bad, "text/csv")},
-                    headers={"Authorization": "Bearer x"})
-    assert r.status_code == 422
+def test_replacement_close_and_idempotent_finalization(backend):
+    db, _files, client = backend
+    live, public = make_round(backend)
+    path = f"/ml/datasets/{live['id']}/predictions"
+    headers = {"Content-Type": "text/csv", "Authorization": "Bearer x"}
+    first_csv = public[["id", "feature_01"]].rename(columns={"feature_01": "prediction"}).to_csv(index=False).encode()
+    first = client.post(path, content=first_csv, headers=headers)
+    assert first.status_code == 200, first.text
+    receipt = first.json()["submission"]
+    assert receipt["status"] == "validated"
+    assert receipt["file_sha256"] == hashlib.sha256(first_csv).hexdigest()
+    assert client.get("/ml/leaderboard", params={"dataset_id": live["id"]}).json()["leaderboard"] == []
+    assert client.post(f"/ml/submissions/{receipt['id']}/evaluate", headers=headers).status_code == 410
+
+    second_csv = public[["id", "feature_02"]].rename(columns={"feature_02": "prediction"}).to_csv(index=False).encode()
+    second = client.post(path, content=second_csv, headers=headers)
+    assert second.status_code == 200, second.text
+    subs = db.rows["prediction_submissions"]
+    assert len(subs) == 2 and [row["is_selected"] for row in subs] == [False, True]
+    assert "score" not in subs[0] and "score" not in subs[1]
+
+    db.rows["ml_datasets"][-1]["closes_at"] = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
+    assert ml_scheduler.evaluate_ml_rounds(db) == 1
+    assert subs[1]["status"] == "scored" and isinstance(subs[1]["score"], float)
+    assert subs[0]["status"] == "validated"
+    assert set(db.rows["ml_datasets"][-1]["benchmarks"]) == {"random", "feature_01"}
+    assert ml_scheduler.evaluate_ml_rounds(db) == 0
+    ranking = client.get("/ml/leaderboard", params={"dataset_id": live["id"]}).json()["leaderboard"]
+    assert len(ranking) == 1 and ranking[0]["user_id"] == USER
 
 
-def test_submit_reemplaza_sin_duplicar(sb, monkeypatch, stub_storage):
-    """Segundo envío del mismo usuario actualiza, no inserta duplicado."""
-    import tournaments as _t
-    monkeypatch.setattr(_t, "get_supabase", lambda: sb)
-    sb._store.setdefault("ml_datasets", [
-        {"id": "live1", "kind": "live", "status": "ready", "closes_at": None},
-    ])
-    sb._store.setdefault("prediction_submissions", [
-        {"id": "prev", "dataset_id": "live1", "user_id": "u1", "file_path": "old.csv"},
-    ])
-    from fastapi.testclient import TestClient
-    import main
-    client = TestClient(main.app)
-
-    good = io.BytesIO(b"id,prediction\n1,0.3\n2,0.7\n3,-0.1\n")
-    r = client.post("/ml/datasets/live1/predictions",
-                    files={"file": ("p.csv", good, "text/csv")},
-                    headers={"Authorization": "Bearer x"})
-    assert r.status_code == 200
-    subs = sb._store["prediction_submissions"]
-    assert len([s for s in subs if s["dataset_id"] == "live1" and s["user_id"] == "u1"]) == 1
-    assert subs[-1]["row_count"] == 3
+def test_round_specific_ids_and_hashes(backend):
+    first, rows_one = make_round(backend, number=1, seed=11)
+    second, rows_two = make_round(backend, number=2, seed=12)
+    assert first["version"] != second["version"]
+    assert set(rows_one["id"]).isdisjoint(set(rows_two["id"]))
 
 
-def test_scoring_end_to_end_con_datos_reales(sb, monkeypatch, stub_storage):
-    """Flujo completo: generar dataset -> enviar predicciones -> puntuar."""
-    import tournaments as _t
-    monkeypatch.setattr(_t, "get_supabase", lambda: sb)
-    panel, cols, meta = _dataset_real(n_activos=200, n_eras=80, seed=7)
-    with patch.object(db, "generar_mercado_sintetico", return_value=(panel, cols, meta)):
-        ml_persist.crear_dataset("t", 1, mode="sintetico", n_activos=200, n_eras=80,
-                                 n_features=12, n_features_utiles=5, ic_objetivo=0.06, seed=7)
-    live = [r for r in sb._store["ml_datasets"] if r["kind"] == "live"][0]
-    feat = live["feature_cols"]
-    targets = pd.DataFrame(sb._store["dataset_targets"])
-
-    # Usuario entrena un modelo real sobre el live (en memoria) y predice.
-    # Ojo: debe usar la MISMA sal que crear_dataset para que los 'id' coincidan.
-    interna = db.obfuscar(panel, cols, salt=ml_persist._SALT, seed=meta.get("seed", 0))[1]
-    partes = db.partir(interna)
-    tr, lv = partes["train"], partes["live"].copy()
-    from sklearn.ensemble import HistGradientBoostingRegressor
-    m = HistGradientBoostingRegressor(max_iter=120, learning_rate=0.08, max_depth=4, random_state=0)
-    m.fit(tr[feat], tr["target"])
-    lv["prediction"] = m.predict(lv[feat])
-    preds = lv[["id", "prediction"]]
-
-    # Insertar submission con el df embebido (tests)
-    sb._store.setdefault("prediction_submissions", [])
-    sb._store["prediction_submissions"].append({
-        "id": "sub1", "dataset_id": live["id"], "user_id": "u1",
-        "file_path": "sub.csv", "_predicciones_df": preds,
-    })
-    # _leer_predicciones debe usar el df embebido
-    res = ml_persist.puntuar_submission_en_bd("sub1")
-    assert res["valida"] is True
-    assert res["corr_mean"] > 0, "el modelo debe puntuar positivo"
-    # La submission quedó scored (lo verificamos consultando el mock como lo haría el código)
-    st = sb.table("prediction_submissions").select("status").eq("id", "sub1").execute()
-    assert st.data[0]["status"] == "scored"
+def test_quality_gate_rejects_small_universe():
+    panel, cols, _ = builder.generar_mercado_sintetico(n_activos=2, n_eras=60, n_features=10, seed=1)
+    _, internal, mapping = builder.obfuscar(panel, cols, salt="test", seed=1)
+    with pytest.raises(ValueError, match="activos"):
+        ml_protocol.validate_round_parts(builder.partir(internal), mapping["feat_cols"],
+                                         min_assets=30, min_test_eras=10)
 
 
-def test_create_ml_round_en_scheduler(sb, monkeypatch, stub_storage):
-    """create_ml_round inserta torneo + datasets y no duplica si hay reciente."""
-    import tournaments as _t
-    monkeypatch.setattr(_t, "get_supabase", lambda: sb)
-    # Sin rondas previas -> crea
-    r1 = ml_scheduler_crear(sb, monkeypatch, seed=11)
-    assert r1 is not None
-    # Simular ronda reciente para que no duplique
-    n_ds_antes = len(sb._store.get("ml_datasets", []))
-    r2 = ml_scheduler_crear(sb, monkeypatch, seed=12, reciente=True)
-    assert r2 is None
-    assert len(sb._store.get("ml_datasets", [])) == n_ds_antes
+def test_prospective_target_only_after_five_complete_dates(backend, monkeypatch):
+    db, files, _client = backend
+    as_of = pd.Timestamp(datetime.now(timezone.utc).date()) - pd.offsets.BDay(1)
+    dates = pd.bdate_range(end=as_of, periods=270, tz="UTC")
+    future = pd.bdate_range(start=as_of + pd.offsets.BDay(1), periods=5, tz="UTC")
+    all_dates = dates.append(future)
+    universe = [("stock", f"STOCK{i:02d}") for i in range(35)]
+    prices = {}
+    for index, (_type, symbol) in enumerate(universe):
+        rng = np.random.default_rng(index + 100)
+        returns = rng.normal(0.0003 + index * 0.00001, 0.01, len(all_dates))
+        prices[symbol] = pd.DataFrame({
+            "close": 100 * np.exp(np.cumsum(returns)),
+            "volume": np.full(len(all_dates), 100000 + index * 1000),
+        }, index=all_dates)
 
+    def get_prices(asset_type, symbol, timeframe, start, end, **_kwargs):
+        cutoff = pd.Timestamp(end)
+        cutoff = cutoff.tz_localize("UTC") if cutoff.tz is None else cutoff.tz_convert("UTC")
+        return prices[symbol].loc[prices[symbol].index < cutoff].copy()
 
-def ml_scheduler_crear(sb, monkeypatch, seed=1, reciente=False):
-    """Helper: llama create_ml_round con stub de generador y (opcional) ronda reciente."""
-    import dataset_builder as _db
-    panel, cols, meta = _dataset_real(seed=seed)
-    monkeypatch.setattr(_db, "generar_mercado_sintetico", lambda **k: (panel, cols, meta))
-    if reciente:
-        sb._store.setdefault("ml_datasets", [{
-            "id": "old", "kind": "live", "status": "ready",
-            "created_at": "2099-01-01T00:00:00+00:00",
-        }])
-    import ml_scheduler
-    return ml_scheduler.create_ml_round(sb, mode="sintetico", now=__import__("datetime").datetime(2026, 1, 1),
-                                       round_days=4, n_activos=120, n_eras=60,
-                                       n_features=12, n_features_utiles=5, ic_objetivo=0.06, seed=seed)
-
-
-def test_metamodelo_penaliza_clon(sb, monkeypatch, stub_storage):
-    """Con 2 subs idénticas (clon), el meta-modelo marca una con plagio o meta_corr>0.95."""
-    import tournaments as _t
-    import ml_scheduler
-    monkeypatch.setattr(_t, "get_supabase", lambda: sb)
-    panel, cols, meta = _dataset_real(n_activos=200, n_eras=80, seed=3)
-    with patch.object(db, "generar_mercado_sintetico", return_value=(panel, cols, meta)):
-        ml_persist.crear_dataset("t", 1, mode="sintetico", n_activos=200, n_eras=80,
-                                 n_features=12, n_features_utiles=5, ic_objetivo=0.06, seed=3)
-    live = [r for r in sb._store["ml_datasets"] if r["kind"] == "live"][0]
-    feat = live["feature_cols"]
-    interna = db.obfuscar(panel, cols, salt=ml_persist._SALT, seed=meta.get("seed", 0))[1]
-    partes = db.partir(interna)
-    from sklearn.ensemble import HistGradientBoostingRegressor
-    m = HistGradientBoostingRegressor(max_iter=120, learning_rate=0.08, max_depth=4, random_state=0)
-    m.fit(partes["train"][feat], partes["train"]["target"])
-    partes["live"]["prediction"] = m.predict(partes["live"][feat])
-    preds = partes["live"][["id", "prediction"]]
-    # Dos usuarios envían el MISMO modelo (clon)
-    sb._store.setdefault("prediction_submissions", [])
-    for uid in ("u1", "u2"):
-        sb._store["prediction_submissions"].append({
-            "id": f"sub_{uid}", "dataset_id": live["id"], "user_id": uid,
-            "file_path": f"{uid}.csv", "_predicciones_df": preds.copy(),
-        })
-    # Puntuar ambas (is_valid=True, score>0)
-    ml_persist.puntuar_submission_en_bd("sub_u1")
-    ml_persist.puntuar_submission_en_bd("sub_u2")
-    # Construir meta-modelo y re-puntuar con penalización por falta de originalidad
-    ml_scheduler._distribute_ml_qp(sb, live["id"])
-    # Una de las dos debe quedar marcada (plagio o meta_corr alto)
-    st = sb.table("prediction_submissions").select("id,plagio_flag,meta_corr").eq(
-        "dataset_id", live["id"]
-    ).execute()
-    assert any(
-        (s.get("plagio_flag") is True)
-        or (s.get("meta_corr") is not None and s["meta_corr"] > 0.95)
-        for s in st.data
+    import data_feed
+    monkeypatch.setattr(data_feed, "get_ohlcv", get_prices)
+    build_at = (as_of + pd.Timedelta(days=1)).to_pydatetime().replace(tzinfo=timezone.utc)
+    live = ml_persist.crear_dataset(
+        "prospective-tournament", 1, mode="real", round_type="prospective",
+        closes_at=(build_at + timedelta(hours=24)).isoformat(), now=build_at,
+        universo=universe, fin=build_at, dias=900,
     )
+    assert live["target_hash"] is None
+    assert live["mapping_path"] in files
+    assert "target" not in files[live["bucket_path"]].columns
+
+    before = (future[3] + pd.Timedelta(days=1)).to_pydatetime()
+    assert not ml_prospective.resolve_round(db, live, before)
+    assert live["target_path"] not in files
+    after = (future[4] + pd.Timedelta(days=1)).to_pydatetime()
+    assert ml_prospective.resolve_round(db, live, after)
+    resolved = db.rows["ml_datasets"][-1]
+    assert resolved["target_hash"] and resolved["status"] == "closed"
+    assert files[live["target_path"]]["target"].notna().all()

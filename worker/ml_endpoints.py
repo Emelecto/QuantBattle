@@ -2,7 +2,7 @@
 
 Rutas (prefijo /ml):
   GET  /ml/datasets?tournament_id=&round=   -> lista datasets públicos (metadatos + URLs)
-  GET  /ml/datasets/{id}/download?kind=     -> URL firmada del parquet (train/validation)
+  GET  /ml/datasets/{id}/download?kind=     -> URL del parquet (train/validation/live)
   POST /ml/datasets/{id}/predictions        -> sube CSV (id,prediction), valida, guarda
   GET  /ml/predictions/mine?dataset_id=      -> estado y score de mi envío
   GET  /ml/leaderboard?dataset_id=           -> ranking de la ronda
@@ -11,25 +11,29 @@ Ningún endpoint expone dataset_targets (el holdout). El scoring lo hace el cron
 """
 from __future__ import annotations
 
+import csv
+import hashlib
 import io
 import logging
 import uuid
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Request, BackgroundTasks, UploadFile, Header
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Request, UploadFile
 
 import os
+import math
+from datetime import datetime, timezone
 from auth import require_user
 import ml_storage as store
 import ml_persist as persist
+import ml_protocol as protocol
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ml", tags=["ml-tournaments"])
 
 # Tope de CSV aceptado (se rechaza por Content-Length con 413 antes de parsear).
-_MAX_CSV_BYTES = 10 * 1024 * 1024
+_MAX_CSV_BYTES = protocol.MAX_CSV_BYTES
 
 
 def _rechazar_si_muy_grande(request: Request) -> None:
@@ -65,22 +69,33 @@ def list_datasets(tournament_id: str | None = None, round_number: int | None = N
     sb = get_supabase()
     q = sb.table("ml_datasets").select(
         "id,tournament_id,round_number,mode,kind,status,n_assets,n_eras,"
-        "n_features,row_count,feature_cols,closes_at"
+        "n_features,row_count,feature_cols,closes_at,bucket_path,version,"
+        "round_type,score_version,published_at,target_available_at,finalized_at,"
+        "data_hash,benchmarks"
     )
     if tournament_id:
         q = q.eq("tournament_id", tournament_id)
     if round_number:
         q = q.eq("round_number", round_number)
-    data = q.order("round_number").execute()
-    # URLs públicas de Storage para train/validation
+    data = q.in_("status", ["ready", "closed", "awaiting_labels", "scoring", "scored"]).order(
+        "round_number", desc=True
+    ).execute()
+    # Las tres particiones tienen datos públicos; live no contiene target.
     out = []
     for d in data.data or []:
-        d = dict(d)
-        if d.get("kind") in ("train", "validation") and d.get("bucket_path"):
-            d["download_url"] = store.public_url(d["bucket_path"])
-        else:
-            d["download_url"] = None  # live nunca se expone
-        out.append(d)
+        visible = {key: d.get(key) for key in (
+            "id", "tournament_id", "round_number", "mode", "kind", "status",
+            "n_assets", "n_eras", "n_features", "row_count", "feature_cols",
+            "closes_at", "version", "round_type", "score_version", "published_at",
+            "target_available_at", "finalized_at", "data_hash",
+        )}
+        visible["benchmarks"] = d.get("benchmarks") if d.get("status") == "scored" else None
+        visible["download_url"] = (
+            store.public_url(d["bucket_path"])
+            if d.get("kind") in ("train", "validation", "live") and d.get("bucket_path")
+            else None
+        )
+        out.append(visible)
     return {"datasets": out}
 
 
@@ -91,12 +106,14 @@ def list_datasets(tournament_id: str | None = None, round_number: int | None = N
 def download_dataset(dataset_id: str, kind: str = "train"):
     from tournaments import get_supabase
     sb = get_supabase()
-    rec = sb.table("ml_datasets").select("bucket_path,kind").eq("id", dataset_id).execute()
+    rec = sb.table("ml_datasets").select("bucket_path,kind,status").eq("id", dataset_id).execute()
     if not rec.data:
         raise HTTPException(404, "dataset no encontrado")
     rec = rec.data[0]
-    if rec["kind"] != kind or kind not in ("train", "validation"):
-        raise HTTPException(403, "solo train/validation son públicos")
+    if rec["kind"] != kind or kind not in ("train", "validation", "live"):
+        raise HTTPException(403, "tipo de dataset inválido")
+    if rec["status"] in ("building", "failed"):
+        raise HTTPException(404, "dataset aún no publicado")
     if not rec.get("bucket_path"):
         raise HTTPException(404, "ruta no disponible")
     return {"url": store.public_url(rec["bucket_path"])}
@@ -112,10 +129,16 @@ def _validar_csv(df: pd.DataFrame) -> pd.DataFrame:
     
     if "id" not in df.columns or "prediction" not in df.columns:
         raise HTTPException(422, "el CSV debe tener columnas 'id' y 'prediction'")
+    if df.empty or df["id"].isna().any() or df["id"].astype(str).str.strip().eq("").any():
+        raise HTTPException(422, "id vacío o nulo")
+    if df["id"].astype(str).duplicated().any():
+        raise HTTPException(422, "id duplicado")
     if df["prediction"].isna().any():
         raise HTTPException(422, "prediction contiene valores nulos")
     if not pd.api.types.is_numeric_dtype(df["prediction"]):
         raise HTTPException(422, "prediction debe ser numérico")
+    if not df["prediction"].map(math.isfinite).all():
+        raise HTTPException(422, "prediction debe ser finito")
     return df[["id", "prediction"]].copy()
 
 
@@ -123,7 +146,6 @@ def _validar_csv(df: pd.DataFrame) -> pd.DataFrame:
 async def submit_predictions(
     dataset_id: str,
     request: Request,
-    background_tasks: BackgroundTasks,
     file: UploadFile | None = None,
 ):
     try:
@@ -133,101 +155,94 @@ async def submit_predictions(
         from tournaments import get_supabase
         sb = get_supabase()
 
-        # El dataset debe existir y estar abierto
-        ds = sb.table("ml_datasets").select("id,kind,status,closes_at").eq("id", dataset_id).execute()
+        # Las rondas anteriores se muestran como archivo, pero no reciben
+        # envíos bajo un protocolo que filtraba el score durante la apertura.
+        ds = sb.table("ml_datasets").select(
+            "id,kind,status,closes_at,bucket_path,data_hash,version,score_version"
+        ).eq("id", dataset_id).execute()
         if not ds.data or ds.data[0]["kind"] != "live":
             raise HTTPException(404, "dataset de predicciones no encontrado")
-        if ds.data[0]["status"] not in ("ready", "building"):
-            raise HTTPException(409, f"ronda en estado {ds.data[0]['status']}")
+        round_data = ds.data[0]
+        if round_data.get("score_version") != protocol.SCORE_VERSION:
+            raise HTTPException(409, "ronda anterior de solo lectura")
+        if round_data["status"] != "ready":
+            raise HTTPException(409, "la ronda no está abierta")
+        closes_at = round_data.get("closes_at")
+        if not closes_at or datetime.fromisoformat(closes_at.replace("Z", "+00:00")) <= datetime.now(timezone.utc):
+            raise HTTPException(409, "ronda cerrada")
 
         # 413 temprano: no leer ni parsear un body gigante.
         _rechazar_si_muy_grande(request)
 
-        # Parsear entrada
+        # CSV directo, multipart o JSON antiguo. La misma validación del
+        # servidor se aplica a los tres; el navegador solo ofrece una vista.
         if file is not None:
             content = await file.read()
-            try:
-                csv_text = content.decode("utf-8")
-            except Exception:
-                raise HTTPException(422, "archivo no es UTF-8 válido")
+        elif request.headers.get("content-type", "").startswith("text/csv"):
+            content = await request.body()
         else:
             try:
                 json_body = await request.json()
                 rows = json_body.get("rows")
                 if not rows or not isinstance(rows, list):
                     raise HTTPException(422, "envía un archivo CSV o un body JSON con 'rows'")
-                # Construir CSV en memoria
                 buf = io.StringIO()
                 w = csv.writer(buf)
                 w.writerow(["id", "prediction"])
                 for r in rows:
                     w.writerow([r.get("id"), r.get("prediction")])
-                csv_text = buf.getvalue()
+                content = buf.getvalue().encode("utf-8")
             except HTTPException:
                 raise
-            except Exception as e:
-                raise HTTPException(422, f"Datos de predicciones inválidos: {e}")
-
-        # Validar CSV parseando una muestra
+            except Exception:
+                raise HTTPException(422, "Datos de predicciones inválidos")
+        if len(content) > _MAX_CSV_BYTES:
+            raise HTTPException(413, "predicciones demasiado grandes (máx 10MB)")
         try:
-            df_check = pd.read_csv(io.BytesIO(csv_text.encode("utf-8")))
-            df_check = _validar_csv(df_check)
+            if not round_data.get("bucket_path") or not round_data.get("data_hash"):
+                raise HTTPException(409, "dataset sin archivo verificable")
+            live = store.download_parquet(round_data["bucket_path"])
+            if not persist.verify_frame_hash(live, round_data["data_hash"]):
+                raise _opaco(503, "Hash del live no coincide")
+            if "target" in live.columns:
+                raise _opaco(503, "Live publicó una etiqueta")
+            checked = protocol.validate_predictions(content, live[["id", "era"]])
+        except protocol.PredictionError as exc:
+            raise HTTPException(422, str(exc)) from exc
         except HTTPException:
             raise
-        except Exception as e:
-            raise HTTPException(422, f"CSV inválido: {e}")
+        except Exception:
+            raise _opaco(503, "No se pudo verificar el dataset")
 
-        # Crear submission en DB (status "pending": el CHECK real solo admite
-        # pending/scoring/scored/disqualified; NUNCA "processing"/"error").
-        prev = sb.table("prediction_submissions").select("id").eq(
-            "dataset_id", dataset_id
-        ).eq("user_id", user_id).execute()
-        # La ruta del CSV es determinista (dataset_id[:8] + user_id); no se
-        # guarda en una columna (p.ej. file_path) que el esquema real no tiene.
-        path = f"submissions/{dataset_id[:8]}/{user_id}.csv"
+        # Ruta inmutable y privada, con recibo verificable. El RPC hace el
+        # reemplazo atómico y vuelve a comprobar el cierre en la base de datos.
+        sub_id = str(uuid.uuid4())
+        path = f"{user_id}/{dataset_id}/{sub_id}.csv"
+        digest = hashlib.sha256(content).hexdigest()
         payload = {
+            "id": sub_id,
             "dataset_id": dataset_id,
             "user_id": user_id,
-            "file_name": file.filename if file else "inline.json",
-            "row_count": len(df_check),
-            "status": "pending",
+            "file_name": file.filename if file else "predictions.csv",
+            "file_path": path,
+            "file_sha256": digest,
+            "dataset_version": round_data["version"],
+            "row_count": len(checked),
+            "status": "validated",
+            "is_selected": False,
         }
         try:
-            if prev.data:
-                sb.table("prediction_submissions").update(payload).eq("id", prev.data[0]["id"]).execute()
-                sub_id = prev.data[0]["id"]
-            else:
-                res = sb.table("prediction_submissions").insert(payload).execute()
-                sub_id = res.data[0]["id"]
+            store.upload_csv(content, path)
+            sb.table("prediction_submissions").insert(payload).execute()
+            sb.rpc("activate_ml_submission", {"p_submission": sub_id}).execute()
+        except HTTPException:
+            raise
         except Exception:
-            raise _opaco(502, "Error al guardar submission en DB")
-
-        # Upload síncrono al bucket de predicciones (env SUBMISSIONS_BUCKET,
-        # default tournament-datasets; migrable a bucket privado sin cambiar
-        # este endpoint). CSV directo, sin parquet — más rápido.
-        try:
-            store.upload_csv(csv_text, path)
-            sb.table("prediction_submissions").update({"status": "pending"}).eq("id", sub_id).execute()
-        except Exception:
-            sb.table("prediction_submissions").update({"status": "disqualified"}).eq("id", sub_id).execute()
-            raise _opaco(502, "Error en upload de predicciones")
-
-        # SCORING SINCRONO (set-and-forget). El plan free/start de Render mata
-        # los BackgroundTask tras responder, así que la evaluacion se corre AQUI
-        # mismo dentro del request: el usuario envia -> se puntua al instante ->
-        # la respuesta ya trae status terminal (scored/disqualified). El scoring
-        # de ~70 eras cabe en el timeout de gunicorn (Dockerfile: --timeout 300).
-        import ml_persist
-        try:
-            ml_persist.puntuar_submission_en_bd(sub_id)
-        except Exception:
-            logger.exception(f"Scoring sincrono falló para {sub_id}")
-
-        # Devolver resultado final (siempre 200, con el status ya terminal)
+            raise _opaco(502, "No se pudo almacenar o activar el envío")
         res = sb.table("prediction_submissions").select(
-            "id,row_count,status,score,corr_mean,fnc_mean,consistencia,meta_corr,is_valid,plagio_flag,submitted_at,scored_at"
-        ).eq("id", sub_id).execute()
-        return {"submission": res.data[0] if res.data else {"id": sub_id, "status": "pending"}}
+            "id,row_count,status,submitted_at,file_sha256,dataset_version,is_selected"
+        ).eq("id", sub_id).eq("user_id", user_id).execute()
+        return {"submission": res.data[0]}
     except HTTPException:
         raise
     except Exception:
@@ -238,42 +253,9 @@ async def submit_predictions(
 # Evaluar submission bajo demanda (llamado desde el frontend vía polling)
 # ---------------------------------------------------------------------------
 @router.post("/submissions/{submission_id}/evaluate")
-def evaluate_submission(
-    submission_id: str,
-    request: Request,
-    x_scheduler_key: str | None = Header(None),
-):
-    """Evalúa una submission pending bajo demanda (timeout-safe).
-
-    Auth: JWT de usuario (Authorization) o header X-Scheduler-Key para
-    disparar scoring programado/forzado sin intervención del usuario (cron,
-    admin, etc.). En Render plan free el BackgroundTask no persiste, así que
-    este endpoint ejecuta el scoring SÍNCRONO dentro del request.
-    """
-    from tournaments import get_supabase
-    sb = get_supabase()
-    # Auth: clave de scheduler (bypass) o usuario normal.
-    _sk = os.environ.get("SCHEDULER_KEY")
-    if _sk and x_scheduler_key and x_scheduler_key == _sk:
-        filas = sb.table("prediction_submissions").select("user_id").eq(
-            "id", submission_id).execute().data or []
-        if not filas:
-            raise HTTPException(404, "submission no encontrada")
-        user_id = filas[0]["user_id"]
-    else:
-        user_id = require_user(request)
-    sub = sb.table("prediction_submissions").select("id,user_id,status").eq("id", submission_id).eq("user_id", user_id).execute()
-    if not sub.data:
-        raise HTTPException(404, "submission no encontrada")
-    if sub.data[0]["status"] != "pending":
-        raise HTTPException(409, f"submission en estado {sub.data[0]['status']}, no se puede evaluar")
-    import ml_persist
-    try:
-        ml_persist.puntuar_submission_en_bd(submission_id)
-        return {"status": "scored"}
-    except Exception:
-        sb.table("prediction_submissions").update({"status": "pending"}).eq("id", submission_id).execute()
-        raise _opaco(500, f"Evaluación falló para {submission_id}")
+def evaluate_submission(submission_id: str, request: Request):
+    require_user(request)
+    raise HTTPException(410, "El scoring se ejecuta después del cierre de la ronda")
 
 
 # ---------------------------------------------------------------------------
@@ -287,7 +269,8 @@ def get_submission(submission_id: str, request: Request):
     sb = get_supabase()
     res = sb.table("prediction_submissions").select(
         "id,dataset_id,row_count,status,score,corr_mean,fnc_mean,consistencia,"
-        "meta_corr,is_valid,plagio_flag,submitted_at,scored_at"
+        "meta_corr,is_valid,plagio_flag,submitted_at,scored_at,file_sha256,"
+        "dataset_version,is_selected,qp_earned,eval_error"
     ).eq("id", submission_id).eq("user_id", user_id).execute()
     if not res.data:
         raise HTTPException(404, "submission no encontrada")
@@ -303,8 +286,12 @@ def my_prediction(dataset_id: str, request: Request):
     from tournaments import get_supabase
     sb = get_supabase()
     res = sb.table("prediction_submissions").select(
-        "id,row_count,status,score,corr_mean,fnc_mean,consistencia,meta_corr,is_valid,plagio_flag,submitted_at,scored_at"
-    ).eq("dataset_id", dataset_id).eq("user_id", user_id).execute()
+        "id,row_count,status,score,corr_mean,fnc_mean,consistencia,meta_corr,"
+        "is_valid,plagio_flag,submitted_at,scored_at,file_sha256,dataset_version,"
+        "is_selected,qp_earned,eval_error"
+    ).eq("dataset_id", dataset_id).eq("user_id", user_id).eq(
+        "is_selected", True
+    ).order("submitted_at", desc=True).limit(1).execute()
     return {"submission": res.data[0] if res.data else None}
 
 
@@ -315,7 +302,13 @@ def my_prediction(dataset_id: str, request: Request):
 def leaderboard(dataset_id: str):
     from tournaments import get_supabase
     sb = get_supabase()
+    ds = sb.table("ml_datasets").select("status").eq("id", dataset_id).execute()
+    if not ds.data or ds.data[0]["status"] != "scored":
+        return {"leaderboard": []}
     res = sb.table("prediction_submissions").select(
-        "user_id,score,corr_mean,fnc_mean,consistencia,is_valid,plagio_flag,submitted_at"
-    ).eq("dataset_id", dataset_id).eq("is_valid", True).order("score", desc=True).execute()
+        "user_id,score,corr_mean,fnc_mean,consistencia,is_valid,plagio_flag,"
+        "submitted_at,qp_earned"
+    ).eq("dataset_id", dataset_id).eq("is_selected", True).eq(
+        "is_valid", True
+    ).order("score", desc=True).execute()
     return {"leaderboard": res.data or []}

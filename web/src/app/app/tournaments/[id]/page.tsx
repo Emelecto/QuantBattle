@@ -10,20 +10,17 @@ import {
   downloadDatasetUrl,
   submitPredictions,
   myPrediction,
-  getSubmission,
   mlLeaderboard,
-  parsePredictionsCsv,
   mlModeLabel,
+  mlRoundTypeLabel,
 } from "@/lib/mlTournaments";
 import type {
   MlDataset,
   MlSubmission,
   MlLeaderboardEntry,
-  MlPredictionRow,
 } from "@/lib/mlTournaments";
 import { useAuth } from "@/lib/useAuth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { call } from "@/lib/tournaments";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
 
@@ -215,7 +212,7 @@ const TABS: { key: MlTab; label: string }[] = [
 const KIND_LABEL: Record<string, string> = {
   train: "Entrenamiento",
   validation: "Validación",
-  live: "Ronda en vivo",
+  live: "Predicciones de la ronda",
 };
 
 const ML_BADGE_CLASS = "border-[#a78bfa]/35 bg-[#a78bfa]/12 text-[#c4b5fd]";
@@ -244,8 +241,8 @@ function MlTournamentDetail({
     (async () => {
       try {
         setDatasets(await listDatasets(id));
-      } catch (e: any) {
-        setError(e?.message || "No se pudieron cargar los datasets de la ronda.");
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "No se pudieron cargar los datasets de la ronda.");
       } finally {
         setLoading(false);
       }
@@ -255,7 +252,7 @@ function MlTournamentDetail({
   const publicos = useMemo(
     () =>
       datasets
-        .filter((d) => d.kind === "train" || d.kind === "validation")
+        .filter((d) => d.kind === "train" || d.kind === "validation" || d.kind === "live")
         .sort(
           (a, b) =>
             (b.round_number ?? 0) - (a.round_number ?? 0) ||
@@ -270,11 +267,19 @@ function MlTournamentDetail({
    * Antes se tomaba el primer live de la lista (ronda 1, ya cerrada), lo que
    * hacía fallar el envío/intento de evaluación. Usa el de mayor round_number.
    */
-  const nowMs = Date.now();
+  const [nowMs, setNowMs] = useState<number | null>(null);
+  useEffect(() => {
+    const initial = window.setTimeout(() => setNowMs(Date.now()), 0);
+    const interval = window.setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(interval);
+    };
+  }, []);
   const liveReady = useMemo(
     () =>
       datasets
-        .filter((d) => d.kind === "live" && d.status === "ready")
+        .filter((d) => d.kind === "live" && d.status === "ready" && d.score_version === "spearman_era_v1")
         .sort(
           (a, b) =>
             (b.round_number ?? 0) - (a.round_number ?? 0) ||
@@ -282,26 +287,21 @@ function MlTournamentDetail({
         )
         .find(
           (d) =>
-            !d.closes_at || new Date(d.closes_at).getTime() > nowMs,
-        ) ??
-      // Fallback: si ninguna ronda está "abierta por fecha", tomar la más reciente.
-      datasets
-        .filter((d) => d.kind === "live" && d.status === "ready")
-        .sort(
-          (a, b) =>
-            (b.round_number ?? 0) - (a.round_number ?? 0) ||
-            (b.closes_at ?? "").localeCompare(a.closes_at ?? ""),
-        )[0] ??
-      null,
-    [datasets],
+            !d.closes_at || (nowMs !== null && new Date(d.closes_at).getTime() > nowMs),
+        ) ?? null,
+    [datasets, nowMs],
   );
   /** Para el ranking sirve cualquier live (aunque la ronda ya esté cerrada). */
   const liveAny = useMemo(
-    () => liveReady ?? datasets.find((d) => d.kind === "live") ?? null,
-    [datasets, liveReady],
+    () => liveReady ?? publicos.find((d) => d.kind === "live") ?? null,
+    [publicos, liveReady],
+  );
+  const roundDatasets = useMemo(
+    () => publicos.filter((d) => d.round_number === liveAny?.round_number),
+    [publicos, liveAny],
   );
 
-  const modo = datasets[0]?.mode ?? null;
+  const modo = liveAny?.mode ?? null;
   const ronda = datasets.length
     ? Math.max(...datasets.map((d) => d.round_number ?? 0))
     : null;
@@ -316,22 +316,19 @@ function MlTournamentDetail({
               <Badge className={ML_BADGE_CLASS}>Predicciones ML</Badge>
               {ronda != null && <Badge tone="neutral">Ronda {ronda}</Badge>}
               {modo && <Badge tone="neutral">{mlModeLabel(modo)}</Badge>}
+              {liveAny && <Badge tone="neutral">{mlRoundTypeLabel(liveAny.round_type)}</Badge>}
             </div>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink">
               {tournament.name}
             </h1>
             <p className="mt-2 text-sm text-muted">
-              Sube un CSV <span className="text-ink">id,prediction</span> y compite por la
-              correlación media entre eras.
+              Descarga los datos, entrena tu modelo y envía <span className="text-ink">id,prediction</span>.
+              La puntuación se publica después del cierre.
             </p>
           </div>
           <div className="flex items-center gap-3">
             <span className="rounded border border-line bg-surface px-3 py-1.5 text-sm text-muted">
-              {tournament.status === "open"
-                ? "🟢 Abierto"
-                : tournament.status === "closed"
-                  ? "🔴 Cerrado"
-                  : tournament.status}
+              {liveReady ? "Abierta" : liveAny?.status === "scored" ? "Finalizada" : "Cerrada"}
             </span>
             <span className="rounded border border-accent/30 bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent">
               {tournament.prize_pool_qp} QP
@@ -389,8 +386,8 @@ function MlTournamentDetail({
           </div>
         ) : (
           <div className="mt-6">
-            {tab === "datos" && <TabDatos datasets={publicos} />}
-            {tab === "enviar" && <TabEnviar liveDataset={liveReady} />}
+            {tab === "datos" && <TabDatos datasets={roundDatasets} />}
+            {tab === "enviar" && <TabEnviar liveDataset={liveAny} canSubmit={Boolean(liveReady)} />}
             {tab === "ranking" && <TabRanking dataset={liveAny} />}
           </div>
         )}
@@ -413,7 +410,6 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
 
   const descargar = useCallback(
     async (ds: MlDataset) => {
-      if (ds.kind !== "train" && ds.kind !== "validation") return;
       setErr(null);
       setBajando(ds.id);
       try {
@@ -427,8 +423,8 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
           url = ds.download_url;
         }
         window.open(url, "_blank", "noopener,noreferrer");
-      } catch (e: any) {
-        setErr(e?.message || "No se pudo obtener el archivo.");
+      } catch (e: unknown) {
+        setErr(e instanceof Error ? e.message : "No se pudo obtener el archivo.");
       } finally {
         setBajando(null);
       }
@@ -438,6 +434,21 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {datasets.length > 0 && (
+        <div className="ql-glass ql-elev-1 rounded-xl p-5 text-sm text-muted">
+          <p className="font-medium text-ink">{mlRoundTypeLabel(datasets[0].round_type)}</p>
+          <p className="mt-1">
+            Entrenamiento y validación incluyen el resultado conocido. El archivo de predicciones
+            contiene solo variables e IDs; su resultado se reserva hasta finalizar la ronda.
+          </p>
+          {datasets[0].round_type === "historical" && (
+            <p className="mt-2">Esta es una evaluación histórica; no representa predicciones futuras en vivo.</p>
+          )}
+          {datasets[0].version && (
+            <p className="mt-2 font-mono text-xs">Versión del dataset: {datasets[0].version}</p>
+          )}
+        </div>
+      )}
       {err && (
         <div className="rounded-md border border-short/30 bg-short/10 px-4 py-3 text-sm text-short">
           {err}
@@ -492,12 +503,14 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
                 <button
                   type="button"
                   onClick={() => descargar(ds)}
-                  disabled={bajando === ds.id}
+                  disabled={bajando === ds.id || !ds.download_url}
                   className={buttonClasses("primary", "sm")}
                 >
                   {bajando === ds.id ? "Obteniendo..." : `Descargar ${ds.kind}.parquet`}
                 </button>
-                <span className="text-[11px] text-muted">{ds.status}</span>
+                <span className="text-[11px] text-muted">
+                  {ds.download_url ? ds.status : "Archivo no disponible en esta ronda"}
+                </span>
               </div>
             </div>
           ))}
@@ -505,13 +518,14 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
       )}
 
       {/* Nota: cómo leer los .parquet */}
-      <div className="ql-glass ql-elev-1 rounded-xl border-l-2 border-[#a78bfa]/50 p-5">
+      <div className="ql-glass ql-elev-1 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-ink">
           Los archivos <span className="font-mono text-[#c4b5fd]">.parquet</span> no se abren en un editor de texto
         </h3>
         <p className="mt-2 text-sm text-muted">
-          <span className="font-mono text-ink">train.parquet</span> y{" "}
-                    <span className="font-mono text-ink">validation.parquet</span> son archivos de datos{" "}
+          <span className="font-mono text-ink">train.parquet</span>,{" "}
+          <span className="font-mono text-ink">validation.parquet</span> y{" "}
+          <span className="font-mono text-ink">live.parquet</span> son archivos de datos{" "}
                     <strong className="text-ink">comprimidos en columnas</strong>, no texto plano. Si los abres con
                     el Bloc de Notas (o un editor de texto) verás símbolos ilegibles — eso es el formato binario
                     del parquet, no un archivo corrupto ni un error.
@@ -528,7 +542,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
       <div className="ql-glass ql-elev-1 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-ink">¿Primera vez?</h3>
         <p className="mt-2 text-sm text-muted">
-          El notebook de ejemplo descarga train/validation, entrena un modelo pequeño sobre
+          El notebook de ejemplo descarga train/validation/live, entrena un modelo pequeño sobre
           las features <span className="text-ink">feature_XX</span> y genera el CSV{" "}
           <span className="text-ink">id,prediction</span> listo para enviar.
         </p>
@@ -556,150 +570,64 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
 
 /* -------------------------- Pestaña: Enviar -------------------------- */
 
-function TabEnviar({ liveDataset }: { liveDataset: MlDataset | null }) {
+function TabEnviar({
+  liveDataset,
+  canSubmit,
+}: {
+  liveDataset: MlDataset | null;
+  canSubmit: boolean;
+}) {
   const [dragging, setDragging] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [rows, setRows] = useState<MlPredictionRow[] | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; msg: string } | null>(null);
-  const [mine, setMine] = useState<MlSubmission | null>(null);
-  const [pollingId, setPollingId] = useState<string | null>(null);
-
+  const [mineState, setMineState] = useState<{ datasetId: string; submission: MlSubmission | null } | null>(null);
   const datasetId = liveDataset?.id ?? null;
+  const mine = mineState?.datasetId === datasetId ? mineState.submission : null;
 
-  const recargarMio = useCallback(async () => {
+  useEffect(() => {
     if (!datasetId) return;
-    setMine(await myPrediction(datasetId));
+    let active = true;
+    void myPrediction(datasetId).then((submission) => {
+      if (active) setMineState({ datasetId, submission });
+    });
+    return () => {
+      active = false;
+    };
   }, [datasetId]);
 
-  useEffect(() => {
-    void recargarMio();
-  }, [recargarMio]);
-
-  // Polling de estado cuando hay una submission en procesamiento
-  useEffect(() => {
-    if (!pollingId) return;
-    let alive = true;
-    const poll = async () => {
-      try {
-        const s = await getSubmission(pollingId);
-        if (!alive || !s) return;
-        if (s.status === "pending") {
-          // Disparar evaluación bajo demanda
-          try {
-            await call(`/ml/submissions/${pollingId}/evaluate`, { method: "POST" });
-          } catch {
-            // Error manejado abajo con el estado
-          }
-        }
-        if (s.status === "scored" || s.status === "error" || s.status === "disqualified") {
-          setPollingId(null);
-          setMine({
-            id: s.id,
-            row_count: s.row_count,
-            status: s.status,
-            score: s.score,
-            corr_mean: s.corr_mean,
-            fnc_mean: s.fnc_mean,
-            consistencia: s.consistencia,
-            meta_corr: s.meta_corr,
-            is_valid: s.is_valid,
-            plagio_flag: s.plagio_flag,
-            submitted_at: s.submitted_at,
-            scored_at: s.scored_at,
-          });
-          if (s.status === "error") {
-            setFeedback({ type: "err", msg: `Error al evaluar: ${s.eval_error || "error desconocido"}` });
-          } else if (s.status === "disqualified") {
-            setFeedback({ type: "err", msg: "Tu submission fue descalificada (datos inválidos o insuficientes)." });
-          } else {
-            setFeedback({ type: "ok", msg: `¡Evaluación completa! Score: ${s.score?.toFixed(4) ?? "—"}` });
-          }
-        }
-      } catch {
-        // Silencioso: reintentará
-      }
-    };
-    const interval = setInterval(poll, 3000);
-    return () => {
-      alive = false;
-      clearInterval(interval);
-    };
-  }, [pollingId]);
-
-  const cargarArchivo = useCallback(async (file: File) => {
+  const cargarArchivo = useCallback((candidate: File) => {
+    setFile(null);
     setFeedback(null);
-    setRows(null);
-    setFileName(file.name);
-    if (!/\.csv$/i.test(file.name)) {
-      setFeedback({ type: "err", msg: "El archivo debe ser un .csv" });
+    if (!candidate.name.toLowerCase().endsWith(".csv")) {
+      setFeedback({ type: "err", msg: "Selecciona un archivo .csv." });
       return;
     }
-    const texto = await file.text();
-    const { rows: parsed, error } = parsePredictionsCsv(texto);
-    if (error) {
-      setFeedback({ type: "err", msg: error });
+    if (candidate.size === 0 || candidate.size > 10 * 1024 * 1024) {
+      setFeedback({ type: "err", msg: "El CSV debe pesar entre 1 byte y 10 MB." });
       return;
     }
-    setRows(parsed);
-    setFeedback({
-      type: "ok",
-      msg: `${parsed.length.toLocaleString()} predicciones válidas listas para enviar.`,
-    });
+    setFile(candidate);
   }, []);
 
   async function enviar() {
-    if (!datasetId || !rows) return;
+    if (!datasetId || !file || !canSubmit) return;
     setEnviando(true);
     setFeedback(null);
     try {
-      const res = await submitPredictions(datasetId, rows);
-      // El worker ahora devuelve el resultado completo en la misma respuesta
-      if (res.submission) {
-        const s = res.submission;
-        setMine({
-          id: s.id,
-          row_count: s.row_count,
-          status: s.status,
-          score: s.score,
-          corr_mean: s.corr_mean,
-          fnc_mean: s.fnc_mean,
-          consistencia: s.consistencia,
-          meta_corr: s.meta_corr,
-          is_valid: s.is_valid,
-          plagio_flag: s.plagio_flag,
-          submitted_at: s.submitted_at,
-          scored_at: s.scored_at,
-        });
-        if (s.status === "pending" || s.status === "processing" || s.status === "scoring") {
-          // Aún evaluando: activar el polling hasta estado terminal.
-          setPollingId(s.id);
-          setFeedback({ type: "ok", msg: "Recibimos tus predicciones. Evaluando..." });
-        } else if (s.status === "disqualified") {
-          setFeedback({ type: "err", msg: "Tu submission fue descalificada (datos inválidos o insuficientes)." });
-        } else {
-          setFeedback({ type: "ok", msg: `¡Evaluación completa! Score: ${s.score?.toFixed(4) ?? "—"}` });
-        }
-      } else if (res.status === "processing") {
-        // Fallback: si sigue en processing, iniciar polling
-        setPollingId(res.id);
-        setFeedback({
-          type: "ok",
-          msg: "Recibimos tus predicciones. Evaluando...",
-        });
-      }
-      setRows(null);
-    } catch (e: any) {
-      const code = e?.code;
-      let msg = e?.message || "Error al enviar las predicciones.";
-      if (code === "WORKER_UNAVAILABLE") {
-        msg = "El servidor de predicciones no está disponible temporalmente. Reintentá en unos minutos.";
-      } else if (code === "WORKER_TIMEOUT") {
-        msg = "El envío tardó demasiado. Probá con un archivo más chico o reintentá.";
-      } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
-        msg = "Sin conexión al server. Verificá tu internet.";
-      }
-      setFeedback({ type: "err", msg });
+      const response = await submitPredictions(datasetId, file);
+      if (!response.submission) throw new Error("El servidor no devolvió un comprobante.");
+      setMineState({ datasetId, submission: response.submission });
+      setFile(null);
+      setFeedback({
+        type: "ok",
+        msg: "Envío validado y registrado. Tu puntuación aparecerá cuando cierre la ronda.",
+      });
+    } catch (error) {
+      setFeedback({
+        type: "err",
+        msg: error instanceof Error ? error.message : "No se pudo registrar el envío.",
+      });
     } finally {
       setEnviando(false);
     }
@@ -707,55 +635,76 @@ function TabEnviar({ liveDataset }: { liveDataset: MlDataset | null }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {!datasetId ? (
+      {!liveDataset ? (
         <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
-          No hay una ronda abierta para recibir predicciones ahora mismo.
+          Todavía no hay un dataset de predicciones publicado.
         </div>
       ) : (
         <>
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragging(false);
-              const f = e.dataTransfer.files?.[0];
-              if (f) void cargarArchivo(f);
-            }}
-            className={
-              "ql-glass ql-elev-1 rounded-xl border-dashed px-6 py-10 text-center transition-colors " +
-              (dragging ? "border-accent bg-accent/5" : "border-line")
-            }
-          >
-            <p className="text-sm text-ink">Arrastra aquí tu predictions.csv</p>
-            <p className="mt-1 text-xs text-muted">
-              Columnas obligatorias: <span className="text-ink">id</span> y{" "}
-              <span className="text-ink">prediction</span> (numérica, sin nulos).
+          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-ink">
+              {canSubmit ? "Envía tus predicciones" : "Recepción de archivos cerrada"}
+            </h3>
+            <p className="mt-2 text-sm text-muted">
+              {canSubmit
+                ? "El CSV debe incluir exactamente los IDs de esta ronda y valores entre 0 y 1. Puedes corregirlo hasta el cierre; se selecciona el último envío válido."
+                : liveDataset.status === "scored"
+                  ? "La puntuación y el ranking final ya están disponibles."
+                  : "Estamos preparando los resultados. Tu último envío válido conserva su lugar."}
             </p>
-            <label className={buttonClasses("secondary", "sm", "mt-4 cursor-pointer")}>
-              Seleccionar archivo
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void cargarArchivo(f);
-                }}
-              />
-            </label>
-            {fileName && (
-              <p className="mt-3 text-xs text-muted">
-                Archivo: <span className="text-ink">{fileName}</span>
+            {liveDataset.closes_at && (
+              <p className="mt-2 text-xs text-muted">
+                Cierre: {new Date(liveDataset.closes_at).toLocaleString("es-CO")}
               </p>
             )}
           </div>
-
+          {canSubmit && (
+            <>
+              <div
+                onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setDragging(false);
+                  const selected = event.dataTransfer.files?.[0];
+                  if (selected) cargarArchivo(selected);
+                }}
+                className={
+                  "ql-glass ql-elev-1 rounded-xl border-dashed px-6 py-10 text-center transition-colors " +
+                  (dragging ? "border-accent bg-accent/5" : "border-line")
+                }
+              >
+                <p className="text-sm text-ink">Arrastra aquí tu predictions.csv</p>
+                <p className="mt-1 text-xs text-muted">
+                  Cabecera exacta: <span className="font-mono text-ink">id,prediction</span>
+                </p>
+                <label className={buttonClasses("secondary", "sm", "mt-4 cursor-pointer")}>
+                  Seleccionar archivo
+                  <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    className="hidden"
+                    onChange={(event) => {
+                      const selected = event.target.files?.[0];
+                      if (selected) cargarArchivo(selected);
+                    }}
+                  />
+                </label>
+                {file && <p className="mt-3 text-xs text-muted">{file.name} · {int(file.size)} bytes</p>}
+              </div>
+              <button
+                type="button"
+                onClick={enviar}
+                disabled={!file || enviando}
+                className={buttonClasses("primary", "md")}
+              >
+                {enviando ? "Verificando..." : "Validar y registrar envío"}
+              </button>
+            </>
+          )}
           {feedback && (
             <div
+              role="status"
               className={
                 "rounded-md px-4 py-3 text-sm " +
                 (feedback.type === "ok"
@@ -766,54 +715,27 @@ function TabEnviar({ liveDataset }: { liveDataset: MlDataset | null }) {
               {feedback.msg}
             </div>
           )}
-
-          <div>
-            <button
-              type="button"
-              onClick={enviar}
-              disabled={!rows || enviando}
-              className={buttonClasses("primary", "md")}
-            >
-              {enviando ? "Enviando..." : "Enviar predicciones"}
-            </button>
-            <p className="mt-2 text-[11px] text-muted">
-              Un envío nuevo reemplaza el anterior de esta ronda.
-            </p>
-          </div>
         </>
       )}
-
-      {/* Mi envío */}
       {mine && (
         <div className="ql-glass ql-elev-1 rounded-xl p-5">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-ink">Mi envío</h3>
-            {mine.plagio_flag && <Badge tone="short">Plagio detectado</Badge>}
-          </div>
-          <dl className="mt-3 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
-            <div>
-              <dt className="uppercase tracking-wider text-muted">Estado</dt>
-              <dd className="text-ink">{mine.status}</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-wider text-muted">Score</dt>
-              <dd className="metric text-accent">{num(mine.score, 4)}</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-wider text-muted">Corr media</dt>
-              <dd className="metric text-ink">{num(mine.corr_mean, 4)}</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-wider text-muted">FNC media</dt>
-              <dd className="metric text-ink">{num(mine.fnc_mean, 4)}</dd>
-            </div>
+          <h3 className="text-sm font-semibold text-ink">Comprobante del envío seleccionado</h3>
+          <dl className="mt-3 grid gap-3 text-xs sm:grid-cols-2">
+            <div><dt className="text-muted">Estado</dt><dd className="text-ink">{mine.status === "validated" ? "Validado; esperando cierre" : mine.status}</dd></div>
+            <div><dt className="text-muted">Filas</dt><dd className="text-ink">{int(mine.row_count)}</dd></div>
+            <div><dt className="text-muted">Versión</dt><dd className="break-all font-mono text-ink">{mine.dataset_version || "—"}</dd></div>
+            <div><dt className="text-muted">Huella SHA-256</dt><dd className="break-all font-mono text-ink">{mine.file_sha256 || "—"}</dd></div>
           </dl>
-          <p className="mt-3 text-[11px] text-muted">
-            {int(mine.row_count)} filas
-            {mine.submitted_at
-              ? ` · enviado ${new Date(mine.submitted_at).toLocaleString("es")}`
-              : ""}
-          </p>
+          {mine.submitted_at && (
+            <p className="mt-3 text-xs text-muted">
+              Recibido {new Date(mine.submitted_at).toLocaleString("es-CO")}
+            </p>
+          )}
+          {liveDataset?.status === "scored" && mine.score != null && (
+            <p className="mt-4 text-sm text-ink">
+              Puntuación final: <strong className="metric text-accent">{num(mine.score, 4)}</strong>
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -832,10 +754,7 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
   const datasetId = dataset?.id ?? null;
 
   useEffect(() => {
-    if (!datasetId) {
-      setLoading(false);
-      return;
-    }
+    if (!datasetId) return;
     let alive = true;
     (async () => {
       setLoading(true);
@@ -849,7 +768,7 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
         if (ids.length === 0) return;
         try {
           const supabase = createBrowserSupabaseClient();
-          let data: any[] | null = null;
+          let data: Array<{ id: string; display_name?: string | null; username?: string | null }> | null = null;
           const primero = await supabase
             .from("profiles")
             .select("id, display_name, username")
@@ -873,8 +792,8 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
         } catch {
           /* sin perfiles: fallback al id recortado */
         }
-      } catch (e: any) {
-        if (alive) setErr(e?.message || "No se pudo cargar el ranking.");
+      } catch (e: unknown) {
+        if (alive) setErr(e instanceof Error ? e.message : "No se pudo cargar el ranking.");
       } finally {
         if (alive) setLoading(false);
       }
@@ -888,6 +807,14 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
     return (
       <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
         Esta ronda todavía no tiene ranking.
+      </div>
+    );
+  }
+
+  if (dataset?.status !== "scored") {
+    return (
+      <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
+        El ranking se publicará cuando cierre la recepción y termine la puntuación.
       </div>
     );
   }
@@ -906,22 +833,38 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
     return (
       <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
         Aún no hay envíos evaluados en esta ronda.
+        {dataset?.benchmarks && Object.keys(dataset.benchmarks).length > 0 && (
+          <p className="mt-3">
+            Referencias: {Object.entries(dataset.benchmarks).map(([name, score]) =>
+              `${name} ${num(score, 4)}`
+            ).join(" · ")}
+          </p>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="ql-glass ql-elev-1 overflow-hidden rounded-xl">
+    <div className="space-y-4">
+      {dataset?.benchmarks && Object.keys(dataset.benchmarks).length > 0 && (
+        <div className="ql-glass ql-elev-1 rounded-xl p-5 text-sm text-muted">
+          <p className="font-medium text-ink">Referencias de esta ronda</p>
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+            {Object.entries(dataset.benchmarks).map(([name, score]) => (
+              <span key={name}>{name === "random" ? "Aleatorio" : name}: <strong className="font-mono text-ink">{num(score, 4)}</strong></span>
+            ))}
+          </div>
+          <p className="mt-2 text-xs">Estas referencias ayudan a interpretar el score; no participan en el ranking.</p>
+        </div>
+      )}
+      <div className="ql-glass ql-elev-1 overflow-hidden rounded-xl">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
               <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">Usuario</th>
-              <th className="px-4 py-3 text-right">Corr</th>
-              <th className="px-4 py-3 text-right">FNC</th>
-              <th className="px-4 py-3 text-right">Consistencia</th>
-              <th className="px-4 py-3 text-right">Score</th>
+              <th className="px-4 py-3 text-right">Spearman medio</th>
               <th className="px-4 py-3 text-right">QP</th>
             </tr>
           </thead>
@@ -941,17 +884,8 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
                     <span className="inline-flex items-center gap-2">
                       {nombres[e.user_id] || e.user_id.slice(0, 8)}
                       {esMio && <Badge tone="cyan">tú</Badge>}
-                      {e.plagio_flag && <Badge tone="short">plagio</Badge>}
+                      {e.plagio_flag && <Badge tone="short">Similitud alta</Badge>}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-ink">
-                    {num(e.corr_mean, 4)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-ink">
-                    {num(e.fnc_mean, 4)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-ink">
-                    {num(e.consistencia, 3)}
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-accent">
                     {num(e.score, 4)}
@@ -964,6 +898,7 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
             })}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

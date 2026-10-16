@@ -9,22 +9,31 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 
+import ml_protocol as protocol
+
 logger = logging.getLogger(__name__)
 
 
 def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | None = None,
-                    round_days: int = 4, **gen_kwargs) -> dict | None:
+                    round_days: int = 7, round_type: str | None = None,
+                    round_hours: int | None = None, **gen_kwargs) -> dict | None:
     """Crea una ronda de predicciones ML (dataset sintético o real).
 
     Cadencia rápida (decisión de Emilio): rondas cortas de `round_days` días.
     Si ya hay una ronda abierta reciente, no duplica.
     """
     now = now or datetime.now(timezone.utc)
+    round_type = round_type or ("practice" if mode == "sintetico" else "historical")
+    if round_type == "prospective" and (round_hours is None or not 1 <= round_hours <= 24):
+        raise ValueError("Una ronda prospectiva requiere un plazo explícito de 1 a 24 horas")
+    duration = timedelta(hours=round_hours) if round_type == "prospective" else timedelta(days=round_days)
+    closes_at = (now + duration).isoformat()
     recent = (
         supabase_client.table("ml_datasets")
         .select("id")
         .eq("kind", "live")
-        .eq("status", "ready")
+        .eq("round_type", round_type)
+        .in_("status", ["ready", "closed", "awaiting_labels", "scoring", "scored"])
         .gte("created_at", (now - timedelta(days=round_days)).isoformat())
         .execute()
     )
@@ -34,14 +43,24 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
 
     # Torneo contenedor (uno por modo, reutilizado). Lo creamos si falta.
     torneo = supabase_client.table("tournaments").select("id").eq(
-        "slug", f"ml-{mode}"
+        "slug", f"ml-{round_type}"
     ).execute()
     if torneo.data:
         tid = torneo.data[0]["id"]
+        supabase_client.table("tournaments").update({
+            "submission_deadline": closes_at,
+            "primary_metric": protocol.SCORE_VERSION,
+            "prize_pool_qp": 100 if round_type == "prospective" else 0,
+            "rules_text": "Predice el rango de retorno futuro por activo. "
+                          "Un CSV id,prediction entre 0 y 1; solo el último envío válido "
+                          "antes del cierre compite. Score: media de Spearman por era, "
+                          "calculada después del cierre. Rondas históricas y de "
+                          "práctica no otorgan QP.",
+        }).eq("id", tid).execute()
     else:
         res = supabase_client.table("tournaments").insert({
-            "name": f"Torneo ML · {mode}",
-            "slug": f"ml-{mode}",
+            "name": f"Torneo ML · {round_type}",
+            "slug": f"ml-{round_type}",
             "type": "ml",
             "status": "open",
             "asset_type": "synthetic" if mode == "sintetico" else "mixed",
@@ -50,13 +69,15 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
             "data_start": str((now - timedelta(days=400)).date()),
             "data_end": str(now.date()),
             "eval_end": str(now.date()),
-            "submission_deadline": (now + timedelta(days=round_days)).isoformat(),
-            "prize_pool_qp": 100 if mode == "sintetico" else 300,
-            "primary_metric": "ml_score",
+            "submission_deadline": closes_at,
+            "prize_pool_qp": 100 if round_type == "prospective" else 0,
+            "primary_metric": protocol.SCORE_VERSION,
             "min_trades": 0,
             "max_slippage_pct": 0.005,
-            "rules_text": "Sube predicciones (id,prediction) sobre el dataset. Se puntúa por "
-                          "correlación de Spearman + FNC (feature-neutral) + consistencia.",
+            "rules_text": "Sube id,prediction entre 0 y 1. Solo el último envío "
+                          "válido antes del cierre compite. Score: media de Spearman "
+                          "por era, calculada después del cierre. Las rondas de práctica "
+                          "e históricas no otorgan QP.",
         }).execute()
         tid = res.data[0]["id"]
 
@@ -66,129 +87,153 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
     ).order("round_number", desc=True).limit(1).execute()
     ronda = (last.data[0]["round_number"] + 1) if last.data else 1
 
-    closes_at = (now + timedelta(days=round_days)).isoformat()
     import ml_persist
     live = ml_persist.crear_dataset(
-        tid, ronda, mode=mode, closes_at=closes_at, now=now, **gen_kwargs
+        tid, ronda, mode=mode, round_type=round_type,
+        closes_at=closes_at, now=now, **gen_kwargs
     )
     logger.info(f"Ronda ML {mode} #{ronda} creada (dataset live {live['id']}).")
     return live
 
 
 def evaluate_ml_rounds(supabase_client, now: datetime | None = None) -> int:
-    """Evalúa submissions de rondas ML.
-
-    - Rondas ABIERTAS: evalúa submissions pendientes, construye meta-modelo
-      comunitario progresivo y actualiza scores (sin repartir QP).
-    - Rondas CERRADAS: evalúa, rankea y reparte QP.
-    """
+    """Cierra y finaliza rondas v1. Reintentable sin duplicar premios."""
     now = now or datetime.now(timezone.utc)
     live_ds = (
         supabase_client.table("ml_datasets")
-        .select("id,tournament_id,round_number,closes_at,status")
+        .select("id,tournament_id,round_number,closes_at,status,score_version,"
+                "target_available_at,scoring_started_at,round_type,target_hash")
         .eq("kind", "live")
-        .in_("status", ["ready", "scored"])
+        .in_("status", ["ready", "closed", "awaiting_labels", "scoring"])
         .execute()
     )
     evaluados = 0
+    failures = []
     for ds in live_ds.data or []:
-        cerrada = ds.get("closes_at") and ds["closes_at"] <= now.isoformat()
-        # Solo procesar rondas cerradas o abiertas con submissions pendientes
-        pending = (
-            supabase_client.table("prediction_submissions")
-            .select("id,user_id")
-            .eq("dataset_id", ds["id"])
-            .eq("status", "pending")
-            .execute()
-        )
-        if not pending.data:
+        if ds.get("score_version") != protocol.SCORE_VERSION:
+            # Las rondas antiguas usaban score visible durante el plazo. No se
+            # reinterpretan ni se acreditan nuevamente bajo reglas nuevas.
             continue
-
-        import ml_persist
-        import scoring_ml as sc
-        import numpy as np
-        import pandas as pd
-
-        # 1. Evaluar submissions pendientes (score individual)
-        for sub in pending.data:
-            try:
-                ml_persist.puntuar_submission_en_bd(sub["id"])
-                try:
-                    from notifications import notify_user
-                    notify_user(
-                        user_id=sub["user_id"],
-                        type="submission_scored",
-                        title="Tu submission fue evaluada",
-                        body=f"Recibiste un score en el torneo ML. Revisa el ranking.",
-                        link="/app/tournaments",
-                    )
-                except Exception:
-                    pass
-            except Exception as e:
-                logger.warning(f"Score falló para submission {sub['id']}: {e}")
-
-        # 2. Construir meta-modelo comunitario con submissions válidas
-        preds_df = ml_persist.cargar_predicciones_validas(supabase_client, ds["id"])
-        meta = None
-        if not preds_df.empty:
-            score_rows = (
-                supabase_client.table("prediction_submissions")
-                .select("id,score")
-                .eq("dataset_id", ds["id"])
-                .eq("is_valid", True)
-                .execute()
-            )
-            score_map = {r["id"]: (r.get("score") or 0) for r in (score_rows.data or [])}
-            cols_validas = [c for c in preds_df.columns if score_map.get(c, 0) > 0]
-            if cols_validas:
-                s = np.asarray([score_map[c] for c in cols_validas], dtype=float)
-                e = np.exp(s - s.max())
-                pesos = pd.Series(e / e.sum(), index=cols_validas)
-                meta = sc.stake_weight(preds_df[cols_validas], pesos)
-
-        # 3. Re-puntuar con meta-modelo (actualiza meta_corr)
-        subs_validas = (
-            supabase_client.table("prediction_submissions")
-            .select("id")
-            .eq("dataset_id", ds["id"])
-            .eq("is_valid", True)
-            .execute()
-        )
-        for sub in (subs_validas.data or []):
-            try:
-                ml_persist.puntuar_submission_en_bd(sub["id"], meta_modelo=meta)
-            except Exception as e:
-                logger.warning(f"Re-score falló para {sub['id']}: {e}")
-
-        # 4. Persistir meta-modelo en consensus_signals
-        if meta is not None and len(meta) > 0:
-            try:
-                ds_meta = (
-                    supabase_client.table("ml_datasets")
-                    .select("tournament_id,round_number")
-                    .eq("id", ds["id"])
-                    .execute()
-                )
-                if ds_meta.data:
-                    info = ds_meta.data[0]
-                    supabase_client.table("consensus_signals").upsert({
-                        "tournament_id": info.get("tournament_id"),
-                        "round_number": info.get("round_number"),
-                        "dataset_id": ds["id"],
-                        "signal_json": meta.to_dict(),
-                    }, on_conflict="tournament_id,round_number").execute()
-            except Exception as e:
-                logger.warning(f"No se pudo guardar consensus_signals: {e}")
-
-        # 5. Si la ronda cerró: repartir QP y marcar como scored
-        if cerrada:
-            _distribute_ml_qp(supabase_client, ds["id"])
-            supabase_client.table("ml_datasets").update({"status": "scored"}).eq(
-                "id", ds["id"]
-            ).execute()
-
-        evaluados += 1
+        try:
+            if _finalize_v1_round(supabase_client, ds, now):
+                evaluados += 1
+        except Exception:
+            logger.exception("Ronda ML %s no finalizada; se reintentará", ds["id"])
+            failures.append(ds["id"])
+    if failures:
+        raise RuntimeError(f"Falló la finalización de rondas ML: {', '.join(failures)}")
     return evaluados
+
+
+def _finalize_v1_round(supabase_client, ds: dict, now: datetime) -> bool:
+    from ml_persist import puntuar_submission_en_bd
+
+    deadline = ds.get("closes_at")
+    if not deadline or datetime.fromisoformat(deadline.replace("Z", "+00:00")) > now:
+        return False
+    if ds.get("round_type") == "prospective" and not ds.get("target_hash"):
+        if ds["status"] != "awaiting_labels":
+            supabase_client.table("ml_datasets").update({
+                "status": "awaiting_labels"
+            }).eq("id", ds["id"]).eq("status", ds["status"]).execute()
+        return False
+    available = ds.get("target_available_at")
+    if available and datetime.fromisoformat(available.replace("Z", "+00:00")) > now:
+        if ds["status"] != "awaiting_labels":
+            supabase_client.table("ml_datasets").update({
+                "status": "awaiting_labels"
+            }).eq("id", ds["id"]).eq("status", ds["status"]).execute()
+        return False
+
+    # Un UPDATE condicional reclama la ronda. Un worker que cae durante scoring
+    # deja un lease recuperable después de 30 minutos.
+    if ds["status"] == "scoring":
+        started = ds.get("scoring_started_at")
+        if started and datetime.fromisoformat(started.replace("Z", "+00:00")) > now - timedelta(minutes=30):
+            return False
+        claim = supabase_client.table("ml_datasets").update({
+            "scoring_started_at": now.isoformat()
+        }).eq("id", ds["id"]).eq("status", "scoring")
+        if started:
+            claim = claim.eq("scoring_started_at", started)
+        claimed = claim.execute()
+    else:
+        claimed = supabase_client.table("ml_datasets").update({
+            "status": "scoring", "scoring_started_at": now.isoformat()
+        }).eq("id", ds["id"]).eq("status", ds["status"]).execute()
+    if not claimed.data:
+        return False
+
+    submissions = supabase_client.table("prediction_submissions").select(
+        "id,user_id,status,score,submitted_at,is_valid"
+    ).eq("dataset_id", ds["id"]).eq("is_selected", True).execute().data or []
+    for sub in submissions:
+        if sub["status"] != "scored":
+            puntuar_submission_en_bd(sub["id"])
+    scored = supabase_client.table("prediction_submissions").select(
+        "id,user_id,score,submitted_at"
+    ).eq("dataset_id", ds["id"]).eq("is_selected", True).eq(
+        "status", "scored"
+    ).eq("is_valid", True).execute().data or []
+    if len(scored) != len(submissions):
+        raise RuntimeError("No todos los envíos seleccionados fueron puntuados")
+
+    # Dos referencias transparentes, calculadas únicamente tras el cierre.
+    # No influyen en el ranking y permiten interpretar el score de una ronda.
+    try:
+        import hashlib
+        import pandas as pd
+        import ml_storage as storage
+        import ml_persist
+
+        complete = supabase_client.table("ml_datasets").select(
+            "bucket_path,target_path,version,round_type"
+        ).eq("id", ds["id"]).execute().data[0]
+        live = storage.download_parquet(complete["bucket_path"])
+        targets = storage.download_private_parquet(complete["target_path"])
+        random_values = [
+            int(hashlib.sha256(f"{complete['version']}|{row_id}".encode()).hexdigest()[:13], 16)
+            / float(0xfffffffffffff)
+            for row_id in live["id"].astype(str)
+        ]
+        minimum = 1 if ds.get("round_type") == "prospective" else 10
+        benchmark_scores = {
+            "random": protocol.score_predictions(
+                pd.DataFrame({"id": live["id"], "prediction": random_values}),
+                targets, min_eras=minimum,
+            )["score"],
+        }
+        feature = next((column for column in live.columns if column.startswith("feature_")), None)
+        if feature:
+            benchmark_scores[feature] = protocol.score_predictions(
+                pd.DataFrame({"id": live["id"], "prediction": live[feature]}),
+                targets, min_eras=minimum,
+            )["score"]
+        supabase_client.table("ml_datasets").update({
+            "benchmarks": benchmark_scores
+        }).eq("id", ds["id"]).execute()
+    except Exception:
+        logger.exception("No se pudieron calcular referencias para %s", ds["id"])
+
+    # Las rondas históricas/de práctica tienen ranking, pero no premios.
+    if ds.get("round_type") == "prospective" and scored:
+        tournament = supabase_client.table("tournaments").select(
+            "prize_pool_qp"
+        ).eq("id", ds["tournament_id"]).execute().data or []
+        pool = int(tournament[0].get("prize_pool_qp") or 0) if tournament else 0
+        ranked = sorted(scored, key=lambda s: (-s["score"], s.get("submitted_at") or "", s["id"]))
+        for position, sub in enumerate(ranked[:3]):
+            prize = int(pool * (0.5, 0.3, 0.2)[position])
+            if prize > 0:
+                supabase_client.rpc("award_ml_qp_once", {
+                    "p_dataset": ds["id"], "p_submission": sub["id"],
+                    "p_user": sub["user_id"], "p_amount": prize,
+                }).execute()
+
+    supabase_client.table("ml_datasets").update({
+        "status": "scored", "finalized_at": now.isoformat()
+    }).eq("id", ds["id"]).eq("status", "scoring").execute()
+    return True
 
 
 def _distribute_ml_qp(supabase_client, dataset_id: str):
