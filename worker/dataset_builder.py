@@ -150,7 +150,7 @@ def generar_panel_real(
 
     series: dict[str, pd.DataFrame] = {}
     asset_types: dict[str, str] = {}
-    for asset_type, symbol in universo:
+    for asset_index, (asset_type, symbol) in enumerate(universo):
         try:
             df = data_feed.get_ohlcv(
                 asset_type, symbol, timeframe, ini, fin,
@@ -166,7 +166,8 @@ def generar_panel_real(
                 series[symbol] = df
                 asset_types[symbol] = asset_type
         except Exception as e:  # noqa: BLE001 - un activo caido no rompe la ronda
-            logger.warning(f"[dataset] {symbol} descartado: {e}")
+            logger.warning("[dataset] activo %d descartado (%s)",
+                           asset_index, type(e).__name__)
 
     if strict_universe and len(series) != len(universo):
         raise ValueError("Faltan activos del universo configurado")

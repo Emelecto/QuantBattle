@@ -45,7 +45,7 @@ def resolve_round(supabase, round_row: dict, now: datetime | None = None) -> boo
 
     # No usar caché: al crear la ronda ese caché acababa en as_of.
     series: dict[str, pd.Series] = {}
-    for row in mapping.itertuples(index=False):
+    for asset_index, row in enumerate(mapping.itertuples(index=False)):
         frame = data_feed.get_ohlcv(
             row.asset_type, row.symbol, "1d",
             pd.Timestamp(as_of - timedelta(days=2), tz="UTC"),
@@ -56,10 +56,10 @@ def resolve_round(supabase, round_row: dict, now: datetime | None = None) -> boo
         close = frame["close"].astype(float).copy()
         close.index = pd.to_datetime(close.index, utc=True).date
         if as_of not in close.index:
-            logger.warning("Falta precio base para %s", row.symbol)
+            logger.warning("Falta precio base para activo %d", asset_index)
             return False
         if not math.isclose(float(close.loc[as_of]), float(row.as_of_close), rel_tol=1e-3):
-            raise ValueError(f"Precio base revisado para {row.symbol}; requiere revisión")
+            raise ValueError(f"Precio base revisado para activo {asset_index}; requiere revisión")
         series[row.symbol] = close
 
     common = set.intersection(*(set(close.index) for close in series.values()))
