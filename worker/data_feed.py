@@ -92,7 +92,7 @@ _SIDECAR_SUFFIX = ".sha256"
 
 
 def _with_retry(fn, *, op: str, attempts: int = _RETRY_ATTEMPTS,
-                base_delay: float = _RETRY_BASE_DELAY):
+                base_delay: float = _RETRY_BASE_DELAY, should_retry=None):
     """Reintenta `fn()` ante errores transitorios; los ValueError (errores
     deterministas: símbolo inexistente, columnas faltantes) NO se reintentan."""
     last_exc: Exception | None = None
@@ -103,7 +103,7 @@ def _with_retry(fn, *, op: str, attempts: int = _RETRY_ATTEMPTS,
             raise
         except Exception as exc:
             last_exc = exc
-            if attempt >= attempts:
+            if attempt >= attempts or (should_retry is not None and not should_retry(exc)):
                 break
             delay = base_delay * (2 ** (attempt - 1)) + random.uniform(0, base_delay)
             logger.warning("%s: intento %d/%d falló (%s); reintento en %.2fs",
@@ -111,6 +111,29 @@ def _with_retry(fn, *, op: str, attempts: int = _RETRY_ATTEMPTS,
             time.sleep(delay)
     assert last_exc is not None
     raise last_exc
+
+
+def _storage_status_code(exc: Exception) -> int | None:
+    """Extrae el status HTTP de errores de Storage de Supabase."""
+    for candidate in (getattr(exc, "status", None),
+                      getattr(exc, "status_code", None),
+                      getattr(exc, "statusCode", None)):
+        try:
+            if candidate is not None:
+                return int(candidate)
+        except (TypeError, ValueError):
+            continue
+    response = getattr(exc, "response", None)
+    try:
+        return int(response.status_code) if response is not None else None
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+
+def _retry_cache_error(exc: Exception) -> bool:
+    """Reintenta errores de red y HTTP transitorios, no rechazos deterministas."""
+    status = _storage_status_code(exc)
+    return status is None or _is_retryable_http(status)
 
 
 def _is_retryable_http(status: int | None) -> bool:
@@ -243,6 +266,7 @@ def read_from_cache(
         data = _with_retry(
             lambda: client.storage.from_(_CACHE_BUCKET).download(path),
             op=f"cache read {path}", attempts=_CACHE_RETRY_ATTEMPTS,
+            should_retry=_retry_cache_error,
         )
     except Exception as exc:
         logger.info("Cache miss para %s: %s", path, exc)
@@ -307,6 +331,7 @@ def write_to_cache(
                 file_options={"upsert": "true", "content-type": content_type},
             ),
             op=f"cache write {path}", attempts=_CACHE_RETRY_ATTEMPTS,
+            should_retry=_retry_cache_error,
         )
         logger.info("Cache escrito: %s (%d bytes).", path, len(data))
         try:  # sidecar de checksum (best-effort, nunca rompe el write)

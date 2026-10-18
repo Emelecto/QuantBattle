@@ -127,6 +127,31 @@ def test_adjusted_daily_cache_accepts_recent_market_close(monkeypatch):
     assert stale_week is None
 
 
+def test_missing_storage_cache_object_is_not_retried(monkeypatch):
+    attempts = []
+
+    class FakeStorage:
+        def from_(self, _bucket):
+            return self
+
+        def download(self, path):
+            attempts.append(path)
+            error = RuntimeError("object not found")
+            error.status = 404
+            raise error
+
+    class FakeClient:
+        storage = FakeStorage()
+
+    monkeypatch.setattr(data_feed, "_cache_client", lambda: FakeClient())
+    result = data_feed.read_from_cache(
+        "stock", "AAPL", "1d", "2026-10-14", "2026-10-18",
+    )
+
+    assert result is None
+    assert len(attempts) == 1
+
+
 def test_yfinance_honors_configured_request_interval(monkeypatch):
     sleeps = []
 
