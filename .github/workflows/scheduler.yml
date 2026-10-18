@@ -2,9 +2,8 @@ name: QuantLab Weekly Tournament Scheduler
 
 on:
   schedule:
-    # Cada 2 dias a las 06:00 UTC (cadencia de rondas ML ~4 dias,
-    # garantiza crear/evaluar al menos cada 4 dias).
-    - cron: "0 6 */2 * *"
+    # Revisión diaria; create_ml_round solo publica una ronda cada 7 días.
+    - cron: "0 6 * * *"
   # Permitir ejecucion manual desde la pestaña Actions
   workflow_dispatch:
 
@@ -12,6 +11,11 @@ jobs:
   generate-dataset:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        round_type: [practice, historical, prospective]
     # La generacion del dataset sintetico (600x350) es pesada en RAM.
     # GitHub Actions corre en VM de 7 GB y no se duerme, asi que la generamos
     # AQUI y la subimos a Supabase Storage. El worker de Render solo SIRVE
@@ -31,13 +35,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Generate and upload ML round to Supabase Storage
+      - name: Generate or mature ${{ matrix.round_type }} ML rounds
         working-directory: worker
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           DATASET_SALT: ${{ secrets.DATASET_SALT }}
-          ROUND_DAYS: "4"
+          ROUND_DAYS: "7"
+          ML_ROUND_MODE: ${{ matrix.round_type == 'practice' && 'sintetico' || 'real' }}
+          ML_ROUND_TYPE: ${{ matrix.round_type }}
+          ML_REAL_UNIVERSE: ${{ secrets.ML_REAL_UNIVERSE }}
           N_ACTIVOS: "600"
           N_ERAS: "350"
         run: |
@@ -45,13 +52,14 @@ jobs:
             echo "ERROR: SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY deben estar en Secrets"
             exit 1
           fi
-          echo "Generando ronda ML y subiendo a Storage..."
+          echo "Procesando ronda ML: $ML_ROUND_TYPE"
           python generate_dataset_github.py
 
   evaluate-rounds:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: generate-dataset
+    if: always()
     # Evaluar rondas vencidas es ligero; lo dejamos en el worker de Render
     # via su endpoint asincrono (devuelve 200 al instante).
     steps:
@@ -68,7 +76,7 @@ jobs:
           HTTP_CODE="000"
           for i in 1 2 3 4 5; do
             HTTP_CODE=$(curl -s -o /tmp/eval_response.txt -w "%{http_code}" \
-              -X POST "$WORKER_URL/scheduler/evaluate" \
+              -X POST "$WORKER_URL/scheduler/evaluate?sync=true" \
               -H "Content-Type: application/json" \
               -H "X-Scheduler-Key: $SCHEDULER_KEY" \
               --max-time 600)

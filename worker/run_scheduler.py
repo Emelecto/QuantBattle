@@ -67,9 +67,9 @@ def run_create_ml_round() -> None:
 
     sb = get_supabase_client()
     now = datetime.now(timezone.utc)
-    result = create_ml_round(sb, mode="sintetico", now=now, round_days=4,
+    result = create_ml_round(sb, mode="sintetico", now=now, round_days=7,
                              n_activos=600, n_eras=350, n_features=50,
-                             n_features_utiles=12, ic_objetivo=0.06, seed=42)
+                             n_features_utiles=12, ic_objetivo=0.06)
     if result:
         logger.info(f"Ronda ML creada: {result.get('id')}")
     else:

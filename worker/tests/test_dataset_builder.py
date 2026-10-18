@@ -110,6 +110,13 @@ def test_split_temporal_correcto(sintetico):
     assert max_va < min_li, "validation se solapa con live"
 
 
+def test_split_purga_horizonte_futuro(sintetico):
+    *_, interno, _ = sintetico
+    partes = db.partir(interno, purge_eras=5)
+    assert partes["train"]["era_idx"].max() + 5 < partes["validation"]["era_idx"].min()
+    assert partes["validation"]["era_idx"].max() + 5 < partes["live"]["era_idx"].min()
+
+
 def test_sin_solape_de_ids_entre_particiones(sintetico):
     *_, interno, _ = sintetico
     p = db.partir(interno)

@@ -116,6 +116,8 @@ def generar_panel_real(
     *,
     fin=None,
     ini=None,
+    keep_unlabeled: bool = False,
+    strict_universe: bool = False,
 ) -> tuple[pd.DataFrame, list[str], dict]:
     """Panel derivado de datos REALES, con las fugas ya cerradas.
 
@@ -147,9 +149,13 @@ def generar_panel_real(
     fin, ini = _fin, _ini
 
     series: dict[str, pd.DataFrame] = {}
-    for asset_type, symbol in universo:
+    asset_types: dict[str, str] = {}
+    for asset_index, (asset_type, symbol) in enumerate(universo):
         try:
-            df = data_feed.get_ohlcv(asset_type, symbol, timeframe, ini, fin)
+            df = data_feed.get_ohlcv(
+                asset_type, symbol, timeframe, ini, fin,
+                adjusted_close=asset_type in ("stock", "etf"),
+            )
             df = df[["close", "volume"]].copy()
             idx = pd.to_datetime(df.index)
             # Cripto llega tz-aware y las acciones tz-naive: normalizar o
@@ -158,9 +164,13 @@ def generar_panel_real(
             df.index = idx.normalize()
             if len(df) > 120:
                 series[symbol] = df
+                asset_types[symbol] = asset_type
         except Exception as e:  # noqa: BLE001 - un activo caido no rompe la ronda
-            logger.warning(f"[dataset] {symbol} descartado: {e}")
+            logger.warning("[dataset] activo %d descartado (%s)",
+                           asset_index, type(e).__name__)
 
+    if strict_universe and len(series) != len(universo):
+        raise ValueError("Faltan activos del universo configurado")
     if len(series) < 2:
         raise ValueError("Universo insuficiente: menos de 2 activos con datos.")
 
@@ -194,19 +204,25 @@ def generar_panel_real(
     cols = [c for c in panel.columns if c.startswith("u")]
 
     # Solo fechas con el universo COMPLETO -> filas por era constantes.
-    completas = panel.dropna(subset=cols + ["target_raw"]).groupby("fecha").size()
+    required = cols if keep_unlabeled else cols + ["target_raw"]
+    completas = panel.dropna(subset=required).groupby("fecha").size()
     completas = completas[completas == len(series)].index
-    panel = panel[panel["fecha"].isin(completas)].dropna(subset=cols + ["target_raw"]).copy()
+    panel = panel[panel["fecha"].isin(completas)].dropna(subset=required).copy()
 
     fechas = sorted(panel["fecha"].unique())
     panel["era_idx"] = panel["fecha"].map({f: i for i, f in enumerate(fechas)})
-    panel = panel.drop(columns=["fecha"])
+    if not keep_unlabeled:
+        panel = panel.drop(columns=["fecha"])
 
     meta = {
         "modo": "real",
         "n_activos": len(series),
         "n_eras": len(fechas),
         "filas_por_era": int(len(series)),
+        "asset_map": {
+            i: {"asset_type": asset_types[symbol], "symbol": symbol}
+            for i, symbol in enumerate(series)
+        },
     }
     return panel, cols, meta
 
@@ -267,18 +283,22 @@ def obfuscar(
     return publico, interno, {"features": ren, "eras": mapa_eras, "feat_cols": feat_pub}
 
 
-def partir(interno: pd.DataFrame, pct_train=0.6, pct_val=0.2) -> dict:
+def partir(interno: pd.DataFrame, pct_train=0.6, pct_val=0.2,
+           purge_eras: int = 0) -> dict:
     """Split TEMPORAL por era_idx (no por etiqueta, que esta permutada).
 
-    `live` es el holdout privado: su target NUNCA se publica.
+    `purge_eras` elimina las últimas etiquetas de train y validation cuyos
+    retornos futuros podrían alcanzar la partición siguiente.
     """
     n = int(interno["era_idx"].max()) + 1
     lim_tr = int(n * pct_train)
     lim_va = int(n * (pct_train + pct_val))
+    if purge_eras < 0 or lim_tr <= purge_eras or lim_va - lim_tr <= purge_eras:
+        raise ValueError("purge_eras deja train o validation sin datos")
     return {
-        "train": interno[interno["era_idx"] < lim_tr],
+        "train": interno[interno["era_idx"] < lim_tr - purge_eras],
         "validation": interno[
-            (interno["era_idx"] >= lim_tr) & (interno["era_idx"] < lim_va)
+            (interno["era_idx"] >= lim_tr) & (interno["era_idx"] < lim_va - purge_eras)
         ],
         "live": interno[interno["era_idx"] >= lim_va],
     }

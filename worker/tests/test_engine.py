@@ -1,3 +1,5 @@
+import pytest
+
 from engine import walkforward_splits, deflated_sharpe, integrity_label
 
 
@@ -31,6 +33,7 @@ def test_integrity_label():
     assert integrity_label(1.0, 0.1) == "Baja"
 
 
+@pytest.mark.external
 def test_run_backtest_real_btc_jan2023():
     """Backtest OOS con datos REALES de Binance (BTC enero 2023)."""
     from schemas import StrategyConfig

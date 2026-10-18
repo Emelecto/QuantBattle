@@ -14,7 +14,7 @@ import { call } from "@/lib/tournaments";
 /** Origen de los datos de la ronda. */
 export type MlMode = "sintetico" | "real";
 
-/** Rol del dataset dentro de la ronda. `live` nunca expone su parquet. */
+/** Rol del dataset dentro de la ronda. `live` publica features sin target. */
 export type MlDatasetKind = "train" | "validation" | "live";
 
 export interface MlDataset {
@@ -30,7 +30,15 @@ export interface MlDataset {
   row_count: number;
   feature_cols: string[] | null;
   closes_at: string | null;
-  /** Solo train/validation. `null` para live (y cuando el worker no lo resuelve). */
+  version: string | null;
+  data_hash: string | null;
+  round_type: "practice" | "historical" | "prospective";
+  score_version: string;
+  published_at: string | null;
+  target_available_at: string | null;
+  finalized_at: string | null;
+  benchmarks: Record<string, number> | null;
+  /** URL del parquet público; null para rondas antiguas sin archivo. */
   download_url: string | null;
 }
 
@@ -48,6 +56,10 @@ export interface MlSubmission {
   submitted_at: string | null;
   scored_at: string | null;
   eval_error?: string | null;
+  file_sha256?: string | null;
+  dataset_version?: string | null;
+  is_selected?: boolean;
+  qp_earned?: number;
 }
 
 export interface MlLeaderboardEntry {
@@ -61,12 +73,6 @@ export interface MlLeaderboardEntry {
   submitted_at: string | null;
   /** El worker aún no reparte QP por ronda ML; queda opcional. */
   qp_earned?: number | null;
-}
-
-/** Fila de predicción tal como la acepta el worker en modo JSON. */
-export interface MlPredictionRow {
-  id: string;
-  prediction: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -97,10 +103,10 @@ export async function listDatasets(
   return Array.isArray(res?.datasets) ? res.datasets : [];
 }
 
-/** URL pública (Storage) del parquet de un dataset train/validation. */
+/** URL pública (Storage) del parquet de una partición. */
 export async function downloadDatasetUrl(
   datasetId: string,
-  kind: "train" | "validation",
+  kind: MlDatasetKind,
 ): Promise<string> {
   const res = await call<{ url?: string }>(
     `/ml/datasets/${datasetId}/download?kind=${kind}`,
@@ -112,16 +118,16 @@ export async function downloadDatasetUrl(
 /**
  * Envía predicciones al dataset `live` de la ronda.
  *
- * Se usa el modo JSON `{ rows }` (el CSV se parsea en el cliente) para poder
- * reutilizar `call` sin construir un FormData.
+ * El archivo llega sin transformación; el worker es la única autoridad de
+ * validación. Así se conservan las comillas, el orden y los bytes del recibo.
  */
 export async function submitPredictions(
   datasetId: string,
-  rows: MlPredictionRow[],
+  file: File,
 ): Promise<{ id: string; row_count: number; status: string; submission?: MlSubmission }> {
   return call<{ id: string; row_count: number; status: string; submission?: MlSubmission }>(
     `/ml/datasets/${datasetId}/predictions`,
-    { method: "POST", body: JSON.stringify({ rows }) },
+    { method: "POST", headers: { "Content-Type": "text/csv" }, body: file },
   );
 }
 
@@ -163,74 +169,13 @@ export async function mlLeaderboard(
   return Array.isArray(res?.leaderboard) ? res.leaderboard : [];
 }
 
-/* ------------------------------------------------------------------ */
-/* Utilidades de cliente                                              */
-/* ------------------------------------------------------------------ */
-
-export interface CsvParseResult {
-  rows: MlPredictionRow[];
-  error: string | null;
-}
-
-/**
- * Parsea y valida un CSV `id,prediction` en el navegador.
- *
- * Aplica las mismas reglas que `_validar_csv` del worker: columnas `id` y
- * `prediction`, predicciones numéricas, sin nulos y al menos una fila.
- */
-export function parsePredictionsCsv(text: string): CsvParseResult {
-  const clean = text.replace(/^\uFEFF/, "").trim();
-  if (!clean) return { rows: [], error: "El archivo está vacío." };
-
-  const lines = clean.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length < 2) {
-    return {
-      rows: [],
-      error: "El CSV necesita una cabecera y al menos una fila de datos.",
-    };
-  }
-
-  const split = (line: string) =>
-    line.split(",").map((c) => c.trim().replace(/^"(.*)"$/, "$1"));
-
-  const header = split(lines[0]).map((h) => h.toLowerCase());
-  const idIdx = header.indexOf("id");
-  const predIdx = header.indexOf("prediction");
-  if (idIdx === -1 || predIdx === -1) {
-    return {
-      rows: [],
-      error: "El CSV debe tener columnas 'id' y 'prediction'.",
-    };
-  }
-
-  const rows: MlPredictionRow[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cells = split(lines[i]);
-    const id = cells[idIdx];
-    const raw = cells[predIdx];
-    if (!id) {
-      return { rows: [], error: `Fila ${i + 1}: 'id' vacío.` };
-    }
-    if (raw == null || raw === "") {
-      return { rows: [], error: `Fila ${i + 1}: 'prediction' vacío (NaN).` };
-    }
-    const prediction = Number(raw);
-    if (!Number.isFinite(prediction)) {
-      return {
-        rows: [],
-        error: `Fila ${i + 1}: 'prediction' no es numérico ("${raw}").`,
-      };
-    }
-    rows.push({ id, prediction });
-  }
-
-  if (rows.length === 0) {
-    return { rows: [], error: "No hay filas de predicciones." };
-  }
-  return { rows, error: null };
-}
-
 /** Etiqueta en español del modo de la ronda. */
 export function mlModeLabel(mode: MlMode | string | null | undefined): string {
   return mode === "real" ? "datos reales" : "sintético";
+}
+
+export function mlRoundTypeLabel(roundType: MlDataset["round_type"] | null | undefined): string {
+  if (roundType === "prospective") return "Prospectivo";
+  if (roundType === "historical") return "Piloto histórico";
+  return "Práctica sintética";
 }

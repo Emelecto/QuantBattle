@@ -19,6 +19,7 @@ import pandas as pd
 import ml_storage as store
 import dataset_builder as db
 import scoring_ml as sc
+import ml_protocol as protocol
 
 logger = logging.getLogger(__name__)
 
@@ -104,9 +105,9 @@ def compute_dataset_version(*, mode: str, seed_obfuscar, seed_gen,
 # Generación de una ronda (cron / scheduler)
 # ---------------------------------------------------------------------------
 def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico",
-                  closes_at=None, now=None, **gen_kwargs) -> dict:
-    """Genera un dataset completo (train/validation/live), lo sube a Storage y
-    guarda el holdout en dataset_targets. Devuelve el dict del dataset creado.
+                  closes_at=None, now=None, round_type: str | None = None,
+                  **gen_kwargs) -> dict:
+    """Genera una ronda histórica o de práctica con holdout privado.
 
     Para 'real' se requiere `universo` (lista de (tipo, simbolo)).
 
@@ -118,17 +119,55 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
     """
     from datetime import datetime, timezone
     now = now or datetime.now(timezone.utc)
+    round_salt = hashlib.sha256(
+        f"{_SALT}|{tournament_id}|{round_number}".encode("utf-8")
+    ).hexdigest()
+    seed_obf = int(round_salt[:8], 16)
+    round_type = round_type or ("practice" if mode == "sintetico" else "historical")
+    if round_type not in ("practice", "historical", "prospective"):
+        raise ValueError("tipo de ronda desconocido")
+    if (mode == "sintetico") != (round_type == "practice"):
+        raise ValueError("práctica debe ser sintética y rondas reales deben usar mercado")
+    if mode == "sintetico" and gen_kwargs.get("seed") is None:
+        gen_kwargs["seed"] = int(round_salt[8:16], 16)
     if mode == "sintetico":
         panel, cols, meta = db.generar_mercado_sintetico(**gen_kwargs)
     elif mode == "real":
         if "universo" not in gen_kwargs:
             raise ValueError("modo 'real' requiere 'universo'")
-        panel, cols, meta = db.generar_panel_real(**gen_kwargs)
+        panel, cols, meta = db.generar_panel_real(
+            **gen_kwargs, keep_unlabeled=round_type == "prospective",
+            strict_universe=round_type == "prospective",
+        )
     else:
         raise ValueError(f"mode desconocido: {mode}")
 
-    publico, interna, mapeos = db.obfuscar(panel, cols, salt=_SALT, seed=meta.get("seed", 0))
-    partes = db.partir(interna)
+    _publico, interna, mapeos = db.obfuscar(panel, cols, salt=round_salt, seed=seed_obf)
+    # El target real es un retorno a cinco eras; purgar etiquetas que miran
+    # dentro de la siguiente partición evita fuga temporal entre conjuntos.
+    if round_type == "prospective":
+        latest = int(interna["era_idx"].max())
+        available = sorted(int(x) for x in interna.loc[
+            interna["target"].notna() & (interna["era_idx"] < latest), "era_idx"
+        ].unique())
+        if len(available) < 50:
+            raise ValueError("Historia etiquetada insuficiente para prospectivo")
+        cut = int(len(available) * 0.75)
+        partes = {
+            "train": interna[interna["era_idx"] < available[cut - 5]],
+            "validation": interna[(interna["era_idx"] >= available[cut]) &
+                                  (interna["era_idx"] <= available[-1])],
+            "live": interna[interna["era_idx"] == latest],
+        }
+        if partes["live"]["target"].notna().any():
+            raise ValueError("El prospectivo no puede publicar una era con target conocido")
+    else:
+        partes = db.partir(interna, purge_eras=5 if mode == "real" else 0)
+    quality = protocol.validate_round_parts(
+        partes, mapeos["feat_cols"], min_assets=30,
+        min_test_eras=1 if round_type == "prospective" else 10,
+        live_target_required=round_type != "prospective",
+    )
 
     # Metadatos derivados del panel (no dependen de claves del meta del generador)
     n_activos = int(interna["activo_idx"].nunique()) if "activo_idx" in interna else int(panel["activo_idx"].nunique())
@@ -138,7 +177,7 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
     supabase = get_supabase()
 
     base = f"{mode}/{tournament_id[:8]}/r{round_number:03d}"
-    salt_hash = hashlib.sha256(_SALT.encode()).hexdigest()[:16]
+    salt_hash = hashlib.sha256(round_salt.encode()).hexdigest()[:16]
     # Semilla efectiva de la obfuscación (la que fija los ids/features) y
     # semilla pedida al generador (informativa; el generador no siempre la
     # devuelve en `meta`). Ambas entran al versionado.
@@ -147,11 +186,6 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
         seed_gen = int(_sg) if _sg is not None else None
     except (TypeError, ValueError):
         seed_gen = None
-    _so = meta.get("seed", 0)
-    try:
-        seed_obf = int(_so) if _so is not None else 0
-    except (TypeError, ValueError):
-        seed_obf = 0
     params = {
         "n_activos": n_activos,
         "n_eras": n_eras,
@@ -162,23 +196,22 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
         "seed_obfuscar": seed_obf,
         "dias": gen_kwargs.get("dias"),
         "timeframe": gen_kwargs.get("timeframe"),
+        "target_horizon_eras": 5 if mode == "real" else None,
     }
+    # ml_datasets es de lectura pública: nunca guardar símbolos allí.
     if "universo" in gen_kwargs:
-        try:
-            params["universo"] = [list(u) for u in gen_kwargs["universo"]]
-        except Exception:
-            params["universo"] = None
+        params["universe_size"] = len(gen_kwargs["universo"])
     params = {k: v for k, v in params.items() if v is not None}
 
-    _DROP = ["era_idx", "activo_idx", "target_raw", "target"]
+    # Train y validation necesitan etiquetas para que el participante pueda
+    # entrenar y validar. Solo el target de live es un holdout privado.
+    _DROP_INTERNAL = ["era_idx", "activo_idx", "target_raw"]
     frame_hashes: dict[str, str] = {}
     row_counts: dict[str, int] = {}
     recs = []
     for kind, df in (("train", partes["train"]), ("validation", partes["validation"])):
         path = f"{base}/{kind}.parquet"
-        # Quitar columnas internas y el target real (nunca se publica).
-        # era_idx es server-side; activo_idx/target_raw ya no existen en interno.
-        df_pub = df.drop(columns=_DROP, errors="ignore")
+        df_pub = df.drop(columns=_DROP_INTERNAL, errors="ignore")
         store.upload_parquet(df_pub, path)  # reintento + sidecar SHA-256 internos
         frame_hashes[kind] = frame_hash(df_pub)
         row_counts[kind] = len(df)
@@ -187,7 +220,7 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
             "round_number": round_number,
             "mode": mode,
             "kind": kind,
-            "status": "ready",
+            "status": "building",
             "n_assets": n_activos,
             "n_eras": int(df["era_idx"].nunique()),
             "n_features": len(mapeos["feat_cols"]),
@@ -201,13 +234,50 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
             "data_hash": frame_hashes[kind],
             "seed": seed_gen,
             "params": params,
+            "round_type": round_type,
+            "score_version": protocol.SCORE_VERSION,
+            "quality_report": quality,
         })
 
-    # Huella del holdout (sin subirlo): fija la versión del live también.
+    # El live público contiene ids y features, pero nunca sus etiquetas.
     live = partes["live"]
-    live_pub = live.drop(columns=_DROP, errors="ignore")
+    live_pub = live.drop(columns=_DROP_INTERNAL + ["target"], errors="ignore")
+    live_path = f"{base}/live.parquet"
+    store.upload_parquet(live_pub, live_path)
     frame_hashes["live"] = frame_hash(live_pub)
     row_counts["live"] = len(live)
+    target_path = f"{base}/targets.parquet"
+    mapping_path = None
+    mapping_hash = None
+    target_hash = None
+    if round_type == "prospective":
+        latest = int(live["era_idx"].iloc[0])
+        label = mapeos["eras"][latest]
+        source = panel[panel["era_idx"] == latest].copy()
+        asset_map = meta["asset_map"]
+        mapping = pd.DataFrame({
+            "row_id": [hashlib.sha256(
+                f"{round_salt}|{label}|{int(asset)}".encode("utf-8")
+            ).hexdigest()[:16] for asset in source["activo_idx"]],
+            "era": label,
+            "asset_type": [asset_map[int(asset)]["asset_type"] for asset in source["activo_idx"]],
+            "symbol": [asset_map[int(asset)]["symbol"] for asset in source["activo_idx"]],
+            "as_of_date": [pd.Timestamp(date).date().isoformat() for date in source["fecha"]],
+            "as_of_close": source["close"].astype(float).to_numpy(),
+        })
+        mapping_path = f"{base}/mapping.parquet"
+        mapping_hash = frame_hash(mapping)
+        frame_hashes["mapping"] = mapping_hash
+        store.upload_private_parquet(mapping, mapping_path)
+        if not verify_frame_hash(store.download_private_parquet(mapping_path), mapping_hash):
+            raise ValueError("El mapa privado almacenado no coincide con su hash")
+    else:
+        targets = live[["id", "target", "era"]].rename(columns={"id": "row_id"})
+        target_hash = frame_hash(targets)
+        frame_hashes["targets"] = target_hash
+        store.upload_private_parquet(targets, target_path)
+        if not verify_frame_hash(store.download_private_parquet(target_path), target_hash):
+            raise ValueError("El holdout almacenado no coincide con su hash")
     ver = compute_dataset_version(
         mode=mode, seed_obfuscar=seed_obf, seed_gen=seed_gen,
         salt_hash=salt_hash, feature_cols=mapeos["feat_cols"],
@@ -217,7 +287,7 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
     for r in recs:
         r["version"] = ver["version"]
 
-    # Insertar los tres kind (train, validation, live-vacio que se llena abajo)
+    # Insertar los tres tipos de partición.
     inserted = []
     for r in recs:
         res = _with_retry(
@@ -226,18 +296,18 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
         )
         inserted.append(res.data[0])
 
-    # El live es privado: NO se sube a Storage. Guardamos su holdout en DB.
+    # El target de live permanece privado en la base de datos.
     live_rec = {
         "tournament_id": tournament_id,
         "round_number": round_number,
         "mode": mode,
         "kind": "live",
-        "status": "ready",
+        "status": "building",
         "n_assets": n_activos,
         "n_eras": int(live["era_idx"].nunique()),
         "n_features": len(mapeos["feat_cols"]),
         "feature_cols": mapeos["feat_cols"],
-        "bucket_path": None,  # deliberadamente nulo: el live no se publica
+        "bucket_path": live_path,
         "row_count": len(live),
         "salt_hash": salt_hash,
         "ic_objetivo": meta.get("ic_objetivo"),
@@ -247,6 +317,13 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
         "version": ver["version"],
         "seed": seed_gen,
         "params": params,
+        "round_type": round_type,
+        "score_version": protocol.SCORE_VERSION,
+        "quality_report": quality,
+        "target_path": target_path,
+        "target_hash": target_hash,
+        "mapping_path": mapping_path,
+        "mapping_hash": mapping_hash,
     }
     res = _with_retry(
         lambda: supabase.table("ml_datasets").insert(live_rec).execute(),
@@ -254,21 +331,18 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
     )
     live_dataset = res.data[0]
     inserted.append(live_dataset)
-
-    # Guardar holdout (target real por fila). SOLO service_role.
-    # Incluimos las features del live: el worker las necesita para el FNC
-    # (feature-neutral correlation). El cliente NO puede leer dataset_targets
-    # (RLS), así que las features del live nunca se exponen.
-    feat_cols = mapeos["feat_cols"]
-    targets = live[["id", "target", "era"] + feat_cols].rename(columns={"id": "row_id"})
-    targets = targets.assign(dataset_id=live_dataset["id"])
+    ids = [item["id"] for item in inserted]
+    published_at = datetime.now(timezone.utc).isoformat()
     _with_retry(
-        lambda: supabase.table("dataset_targets").insert(targets.to_dict("records")).execute(),
-        op="insert dataset_targets",
+        lambda: supabase.table("ml_datasets").update({
+            "status": "ready", "published_at": published_at,
+        }).in_("id", ids).execute(), op="publish ml_datasets",
     )
+    live_dataset["status"] = "ready"
+    live_dataset["published_at"] = published_at
 
-    logger.info(f"Dataset {mode} creado para torneo {tournament_id} ronda {round_number}: "
-                f"{len(inserted)} registros, holdout {len(targets)} filas.")
+    logger.info("Ronda %s #%s publicada: %s filas de competición (%s)",
+                mode, round_number, len(live), round_type)
     return live_dataset
 
 
@@ -290,7 +364,9 @@ def puntuar_submission_en_bd(submission_id: str, meta_modelo=None) -> dict:
     sub = sub.data[0]
     ahora_iso = datetime.now(timezone.utc).isoformat()
 
-    ds = supabase.table("ml_datasets").select("id,feature_cols").eq("id", sub["dataset_id"]).execute()
+    ds = supabase.table("ml_datasets").select("*").eq("id", sub["dataset_id"]).execute()
+    if ds.data and ds.data[0].get("score_version") == protocol.SCORE_VERSION:
+        return _score_submission_v1(supabase, sub, ds.data[0])
     feat_cols = (ds.data[0].get("feature_cols") or []) if ds.data else []
 
     # Descargar el CSV de predicciones del usuario desde Storage (o leer del campo).
@@ -318,6 +394,18 @@ def puntuar_submission_en_bd(submission_id: str, meta_modelo=None) -> dict:
             break
         _off += len(_page.data or [])
     tdf = pd.DataFrame(targets)
+    # Puntuar solo entregas completas: una selección de filas/eras permitiría
+    # optimizar el score fuera del protocolo del torneo.
+    ids_pred = preds["id"].astype(str) if "id" in preds else pd.Series(dtype=str)
+    ids_live = tdf["row_id"].astype(str) if "row_id" in tdf else pd.Series(dtype=str)
+    if (len(ids_pred) != len(ids_live) or ids_pred.duplicated().any()
+            or set(ids_pred) != set(ids_live)):
+        supabase.table("prediction_submissions").update({
+            "status": "disqualified", "is_valid": False,
+            "eval_error": "la entrega debe incluir exactamente todos los ids del live",
+            "scored_at": ahora_iso,
+        }).eq("id", submission_id).execute()
+        return {"status": "disqualified", "motivo": "ids incompletos o duplicados"}
     merged = preds.merge(tdf, left_on="id", right_on="row_id", how="inner")
     if len(merged) == 0:
         supabase.table("prediction_submissions").update({
@@ -366,13 +454,46 @@ def puntuar_submission_en_bd(submission_id: str, meta_modelo=None) -> dict:
     return res
 
 
-def _leer_predicciones(sub: dict) -> pd.DataFrame | None:
-    """Lee el CSV de predicciones del usuario desde Storage.
+def _score_submission_v1(supabase, sub: dict, ds: dict) -> dict:
+    """Puntúa solo rondas cerradas y reclamadas por el scheduler."""
+    now = datetime.now(timezone.utc)
+    if ds.get("status") != "scoring":
+        raise ValueError("El score de esta ronda aún no está habilitado")
+    closes_at = ds.get("closes_at")
+    if not closes_at or datetime.fromisoformat(closes_at.replace("Z", "+00:00")) > now:
+        raise ValueError("La ronda sigue abierta")
+    available_at = ds.get("target_available_at")
+    if available_at and datetime.fromisoformat(available_at.replace("Z", "+00:00")) > now:
+        raise ValueError("Las etiquetas aún no han madurado")
+    if sub.get("status") not in ("validated", "scoring", "scored") or not sub.get("is_selected", True):
+        raise ValueError("Envío no seleccionado o no validado")
+    if sub.get("dataset_version") and sub["dataset_version"] != ds.get("version"):
+        raise ValueError("Versión del dataset distinta a la del envío")
+    path = ds.get("target_path")
+    if not path or not ds.get("target_hash"):
+        raise ValueError("Holdout privado no configurado")
+    targets = store.download_private_parquet(path)
+    if not verify_frame_hash(targets, ds["target_hash"]):
+        raise ValueError("El hash del holdout no coincide")
+    predictions = _leer_predicciones(sub)
+    if predictions is None:
+        raise ValueError("No se pudo leer el envío")
+    min_eras = 1 if ds.get("round_type") == "prospective" else 10
+    result = protocol.score_predictions(predictions, targets, min_eras=min_eras)
+    supabase.table("prediction_submissions").update({
+        "status": "scored", "is_valid": True, "eval_error": None,
+        "score": result["score"], "corr_mean": result["corr_mean"],
+        "consistencia": sum(corr > 0 for corr in result["per_era"]) / result["n_eras"],
+        "fnc_mean": None, "meta_corr": None,
+        "scored_at": now.isoformat(),
+    }).eq("id", sub["id"]).execute()
+    return result
 
-    La ruta es determinista: `submissions/{dataset_id[:8]}/{user_id}.csv`.
-    El esquema real de `prediction_submissions` NO tiene columna `file_path`,
-    así que la reconstruimos desde dataset_id + user_id (ambos presentes en la
-    fila). Si por compatibilidad la fila trae `file_path`, se prefiere.
+
+def _leer_predicciones(sub: dict) -> pd.DataFrame | None:
+    """Lee un intento inmutable privado y verifica su hash.
+
+    Solo reconstruye la ruta pública antigua para envíos anteriores a v1.
     """
     if sub.get("_predicciones_df") is not None:
         return sub["_predicciones_df"]
@@ -384,9 +505,14 @@ def _leer_predicciones(sub: dict) -> pd.DataFrame | None:
     try:
         # Intentar CSV primero, luego parquet (ambos en el bucket de predicciones)
         try:
-            data = store.download_csv(path)
-            return pd.read_csv(io.BytesIO(data))
+            data = store.download_csv(
+                path, expected_sha256=sub.get("file_sha256"),
+                allow_legacy_fallback=not bool(sub.get("file_path")),
+            )
+            return pd.read_csv(io.BytesIO(data), dtype={"id": str})
         except Exception:
+            if sub.get("file_path"):
+                raise
             return store.download_parquet(path, bucket=store.SUBMISSIONS_BUCKET)
     except Exception as e:
         logger.warning(f"No se pudo leer predicciones desde {path}: {e}")
@@ -425,60 +551,10 @@ def cargar_predicciones_validas(supabase, dataset_id) -> pd.DataFrame:
 # Scoring programado de submissions pendientes (cron / scheduler)
 # ---------------------------------------------------------------------------
 def evaluate_ml_rounds(supabase, now=None) -> int:
-    """Puntúa TODAS las submissions ML en estado `pending` que aún no han
-    sido evaluadas.
-
-    Llamado desde el scheduler (`main.py: /scheduler/run`) para asegurar que
-    una submission que quedó en `pending` (el BackgroundTask de FastAPI se fue
-    en background bajo Render free, que mata el request) eventualmente se
-    puntúa. Cada submission se puntua de forma aislada: si una falla no
-    aborta el lote (se loggea y se marca `disqualified` con `eval_error`;
-    el CHECK de prediction_submissions solo admite
-    pending/scoring/scored/disqualified, NUNCA 'error').
-
-    Devuelve la cantidad de submissions puntuadas en esta pasada.
-    """
-    import logging
-    logger_ = logging.getLogger(__name__)
-    # Import tardío para evitar ciclo de importaciones en el arranque del
-    # worker (tournaments.py no importa ml_persist).
-    try:
-        from ml_persist import puntuar_submission_en_bd
-    except Exception:  # pragma: no cover - defensivo
-        from ml_persist import puntuar_submission_en_bd  # noqa: F811
-
-    import typing as _t
-    # La firma pública acepta un cliente supabase; si llega None, lo creamos.
+    """Alias de compatibilidad: solo el scheduler controla el cierre."""
+    import ml_scheduler
     if supabase is None:
         from tournaments import get_supabase
         supabase = get_supabase()
-
-    subs = (
-        supabase.table("prediction_submissions")
-        .select("id,status,submitted_at")
-        .eq("status", "pending")
-        .order("submitted_at", desc=False)
-        .execute()
-    )
-    rows = subs.data or []
-    scored = 0
-    for r in rows:
-        sid = r.get("id")
-        if not sid:
-            continue
-        try:
-            puntuar_submission_en_bd(sid)
-            scored += 1
-        except Exception as e:
-            logger_.exception("evaluate_ml_rounds: submission %s falló", sid)
-            try:
-                from datetime import datetime as _dt, timezone as _tz
-                supabase.table("prediction_submissions").update(
-                    {"status": "disqualified", "is_valid": False,
-                     "eval_error": str(e)[:500],
-                     "scored_at": _dt.now(_tz.utc).isoformat()}
-                ).eq("id", sid).execute()
-            except Exception:
-                pass
-    return scored
+    return ml_scheduler.evaluate_ml_rounds(supabase, now)
 
