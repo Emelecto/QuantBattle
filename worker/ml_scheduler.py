@@ -33,6 +33,8 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
         .select("id")
         .eq("kind", "live")
         .eq("round_type", round_type)
+        .eq("mode", mode)
+        .eq("score_version", protocol.SCORE_VERSION)
         .in_("status", ["ready", "closed", "awaiting_labels", "scoring", "scored"])
         .gte("created_at", (now - timedelta(days=round_days)).isoformat())
         .execute()

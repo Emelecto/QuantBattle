@@ -224,6 +224,47 @@ def test_round_specific_ids_and_hashes(backend):
     assert set(rows_one["id"]).isdisjoint(set(rows_two["id"]))
 
 
+def test_round_scheduler_ignores_recent_legacy_mode_mismatch(backend, monkeypatch):
+    db, _files, _client = backend
+    now = datetime.now(timezone.utc)
+    db.rows["ml_datasets"] = [{
+        "id": "legacy-live", "kind": "live", "round_type": "historical",
+        "mode": "sintetico", "score_version": "legacy", "status": "ready",
+        "created_at": now.isoformat(),
+    }]
+    monkeypatch.setattr(
+        ml_persist, "crear_dataset",
+        lambda *_args, **kwargs: {"id": "new-real-live", **kwargs},
+    )
+
+    live = ml_scheduler.create_ml_round(
+        db, mode="real", round_type="historical", now=now,
+        universo=[("stock", "AAPL")], dias=900,
+    )
+
+    assert live is not None and live["id"] == "new-real-live"
+    assert live["mode"] == "real" and live["round_type"] == "historical"
+
+
+def test_round_scheduler_skips_recent_current_protocol_round(backend, monkeypatch):
+    db, _files, _client = backend
+    now = datetime.now(timezone.utc)
+    db.rows["ml_datasets"] = [{
+        "id": "current-live", "kind": "live", "round_type": "historical",
+        "mode": "real", "score_version": ml_protocol.SCORE_VERSION,
+        "status": "ready", "created_at": now.isoformat(),
+    }]
+    monkeypatch.setattr(
+        ml_persist, "crear_dataset",
+        lambda *_args, **kwargs: pytest.fail("no debe duplicar una ronda vigente"),
+    )
+
+    assert ml_scheduler.create_ml_round(
+        db, mode="real", round_type="historical", now=now,
+        universo=[("stock", "AAPL")], dias=900,
+    ) is None
+
+
 def test_quality_gate_rejects_small_universe():
     panel, cols, _ = builder.generar_mercado_sintetico(n_activos=2, n_eras=60, n_features=10, seed=1)
     _, internal, mapping = builder.obfuscar(panel, cols, salt="test", seed=1)
