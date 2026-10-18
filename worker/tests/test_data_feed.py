@@ -22,6 +22,7 @@ def _check_ohlcv(df, min_rows=1):
     assert (df["close"] > 0).all(), "hay precios close <= 0"
 
 
+@pytest.mark.external
 def test_crypto_binance_btc_real():
     df = get_ohlcv("crypto", "BTCUSDT", "1d", "2023-01-01", "2023-01-10", use_cache=False)
     _check_ohlcv(df, min_rows=5)
@@ -30,12 +31,14 @@ def test_crypto_binance_btc_real():
     assert df["close"].min() > 1000
 
 
+@pytest.mark.external
 def test_crypto_symbol_normalization():
     # 'BTC' debe normalizarse a 'BTCUSDT' y traer datos reales.
     df = get_ohlcv("crypto", "btc", "1d", "2023-01-01", "2023-01-05", use_cache=False)
     _check_ohlcv(df, min_rows=2)
 
 
+@pytest.mark.external
 def test_stock_yfinance_aapl_real():
     df = get_ohlcv("stock", "AAPL", "1d", "2023-01-01", "2023-01-10", use_cache=False)
     _check_ohlcv(df, min_rows=3)
@@ -47,6 +50,7 @@ def test_stock_yfinance_aapl_real():
     assert (df.index.month == 1).all()
 
 
+@pytest.mark.external
 def test_invalid_crypto_symbol_raises():
     with pytest.raises(ValueError) as exc:
         get_ohlcv("crypto", "ZZZTOPUSDT", "1d", "2023-01-01", "2023-01-10", use_cache=False)

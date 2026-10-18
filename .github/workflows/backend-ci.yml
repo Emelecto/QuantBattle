@@ -20,4 +20,4 @@ jobs:
         run: python -m pip install -r worker/requirements.txt pytest
       - name: Run worker tests
         working-directory: worker
-        run: TESTING=1 python -m pytest tests/ -q -x
+        run: TESTING=1 python -m pytest tests/ -q -x -m "not external"

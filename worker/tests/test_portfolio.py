@@ -4,6 +4,7 @@ Usan DATOS REALES de Binance (igual que el resto del motor). Los tests de red
 descargan de verdad y fallan explícitamente si la red no responde.
 """
 import math
+import pytest
 
 from engine import run_backtest, run_backtest_portfolio, _compute_data_hash
 from schemas import StrategyConfig
@@ -57,6 +58,7 @@ def _single_config(**overrides) -> StrategyConfig:
 # ---------------------------------------------------------------------------
 # (a) run_backtest_portfolio con 2 símbolos: mismo shape y equity_curve no vacío
 # ---------------------------------------------------------------------------
+@pytest.mark.external
 def test_portfolio_returns_same_shape_and_nonempty_curve():
     res = run_backtest_portfolio(_two_symbol_config())
 
@@ -78,6 +80,7 @@ def test_portfolio_returns_same_shape_and_nonempty_curve():
     assert isinstance(res["data_hash"], str) and len(res["data_hash"]) == 16
 
 
+@pytest.mark.external
 def test_portfolio_equal_weight_defaults_to_equal():
     """Sin pesos => igual peso; el retorno de cartera es el promedio de los activos."""
     res = run_backtest_portfolio(_two_symbol_config())
@@ -87,6 +90,7 @@ def test_portfolio_equal_weight_defaults_to_equal():
 # ---------------------------------------------------------------------------
 # (b) run_backtest con símbolo único: mismo shape que antes (contrato intacto)
 # ---------------------------------------------------------------------------
+@pytest.mark.external
 def test_single_symbol_shape_unchanged():
     res = run_backtest(_single_config())
 
@@ -98,6 +102,7 @@ def test_single_symbol_shape_unchanged():
     assert "data_hash" in res and len(res["data_hash"]) == 16
 
 
+@pytest.mark.external
 def test_portfolio_falls_back_to_single_when_one_symbol():
     """symbols con 1 (o 0) activo => se comporta como run_backtest (compatibilidad)."""
     cfg = _single_config()
@@ -109,6 +114,7 @@ def test_portfolio_falls_back_to_single_when_one_symbol():
 # ---------------------------------------------------------------------------
 # (c) data_hash determinista y sensible al símbolo
 # ---------------------------------------------------------------------------
+@pytest.mark.external
 def test_data_hash_deterministic():
     cfg_a = _single_config()
     cfg_b = _single_config()  # misma config

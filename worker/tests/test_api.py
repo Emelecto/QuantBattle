@@ -83,6 +83,7 @@ def test_validate_flags_stock_with_usdt_suffix():
 # ---------------------------------------------------------------------------
 # Backtest real contra Binance (requiere red)
 # ---------------------------------------------------------------------------
+@pytest.mark.external
 def test_backtest_real_crypto_btc():
     """Backtest OOS real (BTCUSDT 1d, ene-2023, rango corto para rapidez).
 
@@ -124,6 +125,7 @@ def test_backtest_real_crypto_btc():
     assert "t" in point and "is" in point and "oos" in point
 
 
+@pytest.mark.external
 def test_backtest_invalid_symbol_returns_400():
     """Símbolo inexistente: la API debe devolver 400 con clave 'error'.
 

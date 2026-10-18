@@ -34,6 +34,7 @@ def _btc_config(**overrides) -> StrategyConfig:
 # ---------------------------------------------------------------------------
 # Motor realista
 # ---------------------------------------------------------------------------
+@pytest.mark.external
 def test_slippage_reduces_return():
     """Con más comisión+slippage el retorno total OOS debe ser menor."""
     low = engine.run_backtest(_btc_config(commission=0.0, slippage=0.0))
@@ -41,6 +42,7 @@ def test_slippage_reduces_return():
     assert low["metrics"]["ret_total"] >= high["metrics"]["ret_total"]
 
 
+@pytest.mark.external
 def test_report_present_and_mentions_oos():
     res = engine.run_backtest(_btc_config())
     assert "report" in res
@@ -48,6 +50,7 @@ def test_report_present_and_mentions_oos():
     assert "out-of-sample" in res["report"].lower()
 
 
+@pytest.mark.external
 def test_calmar_computed():
     res = engine.run_backtest(_btc_config())
     assert "calmar" in res["metrics"]
@@ -55,6 +58,7 @@ def test_calmar_computed():
     assert math.isfinite(res["metrics"]["calmar"])
 
 
+@pytest.mark.external
 def test_integrity_rule_few_trades():
     """Si hay pocas operaciones, la integridad debe bajar a 'Baja' (regla)."""
     res = engine.run_backtest(_btc_config())
@@ -69,6 +73,7 @@ def test_integrity_rule_few_trades():
         assert "report" in res and len(res["report"]) > 20
 
 
+@pytest.mark.external
 def test_long_range_real_data_finite():
     """Backtest largo real: métricas finitas y curva con muchas filas."""
     res = engine.run_backtest(
