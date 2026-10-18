@@ -24,6 +24,9 @@ logger = logging.getLogger("generate_dataset_github")
 
 
 def main() -> int:
+    # yfinance incluye tickers en sus logs de error; el universo es secreto
+    # del scheduler y esos diagnósticos no deben aparecer en Actions.
+    logging.getLogger("yfinance").setLevel(logging.CRITICAL)
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
     if not url or not key:
