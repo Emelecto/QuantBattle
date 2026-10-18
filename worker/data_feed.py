@@ -31,6 +31,7 @@ import io
 import logging
 import os
 import random
+import threading
 import time
 from datetime import datetime, timezone
 from typing import Union
@@ -76,6 +77,12 @@ _BINANCE_INTERVALS = {
 
 # Cliente Supabase cacheado en memoria (lazy). None = sin credenciales/indisponible.
 _CACHE_CLIENT = None
+
+# El scheduler puede solicitar un universo completo de acciones. Yahoo
+# Finance limita ráfagas de consultas desde IPs compartidas; el intervalo se
+# configura solo en ese job, para no hacer más lentos los backtests normales.
+_YF_REQUEST_LOCK = threading.Lock()
+_YF_LAST_REQUEST_AT = 0.0
 
 # Reintento con backoff exponencial + jitter (solo errores transitorios).
 _RETRY_ATTEMPTS = 4
@@ -131,11 +138,14 @@ def cache_file_ext() -> str:
     return ".parquet" if _HAS_PARQUET else ".json"
 
 
-def _cache_path(asset_type: str, symbol: str, timeframe: str) -> str:
-    """Ruta del objeto en el bucket: '{asset_type}/{SYMBOL}/{timeframe}.ext'."""
+def _cache_path(
+    asset_type: str, symbol: str, timeframe: str, *, adjusted_close: bool = False
+) -> str:
+    """Ruta privada separada para cada símbolo, intervalo y ajuste de cierre."""
     asset_type = (asset_type or "").lower()
     sym = (symbol or "").strip().upper()
-    return f"{asset_type}/{sym}/{timeframe}{cache_file_ext()}"
+    adjusted_suffix = "-adjusted" if adjusted_close else ""
+    return f"{asset_type}/{sym}/{timeframe}{adjusted_suffix}{cache_file_ext()}"
 
 
 def _cache_client():
@@ -217,8 +227,10 @@ def read_from_cache(
     timeframe: str,
     start: Union[str, datetime, pd.Timestamp],
     end: Union[str, datetime, pd.Timestamp],
+    *,
+    adjusted_close: bool = False,
 ) -> Union[pd.DataFrame, None]:
-    """Lee desde Supabase Storage si el archivo existe y cubre [start, end].
+    """Lee desde Supabase Storage si el archivo cubre el rango solicitado.
 
     Devuelve el DataFrame recortado al rango, o None si no aplica.
     Cualquier fallo (red, credenciales, archivo ausente) -> None.
@@ -226,7 +238,7 @@ def read_from_cache(
     client = _cache_client()
     if client is None:
         return None
-    path = _cache_path(asset_type, symbol, timeframe)
+    path = _cache_path(asset_type, symbol, timeframe, adjusted_close=adjusted_close)
     try:
         data = _with_retry(
             lambda: client.storage.from_(_CACHE_BUCKET).download(path),
@@ -258,7 +270,14 @@ def read_from_cache(
         df.index = idx
     s = _as_utc(start)
     e = _as_utc(end)
-    if idx.min() <= s and idx.max() >= e:
+    covers_end = idx.max() >= e
+    if adjusted_close and asset_type.lower() in ("stock", "etf") and timeframe == "1d":
+        # Las barras diarias se indexan a medianoche y la fecha `end` suele
+        # ser la hora actual. Acepta el último cierre de mercado reciente
+        # (hasta 5 días) para que los jobs del domingo reutilicen el cierre
+        # del viernes; una caché de la semana anterior sigue siendo MISS.
+        covers_end = idx.max().normalize() >= e.normalize() - pd.Timedelta(days=5)
+    if idx.min() <= s and covers_end:
         return df.loc[s:e]
     logger.info("Cache %s no cubre el rango pedido; se descarga en vivo.", path)
     return None
@@ -269,12 +288,14 @@ def write_to_cache(
     symbol: str,
     timeframe: str,
     df: pd.DataFrame,
+    *,
+    adjusted_close: bool = False,
 ) -> bool:
     """Escribe el DataFrame completo al bucket de Supabase Storage (upsert)."""
     client = _cache_client()
     if client is None:
         return False
-    path = _cache_path(asset_type, symbol, timeframe)
+    path = _cache_path(asset_type, symbol, timeframe, adjusted_close=adjusted_close)
     data = _df_to_bytes(df)
     digest = hashlib.sha256(data).hexdigest()
     content_type = "application/octet-stream"
@@ -485,6 +506,17 @@ def _fetch_yfinance(symbol: str, interval: str, start, end) -> pd.DataFrame:
     # yfinance sólo garantiza '1d' de forma fiable; forzamos 1d para stock.
     yf_interval = "1d" if interval not in ("1d", "1wk", "1mo") else interval
     try:
+        min_interval = max(0.0, float(os.environ.get("YFINANCE_MIN_REQUEST_INTERVAL_SECONDS", "0")))
+    except (TypeError, ValueError):
+        min_interval = 0.0
+    if min_interval:
+        global _YF_LAST_REQUEST_AT
+        with _YF_REQUEST_LOCK:
+            wait = min_interval - (time.monotonic() - _YF_LAST_REQUEST_AT)
+            if wait > 0:
+                time.sleep(wait)
+            _YF_LAST_REQUEST_AT = time.monotonic()
+    try:
         df = _with_retry(
             lambda: yf.download(
                 symbol,
@@ -631,13 +663,12 @@ def get_ohlcv(
     Devuelve DataFrame con columnas [open, high, low, close, volume] y
     DatetimeIndex (nombre 'timestamp'). Lanza ValueError si la fuente falla.
     """
-    # El caché antiguo contiene Close sin ajustar y no identifica la variante.
-    # No usarlo en las rondas ML que solicitan Adj Close.
-    if adjusted_close:
-        use_cache = False
     if use_cache:
         try:
-            cached = read_from_cache(asset_type, symbol, timeframe, start, end)
+            cached = read_from_cache(
+                asset_type, symbol, timeframe, start, end,
+                adjusted_close=adjusted_close,
+            )
             if cached is not None:
                 logger.info("get_ohlcv(%s,%s,%s): servido desde cache.",
                             asset_type, symbol, timeframe)
@@ -650,7 +681,10 @@ def get_ohlcv(
 
     if use_cache and df is not None and not df.empty:
         try:
-            write_to_cache(asset_type, symbol, timeframe, df)
+            write_to_cache(
+                asset_type, symbol, timeframe, df,
+                adjusted_close=adjusted_close,
+            )
         except Exception as exc:  # pragma: no cover
             logger.warning("Cache write falló: %s", exc)
     return df

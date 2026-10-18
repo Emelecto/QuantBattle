@@ -45,6 +45,10 @@ jobs:
           ML_ROUND_MODE: ${{ matrix.round_type == 'practice' && 'sintetico' || 'real' }}
           ML_ROUND_TYPE: ${{ matrix.round_type }}
           ML_REAL_UNIVERSE: ${{ secrets.ML_REAL_UNIVERSE }}
+          # Yahoo limita las ráfagas de descargas desde runners compartidos.
+          # Las rondas financieras esperan entre peticiones y guardan la serie
+          # ajustada en el caché privado para reutilizarla en la misma ejecución.
+          YFINANCE_MIN_REQUEST_INTERVAL_SECONDS: "7"
           N_ACTIVOS: "600"
           N_ERAS: "350"
         run: |
