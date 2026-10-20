@@ -38,9 +38,15 @@ try {
     page.getByRole("button", { name: "Validar y registrar envío" }).click(),
   ]);
   if (response.status() !== 200) throw new Error(`La interfaz recibió HTTP ${response.status()}`);
-  const submission = (await response.json()).submission;
-  if (!submission.is_selected || submission.status !== "validated" || submission.row_count !== 42000) throw new Error("Recibo no válido");
+  // La UI ya consume el cuerpo. Leer el recibo persistido evita depender de
+  // la caché del inspector del navegador al subir archivos grandes.
   await page.getByText("Validado; esperando cierre", { exact: true }).waitFor();
+  const saved = await admin.from("prediction_submissions").select("status,is_selected,row_count,file_sha256,submitted_at")
+    .eq("dataset_id", receipt.dataset_id).eq("user_id", manifest.user_id).eq("is_selected", true).single();
+  if (saved.error) throw saved.error;
+  const submission = saved.data;
+  if (!submission.is_selected || submission.status !== "validated" || submission.row_count !== 42000) throw new Error("Recibo no válido");
+  if (submission.file_sha256 !== receipt.receipt.file_sha256) throw new Error("La huella del comprobante no coincide");
   const output = resolve(root, "artifacts/judge-ui");
   await mkdir(output, { recursive: true });
   await page.screenshot({ path: resolve(output, "authenticated-upload.png"), fullPage: true });
