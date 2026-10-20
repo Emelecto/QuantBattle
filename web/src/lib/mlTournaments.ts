@@ -38,6 +38,13 @@ export interface MlDataset {
   target_available_at: string | null;
   finalized_at: string | null;
   benchmarks: Record<string, number> | null;
+  data_source?: string | null;
+  data_license?: string | null;
+  data_attribution?: string | null;
+  data_attribution_url?: string | null;
+  data_terms_url?: string | null;
+  derived_data_license?: string | null;
+  commercial_use_allowed?: boolean | null;
   /** URL del parquet público; null para rondas antiguas sin archivo. */
   download_url: string | null;
 }
@@ -59,7 +66,6 @@ export interface MlSubmission {
   file_sha256?: string | null;
   dataset_version?: string | null;
   is_selected?: boolean;
-  qp_earned?: number;
 }
 
 export interface MlLeaderboardEntry {
@@ -71,8 +77,6 @@ export interface MlLeaderboardEntry {
   is_valid: boolean | null;
   plagio_flag: boolean | null;
   submitted_at: string | null;
-  /** El worker aún no reparte QP por ronda ML; queda opcional. */
-  qp_earned?: number | null;
 }
 
 /* ------------------------------------------------------------------ */

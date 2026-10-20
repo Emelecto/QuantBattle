@@ -22,10 +22,24 @@ from datetime import datetime, timezone
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("generate_dataset_github")
 
+# Pares USDT spot con historial suficiente y negociación activa. El valor se
+# usa cuando no se configura ML_REAL_UNIVERSE; puede sustituirse con pares
+# explícitos tipo crypto:BTCUSDT,crypto:ETHUSDT,...
+DEFAULT_BINANCE_UNIVERSE = tuple(
+    f"crypto:{symbol}" for symbol in (
+        "BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT",
+        "SOLUSDT", "TRXUSDT", "LINKUSDT", "LTCUSDT", "BCHUSDT", "DOTUSDT",
+        "AVAXUSDT", "ETCUSDT", "XLMUSDT", "ATOMUSDT", "FILUSDT", "NEARUSDT",
+        "SHIBUSDT", "UNIUSDT", "AAVEUSDT", "ALGOUSDT", "VETUSDT", "ICPUSDT",
+        "SANDUSDT", "MANAUSDT", "GRTUSDT", "ZECUSDT", "COMPUSDT", "CRVUSDT",
+        "XTZUSDT", "THETAUSDT", "CHZUSDT", "HBARUSDT", "ARBUSDT", "OPUSDT",
+        "INJUSDT", "APTUSDT", "SEIUSDT", "TIAUSDT",
+    )
+)
+
 
 def main() -> int:
-    # yfinance incluye tickers en sus logs de error; el universo es secreto
-    # del scheduler y esos diagnósticos no deben aparecer en Actions.
+    # Evita ruido de yfinance en Actions; las rondas ML reales usan Binance Vision.
     logging.getLogger("yfinance").setLevel(logging.CRITICAL)
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
@@ -42,32 +56,63 @@ def main() -> int:
     sb = create_client(url, key)
 
     now = datetime.now(timezone.utc)
-    import ml_prospective
-    ml_prospective.resolve_pending_rounds(sb, now)
     round_days = int(os.environ.get("ROUND_DAYS", "7"))
     n_activos = int(os.environ.get("N_ACTIVOS", "600"))
     n_eras = int(os.environ.get("N_ERAS", "350"))
     mode = os.environ.get("ML_ROUND_MODE", "sintetico").strip().lower()
     if mode == "real":
+        if os.environ.get("ML_REAL_ROUNDS_APPROVED", "").lower() != "true":
+            logger.error("Rondas reales desactivadas: falta aprobar la fuente y su distribución.")
+            return 1
+        import ml_prospective
+        ml_prospective.resolve_pending_rounds(sb, now)
         round_type = os.environ.get("ML_ROUND_TYPE", "historical").strip().lower()
         raw_universe = os.environ.get("ML_REAL_UNIVERSE", "")
         try:
-            universe = [tuple(item.strip().split(":", 1)) for item in raw_universe.split(",") if item.strip()]
+            entries = [item.strip() for item in raw_universe.split(",") if item.strip()]
+            if not entries:
+                entries = list(DEFAULT_BINANCE_UNIVERSE)
+            universe = [tuple(item.split(":", 1)) for item in entries]
             if len(universe) < 30 or any(len(item) != 2 or not all(item) for item in universe):
-                raise ValueError("ML_REAL_UNIVERSE necesita al menos 30 entradas tipo:símbolo")
+                raise ValueError("ML_REAL_UNIVERSE necesita al menos 30 entradas crypto:símbolo")
+            if any(asset_type != "crypto" for asset_type, _ in universe):
+                raise ValueError("ML_REAL_UNIVERSE solo admite crypto:símbolo para Binance Vision")
+            symbols = [
+                symbol.upper() if symbol.upper().endswith("USDT") else f"{symbol.upper()}USDT"
+                for _, symbol in universe
+            ]
+            if len(set(symbols)) != len(symbols):
+                raise ValueError("ML_REAL_UNIVERSE no puede repetir pares")
+            universe = [("crypto", symbol) for symbol in symbols]
         except ValueError:
             logger.exception("Universo real inválido")
             return 1
+        import data_feed
+        try:
+            configured_count = len(universe)
+            universe = data_feed.filter_binance_vision_spot_universe(universe)
+        except ValueError:
+            logger.exception("No se pudo validar el universo Binance Vision")
+            return 1
+        logger.info(
+            "Universo Binance Vision activo: %d/%d pares configurados",
+            len(universe), configured_count,
+        )
+        if len(universe) < 30:
+            logger.error("Se requieren al menos 30 pares USDT spot activos")
+            return 1
         if round_type == "prospective":
-            if any(asset_type not in ("stock", "etf") for asset_type, _ in universe):
-                logger.error("El prospectivo v1 solo admite acciones y ETF diarios")
-                return 1
-            # Publicación el domingo UTC: último cierre común viernes; plazo
-            # de 24 h que termina antes de la próxima apertura estadounidense.
+            # La ventana de 24 h termina antes de fijar el primer precio base
+            # que se usa en el objetivo prospectivo.
             if now.weekday() != 6:
                 logger.info("Prospectivo: hoy no es domingo UTC; solo se maduran rondas")
                 return 0
-        kwargs = {"universo": universe, "dias": int(os.environ.get("ML_HISTORY_DAYS", "900"))}
+        kwargs = {
+            "universo": universe,
+            "dias": int(os.environ.get("ML_HISTORY_DAYS", "900")),
+            "timeframe": "1d",
+            "data_source": "binance_vision",
+        }
     elif mode == "sintetico":
         round_type = "practice"
         kwargs = {

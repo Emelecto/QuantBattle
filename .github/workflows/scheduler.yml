@@ -15,7 +15,8 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        round_type: [practice, historical, prospective]
+        # Las rondas reales requieren una decisión explícita sobre la licencia.
+        round_type: ${{ fromJSON(vars.ML_REAL_ROUNDS_APPROVED == 'true' && '["practice","historical","prospective"]' || '["practice"]') }}
     # La generacion del dataset sintetico (600x350) es pesada en RAM.
     # GitHub Actions corre en VM de 7 GB y no se duerme, asi que la generamos
     # AQUI y la subimos a Supabase Storage. El worker de Render solo SIRVE
@@ -44,11 +45,9 @@ jobs:
           ROUND_DAYS: "7"
           ML_ROUND_MODE: ${{ matrix.round_type == 'practice' && 'sintetico' || 'real' }}
           ML_ROUND_TYPE: ${{ matrix.round_type }}
+          # Opcional; vacío usa los pares spot activos definidos por el generador.
           ML_REAL_UNIVERSE: ${{ secrets.ML_REAL_UNIVERSE }}
-          # Yahoo limita las ráfagas de descargas desde runners compartidos.
-          # Las rondas financieras esperan entre peticiones y guardan la serie
-          # ajustada en el caché privado para reutilizarla en la misma ejecución.
-          YFINANCE_MIN_REQUEST_INTERVAL_SECONDS: "7"
+          ML_REAL_ROUNDS_APPROVED: ${{ vars.ML_REAL_ROUNDS_APPROVED }}
           N_ACTIVOS: "600"
           N_ERAS: "350"
         run: |

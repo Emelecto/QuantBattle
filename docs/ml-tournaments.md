@@ -6,88 +6,124 @@ Cada ronda publica tres archivos Parquet con IDs de fila y variables `feature_XX
 
 | Archivo | `target` | Uso |
 | --- | --- | --- |
-| `train.parquet` | Sí | Entrenar |
-| `validation.parquet` | Sí | Comparar modelos sin tocar la competición |
+| `train.parquet` | Sí | Entrenar el modelo |
+| `validation.parquet` | Sí | Comparar modelos fuera del holdout |
 | `live.parquet` | No | Producir un CSV `id,prediction` |
 
-`live` es el nombre del archivo en el protocolo, no una afirmación de que toda
-ronda sea prospectiva. La propiedad `round_type` distingue `practice` (datos
-sintéticos), `historical` (mercado pasado) y `prospective` (mercado futuro).
-No se publican símbolos, fechas exactas ni precios en los archivos del torneo.
-Las transformaciones son **ofuscación**, no cifrado ni garantía de anonimato.
+`round_type` identifica una ronda `practice` (datos sintéticos), `historical`
+(mercado pasado) o `prospective` (evaluación futura). No se publican símbolos,
+fechas exactas ni precios. Las transformaciones son ofuscación: no son cifrado
+ni una garantía de anonimato, en especial porque las fuentes son públicas.
 
-## Reglas de una ronda v1
+## Fuente y licencia de datos reales
 
-- El CSV tiene exactamente las columnas `id,prediction`, codificación UTF-8,
-  un ID por fila y **todos** los IDs de `live.parquet`.
-- `prediction` es un número finito entre 0 y 1. Cada era debe tener variación.
-- La validación solo comprueba datos públicos. Devuelve hora, versión del
-  dataset y SHA-256 del archivo; no calcula ni muestra score antes del cierre.
-- Se conservan todos los intentos y solo el último **válido** anterior al
-  cierre queda seleccionado. El RPC de la migración 0029 confirma esta
-  selección de forma atómica con el estado de la ronda.
-- Tras cerrar, `spearman_era_v1` calcula Spearman entre predicción y target
-  por era. El score oficial es la media aritmética de esas correlaciones.
-  El orden del CSV no importa. La desviación por era es diagnóstica.
-- El resultado final muestra dos referencias reproducibles: predicciones
-  seudoaleatorias derivadas de la versión e ID, y la primera variable pública
-  (`feature_01`) usada directamente como predicción. No compiten por premios.
-- Práctica e histórico no reparten QP. Una ronda prospectiva puede repartir
-  un fondo virtual configurado en `tournaments.prize_pool_qp`. El RPC
-  `award_ml_qp_once` evita créditos duplicados tras un reintento.
+**Estado de la entrega del semillero:** se publican rondas de práctica con
+datos sintéticos. GitHub Actions usa solo `practice` por defecto. Las rondas
+reales requieren `ML_REAL_ROUNDS_APPROVED=true` en la configuración del
+generador/worker y la variable de repositorio del mismo nombre en GitHub.
+No activar ese permiso sin resolver las condiciones de distribución.
 
-## Cómo se crea el dataset
+Las rondas reales usan velas diarias spot de pares cripto cotizados en USDT,
+descargadas del endpoint público de [Binance Vision](https://data-api.binance.vision/api/v3/klines).
+El universo inicial está en `worker/generate_dataset_github.py`; el secreto
+opcional `ML_REAL_UNIVERSE` permite reemplazarlo con al menos 30 entradas como
+`crypto:BTCUSDT,crypto:ETHUSDT,...`. Antes de generar una ronda, el worker
+conserva únicamente pares USDT spot que Binance reporte como activos.
 
-El worker usa datos sintéticos de `dataset_builder.py` o precios diarios de
-Yahoo Finance a través de `data_feed.py`. Para acciones y ETF usa `Adj Close`
-cuando está disponible. El target real es el retorno relativo a cinco fechas
-de negociación posteriores, discretizado por rango transversal en cinco
-niveles. Entrenamiento y validación se separan por fecha y se purgan cinco
-eras en la frontera. El constructor rechaza una ronda si una era tiene menos
-de 30 activos, hay IDs repetidos, valores no finitos o targets constantes.
+Binance publica estos datos y sus derivados bajo
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), con las
+condiciones adicionales de los
+[términos de Binance Public Data](https://github.com/binance/binance-public-data/blob/master/TERMS_AND_CONDITIONS.md).
+QuantLab atribuye los datos a Binance Vision y declara esa licencia en los
+metadatos de cada dataset real. Los archivos derivados deben conservar la misma
+licencia y se ofrecen solo para investigación y educación no comercial. Por
+esta razón, los torneos ML no distribuyen QP ni premios; el worker también
+bloquea los créditos aunque una ronda antigua tenga un fondo distinto de cero.
+Si QuantLab se monetiza o distribuye señales con compensación, esta fuente no
+debe seguir utilizándose sin permiso escrito de Binance.
 
-Una ronda **histórica** reserva varias eras pasadas como holdout. Sirve para
-probar el flujo y comparar modelos, pero no prueba rendimiento prospectivo:
-los precios originales son públicos y la ofuscación puede ser vulnerable a
-reconstrucción. Una ronda **prospectiva** publica la última fecha común con
-características calculadas hasta ese momento. El mapeo de IDs a activos y el
-precio base se guarda en `tournament-targets` (privado). Una tarea posterior
-espera cinco fechas de negociación completas para todo el universo, verifica
-que el precio base no haya sido revisado y entonces sella el target. Solo
-después del cierre y de esa maduración se puntúa.
+La cláusula 4.3 también restringe alojar datasets o feeds históricos derivados,
+mientras la 4.5 contempla obras derivadas redistribuidas. Publicar Parquet de
+features requiere aclarar esa aparente incompatibilidad; declarar atribución y
+CC BY-NC-SA por sí solo no resuelve el permiso para este uso concreto.
 
-Los tres archivos públicos, el mapeo y el holdout privado tienen hashes. La
-versión de ronda incluye los hashes del material disponible al publicarse.
-El target prospectivo tiene una huella adicional cuando madura. Mantener los
-Parquet y los metadatos permite repetir el cálculo del score.
+No se necesita API key de Binance. El worker consulta `exchangeInfo` para
+filtrar pares activos y usa el endpoint público de velas. Las velas de la ronda
+son diarias en UTC y se descarta la vela que todavía está abierta. La caché
+privada separa los datos de Binance Vision de los de otros proveedores para
+evitar mezclar series.
+
+## Protocolo de predicciones
+
+- El CSV debe tener exactamente las columnas `id,prediction`, codificación
+  UTF-8, un ID único por fila y todos los IDs de `live.parquet`.
+- `prediction` debe ser un número finito entre 0 y 1, con variación dentro de
+  cada era.
+- La validación comprueba el archivo, su versión y su SHA-256. No calcula ni
+  revela puntuaciones antes del cierre.
+- Se guardan los intentos y solo el último envío válido antes del cierre queda
+  seleccionado. La base de datos confirma la selección junto con el estado de
+  la ronda.
+- Tras el cierre, `spearman_era_v1` calcula Spearman entre predicción y target
+  en cada era. La puntuación oficial es la media de esas correlaciones. No es
+  una métrica de rentabilidad ni incluye costos de trading.
+- El resultado final muestra referencias reproducibles: una predicción
+  seudoaleatoria derivada de la versión e ID y la primera variable pública
+  usada directamente como predicción.
+- Las rondas ML no tienen premios QP.
+
+## Construcción del dataset
+
+El constructor crea variables de retornos, volatilidad, RSI, distancia a medias
+móviles y volumen relativo a partir de `close` y `volume`. Para datos reales, el
+target se calcula como el retorno a cinco velas diarias y se discretiza en cinco
+niveles por rango transversal. Entrenamiento y validación se separan en orden
+temporal y se purgan cinco eras en la frontera. Una ronda se rechaza si no
+mantiene al menos 30 activos por era, tiene valores no finitos, IDs repetidos o
+targets constantes.
+
+Una ronda **histórica** separa eras pasadas para evaluar el flujo y comparar
+modelos. Como los precios originales son públicos, no debe presentarse como una
+prueba prospectiva ni como protección criptográfica contra reconstrucción.
+
+Una ronda **prospectiva** publica las features de la última vela diaria común
+cerrada. Los participantes tienen 24 horas para enviar predicciones. El precio
+base se fija en el primer cierre diario común posterior a ese plazo; la etiqueta
+se calcula con el quinto cierre diario que le sigue. El mapeo privado de IDs a
+pares y el precio de la última vela publicada se usan para verificar la serie,
+pero el holdout permanece privado. La etiqueta no se escribe ni se puntúa hasta
+que ese horizonte haya madurado.
+
+Los tres Parquet públicos y los artefactos privados tienen hashes. La versión
+de ronda incluye los hashes de los archivos publicados, la fuente y la licencia.
+El holdout prospectivo obtiene otro hash al madurar. Conservar los archivos y
+metadatos permite repetir la puntuación.
 
 ## Despliegue
 
 1. Aplicar `supabase/migrations/0029_ml_round_integrity.sql` después de
    `0028_onboarding_activation.sql`. La migración crea buckets privados,
-   columnas, políticas y los RPC necesarios. **Desplegarla antes del worker**.
-2. Configurar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `DATASET_SALT`
-   tanto en el worker como en GitHub Actions. Usar el mismo salt en ambos.
-   Los buckets nuevos tienen valores por defecto `submissions` y
-   `tournament-targets`; nunca configurarlos igual que `tournament-datasets`.
-3. Desplegar el worker y la web. `scheduler.yml` ejecuta diariamente las
-   modalidades `practice`, `historical` y `prospective` en trabajos separados,
-   madura los objetivos pendientes y llama a
-   `/scheduler/evaluate?sync=true` para que el código de salida refleje la
-   evaluación terminada.
-4. Configurar el secreto de Actions `ML_REAL_UNIVERSE` como
-   `stock:AAPL,stock:MSFT,...` con **al menos 30 símbolos distintos** que
-   superen el control de calidad. Lanzar `workflow_dispatch` y descargar los
-   tres archivos publicados para comprobarlos. El histórico se publica una
-   vez cada siete días; práctica tiene su propia cadencia semanal.
-5. El prospectivo v1 admite solo acciones/ETF diarios. Publica los domingos
-   a las 06:00 UTC y cierra a las
-   06:00 UTC del lunes, antes de la sesión estadounidense. La tarea diaria
-   intenta madurar el objetivo hasta que existan cinco fechas completas.
+   columnas, políticas y RPC. Desplegarla antes del worker.
+2. Configurar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `DATASET_SALT` tanto
+   en el worker como en GitHub Actions. Usar el mismo salt en ambos. Los buckets
+   de envíos y targets deben seguir siendo privados y distintos del bucket
+   público `tournament-datasets`.
+3. Desplegar worker y web. `scheduler.yml` revisa diariamente `practice`.
+   Si se aprueban explícitamente las rondas reales, también revisa `historical`
+   y `prospective`: práctica e histórico publican como máximo cada siete días,
+   y el prospectivo solo se intenta los domingos UTC.
+   Las rondas pendientes maduran diariamente y el worker puntúa después.
+4. `ML_REAL_UNIVERSE` es opcional. Si está vacío, se usa el universo inicial
+   integrado en el generador. Si se define, debe contener al menos 30 pares en
+   formato `crypto:BTCUSDT,crypto:ETHUSDT,...`; los valores anteriores de
+   acciones/ETF deben eliminarse o sustituirse.
+5. Lanzar `workflow_dispatch` y verificar los tres archivos publicados, los
+   metadatos `data_source` y `data_license` en la API de listado/descarga y la
+   atribución visible en la web.
 
-No convertir un torneo histórico ya publicado a prospectivo ni recalcular
-premios con otra versión de métrica. Los datos previos a 0029 son de solo
-lectura en la nueva interfaz de envíos.
+No convertir una ronda histórica publicada a prospectiva ni recalcular premios
+con otra versión de métrica. Los datos previos a la migración 0029 son de solo
+lectura en la interfaz actual.
 
 ## Verificación local
 
@@ -97,18 +133,18 @@ cd web
 npx tsc --noEmit
 ```
 
-La prueba de integración genera una ronda, comprueba que el público no recibe
-el target, envía dos CSV, confirma que no hay score durante la apertura, cierra
-la ronda y verifica que solo se puntúa el último válido. Otra prueba simula
-precios diarios y comprueba que el objetivo prospectivo aparece solo después
-de la quinta fecha completa.
+Las pruebas verifican que el feed solicita el endpoint de Binance Vision, no
+mezcla su caché con la de otros proveedores y descarta velas abiertas. Las
+pruebas del protocolo comprueban que una ronda prospectiva no se resuelva antes
+de cinco cierres posteriores al precio base, que ocurre después de la fecha
+límite de envío.
 
 ## Límites para el informe de investigación
 
-Un score positivo en una ronda no demuestra rentabilidad de trading. El
-protocolo mide capacidad de ordenar retornos entre activos; no modela
-costos, ejecución ni gestión de cartera. La validación histórica se puede
-sobreajustar y las rondas cercanas pueden compartir condiciones de mercado.
-Informar número de eras, activos, score por era, dispersión y resultados de
-referencia antes de hablar de generalización. No afirmar usuarios reales ni
-rendimiento prospectivo hasta contar con esos datos.
+Un score positivo no demuestra rentabilidad ni generalización. El protocolo
+mide la capacidad de ordenar retornos relativos entre activos; no modela
+ejecución, costos ni gestión de cartera. La validación histórica puede
+sobreajustarse y rondas cercanas pueden compartir condiciones de mercado.
+Informar activos, eras, score por era, dispersión y referencias antes de hablar
+de rendimiento. No afirmar que hay usuarios reales ni resultados prospectivos
+hasta contar con esos datos.

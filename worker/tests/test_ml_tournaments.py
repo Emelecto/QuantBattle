@@ -118,6 +118,7 @@ class FakeSupabase:
 def backend(monkeypatch):
     import main
     import tournaments
+    monkeypatch.setenv("ML_REAL_ROUNDS_APPROVED", "true")
 
     db, files = FakeSupabase(), {}
     monkeypatch.setattr(tournaments, "get_supabase", lambda: db)
@@ -167,6 +168,8 @@ def test_round_publishes_features_but_seals_targets(backend):
     assert live["quality_report"]["passed"]
     assert "target" not in public.columns
     assert "target" in files[live["target_path"]].columns
+    # El orden de filas público no puede actuar como índice estable del activo.
+    assert public["id"].tolist() != files[live["target_path"]]["row_id"].tolist()
     assert all(row["status"] == "ready" for row in db.rows["ml_datasets"])
     result = client.get("/ml/datasets", params={"tournament_id": "tournament-1"})
     assert result.status_code == 200 and len(result.json()["datasets"]) == 3
@@ -213,8 +216,67 @@ def test_replacement_close_and_idempotent_finalization(backend):
     assert subs[0]["status"] == "validated"
     assert set(db.rows["ml_datasets"][-1]["benchmarks"]) == {"random", "feature_01"}
     assert ml_scheduler.evaluate_ml_rounds(db) == 0
+    assert not ml_scheduler._finalize_v1_round(db, db.rows["ml_datasets"][-1], datetime.now(timezone.utc))
     ranking = client.get("/ml/leaderboard", params={"dataset_id": live["id"]}).json()["leaderboard"]
     assert len(ranking) == 1 and ranking[0]["user_id"] == USER
+
+
+def test_chunked_upload_is_bounded_without_content_length(backend, monkeypatch):
+    import ml_endpoints
+    _db, _files, client = backend
+    live, _ = make_round(backend)
+    monkeypatch.setattr(ml_endpoints, "_MAX_CSV_BYTES", 64)
+    response = client.post(
+        f"/ml/datasets/{live['id']}/predictions",
+        content=iter([b"id,prediction\n", b"x" * 80]),
+        headers={"Content-Type": "text/csv", "Authorization": "Bearer x"},
+    )
+    assert response.status_code == 413
+
+
+def test_real_generation_requires_explicit_source_approval(monkeypatch):
+    import generate_dataset_github
+    import supabase
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "test")
+    monkeypatch.setenv("ML_ROUND_MODE", "real")
+    monkeypatch.delenv("ML_REAL_ROUNDS_APPROVED", raising=False)
+    monkeypatch.setattr(supabase, "create_client", lambda *_args: object())
+    assert generate_dataset_github.main() == 1
+
+
+def test_ml_round_does_not_award_qp_from_legacy_tournament_pool(backend):
+    db, _files, client = backend
+    live, public = make_round(backend)
+    db.rows["tournaments"] = [{"id": live["tournament_id"], "prize_pool_qp": 100}]
+    live_row = next(row for row in db.rows["ml_datasets"] if row["kind"] == "live")
+    live_row["round_type"] = "prospective"
+    live_row["params"] = {
+        "data_source": "binance_vision",
+        "data_license": "CC BY-NC-SA 4.0",
+    }
+    live_row["closes_at"] = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
+    csv_data = public[["id", "feature_01"]].rename(
+        columns={"feature_01": "prediction"},
+    ).to_csv(index=False).encode()
+    response = client.post(
+        f"/ml/datasets/{live['id']}/predictions", content=csv_data,
+        headers={"Content-Type": "text/csv", "Authorization": "Bearer x"},
+    )
+    assert response.status_code == 409  # la ronda ya cerró
+
+    live_row["closes_at"] = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    response = client.post(
+        f"/ml/datasets/{live['id']}/predictions", content=csv_data,
+        headers={"Content-Type": "text/csv", "Authorization": "Bearer x"},
+    )
+    assert response.status_code == 200
+    live_row["closes_at"] = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
+
+    assert ml_scheduler.evaluate_ml_rounds(db) == 1
+    assert live_row["status"] == "scored"
+    submission = db.rows["prediction_submissions"][0]
+    assert submission.get("qp_earned", 0) == 0
 
 
 def test_round_specific_ids_and_hashes(backend):
@@ -239,7 +301,8 @@ def test_round_scheduler_ignores_recent_legacy_mode_mismatch(backend, monkeypatc
 
     live = ml_scheduler.create_ml_round(
         db, mode="real", round_type="historical", now=now,
-        universo=[("stock", "AAPL")], dias=900,
+        universo=[("crypto", f"TEST{i:02d}USDT") for i in range(30)],
+        dias=900, data_source="binance_vision",
     )
 
     assert live is not None and live["id"] == "new-real-live"
@@ -261,8 +324,31 @@ def test_round_scheduler_skips_recent_current_protocol_round(backend, monkeypatc
 
     assert ml_scheduler.create_ml_round(
         db, mode="real", round_type="historical", now=now,
-        universo=[("stock", "AAPL")], dias=900,
+        universo=[("crypto", f"TEST{i:02d}USDT") for i in range(30)],
+        dias=900, data_source="binance_vision",
     ) is None
+
+
+def test_round_scheduler_does_not_skip_weekly_slot_after_late_job(backend, monkeypatch):
+    db, _files, _client = backend
+    now = datetime.now(timezone.utc)
+    db.rows["ml_datasets"] = [{
+        "id": "previous-week-live", "kind": "live", "round_type": "historical",
+        "mode": "real", "score_version": ml_protocol.SCORE_VERSION,
+        "status": "scored", "created_at": (now - timedelta(days=7, minutes=-2)).isoformat(),
+    }]
+    monkeypatch.setattr(
+        ml_persist, "crear_dataset",
+        lambda *_args, **kwargs: {"id": "weekly-live", **kwargs},
+    )
+
+    live = ml_scheduler.create_ml_round(
+        db, mode="real", round_type="historical", now=now,
+        universo=[("crypto", f"TEST{i:02d}USDT") for i in range(30)],
+        dias=900, data_source="binance_vision",
+    )
+
+    assert live is not None and live["id"] == "weekly-live"
 
 
 def test_quality_gate_rejects_small_universe():
@@ -273,13 +359,13 @@ def test_quality_gate_rejects_small_universe():
                                          min_assets=30, min_test_eras=10)
 
 
-def test_prospective_target_only_after_five_complete_dates(backend, monkeypatch):
-    db, files, _client = backend
-    as_of = pd.Timestamp(datetime.now(timezone.utc).date()) - pd.offsets.BDay(1)
-    dates = pd.bdate_range(end=as_of, periods=270, tz="UTC")
-    future = pd.bdate_range(start=as_of + pd.offsets.BDay(1), periods=5, tz="UTC")
+def test_prospective_target_starts_after_submission_deadline(backend, monkeypatch):
+    db, files, client = backend
+    as_of = pd.Timestamp(datetime.now(timezone.utc).date()) - pd.Timedelta(days=1)
+    dates = pd.date_range(end=as_of, periods=270, freq="D", tz="UTC")
+    future = pd.date_range(start=as_of + pd.Timedelta(days=1), periods=10, freq="D", tz="UTC")
     all_dates = dates.append(future)
-    universe = [("stock", f"STOCK{i:02d}") for i in range(35)]
+    universe = [("crypto", f"COIN{i:02d}USDT") for i in range(35)]
     prices = {}
     for index, (_type, symbol) in enumerate(universe):
         rng = np.random.default_rng(index + 100)
@@ -296,20 +382,33 @@ def test_prospective_target_only_after_five_complete_dates(backend, monkeypatch)
 
     import data_feed
     monkeypatch.setattr(data_feed, "get_ohlcv", get_prices)
-    build_at = (as_of + pd.Timedelta(days=1)).to_pydatetime().replace(tzinfo=timezone.utc)
+    build_at = (as_of + pd.Timedelta(days=1, hours=6)).to_pydatetime()
+    deadline = build_at + timedelta(hours=24)
     live = ml_persist.crear_dataset(
         "prospective-tournament", 1, mode="real", round_type="prospective",
-        closes_at=(build_at + timedelta(hours=24)).isoformat(), now=build_at,
-        universo=universe, fin=build_at, dias=900,
+        closes_at=deadline.isoformat(), now=build_at,
+        universo=universe, fin=build_at, dias=900, data_source="binance_vision",
+        timeframe="1d",
     )
     assert live["target_hash"] is None
+    assert live["params"]["data_source"] == "binance_vision"
+    assert live["params"]["data_license"] == "CC BY-NC-SA 4.0"
     assert live["mapping_path"] in files
     assert "target" not in files[live["bucket_path"]].columns
+    listing = client.get("/ml/datasets", params={"tournament_id": "prospective-tournament"})
+    live_public = next(item for item in listing.json()["datasets"] if item["kind"] == "live")
+    assert live_public["data_attribution"] == "Binance Vision"
+    assert live_public["derived_data_license"] == "CC BY-NC-SA 4.0"
+    assert "params" not in live_public and "COIN00USDT" not in listing.text
+    download = client.get(f"/ml/datasets/{live['id']}/download", params={"kind": "live"})
+    assert download.json()["data_license"] == "CC BY-NC-SA 4.0"
+    assert download.json()["data_attribution"] == "Binance Vision"
 
-    before = (future[3] + pd.Timedelta(days=1)).to_pydatetime()
+    base_date = pd.Timestamp(deadline.date(), tz="UTC")
+    before = (base_date + pd.Timedelta(days=5)).to_pydatetime()
     assert not ml_prospective.resolve_round(db, live, before)
     assert live["target_path"] not in files
-    after = (future[4] + pd.Timedelta(days=1)).to_pydatetime()
+    after = (base_date + pd.Timedelta(days=6, hours=1)).to_pydatetime()
     assert ml_prospective.resolve_round(db, live, after)
     resolved = db.rows["ml_datasets"][-1]
     assert resolved["target_hash"] and resolved["status"] == "closed"

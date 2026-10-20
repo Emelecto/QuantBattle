@@ -35,6 +35,9 @@ export function TopBar() {
         </Link>
 
         <div className="ml-auto flex items-center gap-3">
+          <Link href="/docs#evaluacion" className="hidden text-sm text-muted transition-colors hover:text-ink md:inline">
+            Investigación
+          </Link>
           {user && inApp ? (
             <button
               onClick={handleSignOut}

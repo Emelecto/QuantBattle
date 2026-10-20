@@ -11,3 +11,5 @@ __pycache__
 .exclude
 .vercel/
 supabase/.temp/
+web/test-results/
+web/playwright-report/

@@ -20,9 +20,17 @@ acciones). Expone el motor validado `engine.run_backtest` vía FastAPI.
 - Otros errores inesperados responden **500** con `{"error": "..."}`.
 
 ### CORS
-Abierto por defecto (`allow_origins = ["*"]`). Para restringir, define la variable
-de entorno `CORS_ORIGINS` con una lista separada por comas:
+Cerrado por defecto. Define `CORS_ORIGINS` con una lista separada por comas:
 `CORS_ORIGINS="http://localhost:3000,https://app.quantlab.io"`.
+La configuración actual también reconoce previews HTTPS de Vercel; todos los
+endpoints de escritura mantienen su autenticación propia.
+
+### Torneos ML y evaluación del semillero
+
+Consultar [el README general](../README.md), [el protocolo](../docs/ml-tournaments.md)
+y [la guía de evaluación](../docs/evaluation-guide.md). El piloto publicado usa
+datos sintéticos y servicios reales. Las rondas reales están desactivadas por
+defecto y los torneos ML no distribuyen QP.
 
 ## Arranque
 

@@ -93,6 +93,86 @@ def test_adjusted_close_has_separate_cache_and_uses_it(monkeypatch):
     assert result.equals(cached)
 
 
+def test_binance_vision_uses_isolated_cache_path():
+    standard = data_feed._cache_path("crypto", "BTCUSDT", "1d")
+    vision = data_feed._cache_path(
+        "crypto", "BTCUSDT", "1d", source="binance_vision",
+    )
+    assert standard != vision
+    assert "binance-vision" in vision
+
+
+def test_binance_vision_requests_official_endpoint_and_drops_open_candle(monkeypatch):
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc)
+    today = pd.Timestamp(now.date(), tz="UTC")
+    yesterday = today - pd.Timedelta(days=1)
+    rows = [
+        [int(yesterday.timestamp() * 1000), "100", "103", "99", "102", "500",
+         int(today.timestamp() * 1000) - 1],
+        [int(today.timestamp() * 1000), "102", "104", "101", "103", "250",
+         int((today + pd.Timedelta(days=1)).timestamp() * 1000) - 1],
+    ]
+    seen = {}
+
+    def fetch(symbol, interval, start_ms, end_ms, **kwargs):
+        seen.update(symbol=symbol, interval=interval, **kwargs)
+        return rows
+
+    monkeypatch.setattr(data_feed, "_fetch_binance", fetch)
+    frame = data_feed._download_live(
+        "crypto", "btc", "1d", yesterday, today + pd.Timedelta(days=1),
+        source="binance_vision",
+    )
+
+    assert seen["symbol"] == "BTCUSDT"
+    assert seen["endpoint"] == data_feed.BINANCE_VISION_KLINES
+    assert seen["provider"] == "Binance Vision"
+    assert len(frame) == 1
+    assert frame.index[0] == yesterday
+
+
+def test_binance_vision_rejects_non_spot_requests():
+    with pytest.raises(ValueError, match="crypto spot"):
+        data_feed._download_live(
+            "stock", "AAPL", "1d", "2026-01-01", "2026-02-01",
+            source="binance_vision",
+        )
+    with pytest.raises(ValueError, match="velas diarias"):
+        data_feed._download_live(
+            "crypto", "BTC", "1h", "2026-01-01", "2026-02-01",
+            source="binance_vision",
+        )
+
+
+def test_binance_vision_universe_keeps_only_active_usdt_spot(monkeypatch):
+    class Response:
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"symbols": [
+                {"symbol": "BTCUSDT", "status": "TRADING", "quoteAsset": "USDT", "isSpotTradingAllowed": True},
+                {"symbol": "OLDUSDT", "status": "BREAK", "quoteAsset": "USDT", "isSpotTradingAllowed": True},
+                {"symbol": "BTCUSD", "status": "TRADING", "quoteAsset": "USD", "isSpotTradingAllowed": True},
+                {"symbol": "ETHUSDT", "status": "TRADING", "quoteAsset": "USDT", "isSpotTradingAllowed": False},
+            ]}
+
+    def get(url, *, params, op):
+        assert url == data_feed.BINANCE_VISION_EXCHANGE_INFO
+        assert params == {}
+        assert op == "Binance Vision exchangeInfo"
+        return Response()
+
+    monkeypatch.setattr(data_feed, "_http_get", get)
+    result = data_feed.filter_binance_vision_spot_universe([
+        ("crypto", "BTC"), ("crypto", "OLDUSDT"), ("crypto", "BTCUSD"),
+        ("crypto", "ETHUSDT"), ("stock", "AAPL"),
+    ])
+    assert result == [("crypto", "BTCUSDT")]
+
+
 def test_adjusted_daily_cache_accepts_recent_market_close(monkeypatch):
     cached = pd.DataFrame(
         {"close": [99.0, 100.0, 101.0]},

@@ -33,7 +33,9 @@ export async function proxy(request: NextRequest) {
   // 1) Pinneo de dominio canónico: redirige al host de NEXT_PUBLIC_SITE_URL
   // cuando el host entrante difiera (excepto localhost / 127.0.0.1).
   const canonicalRaw = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
-  if (canonicalRaw) {
+  // El preview debe poder revisarse en su propio host; sus metadatos siguen
+  // apuntando al dominio canónico de producción.
+  if (canonicalRaw && process.env.VERCEL_ENV !== "preview") {
     try {
       const canonicalHost = new URL(canonicalRaw).host.toLowerCase();
       const incomingHost = request.headers.get("host")?.toLowerCase() ?? "";

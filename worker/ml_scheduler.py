@@ -7,6 +7,7 @@ como está (aunque el frontend lo retirará).
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 
 import ml_protocol as protocol
@@ -24,10 +25,44 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
     """
     now = now or datetime.now(timezone.utc)
     round_type = round_type or ("practice" if mode == "sintetico" else "historical")
+    if mode == "real":
+        if os.environ.get("ML_REAL_ROUNDS_APPROVED", "").lower() != "true":
+            raise ValueError("Publicación real desactivada hasta aprobar la fuente y su distribución")
+        if gen_kwargs.get("data_source") != "binance_vision":
+            raise ValueError("Las rondas ML reales deben usar Binance Vision.")
+        universe = gen_kwargs.get("universo") or []
+        if len(universe) < 30 or any(asset_type != "crypto" for asset_type, _ in universe):
+            raise ValueError("Binance Vision requiere al menos 30 pares crypto spot.")
+        if gen_kwargs.get("timeframe", "1d") != "1d":
+            raise ValueError("Las rondas Binance Vision usan velas diarias (1d).")
     if round_type == "prospective" and (round_hours is None or not 1 <= round_hours <= 24):
         raise ValueError("Una ronda prospectiva requiere un plazo explícito de 1 a 24 horas")
     duration = timedelta(hours=round_hours) if round_type == "prospective" else timedelta(days=round_days)
     closes_at = (now + duration).isoformat()
+    tournament_asset_type = "synthetic" if mode == "sintetico" else "crypto"
+    rules_text = (
+        "Predice el rango de retorno futuro por activo. Un CSV id,prediction entre 0 y 1; "
+        "solo el último envío válido antes del cierre compite. Score: media de Spearman "
+        "por era, calculada después del cierre. Ninguna ronda de predicciones ML otorga QP."
+    )
+    if mode == "real":
+        rules_text += (
+            " Datos diarios de Binance Vision. Los datasets derivados se distribuyen bajo "
+            "CC BY-NC-SA 4.0, con atribución a Binance Vision y para uso no comercial."
+        )
+    pending = (
+        supabase_client.table("ml_datasets")
+        .select("id")
+        .eq("kind", "live")
+        .eq("round_type", round_type)
+        .eq("mode", mode)
+        .eq("score_version", protocol.SCORE_VERSION)
+        .in_("status", ["ready", "awaiting_labels", "scoring"])
+        .execute()
+    )
+    if pending.data:
+        logger.info("Ronda ML anterior aún activa; se omite creación.")
+        return None
     recent = (
         supabase_client.table("ml_datasets")
         .select("id")
@@ -35,8 +70,10 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
         .eq("round_type", round_type)
         .eq("mode", mode)
         .eq("score_version", protocol.SCORE_VERSION)
-        .in_("status", ["ready", "closed", "awaiting_labels", "scoring", "scored"])
-        .gte("created_at", (now - timedelta(days=round_days)).isoformat())
+        .in_("status", ["closed", "scored"])
+        # La cadencia semanal no debe saltarse una semana si el último job se
+        # demoró unos minutos: libera la siguiente ventana tras seis días.
+        .gte("created_at", (now - timedelta(days=max(0.5, round_days - 1))).isoformat())
         .execute()
     )
     if recent.data:
@@ -50,14 +87,11 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
     if torneo.data:
         tid = torneo.data[0]["id"]
         supabase_client.table("tournaments").update({
+            "asset_type": tournament_asset_type,
             "submission_deadline": closes_at,
             "primary_metric": protocol.SCORE_VERSION,
-            "prize_pool_qp": 100 if round_type == "prospective" else 0,
-            "rules_text": "Predice el rango de retorno futuro por activo. "
-                          "Un CSV id,prediction entre 0 y 1; solo el último envío válido "
-                          "antes del cierre compite. Score: media de Spearman por era, "
-                          "calculada después del cierre. Rondas históricas y de "
-                          "práctica no otorgan QP.",
+            "prize_pool_qp": 0,
+            "rules_text": rules_text,
         }).eq("id", tid).execute()
     else:
         res = supabase_client.table("tournaments").insert({
@@ -65,21 +99,18 @@ def create_ml_round(supabase_client, mode: str = "sintetico", now: datetime | No
             "slug": f"ml-{round_type}",
             "type": "ml",
             "status": "open",
-            "asset_type": "synthetic" if mode == "sintetico" else "mixed",
+            "asset_type": tournament_asset_type,
             "symbols": [],
             "timeframe": "1d",
             "data_start": str((now - timedelta(days=400)).date()),
             "data_end": str(now.date()),
             "eval_end": str(now.date()),
             "submission_deadline": closes_at,
-            "prize_pool_qp": 100 if round_type == "prospective" else 0,
+            "prize_pool_qp": 0,
             "primary_metric": protocol.SCORE_VERSION,
             "min_trades": 0,
             "max_slippage_pct": 0.005,
-            "rules_text": "Sube id,prediction entre 0 y 1. Solo el último envío "
-                          "válido antes del cierre compite. Score: media de Spearman "
-                          "por era, calculada después del cierre. Las rondas de práctica "
-                          "e históricas no otorgan QP.",
+            "rules_text": rules_text,
         }).execute()
         tid = res.data[0]["id"]
 
@@ -104,7 +135,7 @@ def evaluate_ml_rounds(supabase_client, now: datetime | None = None) -> int:
     live_ds = (
         supabase_client.table("ml_datasets")
         .select("id,tournament_id,round_number,closes_at,status,score_version,"
-                "target_available_at,scoring_started_at,round_type,target_hash")
+                "target_available_at,scoring_started_at,round_type,target_hash,params")
         .eq("kind", "live")
         .in_("status", ["ready", "closed", "awaiting_labels", "scoring"])
         .execute()
@@ -129,6 +160,9 @@ def evaluate_ml_rounds(supabase_client, now: datetime | None = None) -> int:
 
 def _finalize_v1_round(supabase_client, ds: dict, now: datetime) -> bool:
     from ml_persist import puntuar_submission_en_bd
+
+    if ds.get("status") not in ("ready", "closed", "awaiting_labels", "scoring"):
+        return False
 
     deadline = ds.get("closes_at")
     if not deadline or datetime.fromisoformat(deadline.replace("Z", "+00:00")) > now:
@@ -217,20 +251,9 @@ def _finalize_v1_round(supabase_client, ds: dict, now: datetime) -> bool:
     except Exception:
         logger.exception("No se pudieron calcular referencias para %s", ds["id"])
 
-    # Las rondas históricas/de práctica tienen ranking, pero no premios.
-    if ds.get("round_type") == "prospective" and scored:
-        tournament = supabase_client.table("tournaments").select(
-            "prize_pool_qp"
-        ).eq("id", ds["tournament_id"]).execute().data or []
-        pool = int(tournament[0].get("prize_pool_qp") or 0) if tournament else 0
-        ranked = sorted(scored, key=lambda s: (-s["score"], s.get("submitted_at") or "", s["id"]))
-        for position, sub in enumerate(ranked[:3]):
-            prize = int(pool * (0.5, 0.3, 0.2)[position])
-            if prize > 0:
-                supabase_client.rpc("award_ml_qp_once", {
-                    "p_dataset": ds["id"], "p_submission": sub["id"],
-                    "p_user": sub["user_id"], "p_amount": prize,
-                }).execute()
+    # El proveedor elegido licencia los datos y derivados solo para usos no
+    # comerciales; los torneos ML no distribuyen QP, aunque una fila antigua
+    # tenga un prize_pool_qp distinto de cero.
 
     supabase_client.table("ml_datasets").update({
         "status": "scored", "finalized_at": now.isoformat()
@@ -238,16 +261,10 @@ def _finalize_v1_round(supabase_client, ds: dict, now: datetime) -> bool:
     return True
 
 
-def _distribute_ml_qp(supabase_client, dataset_id: str):
-    """Rankea submissions válidas y reparte QP por posición (reusa _credit_qp).
-
-    Antes de repartir QP construye el meta-modelo comunitario (solo con subs
-    score>0) y re-puntúa cada submission penalizando falta de originalidad.
-    """
+def _build_consensus_signal(supabase_client, dataset_id: str):
+    """Construye la señal comunitaria de la ronda sin repartir recompensas."""
     import numpy as np
     import pandas as pd
-    from scheduler import _credit_qp  # evita import circular en tests
-
     import ml_persist
     import scoring_ml as sc
 
@@ -280,23 +297,30 @@ def _distribute_ml_qp(supabase_client, dataset_id: str):
         try:
             ds_meta = (
                 supabase_client.table("ml_datasets")
-                .select("tournament_id,round_number")
+                .select("tournament_id,round_number,params")
                 .eq("id", dataset_id)
                 .execute()
             )
             if ds_meta.data:
                 info = ds_meta.data[0]
-                supabase_client.table("consensus_signals").upsert({
-                    "tournament_id": info.get("tournament_id"),
-                    "round_number": info.get("round_number"),
-                    "dataset_id": dataset_id,
-                    "signal_json": meta.to_dict(),
-                }, on_conflict="tournament_id,round_number").execute()
-                logger.info(
-                    f"Meta-modelo comunitario persistido en consensus_signals "
-                    f"(torneo {info.get('tournament_id')}, ronda {info.get('round_number')}): "
-                    f"{len(meta)} señales)."
-                )
+                data_source = (info.get("params") or {}).get("data_source")
+                if data_source == "binance_vision":
+                    logger.info(
+                        "No se publica la señal de %s en el marketplace por la licencia de datos.",
+                        dataset_id,
+                    )
+                else:
+                    supabase_client.table("consensus_signals").upsert({
+                        "tournament_id": info.get("tournament_id"),
+                        "round_number": info.get("round_number"),
+                        "dataset_id": dataset_id,
+                        "signal_json": meta.to_dict(),
+                    }, on_conflict="tournament_id,round_number").execute()
+                    logger.info(
+                        f"Meta-modelo comunitario persistido en consensus_signals "
+                        f"(torneo {info.get('tournament_id')}, ronda {info.get('round_number')}): "
+                        f"{len(meta)} señales)."
+                    )
         except Exception as e:  # noqa: BLE001
             logger.warning(
                 f"No se pudo guardar consensus_signals (¿migración 0013 no aplicada?): {e}"
@@ -313,23 +337,4 @@ def _distribute_ml_qp(supabase_client, dataset_id: str):
     for sub in (subs_validas.data or []):
         ml_persist.puntuar_submission_en_bd(sub["id"], meta_modelo=meta)
 
-    # --- Repartir QP (score ya incluye la penalización por meta_corr) ---
-    subs = (
-        supabase_client.table("prediction_submissions")
-        .select("id,user_id,score")
-        .eq("dataset_id", dataset_id)
-        .eq("is_valid", True)
-        .eq("plagio_flag", False)
-        .order("score", desc=True)
-        .execute()
-    )
-    prizes = {0: 100, 1: 50, 2: 25}
-    for i, sub in enumerate(subs.data or []):
-        if (sub.get("score") or 0) <= 0:
-            continue
-        prize = prizes.get(i, 5)
-        supabase_client.table("prediction_submissions").update({
-            "status": "scored",
-        }).eq("id", sub["id"]).execute()
-        _credit_qp(supabase_client, sub["user_id"], prize, "ml_tournament_prize", dataset_id)
-    logger.info(f"QP distribuidos para dataset {dataset_id}: {len(subs.data or [])} subs.")
+    logger.info("Señal comunitaria construida para dataset %s; sin premios QP.", dataset_id)

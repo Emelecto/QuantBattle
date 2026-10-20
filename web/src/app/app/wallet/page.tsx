@@ -13,6 +13,7 @@ const PLAN_MAP: Record<number, PlanKey> = {
   300: "pro",
   1000: "legend",
 };
+const BILLING_ENABLED = process.env.NEXT_PUBLIC_ENABLE_BILLING === "true";
 
 function WalletSkeleton() {
   return (
@@ -63,7 +64,7 @@ function EmptyLedgerState() {
       </svg>
       <div>
         <p className="text-sm font-medium text-ink">Tu primera transacción aparecerá aquí</p>
-        <p className="mt-1 text-xs text-muted">Compra QP o gana recompensas para empezar tu historial.</p>
+        <p className="mt-1 text-xs text-muted">Los movimientos de puntos virtuales aparecerán aquí. Los torneos ML no otorgan QP.</p>
       </div>
     </div>
   );
@@ -179,7 +180,13 @@ export default function WalletPage() {
           </div>
         </div>
 
+        {!BILLING_ENABLED && (
+          <p className="mt-8 border-t border-line pt-5 text-sm leading-relaxed text-muted">
+            Este prototipo de investigación tiene los pagos desactivados. Los QP son puntos virtuales sin valor monetario; participar en torneos ML es gratuito y no genera premios QP.
+          </p>
+        )}
         {/* Comprar QP */}
+        {BILLING_ENABLED && (
         <div className="mt-8 ql-glass ql-elev-1 ql-glass-hover rounded-xl p-5 animate-fadeIn">
           <h2 className="text-sm font-semibold text-ink">Comprar QP</h2>
 
@@ -231,6 +238,7 @@ export default function WalletPage() {
           </div>
         </div>
 
+        )}
         {/* Historial */}
         <div className="mt-8 animate-fadeIn">
           <h2 className="text-lg font-semibold text-ink">Historial</h2>
