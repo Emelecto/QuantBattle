@@ -8,9 +8,9 @@ import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { getSiteUrl } from "@/lib/site";
 
 const SITE_URL = getSiteUrl();
-const SITE_TITLE = "QuantLab — Crea estrategias de trading que de verdad funcionan";
+const SITE_TITLE = "QuantLab — Investigación cuantitativa y torneos de machine learning";
 const SITE_DESCRIPTION =
-  "Prueba tus ideas de trading en la nube y descubre si realmente ganarían o solo tuviste suerte. Sin instalar nada y sin que el overfitting te engañe.";
+  "Prototipo de investigación en español: experimenta con modelos, participa en torneos de predicciones y compara resultados reproducibles.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

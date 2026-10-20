@@ -11,11 +11,11 @@ export interface TournamentSummary {
   name: string;
   type: "sharpe" | "returns" | "sortino" | "custom" | "ml";
   status: "active" | "upcoming" | "finished";
-  asset_type: "crypto" | "stock" | "any";
+  asset_type: "crypto" | "stock" | "any" | "synthetic";
   symbol?: string;
   qp_prize: number;
   deadline: string;
-  participants: number;
+  participants?: number;
   max_participants?: number;
   metric_label: string;
   metric_value?: string;
@@ -79,6 +79,8 @@ export function TournamentCard({
             <Badge tone="neutral">
               {tournament.asset_type === "any"
                 ? "Multi-activo"
+                : tournament.asset_type === "synthetic"
+                ? "Datos sintéticos"
                 : tournament.asset_type === "crypto"
                 ? "Crypto"
                 : "Stocks"}
@@ -93,10 +95,10 @@ export function TournamentCard({
           <div className="mt-auto pt-2 mb-2 flex items-end justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted">
-                Premio
+                {esML ? "Recompensa" : "Premio"}
               </p>
               <p className="metric text-accent ql-glow-text text-lg font-semibold">
-                {tournament.qp_prize.toLocaleString()} QP
+                {esML ? "Sin QP" : `${tournament.qp_prize.toLocaleString()} QP`}
               </p>
             </div>
             <div className="text-right">
@@ -104,7 +106,7 @@ export function TournamentCard({
                 Participantes
               </p>
               <p className="metric text-ink text-sm">
-                {tournament.participants}
+                {tournament.participants ?? "—"}
                 {tournament.max_participants && (
                   <span className="text-muted">
                     {" "}

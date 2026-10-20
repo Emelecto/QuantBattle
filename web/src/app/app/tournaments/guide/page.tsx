@@ -11,9 +11,8 @@ export default function TournamentsGuidePage() {
             Guía de Torneos
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-            Todo lo que necesitas saber sobre cómo funcionan los torneos de
-            QuantLab: desde los datasets hasta las predicciones, los submits,
-            la evaluación y el MCP.
+            Cómo funcionan los torneos de predicción ML de QuantLab: datasets,
+            envío de predicciones, evaluación y condiciones de uso de los datos.
           </p>
         </div>
       </section>
@@ -26,14 +25,13 @@ export default function TournamentsGuidePage() {
             <p className="text-sm leading-relaxed text-muted mb-4">
               Los torneos son competiciones periódicas donde los participantes
               envían predicciones sobre el comportamiento de mercados financieros.
-              A diferencia de torneos de trading tradicionales, aquí no se ejecuta
-              dinero real: compites con puntos virtuales (QP) y tus habilidades
-              de modelado.
+              En los torneos de predicción ML no se ejecuta dinero real: descargas
+              datos, entrenas un modelo y envías predicciones para una evaluación
+              fuera de muestra.
             </p>
             <p className="text-sm leading-relaxed text-muted">
-              Cada torneo tiene una <strong className="text-ink">bolsa de QP</strong>{" "}
-              que se reparte entre los mejores participantes según su posición en el
-              ranking final.
+              Las rondas ML no tienen premios QP. Los puntos de QuantLab se usan
+              en otros flujos de la plataforma, pero no en estos torneos.
             </p>
           </div>
 
@@ -44,9 +42,9 @@ export default function TournamentsGuidePage() {
               <div className="rounded-lg border border-line/50 p-4">
                 <h3 className="text-sm font-semibold text-accent mb-2">Predicciones ML</h3>
                 <p className="text-sm text-muted leading-relaxed">
-                  Torneos estilo Numerai. Recibes un dataset con datos históricos de
-                  múltiples activos y debes predecir el retorno futuro de cada uno.
-                  Tu submission es una fila de predicciones normalizadas.
+                  Recibes variables ofuscadas de múltiples activos y predices
+                  el rango de sus retornos futuros. Envías un CSV con un ID y una
+                  predicción por fila.
                 </p>
               </div>
               <div className="rounded-lg border border-line/50 p-4">
@@ -67,7 +65,7 @@ export default function TournamentsGuidePage() {
             <h3 className="text-sm font-semibold text-ink mb-2">¿De dónde vienen los datos?</h3>
             <p className="text-sm leading-relaxed text-muted mb-4">
               Los datasets se generan automáticamente antes de cada ronda del torneo.
-              Pueden ser de dos tipos:
+              Hay rondas de práctica sintéticas y rondas reales con datos de mercado:
             </p>
             <ul className="text-sm text-muted space-y-2 mb-4 list-disc pl-5">
               <li>
@@ -76,13 +74,41 @@ export default function TournamentsGuidePage() {
                 distribuciones de retorno, volatilidad variable).
               </li>
               <li>
-                <strong className="text-ink">Datos reales:</strong> Información
-                histórica de mercados reales (acciones, cripto, forex) obtenida de
-                fuentes como Yahoo Finance y Binance.
+                <strong className="text-ink">Datos reales:</strong> Velas diarias
+                spot de pares cripto/USDT descargadas de Binance Vision. Las velas
+                abiertas se excluyen del dataset.
               </li>
             </ul>
 
+            <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 mb-5">
+              <h3 className="text-sm font-semibold text-ink mb-2">Atribución y licencia</h3>
+              <p className="text-sm leading-relaxed text-muted">
+                Los datasets reales derivados se atribuyen a Binance Vision y se
+                distribuyen bajo CC BY-NC-SA 4.0 para investigación y educación no
+                comercial. Las redistribuciones deben conservar esa licencia.
+                No se permiten usos comerciales, señales compensadas ni premios
+                QP en estas rondas.
+              </p>
+              <p className="mt-2 text-xs text-muted">
+                <a className="text-accent underline" href="https://data.binance.vision/" target="_blank" rel="noreferrer">
+                  Binance Vision
+                </a>{" · "}
+                <a className="text-accent underline" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer">
+                  CC BY-NC-SA 4.0
+                </a>{" · "}
+                <a className="text-accent underline" href="https://github.com/binance/binance-public-data/blob/master/TERMS_AND_CONDITIONS.md" target="_blank" rel="noreferrer">
+                  Términos de Binance Public Data
+                </a>
+              </p>
+            </div>
+
             <h3 className="text-sm font-semibold text-ink mb-2">Estructura del dataset</h3>
+            <p className="text-sm leading-relaxed text-muted mb-4">
+              En las rondas prospectivas, los envíos se reciben durante 24 horas.
+              El precio base se fija en el primer cierre diario común posterior al
+              plazo y la evaluación compara ese precio con los cinco cierres que le
+              siguen. La etiqueta permanece privada hasta que se complete el horizonte.
+            </p>
             <p className="text-sm leading-relaxed text-muted mb-3">
               Cada dataset contiene tres particiones:
             </p>
@@ -144,8 +170,9 @@ export default function TournamentsGuidePage() {
               Para torneos de predicciones ML, el CSV debe contener al menos:
             </p>
             <ul className="text-sm text-muted space-y-1 mb-4 list-disc pl-5">
-              <li>Una columna <code className="font-mono text-accent text-xs">activo_id</code> identificando cada activo</li>
-              <li>Una columna <code className="font-mono text-accent text-xs">prediccion</code> con tu predicción normalizada (ej: entre -1 y 1)</li>
+              <li>Exactamente las columnas <code className="font-mono text-accent text-xs">id,prediction</code></li>
+              <li>Un ID único por cada fila del archivo <code className="font-mono text-accent text-xs">live.parquet</code></li>
+              <li>Una predicción finita entre 0 y 1 para cada ID</li>
             </ul>
             <p className="text-sm text-muted">
               Para torneos de estrategias, el CSV incluye las señales generadas
@@ -160,7 +187,7 @@ export default function TournamentsGuidePage() {
             <h3 className="text-sm font-semibold text-ink mb-2">¿Cómo se envía una predicción?</h3>
             <p className="text-sm leading-relaxed text-muted mb-4">
               El envío se hace a través del endpoint{" "}
-              <code className="font-mono text-accent text-xs">POST /datasets/{'{dataset_id}'}/predictions</code>{" "}
+              <code className="font-mono text-accent text-xs">POST /ml/datasets/{'{dataset_id}'}/predictions</code>{" "}
               del worker. Tienes dos opciones:
             </p>
             <div className="grid gap-4 md:grid-cols-2 mb-4">
@@ -190,10 +217,9 @@ export default function TournamentsGuidePage() {
 
             <h3 className="text-sm font-semibold text-ink mb-2">Validación del CSV</h3>
             <p className="text-sm leading-relaxed text-muted">
-              El worker valida automáticamente que el CSV tenga las columnas
-              requeridas, el número correcto de filas y que los valores sean
-              coherentes. Si hay errores, recibirás un HTTP 422 con la descripción
-              del problema.
+              El worker comprueba columnas, IDs, valores, versión del dataset y
+              número de filas. Solo el último envío válido antes del cierre se
+              incluye en el ranking. No se muestra score mientras la ronda está abierta.
             </p>
           </div>
 
@@ -211,7 +237,7 @@ export default function TournamentsGuidePage() {
               <li>Compara cada predicción contra los valores reales (holdout)</li>
               <li>Calcula métricas de rendimiento por participante</li>
               <li>Genera el ranking final</li>
-              <li>Reparte la bolsa de QP según la posición</li>
+              <li>Publica el ranking después del cierre y de la maduración de etiquetas</li>
             </ol>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Métricas de evaluación</h3>
@@ -228,20 +254,12 @@ export default function TournamentsGuidePage() {
                 </thead>
                 <tbody className="text-muted">
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium">Correlación (corr_mean)</td>
-                    <td className="px-4 py-2">Correlación media de tus predicciones con los retornos reales</td>
-                  </tr>
-                  <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium">FNC (Feature Neutral Correlation)</td>
-                    <td className="px-4 py-2">Correlación neutralizada por features, para evitar sesgos</td>
-                  </tr>
-                  <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium">Consistencia</td>
-                    <td className="px-4 py-2">Estabilidad de tu rendimiento a lo largo de las eras</td>
+                    <td className="px-4 py-2 font-medium">Spearman por era</td>
+                    <td className="px-4 py-2">Correlación entre el orden de tus predicciones y el orden de los retornos observados en cada era</td>
                   </tr>
                   <tr className="border-t border-line/30">
                     <td className="px-4 py-2 font-medium">Score final</td>
-                    <td className="px-4 py-2">Puntuación ponderada que determina tu posición</td>
+                    <td className="px-4 py-2">Media aritmética de Spearman entre las eras evaluadas; no mide rentabilidad ni incluye costos</td>
                   </tr>
                 </tbody>
               </table>
@@ -249,11 +267,10 @@ export default function TournamentsGuidePage() {
 
             <h3 className="text-sm font-semibold text-ink mb-2">Anti-trampas</h3>
             <p className="text-sm leading-relaxed text-muted">
-              El sistema incluye detección de plagio (comparación entre submissions)
-              y penalizaciones por overfitting. El{" "}
-              <strong className="text-ink">Deflated Sharpe OOS</strong> ajusta el
-              Sharpe ratio por el número de intentos, desincentivando el data
-              snooping.
+              El holdout se mantiene privado y la puntuación se calcula en el
+              servidor después del plazo. Las features están ofuscadas, pero no
+              cifradas; como los datos de origen son públicos, pueden ser
+              susceptibles a reconstrucción.
             </p>
           </div>
 
@@ -261,14 +278,14 @@ export default function TournamentsGuidePage() {
           <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
             <h2 className="text-xl font-semibold text-ink mb-4">Reparto de QP</h2>
             <p className="text-sm leading-relaxed text-muted mb-4">
-              La bolsa de QP del torneo se reparte entre los mejores participantes.
-              El reparto es proporcional a la puntuación obtenida: cuanto mayor
-              sea tu score, más QP recibes.
+              Los torneos de predicción ML no reparten QP ni recompensas. Esta
+              condición permite usar los datos derivados de Binance Vision bajo
+              los términos no comerciales aplicables.
             </p>
             <p className="text-sm leading-relaxed text-muted">
-              Los QP se acreditan automáticamente en tu wallet una vez finalizado
-              el scoring. Puedes usarlos para participar en más torneos o por
-              servicios en el marketplace.
+              El ranking sirve para comparar submissions dentro de la ronda. Un
+              resultado positivo no demuestra rentabilidad ni garantiza que el
+              modelo funcione en otros períodos.
             </p>
           </div>
 
@@ -361,19 +378,19 @@ export default function TournamentsGuidePage() {
                 <p className="text-xs text-muted mt-1">Detalle de un torneo específico</p>
               </div>
               <div className="rounded-lg border border-line/50 p-3">
-                <code className="text-xs font-mono text-accent">GET /datasets/{"{dataset_id}"}</code>
-                <p className="text-xs text-muted mt-1">Info del dataset y URLs de descarga</p>
+                <code className="text-xs font-mono text-accent">GET /ml/datasets</code>
+                <p className="text-xs text-muted mt-1">Lista datasets, metadatos y atribución de la fuente</p>
               </div>
               <div className="rounded-lg border border-line/50 p-3">
-                <code className="text-xs font-mono text-accent">POST /datasets/{"{dataset_id}"}/predictions</code>
+                <code className="text-xs font-mono text-accent">POST /ml/datasets/{"{dataset_id}"}/predictions</code>
                 <p className="text-xs text-muted mt-1">Enviar predicciones (CSV o JSON)</p>
               </div>
               <div className="rounded-lg border border-line/50 p-3">
-                <code className="text-xs font-mono text-accent">GET /predictions/mine?dataset_id={"{id}"}</code>
+                <code className="text-xs font-mono text-accent">GET /ml/predictions/mine?dataset_id={"{id}"}</code>
                 <p className="text-xs text-muted mt-1">Consultar tu submission actual</p>
               </div>
               <div className="rounded-lg border border-line/50 p-3">
-                <code className="text-xs font-mono text-accent">GET /leaderboard?dataset_id={"{id}"}</code>
+                <code className="text-xs font-mono text-accent">GET /ml/leaderboard?dataset_id={"{id}"}</code>
                 <p className="text-xs text-muted mt-1">Ranking de la ronda</p>
               </div>
             </div>

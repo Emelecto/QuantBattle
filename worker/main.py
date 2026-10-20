@@ -35,7 +35,7 @@ from badges import router as badges_router
 from admin import router as admin_router
 import ml_persist
 import scheduler as _scheduler  # torneos de codigo (create/evaluate/signals)
-import ml_scheduler  # reparto QP + consensus_signals tras el scoring ML
+import ml_scheduler  # scoring ML y consensus_signals
 
 app = FastAPI(
     title="QuantLab Worker API",

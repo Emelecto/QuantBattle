@@ -16,6 +16,9 @@ import { getStripe, PLANS, type PlanId } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   try {
+    if (process.env.ENABLE_BILLING !== "true") {
+      return NextResponse.json({ error: "El prototipo de investigación no tiene pagos habilitados." }, { status: 503 });
+    }
     const stripe = getStripe();
 
     // Stripe no configurado → respuesta amigable (no error 500)

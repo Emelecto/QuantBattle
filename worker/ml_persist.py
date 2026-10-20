@@ -31,6 +31,12 @@ _SALT = os.environ.get("DATASET_SALT") or os.environ.get(
 # ml_storage: exponencial + jitter, 4 intentos por defecto).
 _DB_RETRY_ATTEMPTS = 4
 _DB_RETRY_BASE_DELAY = 0.5
+BINANCE_VISION_LICENSE = "CC BY-NC-SA 4.0"
+BINANCE_VISION_ATTRIBUTION = "Binance Vision"
+BINANCE_VISION_ATTRIBUTION_URL = "https://data.binance.vision/"
+BINANCE_VISION_TERMS_URL = (
+    "https://github.com/binance/binance-public-data/blob/master/TERMS_AND_CONDITIONS.md"
+)
 
 
 def _with_retry(fn, *, op: str):
@@ -77,7 +83,10 @@ def compute_dataset_version(*, mode: str, seed_obfuscar, seed_gen,
                             salt_hash: str, feature_cols: list,
                             frames: dict, row_counts: dict,
                             n_activos: int, n_eras: int,
-                            ic_objetivo=None) -> dict:
+                            ic_objetivo=None, data_source=None,
+                            data_license=None, round_type=None, timeframe=None,
+                            target_horizon_eras=None,
+                            target_base_delay_eras=None) -> dict:
     """Huella determinista del dataset.
 
     `frames`: {kind: sha256 del frame publicado} (train/validation/live).
@@ -96,6 +105,12 @@ def compute_dataset_version(*, mode: str, seed_obfuscar, seed_gen,
         "n_activos": int(n_activos),
         "n_eras": int(n_eras),
         "ic_objetivo": ic_objetivo,
+        "data_source": data_source,
+        "data_license": data_license,
+        "round_type": round_type,
+        "timeframe": timeframe,
+        "target_horizon_eras": target_horizon_eras,
+        "target_base_delay_eras": target_base_delay_eras,
     }, sort_keys=True, separators=(",", ":"))
     data_hash = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     return {"version": f"v1-{data_hash[:12]}", "data_hash": data_hash}
@@ -128,6 +143,17 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
         raise ValueError("tipo de ronda desconocido")
     if (mode == "sintetico") != (round_type == "practice"):
         raise ValueError("práctica debe ser sintética y rondas reales deben usar mercado")
+    data_source = gen_kwargs.get("data_source")
+    if mode == "real":
+        if os.environ.get("ML_REAL_ROUNDS_APPROVED", "").lower() != "true":
+            raise ValueError("Publicación real desactivada hasta aprobar la fuente y su distribución")
+        if data_source != "binance_vision":
+            raise ValueError("Las rondas ML reales deben usar Binance Vision.")
+        universo = gen_kwargs.get("universo") or []
+        if len(universo) < 30 or any(asset_type != "crypto" for asset_type, _ in universo):
+            raise ValueError("Binance Vision requiere al menos 30 pares crypto spot.")
+        if gen_kwargs.get("timeframe", "1d") != "1d":
+            raise ValueError("Los torneos Binance Vision usan velas diarias (1d).")
     if mode == "sintetico" and gen_kwargs.get("seed") is None:
         gen_kwargs["seed"] = int(round_salt[8:16], 16)
     if mode == "sintetico":
@@ -197,7 +223,18 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
         "dias": gen_kwargs.get("dias"),
         "timeframe": gen_kwargs.get("timeframe"),
         "target_horizon_eras": 5 if mode == "real" else None,
+        "target_base_delay_eras": 1 if round_type == "prospective" else None,
+        "data_source": data_source,
     }
+    if data_source == "binance_vision":
+        params.update({
+            "data_license": BINANCE_VISION_LICENSE,
+            "data_attribution": BINANCE_VISION_ATTRIBUTION,
+            "data_attribution_url": BINANCE_VISION_ATTRIBUTION_URL,
+            "data_terms_url": BINANCE_VISION_TERMS_URL,
+            "derived_data_license": BINANCE_VISION_LICENSE,
+            "commercial_use_allowed": False,
+        })
     # ml_datasets es de lectura pública: nunca guardar símbolos allí.
     if "universo" in gen_kwargs:
         params["universe_size"] = len(gen_kwargs["universo"])
@@ -211,7 +248,9 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
     recs = []
     for kind, df in (("train", partes["train"]), ("validation", partes["validation"])):
         path = f"{base}/{kind}.parquet"
-        df_pub = df.drop(columns=_DROP_INTERNAL, errors="ignore")
+        df_pub = df.drop(columns=_DROP_INTERNAL, errors="ignore").sample(
+            frac=1, random_state=seed_obf
+        ).reset_index(drop=True)
         store.upload_parquet(df_pub, path)  # reintento + sidecar SHA-256 internos
         frame_hashes[kind] = frame_hash(df_pub)
         row_counts[kind] = len(df)
@@ -241,7 +280,9 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
 
     # El live público contiene ids y features, pero nunca sus etiquetas.
     live = partes["live"]
-    live_pub = live.drop(columns=_DROP_INTERNAL + ["target"], errors="ignore")
+    live_pub = live.drop(columns=_DROP_INTERNAL + ["target"], errors="ignore").sample(
+        frac=1, random_state=seed_obf
+    ).reset_index(drop=True)
     live_path = f"{base}/live.parquet"
     store.upload_parquet(live_pub, live_path)
     frame_hashes["live"] = frame_hash(live_pub)
@@ -283,6 +324,12 @@ def crear_dataset(tournament_id: str, round_number: int, mode: str = "sintetico"
         salt_hash=salt_hash, feature_cols=mapeos["feat_cols"],
         frames=frame_hashes, row_counts=row_counts,
         n_activos=n_activos, n_eras=n_eras, ic_objetivo=meta.get("ic_objetivo"),
+        data_source=data_source,
+        data_license=params.get("data_license"),
+        round_type=round_type,
+        timeframe=gen_kwargs.get("timeframe"),
+        target_horizon_eras=params.get("target_horizon_eras"),
+        target_base_delay_eras=params.get("target_base_delay_eras"),
     )
     for r in recs:
         r["version"] = ver["version"]

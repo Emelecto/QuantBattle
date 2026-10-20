@@ -2,6 +2,7 @@
 
 Descarga series OHLCV reales desde fuentes públicas:
   - crypto: Binance public REST klines (sin API key).
+    Las rondas ML fuerzan Binance Vision y solo consumen Spot 1d.
   - stock: Yahoo Finance vía yfinance.
 
 Toda función devuelve un pandas.DataFrame con columnas
@@ -11,7 +12,8 @@ no responde o el símbolo no existe, se lanza una excepción clara.
 
 CACHE (opcional, best-effort):
   get_ohlcv(..., use_cache=True) intenta primero leer desde Supabase Storage
-  (bucket 'market-data', ruta '{asset_type}/{symbol}/{timeframe}.parquet').
+  (bucket 'market-data', ruta '{asset_type}/{symbol}/{timeframe}.parquet';
+  Binance Vision añade un sufijo de proveedor para aislar las cachés).
   Si el archivo existe y cubre el rango pedido, lo devuelve sin tocar la API.
   Si no, descarga de la fuente en vivo y (opcionalmente) escribe a cache.
   Cualquier fallo de cache es SILENCIOSO y cae siempre a la descarga directa,
@@ -53,6 +55,8 @@ except Exception:  # pragma: no cover
     _HAS_PARQUET = False
 
 BINANCE_KLINES = "https://api.binance.com/api/v3/klines"
+BINANCE_VISION_KLINES = "https://data-api.binance.vision/api/v3/klines"
+BINANCE_VISION_EXCHANGE_INFO = "https://data-api.binance.vision/api/v3/exchangeInfo"
 _BINANCE_LIMIT = 1000  # máximo por petición según API de Binance
 _REQUEST_TIMEOUT = 30
 
@@ -162,13 +166,15 @@ def cache_file_ext() -> str:
 
 
 def _cache_path(
-    asset_type: str, symbol: str, timeframe: str, *, adjusted_close: bool = False
+    asset_type: str, symbol: str, timeframe: str, *, adjusted_close: bool = False,
+    source: str | None = None,
 ) -> str:
     """Ruta privada separada para cada símbolo, intervalo y ajuste de cierre."""
     asset_type = (asset_type or "").lower()
     sym = (symbol or "").strip().upper()
     adjusted_suffix = "-adjusted" if adjusted_close else ""
-    return f"{asset_type}/{sym}/{timeframe}{adjusted_suffix}{cache_file_ext()}"
+    source_suffix = "-binance-vision" if source == "binance_vision" else ""
+    return f"{asset_type}/{sym}/{timeframe}{adjusted_suffix}{source_suffix}{cache_file_ext()}"
 
 
 def _cache_client():
@@ -252,6 +258,7 @@ def read_from_cache(
     end: Union[str, datetime, pd.Timestamp],
     *,
     adjusted_close: bool = False,
+    source: str | None = None,
 ) -> Union[pd.DataFrame, None]:
     """Lee desde Supabase Storage si el archivo cubre el rango solicitado.
 
@@ -261,7 +268,9 @@ def read_from_cache(
     client = _cache_client()
     if client is None:
         return None
-    path = _cache_path(asset_type, symbol, timeframe, adjusted_close=adjusted_close)
+    path = _cache_path(
+        asset_type, symbol, timeframe, adjusted_close=adjusted_close, source=source,
+    )
     try:
         data = _with_retry(
             lambda: client.storage.from_(_CACHE_BUCKET).download(path),
@@ -295,6 +304,10 @@ def read_from_cache(
     s = _as_utc(start)
     e = _as_utc(end)
     covers_end = idx.max() >= e
+    if source == "binance_vision" and timeframe == "1d":
+        # Binance Vision bars are indexed by their UTC open date. The latest
+        # complete candle is therefore yesterday's index at any time today.
+        covers_end = idx.max().normalize() >= e.normalize() - pd.Timedelta(days=1)
     if adjusted_close and asset_type.lower() in ("stock", "etf") and timeframe == "1d":
         # Las barras diarias se indexan a medianoche y la fecha `end` suele
         # ser la hora actual. Acepta el último cierre de mercado reciente
@@ -302,6 +315,8 @@ def read_from_cache(
         # del viernes; una caché de la semana anterior sigue siendo MISS.
         covers_end = idx.max().normalize() >= e.normalize() - pd.Timedelta(days=5)
     if idx.min() <= s and covers_end:
+        if source == "binance_vision":
+            return df.loc[(df.index >= s) & (df.index < e)]
         return df.loc[s:e]
     logger.info("Cache %s no cubre el rango pedido; se descarga en vivo.", path)
     return None
@@ -314,12 +329,15 @@ def write_to_cache(
     df: pd.DataFrame,
     *,
     adjusted_close: bool = False,
+    source: str | None = None,
 ) -> bool:
     """Escribe el DataFrame completo al bucket de Supabase Storage (upsert)."""
     client = _cache_client()
     if client is None:
         return False
-    path = _cache_path(asset_type, symbol, timeframe, adjusted_close=adjusted_close)
+    path = _cache_path(
+        asset_type, symbol, timeframe, adjusted_close=adjusted_close, source=source,
+    )
     data = _df_to_bytes(df)
     digest = hashlib.sha256(data).hexdigest()
     content_type = "application/octet-stream"
@@ -398,7 +416,10 @@ def _to_ms(value: Union[str, datetime, pd.Timestamp, int, float]) -> int:
     raise ValueError(f"Tipo de fecha no soportado: {type(value)}")
 
 
-def _fetch_binance(symbol: str, interval: str, start_ms: int, end_ms: int) -> list:
+def _fetch_binance(
+    symbol: str, interval: str, start_ms: int, end_ms: int, *,
+    endpoint: str = BINANCE_KLINES, provider: str = "Binance",
+) -> list:
     """Descarga klines de Binance paginando de 1000 en 1000 velas."""
     rows: list = []
     cursor = start_ms
@@ -411,10 +432,10 @@ def _fetch_binance(symbol: str, interval: str, start_ms: int, end_ms: int) -> li
             "limit": _BINANCE_LIMIT,
         }
         try:
-            resp = _http_get(BINANCE_KLINES, params=params, op=f"Binance {symbol}")
+            resp = _http_get(endpoint, params=params, op=f"{provider} {symbol}")
         except requests.RequestException as exc:
             raise ValueError(
-                f"Binance: fallo de red al consultar '{symbol}' ({interval}): {exc}"
+                f"{provider}: fallo de red al consultar '{symbol}' ({interval}): {exc}"
             ) from exc
 
         if resp.status_code != 200:
@@ -425,14 +446,14 @@ def _fetch_binance(symbol: str, interval: str, start_ms: int, end_ms: int) -> li
             except Exception:
                 msg = resp.text
             raise ValueError(
-                f"Binance: no se pudo obtener '{symbol}' ({interval}). "
+                f"{provider}: no se pudo obtener '{symbol}' ({interval}). "
                 f"HTTP {resp.status_code} - {msg}"
             )
         try:
             data = resp.json()
         except ValueError as exc:
             raise ValueError(
-                f"Binance: respuesta no JSON para '{symbol}': {resp.text[:200]}"
+                f"{provider}: respuesta no JSON para '{symbol}': {resp.text[:200]}"
             ) from exc
 
         if not data:
@@ -446,6 +467,35 @@ def _fetch_binance(symbol: str, interval: str, start_ms: int, end_ms: int) -> li
         cursor = last_open + 1
         time.sleep(0.05)  # cortesía con la API pública
     return rows
+
+
+def filter_binance_vision_spot_universe(universe: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    """Conserva pares USDT spot activos en Binance Vision."""
+    try:
+        response = _http_get(
+            BINANCE_VISION_EXCHANGE_INFO, params={}, op="Binance Vision exchangeInfo",
+        )
+    except requests.RequestException as exc:
+        raise ValueError(f"Binance Vision: fallo al consultar el universo spot: {exc}") from exc
+    if response.status_code != 200:
+        raise ValueError(
+            f"Binance Vision: exchangeInfo respondió HTTP {response.status_code}."
+        )
+    try:
+        payload = response.json()
+        active = {
+            item["symbol"] for item in payload.get("symbols", [])
+            if item.get("status") == "TRADING"
+            and item.get("quoteAsset") == "USDT"
+            and item.get("isSpotTradingAllowed", True)
+        }
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
+        raise ValueError("Binance Vision: exchangeInfo tiene un formato inválido.") from exc
+    return [
+        (asset_type, _normalize_symbol("crypto", symbol))
+        for asset_type, symbol in universe
+        if asset_type == "crypto" and _normalize_symbol("crypto", symbol) in active
+    ]
 
 
 def _fetch_bybit(symbol: str, interval: str, start_ms: int, end_ms: int) -> list:
@@ -577,10 +627,35 @@ def _download_live(
     start: Union[str, datetime, pd.Timestamp],
     end: Union[str, datetime, pd.Timestamp],
     adjusted_close: bool = False,
+    source: str | None = None,
 ) -> pd.DataFrame:
     """Descarga OHLCV REALES desde la fuente (sin cache)."""
     asset_type = asset_type.lower()
     timeframe = timeframe or "1d"
+
+    if source == "binance_vision":
+        if asset_type != "crypto":
+            raise ValueError("Binance Vision solo admite activos crypto spot.")
+        if timeframe != "1d":
+            raise ValueError("Binance Vision para torneos requiere velas diarias (1d).")
+        sym = _normalize_symbol("crypto", symbol)
+        start_ms = _to_ms(start)
+        end_ms = _to_ms(end)
+        rows = _fetch_binance(
+            sym, "1d", start_ms, end_ms, endpoint=BINANCE_VISION_KLINES,
+            provider="Binance Vision",
+        )
+        if not rows:
+            raise ValueError(f"Binance Vision: no se obtuvieron velas para '{sym}'.")
+        # Spot REST puede incluir la vela UTC aún abierta. Excluirla usando
+        # close_time (campo 6) para impedir que el dataset use información parcial.
+        now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+        complete = [row for row in rows if int(row[6]) < now_ms]
+        if not complete:
+            raise ValueError(f"Binance Vision: no hay velas diarias cerradas para '{sym}'.")
+        frame = _rows_to_df(complete)
+        start_ts, end_ts = _as_utc(start), _as_utc(end)
+        return frame.loc[(frame.index >= start_ts) & (frame.index < end_ts)]
 
     if asset_type == "crypto":
         sym = _normalize_symbol("crypto", symbol)
@@ -674,6 +749,7 @@ def get_ohlcv(
     end: Union[str, datetime, pd.Timestamp],
     use_cache: bool = True,
     adjusted_close: bool = False,
+    source: str | None = None,
 ) -> pd.DataFrame:
     """Descarga OHLCV REALES, usando cache de Supabase Storage cuando es posible.
 
@@ -692,7 +768,7 @@ def get_ohlcv(
         try:
             cached = read_from_cache(
                 asset_type, symbol, timeframe, start, end,
-                adjusted_close=adjusted_close,
+                adjusted_close=adjusted_close, source=source,
             )
             if cached is not None:
                 logger.info("get_ohlcv(%s,%s,%s): servido desde cache.",
@@ -701,14 +777,16 @@ def get_ohlcv(
         except Exception as exc:  # pragma: no cover - defensa adicional
             logger.warning("Cache read falló; descarga en vivo: %s", exc)
 
-    df = _download_live(asset_type, symbol, timeframe, start, end,
-                        adjusted_close=adjusted_close)
+    df = _download_live(
+        asset_type, symbol, timeframe, start, end,
+        adjusted_close=adjusted_close, source=source,
+    )
 
     if use_cache and df is not None and not df.empty:
         try:
             write_to_cache(
                 asset_type, symbol, timeframe, df,
-                adjusted_close=adjusted_close,
+                adjusted_close=adjusted_close, source=source,
             )
         except Exception as exc:  # pragma: no cover
             logger.warning("Cache write falló: %s", exc)

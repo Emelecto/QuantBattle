@@ -3,10 +3,10 @@
 Dos modos:
   - "sintetico": mercado artificial con estructura de factores, regimenes,
     volatilidad con clustering y colas gruesas. Anonimato total por
-    construccion, universo del tamaño que queramos y señal CONOCIDA (podemos
-    garantizar que el torneo es ganable).
-  - "real": panel derivado de datos reales (Binance/yfinance) obfuscado con
-    las 6 capas anti-de-anonimizacion validadas.
+    construccion y señal configurable. La capacidad de aprender esa señal se
+    evalúa experimentalmente, sin garantizar el score de un modelo.
+  - "real": panel derivado de precios reales con variables renombradas y
+    discretizadas. Esta ofuscación no es cifrado ni garantiza anonimato.
 
 En ambos casos lo que se publica son features normalizadas POR ERA y
 discretizadas: no hay precios, ni fechas, ni tickers.
@@ -118,6 +118,7 @@ def generar_panel_real(
     ini=None,
     keep_unlabeled: bool = False,
     strict_universe: bool = False,
+    data_source: str | None = None,
 ) -> tuple[pd.DataFrame, list[str], dict]:
     """Panel derivado de datos REALES, con las fugas ya cerradas.
 
@@ -129,9 +130,8 @@ def generar_panel_real(
       - eras permutadas (en `obfuscar`): el numero no revela el orden.
 
     Reproducibilidad: `fin`/`ini` fijan la ventana (por defecto, últimos
-    `dias` hasta ahora). Para pinnear una versión exacta del dataset, pasar
-    `fin`/`ini` explícitos + leer desde el caché de Storage (que evita
-    re-descargar Binance/yfinance): mismos bytes cacheados => misma versión.
+    `dias` hasta ahora). `data_source="binance_vision"` fuerza el endpoint
+    público oficial de Binance y su caché aislada para las rondas ML reales.
     """
     from datetime import datetime, timedelta, timezone
 
@@ -155,6 +155,7 @@ def generar_panel_real(
             df = data_feed.get_ohlcv(
                 asset_type, symbol, timeframe, ini, fin,
                 adjusted_close=asset_type in ("stock", "etf"),
+                source=data_source,
             )
             df = df[["close", "volume"]].copy()
             idx = pd.to_datetime(df.index)

@@ -77,7 +77,7 @@ def run_create_ml_round() -> None:
 
 
 def run_evaluate_ml() -> None:
-    """Evalúa submissions de rondas ML cerradas y reparte QP."""
+    """Evalúa submissions de rondas ML cerradas; ML no distribuye QP."""
     from ml_scheduler import evaluate_ml_rounds
 
     sb = get_supabase_client()

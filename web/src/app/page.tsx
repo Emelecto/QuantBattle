@@ -17,7 +17,7 @@ const STEPS = [
     n: "2",
     title: "Pruébala a fondo",
     text: "Walk-forward OOS: entrena en el pasado, mide en datos que nunca vio.",
-    detail: "Split automático en pliegues, métricas deflatidas y curva de equity. Si tu estrategia sobrevive al out-of-sample, tiene edge real.",
+    detail: "Split automático en pliegues, métricas y curva de equity. Una evaluación fuera de muestra ayuda a detectar sobreajuste; no demuestra rentabilidad futura.",
     icon: "🔬",
   },
   {
@@ -29,9 +29,9 @@ const STEPS = [
   },
   {
     n: "4",
-    title: "Compite por premios",
-    text: "Entra a torneos semanales con QP como premio y sube en el ranking global.",
-    detail: "Rounds con deadline fijo, evaluación automática y leaderboard público. Tu reputación se construye con cada envío válido.",
+    title: "Compite con predicciones",
+    text: "Descarga un dataset, entrena tu modelo y envía sus predicciones.",
+    detail: "Rondas con plazo fijo, validación de archivos y ranking tras el cierre. La modalidad de práctica usa datos sintéticos y no otorga premios QP.",
     icon: "🏆",
   },
 ];
@@ -58,8 +58,8 @@ const FEATURES = [
     visual: "marketplace",
   },
   {
-    title: "Torneos con QP",
-    text: "Rounds semanales con premios, ranking global y reputación.",
+    title: "Torneos de machine learning",
+    text: "Predicciones sobre datos sintéticos, evaluación por era y resultados después del cierre.",
     visual: "tournaments",
   },
   {
@@ -97,19 +97,19 @@ export default function Home() {
                       <span className="text-accent">cuantitativo.</span>
                     </h1>
                     <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted md:text-lg">
-                      Pon a prueba tus ideas de trading contra las de toda la comunidad.
-                      Backtests con datos reales, torneos semanales y un ranking donde gana
-                      quien mejor estrategias construye.
+                      Una plataforma experimental en español para investigar modelos,
+                      compartir estrategias y competir con predicciones de machine learning.
+                      Desarrollada en el semillero DeepFin de la Universidad EIA.
                     </p>
                     <div className="mt-9 flex flex-wrap items-center gap-3">
-                      <Link href="/register" className={buttonClasses("primary", "lg")}>
-                        Crea tu estrategia
+                      <Link href="/app/tournaments" className={buttonClasses("primary", "lg")}>
+                        Explorar torneos ML
                       </Link>
                       <Link
-                        href="/demo"
+                        href="/docs#evaluacion"
                         className={buttonClasses("secondary", "lg")}
                       >
-                        Pruébalo sin registro
+                        Ver evaluación técnica
                       </Link>
                     </div>
                   </div>

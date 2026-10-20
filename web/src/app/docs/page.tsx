@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ResearchEvidence } from "@/components/research/ResearchEvidence";
 
 /**
  * /docs — Documentación técnica de QuantLab.
@@ -23,19 +24,16 @@ function Pre({ children }: { children: string }) {
 
 function Section({
   id,
-  n,
   title,
   children,
 }: {
   id: string;
-  n: string;
   title: string;
   children: ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-20 border-t border-line pt-10">
       <div className="flex items-baseline gap-3">
-        <span className="metric text-[12px] text-muted">{n}</span>
         <h2 className="text-xl font-semibold tracking-tight text-ink">{title}</h2>
       </div>
       <div className="mt-4 space-y-4 text-[14px] leading-relaxed text-muted">
@@ -59,12 +57,14 @@ export default function DocsPage() {
           Documentación
         </h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-          Cómo funciona QuantLab por dentro: el motor walk-forward, cómo leer
-          tus métricas y la API programática. Todo aquí describe código que ya
-          corre en producción.
+          Protocolo de los torneos ML, evidencia de la evaluación técnica y
+          herramientas para reproducir experimentos. QuantLab es un prototipo
+          de investigación del semillero DeepFin de la Universidad EIA.
         </p>
 
         <nav className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-[13px]">
+          <a href="#evaluacion" className="text-accent hover:underline">Evaluación del semillero</a>
+          <a href="#torneos-ml" className="text-accent hover:underline">Protocolo ML</a>
           <a href="#walk-forward" className="text-accent hover:underline">Walk-forward OOS</a>
           <a href="#metricas" className="text-accent hover:underline">Métricas</a>
           <a href="#api" className="text-accent hover:underline">API</a>
@@ -72,8 +72,20 @@ export default function DocsPage() {
         </nav>
 
         <div className="mt-10 space-y-10">
+          <Section id="evaluacion" title="Evaluación técnica con datos sintéticos">
+            <ResearchEvidence />
+          </Section>
+          <Section id="torneos-ml" title="Cómo funciona una ronda ML">
+            <p>Descarga train y validation con target, y live sin target. Cada envío debe incluir exactamente las columnas <Code>id,prediction</Code>, todos los IDs de live una sola vez y números finitos entre 0 y 1. Cada era debe tener predicciones con variación.</p>
+            <p>El servidor valida y guarda el archivo con un recibo SHA-256. Solo el último envío válido antes del cierre queda seleccionado. La puntuación y el ranking se publican después del plazo; la métrica oficial es la media de Spearman por era, versión <Code>spearman_era_v1</Code>.</p>
+            <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. La generación automática de rondas reales permanece desactivada hasta resolver la distribución de la fuente.</p>
+            <div className="flex flex-wrap gap-4">
+              <a href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía del participante</a>
+              <a href="/ml/ejemplo_quantlab.ipynb" download className="text-accent underline underline-offset-4">Descargar notebook reproducible</a>
+            </div>
+          </Section>
           {/* ---------------------------------------------------------- */}
-          <Section id="walk-forward" n="01" title="Walk-forward out-of-sample">
+          <Section id="walk-forward" title="Walk-forward out-of-sample">
             <p>
               Un backtest clásico entrena y evalúa sobre los mismos datos: eso
               premia estrategias sobreajustadas. QuantLab separa{" "}
@@ -110,7 +122,7 @@ export default function DocsPage() {
           </Section>
 
           {/* ---------------------------------------------------------- */}
-          <Section id="metricas" n="02" title="Cómo leer tus métricas">
+          <Section id="metricas" title="Cómo leer tus métricas de estrategias">
             <dl className="space-y-4">
               <div>
                 <dt className="font-medium text-ink">Sharpe OOS</dt>
@@ -149,25 +161,25 @@ export default function DocsPage() {
           </Section>
 
           {/* ---------------------------------------------------------- */}
-          <Section id="api" n="03" title="API programática">
+          <Section id="api" title="API programática">
             <p>
               Base URL del worker:{" "}
-              <Code>{process.env.NEXT_PUBLIC_WORKER_URL ?? "https://quantlab-worker.onrender.com"}</Code>{" "}
+              <Code>{process.env.NEXT_PUBLIC_WORKER_URL ?? "https://quantlab2.onrender.com"}</Code>{" "}
               — autenticación opcional con JWT de Supabase o clave API{" "}
               <Code>qlk_…</Code> (créala en{" "}
               <a href="/app/api-keys" className="text-accent hover:underline">Tu cuenta → Claves API</a>).
               Los endpoints públicos de lectura no requieren clave.
             </p>
             <Pre>{`# Health check (público)
-curl https://quantlab-worker.onrender.com/health
+curl https://quantlab2.onrender.com/health
 
 # Listar marketplace (público)
-curl https://quantlab-worker.onrender.com/marketplace
+curl https://quantlab2.onrender.com/marketplace
 
 # Torneos activos
-curl https://quantlab-worker.onrender.com/tournament/list`}</Pre>
+curl https://quantlab2.onrender.com/tournament/list`}</Pre>
             <Pre>{`# Con clave API qlk_: publicar una estrategia
-curl -X POST https://quantlab-worker.onrender.com/marketplace/publish \\
+curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
   -H "Authorization: Bearer qlk_TU_CLAVE" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -191,6 +203,9 @@ curl -X POST https://quantlab-worker.onrender.com/marketplace/publish \\
                 <tbody className="metric divide-y divide-line">
                   {[
                     ["GET /health", "—", "Estado del worker"],
+                    ["GET /ml/datasets", "—", "Particiones y metadatos públicos"],
+                    ["POST /ml/datasets/{id}/predictions", "JWT/qlk_", "Validar y seleccionar un CSV"],
+                    ["GET /ml/leaderboard?dataset_id=…", "—", "Resultados tras el cierre"],
                     ["POST /backtest", "JWT", "Ejecuta backtest walk-forward"],
                     ["GET /marketplace", "—", "Lista estrategias publicadas"],
                     ["POST /marketplace/publish", "JWT/qlk_", "Publica estrategia"],
@@ -212,13 +227,13 @@ curl -X POST https://quantlab-worker.onrender.com/marketplace/publish \\
           </Section>
 
           {/* ---------------------------------------------------------- */}
-          <Section id="mcp" n="04" title="MCP — QuantLab desde tu asistente IA">
+          <Section id="mcp" title="MCP — QuantLab desde tu asistente IA">
             <p>
               QuantLab expone un servidor MCP (Model Context Protocol): tu
               Claude Desktop u otro cliente compatible puede consultar el
               marketplace, torneos y rankings con lenguaje natural.
             </p>
-            <Pre>{`claude mcp add quantlab -- node /ruta/a/QuantLab/mcp-server/mcp_server.py`}</Pre>
+            <Pre>{`claude mcp add quantlab -e QUANTLAB_TOKEN=tu_clave -- python /ruta/a/QuantLab/mcp-server/mcp_server.py`}</Pre>
             <p>
               El servidor usa tu clave <Code>qlk_</Code> vía variable de entorno{" "}
               <Code>QUANTLAB_TOKEN</Code>. Ejemplos de uso natural:

@@ -1,161 +1,71 @@
 "use client";
 
 import Link from "next/link";
-import { listTournaments } from "@/lib/tournaments";
+import { useCallback, useEffect, useState } from "react";
+import { listTournaments, type Tournament } from "@/lib/tournaments";
+import { listDatasets, type MlDataset } from "@/lib/mlTournaments";
 import { TournamentCard } from "./components/TournamentCard";
-import { SubmitStrategyModal } from "./components/SubmitStrategyModal";
-import { useAuth } from "@/lib/useAuth";
-import { getBalance } from "@/lib/tokens";
-import { useState, useEffect } from "react";
-
-// No prerender: requiere el worker corriendo
-export const dynamic = "force-dynamic";
-
-function EmptyTournamentsState({ hasQP }: { hasQP: boolean }) {
-  return (
-    <div className="mt-12 ql-glass ql-elev-1 rounded-xl px-6 py-14 text-center animate-fadeIn">
-      <svg
-        className="mx-auto mb-6 opacity-60"
-        width="160"
-        height="120"
-        viewBox="0 0 160 120"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <rect x="30" y="40" width="100" height="60" rx="8" stroke="rgba(94,234,212,0.3)" strokeWidth="1.5" fill="none" />
-        <path d="M50 70 L70 55 L90 65 L110 45" stroke="#5eead4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        <circle cx="50" cy="70" r="3" fill="#5eead4" />
-        <circle cx="70" cy="55" r="3" fill="#5eead4" />
-        <circle cx="90" cy="65" r="3" fill="#5eead4" />
-        <circle cx="110" cy="45" r="3" fill="#5eead4" />
-        <path d="M130 30 L135 20 L140 30" stroke="rgba(56,189,248,0.5)" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="20" cy="25" r="2" fill="rgba(56,189,248,0.4)" />
-        <circle cx="145" cy="90" r="1.5" fill="rgba(94,234,212,0.3)" />
-      </svg>
-      <h3 className="text-lg font-semibold text-ink">
-        No hay torneos activos
-      </h3>
-      <p className="mx-auto mt-2 max-w-md text-sm text-muted">
-        Los torneos se crean automáticamente. Vuelve pronto para competir.
-      </p>
-      {hasQP && (
-        <Link
-          href="/app/tournaments/new"
-          className="mt-6 inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-medium text-bg transition-colors hover:bg-accent/90 active:scale-[0.96]"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          Crear torneo
-        </Link>
-      )}
-    </div>
-  );
-}
 
 export default function TournamentsPage() {
-  const [tournaments, setTournaments] = useState<any[]>([]);
+  const [rounds, setRounds] = useState<{ tournament: Tournament; dataset: MlDataset }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userQP, setUserQP] = useState<number>(0);
-  const [submitTarget, setSubmitTarget] = useState<{ id: string; name: string } | null>(null);
-  const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const list = await listTournaments();
-        setTournaments(list);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [tournaments, datasets] = await Promise.all([listTournaments({ type: "ml" }), listDatasets()]);
+      const latest = new Map<string, MlDataset>();
+      for (const dataset of datasets) {
+        if (dataset.kind !== "live" || dataset.score_version !== "spearman_era_v1") continue;
+        const previous = latest.get(dataset.tournament_id);
+        if (!previous || dataset.round_number > previous.round_number) latest.set(dataset.tournament_id, dataset);
       }
-    })();
+      setRounds(tournaments.flatMap((tournament) => {
+        const dataset = latest.get(tournament.id);
+        return dataset ? [{ tournament, dataset }] : [];
+      }));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudieron cargar las rondas. Vuelve a intentar.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      try {
-        const bal = await getBalance();
-        setUserQP(bal?.balance ?? 0);
-      } catch {}
-    })();
-  }, [user]);
+  useEffect(() => { void load(); }, [load]);
 
   return (
-    <main className="flex min-h-screen flex-col">
-      <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-14">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-ink animate-fadeIn">
-              Torneos activos
-            </h1>
-            <p className="mt-2 text-sm text-muted animate-fadeIn">
-              Compite contra la comunidad y gana QuantPoints apostando por tus estrategias.
-            </p>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="mt-8 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-fadeIn">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="ql-skeleton-card h-48 rounded-xl" />
-            ))}
-          </div>
-        ) : tournaments.length === 0 ? (
-          <EmptyTournamentsState hasQP={userQP > 0} />
-        ) : (
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-fadeIn">
-            {tournaments.map((t) => {
-              // Los torneos ML no usan el modal de código: se resuelven en el
-              // detalle (pestañas Datos / Enviar / Ranking).
-              const esML = t.type === "ml";
-              return (
-              <TournamentCard
-                key={t.id}
-                onEnviar={
-                  esML
-                    ? undefined
-                    : (tt) => setSubmitTarget({ id: tt.id, name: tt.name })
-                }
-                tournament={{
-                  id: t.id,
-                  name: t.name,
-                  type: esML ? "ml" : "custom",
-                  status:
-                    t.status === "open"
-                      ? "active"
-                      : t.status === "draft"
-                        ? "upcoming"
-                        : "finished",
-                  asset_type: t.asset_type as "crypto" | "stock" | "any",
-                  symbol: t.symbols?.[0],
-                  qp_prize: t.prize_pool_qp,
-                  deadline: t.submission_deadline,
-                  participants: t.submission_count ?? 0,
-                  metric_label: t.primary_metric,
-                }}
-              />
-              );
-            })}
-
-            {submitTarget && (
-              <SubmitStrategyModal
-                tournamentId={submitTarget.id}
-                tournamentName={submitTarget.name}
-                onClose={() => setSubmitTarget(null)}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Disclaimer */}
-        <p className="mt-10 text-[11px] text-muted">
-          QuantLab es una herramienta de investigación. No es asesoría financiera ni recomendación de inversión. Los torneos usan paper trading con datos reales.
-        </p>
+    <div className="mx-auto w-full max-w-5xl px-6 py-14">
+      <h1 className="text-3xl font-semibold tracking-tight text-ink">Torneos de machine learning</h1>
+      <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">Descarga los datos, entrena tu modelo y envía predicciones. La práctica usa mercados artificiales, es gratuita y no otorga premios QP.</p>
+      <div className="mt-5 flex flex-wrap gap-5 text-sm">
+        <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Cómo participar</Link>
+        <Link href="/docs#evaluacion" className="text-accent underline underline-offset-4">Evidencia técnica del semillero</Link>
       </div>
-    </main>
+      {error ? (
+        <div role="alert" className="mt-8 rounded-xl border border-line p-6">
+          <p className="text-sm text-short">{error}</p>
+          <button onClick={() => void load()} className="mt-4 rounded-md border border-line px-4 py-2 text-sm text-ink">Volver a cargar</button>
+        </div>
+      ) : loading ? (
+        <p role="status" className="mt-8 text-sm text-muted">Cargando rondas publicadas… El servidor puede tardar al iniciar.</p>
+      ) : rounds.length === 0 ? (
+        <p className="mt-8 rounded-xl border border-line p-6 text-muted">Todavía no hay rondas publicadas bajo el protocolo actual. Consulta la guía o vuelve más tarde.</p>
+      ) : (
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          {rounds.map(({ tournament, dataset }) => (
+            <TournamentCard key={tournament.id} tournament={{
+              id: tournament.id, name: tournament.name, type: "ml",
+              status: dataset.status === "ready" && !!dataset.closes_at && Date.parse(dataset.closes_at) > Date.now() ? "active" : "finished",
+              asset_type: dataset.mode === "sintetico" ? "synthetic" : "crypto",
+              qp_prize: 0, deadline: dataset.closes_at ?? tournament.submission_deadline,
+              participants: tournament.submission_count,
+              metric_label: "Spearman medio por era",
+            }} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

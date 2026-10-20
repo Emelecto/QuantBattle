@@ -154,7 +154,6 @@ function CodeTournamentDetail({
                     <th className="px-4 py-3">#</th>
                     <th className="px-4 py-3">Usuario</th>
                     <th className="px-4 py-3 text-right">Score</th>
-                    <th className="px-4 py-3 text-right">QP</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -167,7 +166,6 @@ function CodeTournamentDetail({
                       <td className="px-4 py-3 text-right font-mono text-accent">
                         {e.score.toFixed(3)}
                       </td>
-                      <td className="px-4 py-3 text-right text-long">+{e.qp_earned}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -300,6 +298,7 @@ function MlTournamentDetail({
     () => publicos.filter((d) => d.round_number === liveAny?.round_number),
     [publicos, liveAny],
   );
+  const licenseDataset = roundDatasets.find((d) => d.data_source === "binance_vision");
 
   const modo = liveAny?.mode ?? null;
   const ronda = datasets.length
@@ -330,8 +329,8 @@ function MlTournamentDetail({
             <span className="rounded border border-line bg-surface px-3 py-1.5 text-sm text-muted">
               {liveReady ? "Abierta" : liveAny?.status === "scored" ? "Finalizada" : "Cerrada"}
             </span>
-            <span className="rounded border border-accent/30 bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent">
-              {tournament.prize_pool_qp} QP
+            <span className="rounded border border-line bg-surface px-3 py-1.5 text-sm font-medium text-muted">
+              Sin premios QP
             </span>
           </div>
         </div>
@@ -345,6 +344,46 @@ function MlTournamentDetail({
               <span>
                 Métrica: <strong className="text-ink">{tournament.primary_metric}</strong>
               </span>
+            </div>
+          </div>
+        )}
+
+        {licenseDataset && (
+          <div className="mt-4 rounded-xl border border-accent/30 bg-accent/5 p-5 text-sm text-muted">
+            <h2 className="font-semibold text-ink">Fuente y licencia de los datos</h2>
+            <p className="mt-2">
+              Data from Binance Vision. Estos datasets derivados se publican bajo{" "}
+              {licenseDataset.derived_data_license ?? licenseDataset.data_license ?? "CC BY-NC-SA 4.0"}
+              {" "}para investigación y educación no comercial. Las redistribuciones
+              deben conservar la misma licencia. Esta ronda no entrega QP ni premios.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+              <a
+                className="text-accent underline"
+                href={licenseDataset.data_attribution_url ?? "https://data.binance.vision/"}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Binance Vision
+              </a>
+              <a
+                className="text-accent underline"
+                href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                CC BY-NC-SA 4.0
+              </a>
+              {licenseDataset.data_terms_url && (
+                <a
+                  className="text-accent underline"
+                  href={licenseDataset.data_terms_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Términos de Binance Public Data
+                </a>
+              )}
             </div>
           </div>
         )}
@@ -443,6 +482,12 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
           </p>
           {datasets[0].round_type === "historical" && (
             <p className="mt-2">Esta es una evaluación histórica; no representa predicciones futuras en vivo.</p>
+          )}
+          {datasets[0].round_type === "prospective" && (
+            <p className="mt-2">
+              El precio base se fija en el primer cierre diario común después del
+              plazo de envío; la evaluación mide los cinco cierres siguientes.
+            </p>
           )}
           {datasets[0].version && (
             <p className="mt-2 font-mono text-xs">Versión del dataset: {datasets[0].version}</p>
@@ -865,7 +910,6 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
               <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">Usuario</th>
               <th className="px-4 py-3 text-right">Spearman medio</th>
-              <th className="px-4 py-3 text-right">QP</th>
             </tr>
           </thead>
           <tbody>
@@ -889,9 +933,6 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-accent">
                     {num(e.score, 4)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-long">
-                    {e.qp_earned != null ? `+${e.qp_earned}` : "—"}
                   </td>
                 </tr>
               );

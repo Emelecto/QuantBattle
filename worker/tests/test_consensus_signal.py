@@ -1,5 +1,4 @@
-"""Tests del item 5 del rediseño: el meta-modelo comunitario de los torneos ML
-como SEÑAL VIVA del marketplace (consensus_signals + endpoint).
+"""Tests del meta-modelo comunitario cuando la licencia permite publicarlo.
 
 Todo offline: se mockea Supabase (conftest.mock_supabase) con un _Table en
 memoria que soporta el encadenamiento y los filtros reales usados por el
@@ -13,7 +12,7 @@ from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
 # Mock de tabla Supabase con encadenamiento y filtros reales (copiado de
-# test_ml_tournaments.py) para que _distribute_ml_qp corra de verdad.
+# test_ml_tournaments.py) para que _build_consensus_signal corra de verdad.
 # ---------------------------------------------------------------------------
 class _Table:
     def __init__(self, store, name):
@@ -141,10 +140,11 @@ def sb(mock_supabase):
 
 
 # ---------------------------------------------------------------------------
-# (a) _distribute_ml_qp persiste el meta-modelo en consensus_signals
+# (a) _build_consensus_signal persiste el meta-modelo en consensus_signals
 # ---------------------------------------------------------------------------
-def test_distribute_ml_qp_persiste_meta_modelo(sb, monkeypatch):
-    """Al construir 'meta', _distribute_ml_qp debe guardar una fila en
+@pytest.mark.parametrize("data_source,expected_rows", [(None, 1), ("binance_vision", 0)])
+def test_build_consensus_signal_respects_data_license(sb, monkeypatch, data_source, expected_rows):
+    """Al construir 'meta', _build_consensus_signal guarda una fila en
     consensus_signals (upsert por tournament_id/round_number)."""
     import tournaments as _t
     import ml_scheduler
@@ -159,6 +159,7 @@ def test_distribute_ml_qp_persiste_meta_modelo(sb, monkeypatch):
     sb._store.setdefault("ml_datasets", [{
         "id": dsid, "tournament_id": tid, "round_number": 7, "kind": "live",
         "status": "ready", "feature_cols": ["f1"],
+        "params": {"data_source": data_source} if data_source else {},
     }])
     # Submission válida con score>0 (para que entre en el meta-modelo) y predicciones.
     preds = pd.DataFrame({
@@ -178,17 +179,18 @@ def test_distribute_ml_qp_persiste_meta_modelo(sb, monkeypatch):
     with patch.object(ml_persist, "cargar_predicciones_validas", return_value=dummy_df), \
          patch.object(sc, "stake_weight", return_value=meta_dummy), \
          patch.object(ml_persist, "puntuar_submission_en_bd", return_value={"valida": True}):
-        ml_scheduler._distribute_ml_qp(sb, dsid)
+        ml_scheduler._build_consensus_signal(sb, dsid)
 
-    # Verificar que consensus_signals tiene la fila (upsert) con el signal correcto.
+    # Las señales derivadas de Binance Vision no salen al marketplace.
     sigs = sb._store.get("consensus_signals", [])
-    assert len(sigs) == 1, "debe haberse guardado una fila en consensus_signals"
-    row = sigs[0]
-    assert row["tournament_id"] == tid
-    assert row["round_number"] == 7
-    assert row["dataset_id"] == dsid
-    assert row["signal_json"] == meta_dummy.to_dict()
-    assert len(row["signal_json"]) == 5
+    assert len(sigs) == expected_rows
+    if expected_rows:
+        row = sigs[0]
+        assert row["tournament_id"] == tid
+        assert row["round_number"] == 7
+        assert row["dataset_id"] == dsid
+        assert row["signal_json"] == meta_dummy.to_dict()
+        assert len(row["signal_json"]) == 5
 
 
 # ---------------------------------------------------------------------------

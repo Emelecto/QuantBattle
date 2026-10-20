@@ -1,7 +1,8 @@
 """Maduración de objetivos de rondas prospectivas con datos de mercado.
 
-Se ejecuta en GitHub Actions. Una fila solo recibe target después de cinco
-fechas completas compartidas por todo el universo. Nunca consulta predicciones.
+La ventana de envío dura 24 h. El precio base es el primer cierre diario común
+posterior al plazo; el objetivo compara ese precio con cinco cierres completos
+posteriores. Así el período medido empieza después de cerrar los envíos.
 """
 from __future__ import annotations
 
@@ -42,6 +43,16 @@ def resolve_round(supabase, round_row: dict, now: datetime | None = None) -> boo
     as_of = pd.Timestamp(dates[0]).date()
     if as_of >= now.date():
         return False
+    deadline_text = round_row.get("closes_at")
+    if not deadline_text:
+        raise ValueError("La ronda prospectiva no tiene plazo de cierre")
+    deadline = datetime.fromisoformat(deadline_text.replace("Z", "+00:00"))
+    if deadline.tzinfo is None:
+        deadline = deadline.replace(tzinfo=timezone.utc)
+    if now <= deadline:
+        return False
+    params = round_row.get("params") or {}
+    data_source = params.get("data_source")
 
     # No usar caché: al crear la ronda ese caché acababa en as_of.
     series: dict[str, pd.Series] = {}
@@ -52,6 +63,7 @@ def resolve_round(supabase, round_row: dict, now: datetime | None = None) -> boo
             pd.Timestamp(now.date() + timedelta(days=1), tz="UTC"),
             use_cache=False,
             adjusted_close=row.asset_type in ("stock", "etf"),
+            source=data_source,
         )
         close = frame["close"].astype(float).copy()
         close.index = pd.to_datetime(close.index, utc=True).date
@@ -63,14 +75,24 @@ def resolve_round(supabase, round_row: dict, now: datetime | None = None) -> boo
         series[row.symbol] = close
 
     common = set.intersection(*(set(close.index) for close in series.values()))
-    completed = sorted(date for date in common if as_of < date < now.date())
-    if len(completed) < HORIZON_ERAS:
-        logger.info("Ronda %s pendiente: %s/%s fechas completas", round_row["id"],
-                    len(completed), HORIZON_ERAS)
+    # Índice diario = apertura UTC; el cierre de la vela ocurre a medianoche
+    # del día siguiente. Solo cuenta como base si ese cierre es posterior al
+    # deadline, y el target usa cinco cierres adicionales después de la base.
+    after_deadline = sorted(
+        date for date in common
+        if as_of < date
+        and pd.Timestamp(date, tz="UTC") + pd.Timedelta(days=1) > pd.Timestamp(deadline)
+        and pd.Timestamp(date, tz="UTC") + pd.Timedelta(days=1) <= pd.Timestamp(now)
+    )
+    if len(after_deadline) < HORIZON_ERAS + 1:
+        logger.info("Ronda %s pendiente: %s/%s cierres después del plazo", round_row["id"],
+                    max(0, len(after_deadline) - 1), HORIZON_ERAS)
         return False
-    settle_date = completed[HORIZON_ERAS - 1]
+    base_date = after_deadline[0]
+    settle_date = after_deadline[HORIZON_ERAS]
     raw = np.array([
-        float(series[row.symbol].loc[settle_date]) / float(row.as_of_close) - 1
+        float(series[row.symbol].loc[settle_date])
+        / float(series[row.symbol].loc[base_date]) - 1
         for row in mapping.itertuples(index=False)
     ], dtype=float)
     if not np.isfinite(raw).all() or len(set(raw)) < 2:
@@ -93,7 +115,6 @@ def resolve_round(supabase, round_row: dict, now: datetime | None = None) -> boo
             raise ValueError("El holdout existente difiere del cálculo actual")
     if not ml_persist.verify_frame_hash(storage.download_private_parquet(path), digest):
         raise ValueError("El holdout subido no coincide con su hash")
-    deadline = datetime.fromisoformat(round_row["closes_at"].replace("Z", "+00:00"))
     status = "closed" if deadline <= now else "ready"
     supabase.table("ml_datasets").update({
         "target_hash": digest,
@@ -108,7 +129,7 @@ def resolve_pending_rounds(supabase, now: datetime | None = None) -> int:
     now = now or datetime.now(timezone.utc)
     rows = supabase.table("ml_datasets").select(
         "id,round_type,mapping_path,mapping_hash,target_path,target_hash,"
-        "closes_at,status"
+        "closes_at,status,params"
     ).eq("kind", "live").eq("round_type", "prospective").in_(
         "status", ["ready", "closed", "awaiting_labels"]
     ).execute().data or []

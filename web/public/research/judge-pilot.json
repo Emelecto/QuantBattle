@@ -1,0 +1,171 @@
+{
+  "tournament_id": "e6f877b0-dad8-42aa-a59e-b90aebe32422",
+  "dataset_id": "30e38abf-755f-40d8-a83e-4f91d9e4c492",
+  "round_number": 1,
+  "version": "v1-e4bbe9a1f40c",
+  "closes_at": "2026-10-20T04:30:31.577680+00:00",
+  "worker_url": "https://quantlab2.onrender.com",
+  "prepared_at": "2026-10-20T04:22:31.577680+00:00",
+  "checks": {
+    "public_downloads_and_hashes": true,
+    "live_without_target": true,
+    "authentication_required": true,
+    "invalid_csv_rejected": true,
+    "last_valid_submission_selected": true,
+    "submission_hash_receipt": true,
+    "no_score_before_close": true,
+    "private_target_not_publicly_downloadable": true,
+    "private_metadata_not_readable_anonymously": true,
+    "invalid_bearer_rejected": true,
+    "score_after_real_deadline": true,
+    "score_reproduced_exactly": true,
+    "public_ranking_after_close": true,
+    "late_submission_rejected": true,
+    "idempotent_finalization": true
+  },
+  "synthetic": true,
+  "external_participants": 0,
+  "generator": {
+    "seed": 20261019,
+    "n_assets": 160,
+    "n_eras": 100,
+    "n_features": 20,
+    "ic_objetivo": 0.08
+  },
+  "model": {
+    "algorithm": "HistGradientBoostingRegressor",
+    "selection": "mayor Spearman medio en validation; entrenamiento solo en train",
+    "candidates": [
+      {
+        "max_leaf_nodes": 7,
+        "validation_score": -0.006300189210235979
+      },
+      {
+        "max_leaf_nodes": 15,
+        "validation_score": 0.0005411570896737059
+      }
+    ],
+    "selected_max_leaf_nodes": 15,
+    "max_iter": 100,
+    "learning_rate": 0.05,
+    "l2_regularization": 1.0,
+    "random_state": 42,
+    "n_features": 20
+  },
+  "row_counts": {
+    "live": 3200,
+    "train": 9600,
+    "validation": 3200
+  },
+  "completed_at": "2026-10-20T04:32:43.725373+00:00",
+  "status": "completed",
+  "results": {
+    "model": {
+      "score": 0.006457443331376218,
+      "corr_mean": 0.006457443331376218,
+      "corr_std": 0.07444608586156098,
+      "n_eras": 20,
+      "per_era": [
+        -0.11343142997476069,
+        0.021220175642323223,
+        0.051112021736663266,
+        0.0051192757978802735,
+        0.06577611549414274,
+        -0.033725322480369545,
+        0.049519723627801555,
+        0.09473650457268856,
+        0.10795930689641903,
+        0.016654092614657817,
+        0.12285813380234104,
+        -0.05348626530180166,
+        -0.10794734597165764,
+        0.08614856059400156,
+        -0.0337283127115599,
+        -0.05906304647180558,
+        -0.10682152392849063,
+        -0.08999100767360212,
+        0.05987638935558095,
+        0.04636282100707212
+      ],
+      "score_version": "spearman_era_v1"
+    },
+    "random_reference": {
+      "score": 0.005418448428474851,
+      "corr_mean": 0.005418448428474851,
+      "corr_std": 0.07391634372813327,
+      "n_eras": 20,
+      "per_era": [
+        0.04711408263516447,
+        0.0034283000597369936,
+        0.06822361972344472,
+        -0.12474197945226193,
+        -0.00027360615391708234,
+        -0.019273535137404964,
+        -0.015671801668627635,
+        -0.02318625264997876,
+        -0.10676022418908843,
+        0.09306197510609222,
+        0.12119107991372055,
+        -0.0227780860924959,
+        0.13409093726889315,
+        -0.006225661338310005,
+        -0.00023622826403769953,
+        0.12271609782079937,
+        0.045813332067361955,
+        -0.05169362170318646,
+        -0.05689064351201585,
+        -0.09953881586439166
+      ],
+      "score_version": "spearman_era_v1"
+    },
+    "feature_reference": {
+      "score": 0.005698596733238932,
+      "corr_mean": 0.005698596733238932,
+      "corr_std": 0.07185252017181336,
+      "n_eras": 20,
+      "per_era": [
+        -0.09065918135651156,
+        0.06476680379901363,
+        -0.07532487548220129,
+        0.061301363591972274,
+        0.11769983885931933,
+        -0.02844834952878559,
+        0.1193142975731237,
+        0.050608245031495684,
+        0.027023872015235123,
+        -0.041628772156843595,
+        -0.06560913008447677,
+        0.0024117693735045656,
+        0.08352153425460228,
+        0.1364988219639631,
+        -0.05608718077054544,
+        -2.6704184774647203e-05,
+        -0.01873260413106109,
+        -0.003890418233312174,
+        -0.06912645270765173,
+        -0.09964094316128717
+      ],
+      "score_version": "spearman_era_v1"
+    }
+  },
+  "versions": {
+    "python": "3.11.15",
+    "pandas": "2.2.2",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "scikit_learn": "1.9.0",
+    "pyarrow": "17.0.0"
+  },
+  "limitations": [
+    "Mercado totalmente artificial: no demuestra capacidad de pronosticar mercados reales.",
+    "Una ronda y una cuenta técnica: no es validación con usuarios externos.",
+    "Spearman mide orden relativo; no incluye ejecución, costos ni rentabilidad.",
+    "La selección del modelo usó validation; live se puntuó únicamente tras el cierre."
+  ],
+  "public_frame_hashes": {
+    "live": "6086249031434126d531d38d8544936a9039a5bfd786d3bff01e369bb2cd7bc5",
+    "train": "9043b680d7985db8b22984b7c542b5bbd9fb286603cd897a7e897cfbaa5d6102",
+    "validation": "a37129833bfa895c9e24285edda3768c959b2aa9db7a92eb6b17326e1f63917b"
+  },
+  "target_hash_after_close": "f8809b5c244ae3ec99b620a401a2b64dbdfe01aa145b809b638bbed4e2126739"
+}

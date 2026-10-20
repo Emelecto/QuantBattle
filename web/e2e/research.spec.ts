@@ -1,0 +1,33 @@
+import { expect, test } from "@playwright/test";
+
+test("un evaluador encuentra el protocolo y la evidencia desde la portada", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "Ver evaluación técnica" }).click();
+  await expect(page).toHaveURL(/\/docs#evaluacion$/);
+  await expect(page.getByRole("heading", { name: "Evaluación técnica con datos sintéticos" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Spearman medio por era sobre el holdout sintético" })).toBeVisible();
+});
+
+test("la evidencia descargable identifica la prueba artificial y sus resultados", async ({ request }) => {
+  const response = await request.get("/research/judge-pilot.json");
+  expect(response.ok()).toBeTruthy();
+  const evidence = await response.json();
+  expect(evidence.status).toBe("completed");
+  expect(evidence.synthetic).toBe(true);
+  expect(evidence.external_participants).toBe(0);
+  expect(Object.values(evidence.checks).every(Boolean)).toBe(true);
+  expect(evidence.results.model.n_eras).toBeGreaterThanOrEqual(10);
+  expect(Number.isFinite(evidence.results.model.score)).toBe(true);
+  expect(JSON.stringify(evidence)).not.toMatch(/service_role|access_token|password/);
+});
+
+test("la documentación se lee sin desbordamiento y el notebook se descarga", async ({ page, request }, testInfo) => {
+  await page.goto("/docs#evaluacion");
+  await expect(page.getByRole("link", { name: "Descargar notebook reproducible" })).toBeAttached();
+  const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+  expect(fits).toBe(true);
+  const notebook = await request.get("/ml/ejemplo_quantlab.ipynb");
+  expect(notebook.ok()).toBe(true);
+  expect((await notebook.json()).nbformat).toBe(4);
+  await page.locator("#evaluacion").screenshot({ path: `../artifacts/judge-ui/${testInfo.project.name}.png` });
+});

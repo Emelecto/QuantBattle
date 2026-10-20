@@ -14,6 +14,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import io
+import json
 import logging
 import uuid
 
@@ -57,6 +58,16 @@ def _opaco(status: int, contexto: str) -> HTTPException:
     return HTTPException(status, f"Error interno (ref {eid})")
 
 
+async def _read_limited_body(request: Request) -> bytes:
+    """Acota también cuerpos sin Content-Length, antes de decodificar JSON/CSV."""
+    chunks = bytearray()
+    async for chunk in request.stream():
+        if len(chunks) + len(chunk) > _MAX_CSV_BYTES:
+            raise HTTPException(413, "predicciones demasiado grandes (máx 10MB)")
+        chunks.extend(chunk)
+    return bytes(chunks)
+
+
 # (PredictionsUpload class removed — JSON body is now parsed directly via request.json())
 
 
@@ -71,7 +82,7 @@ def list_datasets(tournament_id: str | None = None, round_number: int | None = N
         "id,tournament_id,round_number,mode,kind,status,n_assets,n_eras,"
         "n_features,row_count,feature_cols,closes_at,bucket_path,version,"
         "round_type,score_version,published_at,target_available_at,finalized_at,"
-        "data_hash,benchmarks"
+        "data_hash,benchmarks,params"
     )
     if tournament_id:
         q = q.eq("tournament_id", tournament_id)
@@ -89,6 +100,14 @@ def list_datasets(tournament_id: str | None = None, round_number: int | None = N
             "closes_at", "version", "round_type", "score_version", "published_at",
             "target_available_at", "finalized_at", "data_hash",
         )}
+        params = d.get("params") or {}
+        for key in (
+            "data_source", "data_license", "data_attribution",
+            "data_attribution_url", "data_terms_url", "derived_data_license",
+            "commercial_use_allowed",
+        ):
+            if key in params:
+                visible[key] = params[key]
         visible["benchmarks"] = d.get("benchmarks") if d.get("status") == "scored" else None
         visible["download_url"] = (
             store.public_url(d["bucket_path"])
@@ -106,7 +125,9 @@ def list_datasets(tournament_id: str | None = None, round_number: int | None = N
 def download_dataset(dataset_id: str, kind: str = "train"):
     from tournaments import get_supabase
     sb = get_supabase()
-    rec = sb.table("ml_datasets").select("bucket_path,kind,status").eq("id", dataset_id).execute()
+    rec = sb.table("ml_datasets").select(
+        "bucket_path,kind,status,params"
+    ).eq("id", dataset_id).execute()
     if not rec.data:
         raise HTTPException(404, "dataset no encontrado")
     rec = rec.data[0]
@@ -116,7 +137,15 @@ def download_dataset(dataset_id: str, kind: str = "train"):
         raise HTTPException(404, "dataset aún no publicado")
     if not rec.get("bucket_path"):
         raise HTTPException(404, "ruta no disponible")
-    return {"url": store.public_url(rec["bucket_path"])}
+    params = rec.get("params") or {}
+    license_metadata = {
+        key: params[key] for key in (
+            "data_source", "data_license", "data_attribution",
+            "data_attribution_url", "data_terms_url", "derived_data_license",
+            "commercial_use_allowed",
+        ) if key in params
+    }
+    return {"url": store.public_url(rec["bucket_path"]), **license_metadata}
 
 
 # ---------------------------------------------------------------------------
@@ -177,12 +206,12 @@ async def submit_predictions(
         # CSV directo, multipart o JSON antiguo. La misma validación del
         # servidor se aplica a los tres; el navegador solo ofrece una vista.
         if file is not None:
-            content = await file.read()
+            content = await file.read(_MAX_CSV_BYTES + 1)
         elif request.headers.get("content-type", "").startswith("text/csv"):
-            content = await request.body()
+            content = await _read_limited_body(request)
         else:
             try:
-                json_body = await request.json()
+                json_body = json.loads(await _read_limited_body(request))
                 rows = json_body.get("rows")
                 if not rows or not isinstance(rows, list):
                     raise HTTPException(422, "envía un archivo CSV o un body JSON con 'rows'")
@@ -270,7 +299,7 @@ def get_submission(submission_id: str, request: Request):
     res = sb.table("prediction_submissions").select(
         "id,dataset_id,row_count,status,score,corr_mean,fnc_mean,consistencia,"
         "meta_corr,is_valid,plagio_flag,submitted_at,scored_at,file_sha256,"
-        "dataset_version,is_selected,qp_earned,eval_error"
+        "dataset_version,is_selected,eval_error"
     ).eq("id", submission_id).eq("user_id", user_id).execute()
     if not res.data:
         raise HTTPException(404, "submission no encontrada")
@@ -288,7 +317,7 @@ def my_prediction(dataset_id: str, request: Request):
     res = sb.table("prediction_submissions").select(
         "id,row_count,status,score,corr_mean,fnc_mean,consistencia,meta_corr,"
         "is_valid,plagio_flag,submitted_at,scored_at,file_sha256,dataset_version,"
-        "is_selected,qp_earned,eval_error"
+        "is_selected,eval_error"
     ).eq("dataset_id", dataset_id).eq("user_id", user_id).eq(
         "is_selected", True
     ).order("submitted_at", desc=True).limit(1).execute()
@@ -307,7 +336,7 @@ def leaderboard(dataset_id: str):
         return {"leaderboard": []}
     res = sb.table("prediction_submissions").select(
         "user_id,score,corr_mean,fnc_mean,consistencia,is_valid,plagio_flag,"
-        "submitted_at,qp_earned"
+        "submitted_at"
     ).eq("dataset_id", dataset_id).eq("is_selected", True).eq(
         "is_valid", True
     ).order("score", desc=True).execute()

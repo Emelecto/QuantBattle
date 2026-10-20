@@ -36,7 +36,7 @@ export function Footer() {
             ·
           </span>
           <a
-            href="https://github.com"
+            href="https://github.com/Emelecto/QuantLab"
             target="_blank"
             rel="noreferrer"
             className="transition-colors hover:text-ink"

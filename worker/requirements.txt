@@ -4,7 +4,7 @@ httpx==0.28.1
 pydantic==2.9.2
 pandas==2.2.2
 numpy==1.26.4
-scipy==1.13.1
+scipy==1.17.1
 python-multipart==0.0.12
 requests==2.32.3
 yfinance==0.2.54
