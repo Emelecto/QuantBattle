@@ -8,19 +8,17 @@ import type { Tournament, LeaderboardEntry, Submission } from "@/lib/tournaments
 import {
   listDatasets,
   downloadDatasetUrl,
-  submitPredictions,
-  myPrediction,
   mlLeaderboard,
   mlModeLabel,
   mlRoundTypeLabel,
 } from "@/lib/mlTournaments";
 import type {
   MlDataset,
-  MlSubmission,
   MlLeaderboardEntry,
 } from "@/lib/mlTournaments";
 import { useAuth } from "@/lib/useAuth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { MlSubmitPanel } from "@/components/research/MlSubmitPanel";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
 
@@ -615,176 +613,8 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
 
 /* -------------------------- Pestaña: Enviar -------------------------- */
 
-function TabEnviar({
-  liveDataset,
-  canSubmit,
-}: {
-  liveDataset: MlDataset | null;
-  canSubmit: boolean;
-}) {
-  const [dragging, setDragging] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [enviando, setEnviando] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "ok" | "err"; msg: string } | null>(null);
-  const [mineState, setMineState] = useState<{ datasetId: string; submission: MlSubmission | null } | null>(null);
-  const datasetId = liveDataset?.id ?? null;
-  const mine = mineState?.datasetId === datasetId ? mineState.submission : null;
-
-  useEffect(() => {
-    if (!datasetId) return;
-    let active = true;
-    void myPrediction(datasetId).then((submission) => {
-      if (active) setMineState({ datasetId, submission });
-    });
-    return () => {
-      active = false;
-    };
-  }, [datasetId]);
-
-  const cargarArchivo = useCallback((candidate: File) => {
-    setFile(null);
-    setFeedback(null);
-    if (!candidate.name.toLowerCase().endsWith(".csv")) {
-      setFeedback({ type: "err", msg: "Selecciona un archivo .csv." });
-      return;
-    }
-    if (candidate.size === 0 || candidate.size > 10 * 1024 * 1024) {
-      setFeedback({ type: "err", msg: "El CSV debe pesar entre 1 byte y 10 MB." });
-      return;
-    }
-    setFile(candidate);
-  }, []);
-
-  async function enviar() {
-    if (!datasetId || !file || !canSubmit) return;
-    setEnviando(true);
-    setFeedback(null);
-    try {
-      const response = await submitPredictions(datasetId, file);
-      if (!response.submission) throw new Error("El servidor no devolvió un comprobante.");
-      setMineState({ datasetId, submission: response.submission });
-      setFile(null);
-      setFeedback({
-        type: "ok",
-        msg: "Envío validado y registrado. Tu puntuación aparecerá cuando cierre la ronda.",
-      });
-    } catch (error) {
-      setFeedback({
-        type: "err",
-        msg: error instanceof Error ? error.message : "No se pudo registrar el envío.",
-      });
-    } finally {
-      setEnviando(false);
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      {!liveDataset ? (
-        <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
-          Todavía no hay un dataset de predicciones publicado.
-        </div>
-      ) : (
-        <>
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-ink">
-              {canSubmit ? "Envía tus predicciones" : "Recepción de archivos cerrada"}
-            </h3>
-            <p className="mt-2 text-sm text-muted">
-              {canSubmit
-                ? "El CSV debe incluir exactamente los IDs de esta ronda y valores entre 0 y 1. Puedes corregirlo hasta el cierre; se selecciona el último envío válido."
-                : liveDataset.status === "scored"
-                  ? "La puntuación y el ranking final ya están disponibles."
-                  : "Estamos preparando los resultados. Tu último envío válido conserva su lugar."}
-            </p>
-            {liveDataset.closes_at && (
-              <p className="mt-2 text-xs text-muted">
-                Cierre: {new Date(liveDataset.closes_at).toLocaleString("es-CO")}
-              </p>
-            )}
-          </div>
-          {canSubmit && (
-            <>
-              <div
-                onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  setDragging(false);
-                  const selected = event.dataTransfer.files?.[0];
-                  if (selected) cargarArchivo(selected);
-                }}
-                className={
-                  "ql-glass ql-elev-1 rounded-xl border-dashed px-6 py-10 text-center transition-colors " +
-                  (dragging ? "border-accent bg-accent/5" : "border-line")
-                }
-              >
-                <p className="text-sm text-ink">Arrastra aquí tu predictions.csv</p>
-                <p className="mt-1 text-xs text-muted">
-                  Cabecera exacta: <span className="font-mono text-ink">id,prediction</span>
-                </p>
-                <label className={buttonClasses("secondary", "sm", "mt-4 cursor-pointer")}>
-                  Seleccionar archivo
-                  <input
-                    type="file"
-                    accept=".csv,text/csv"
-                    className="hidden"
-                    onChange={(event) => {
-                      const selected = event.target.files?.[0];
-                      if (selected) cargarArchivo(selected);
-                    }}
-                  />
-                </label>
-                {file && <p className="mt-3 text-xs text-muted">{file.name} · {int(file.size)} bytes</p>}
-              </div>
-              <button
-                type="button"
-                onClick={enviar}
-                disabled={!file || enviando}
-                className={buttonClasses("primary", "md")}
-              >
-                {enviando ? "Verificando..." : "Validar y registrar envío"}
-              </button>
-            </>
-          )}
-          {feedback && (
-            <div
-              role="status"
-              className={
-                "rounded-md px-4 py-3 text-sm " +
-                (feedback.type === "ok"
-                  ? "border border-long/30 bg-long/10 text-long"
-                  : "border border-short/30 bg-short/10 text-short")
-              }
-            >
-              {feedback.msg}
-            </div>
-          )}
-        </>
-      )}
-      {mine && (
-        <div className="ql-glass ql-elev-1 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-ink">Comprobante del envío seleccionado</h3>
-          <dl className="mt-3 grid gap-3 text-xs sm:grid-cols-2">
-            <div><dt className="text-muted">Estado</dt><dd className="text-ink">{mine.status === "validated" ? "Validado; esperando cierre" : mine.status}</dd></div>
-            <div><dt className="text-muted">Filas</dt><dd className="text-ink">{int(mine.row_count)}</dd></div>
-            <div><dt className="text-muted">Versión</dt><dd className="break-all font-mono text-ink">{mine.dataset_version || "—"}</dd></div>
-            <div><dt className="text-muted">Huella SHA-256</dt><dd className="break-all font-mono text-ink">{mine.file_sha256 || "—"}</dd></div>
-          </dl>
-          {mine.submitted_at && (
-            <p className="mt-3 text-xs text-muted">
-              Recibido {new Date(mine.submitted_at).toLocaleString("es-CO")}
-            </p>
-          )}
-          {liveDataset?.status === "scored" && mine.score != null && (
-            <p className="mt-4 text-sm text-ink">
-              Puntuación final: <strong className="metric text-accent">{num(mine.score, 4)}</strong>
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  );
+function TabEnviar({liveDataset, canSubmit}: {liveDataset: MlDataset | null; canSubmit: boolean}) {
+  return <MlSubmitPanel liveDataset={liveDataset} canSubmit={canSubmit} />;
 }
 
 /* -------------------------- Pestaña: Ranking ------------------------- */

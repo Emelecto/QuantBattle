@@ -117,9 +117,11 @@ export default function ResultsPage() {
         config: { ...c },
         price_qp_week: priceQpWeek,
       });
-      setPublishMsg(
-        `✅ Publicada en el marketplace (id ${res.id.slice(0, 8)}…). Redirigiendo…`,
-      );
+      if (res.status !== "published") {
+        setPublishMsg("Guardada, pendiente de evidencia. No está disponible en el catálogo público.");
+        return;
+      }
+      setPublishMsg(`Publicada con métricas guardadas (id ${res.id.slice(0, 8)}…). Redirigiendo…`);
       // Dar tiempo a que el usuario vea la confirmación antes de navegar.
       setTimeout(() => router.push("/app/marketplace"), 1200);
     } catch (e) {

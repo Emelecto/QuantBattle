@@ -28,6 +28,7 @@ from auth import require_user
 import ml_storage as store
 import ml_persist as persist
 import ml_protocol as protocol
+import ml_research as research
 
 logger = logging.getLogger(__name__)
 
@@ -181,6 +182,7 @@ async def submit_predictions(
         import csv
         import io
         user_id = require_user(request)
+        experiment = research.parse_experiment_header(request.headers.get("x-quantlab-experiment"))
         from tournaments import get_supabase
         sb = get_supabase()
 
@@ -246,7 +248,8 @@ async def submit_predictions(
         # Ruta inmutable y privada, con recibo verificable. El RPC hace el
         # reemplazo atómico y vuelve a comprobar el cierre en la base de datos.
         sub_id = str(uuid.uuid4())
-        path = f"{user_id}/{dataset_id}/{sub_id}.csv"
+        suffix = ".experiment.csv" if experiment is not None else ".csv"
+        path = f"{user_id}/{dataset_id}/{sub_id}{suffix}"
         digest = hashlib.sha256(content).hexdigest()
         payload = {
             "id": sub_id,
@@ -262,6 +265,7 @@ async def submit_predictions(
         }
         try:
             store.upload_csv(content, path)
+            research.save_experiment(path, sub_id, round_data, digest, experiment)
             sb.table("prediction_submissions").insert(payload).execute()
             sb.rpc("activate_ml_submission", {"p_submission": sub_id}).execute()
         except HTTPException:

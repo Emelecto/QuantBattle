@@ -55,6 +55,14 @@ class Query:
         self.filters.append(lambda row: row.get(key) is not None and row[key] >= value)
         return self
 
+    def lte(self, key, value):
+        self.filters.append(lambda row: row.get(key) is not None and row[key] <= value)
+        return self
+
+    def range(self, start, end):
+        self.start, self.max_rows = start, end - start + 1
+        return self
+
     def order(self, key, desc=False):
         self.order_by = (key, desc)
         return self
@@ -141,6 +149,8 @@ def backend(monkeypatch):
     monkeypatch.setattr(ml_storage, "download_parquet", lambda path, **_kw: files[path].copy())
     monkeypatch.setattr(ml_storage, "upload_private_parquet", save_frame)
     monkeypatch.setattr(ml_storage, "download_private_parquet", lambda path: files[path].copy())
+    monkeypatch.setattr(ml_storage, "upload_experiment", lambda document, path: files.update({path: document.copy()}))
+    monkeypatch.setattr(ml_storage, "download_experiment", lambda path: files.get(path))
     monkeypatch.setattr(ml_storage, "upload_csv", save_csv)
     monkeypatch.setattr(ml_storage, "download_csv", read_csv)
     monkeypatch.setattr(ml_storage, "public_url", lambda path: f"https://fake.storage/{path}")
@@ -174,6 +184,52 @@ def test_round_publishes_features_but_seals_targets(backend):
     result = client.get("/ml/datasets", params={"tournament_id": "tournament-1"})
     assert result.status_code == 200 and len(result.json()["datasets"]) == 3
     assert "target_path" not in result.text
+
+
+def test_research_receipt_history_is_private_and_bound_to_csv(backend):
+    import base64
+    import json
+    db, files, client = backend
+    live, public = make_round(backend)
+    content = public[["id", "feature_01"]].rename(columns={"feature_01": "prediction"}).to_csv(index=False).encode()
+    metadata = {"model_name": "Modelo técnico", "parameters": {"depth": 4}, "seed": 42, "note": "Solo train y validation"}
+    headers = {"Authorization": "Bearer x", "Content-Type": "text/csv", "X-QuantLab-Experiment": base64.b64encode(json.dumps(metadata).encode()).decode()}
+    response = client.post(f"/ml/datasets/{live['id']}/predictions", content=content, headers=headers)
+    assert response.status_code == 200, response.text
+    receipt = response.json()["submission"]
+    stored = db.rows["prediction_submissions"][0]
+    document = files[stored["file_path"] + ".experiment.json"]
+    assert document["file_sha256"] == receipt["file_sha256"] and document["experiment"] == metadata
+    stored["score"] = 0.99  # Incluso si hubiese un valor interno, la API no lo revela antes de scored.
+    db.rows["prediction_submissions"].append({**stored, "id": "other", "user_id": "someone-else"})
+    with patch.dict("os.environ", {"ALLOW_TEST_AUTH": "0"}):
+        assert client.get("/ml/experiments").status_code == 401
+    history = client.get("/ml/experiments", headers={"Authorization": "Bearer x"})
+    assert history.status_code == 200, history.text
+    entries = history.json()["entries"]
+    assert len(entries) == 1 and entries[0]["experiment"] == metadata
+    assert entries[0]["score"] is None and entries[0]["round"]["benchmarks"] is None
+    assert "file_path" not in history.text and "user_id" not in history.text
+    index = client.get(f"/ml/datasets/{live['id']}/rows")
+    assert index.status_code == 200 and index.json()["columns"] == ["id", "era"]
+    assert len(index.json()["rows"]) == len(public) and "target" not in index.text
+    assert client.get("/ml/experiments?limit=500", headers={"Authorization": "Bearer x"}).status_code == 422
+    assert client.get("/ml/experiments?snapshot=invalid", headers={"Authorization": "Bearer x"}).status_code == 422
+    files[stored["file_path"] + ".experiment.json"]["file_sha256"] = "tampered"
+    changed = client.get("/ml/experiments", headers={"Authorization": "Bearer x"}).json()["entries"][0]
+    assert changed["experiment"] is None and changed["metadata_status"] == "unavailable"
+
+
+def test_invalid_experiment_never_replaces_selected_submission(backend):
+    db, _files, client = backend
+    live, public = make_round(backend)
+    content = public[["id", "feature_01"]].rename(columns={"feature_01": "prediction"}).to_csv(index=False).encode()
+    path = f"/ml/datasets/{live['id']}/predictions"
+    headers = {"Authorization": "Bearer x", "Content-Type": "text/csv"}
+    first = client.post(path, content=content, headers=headers)
+    assert first.status_code == 200
+    assert client.post(path, content=content, headers={**headers, "X-QuantLab-Experiment": "not-base64"}).status_code == 422
+    assert len(db.rows["prediction_submissions"]) == 1 and db.rows["prediction_submissions"][0]["is_selected"] is True
 
 
 @pytest.mark.parametrize("bad", [

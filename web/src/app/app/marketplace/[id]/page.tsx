@@ -324,10 +324,10 @@ export default function StrategyDetailPage() {
             <button
               type="button"
               onClick={handleSubscribe}
-              disabled={subscribing}
+              disabled={subscribing || (strategy.status !== "published" || strategy.catalog_available === false)}
               className={buttonClasses("primary", "lg", "w-full mt-4")}
             >
-              {subscribing ? "Procesando…" : `Suscribirse (${strategy.price_qp} QP/sem)`}
+              {(strategy.status !== "published" || strategy.catalog_available === false) ? "Fuera del catálogo público" : subscribing ? "Procesando…" : `Suscribirse (${strategy.price_qp} QP/sem)`}
             </button>
             {subMsg && (
               <p
@@ -513,7 +513,7 @@ export default function StrategyDetailPage() {
                       <button
                         type="button"
                         onClick={handleSubscribe}
-                        disabled={subscribing}
+                        disabled={subscribing || (strategy.status !== "published" || strategy.catalog_available === false)}
                         className={buttonClasses("primary", "sm")}
                       >
                         {subscribing

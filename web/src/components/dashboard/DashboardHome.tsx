@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MlWorkspace } from "@/components/research/MlWorkspace";
 import { useEffect, useState } from "react";
 import { useDashboardData, type DashboardTournament } from "./useDashboardData";
 import { LESSONS } from "@/lib/academia/catalog";
@@ -314,6 +315,7 @@ function DashboardHome() {
         </div>
       </header>
 
+      <MlWorkspace nextRound={tournaments[0]} roundsLoading={sources.tournaments === "loading"} />
       <div className="ql-bento-grid">
         {/* Competencias — fila 1 izquierda */}
         <Card className="ql-bento-competencias">

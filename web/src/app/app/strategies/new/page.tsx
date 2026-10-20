@@ -135,8 +135,8 @@ function NewStrategyPageInner() {
         price_qp_week: Math.max(0, Math.round(publishPrice)),
       });
       setPublishedId(res.id);
-      setShareMsg("✅ Estrategia publicada en el marketplace.");
-      markStep("publica");
+      setShareMsg(res.status === "published" ? "Estrategia publicada con métricas guardadas." : "Estrategia guardada, pendiente de evidencia. Todavía no aparece en el catálogo público.");
+      if (res.status === "published") markStep("publica");
     } catch (e) {
       setShareMsg(`❌ ${e instanceof Error ? e.message : "No se pudo publicar."}`);
     } finally {

@@ -194,6 +194,8 @@ app.include_router(comments_router)
 app.include_router(social_router)
 app.include_router(moderation_router)
 app.include_router(ml_router)
+from ml_workspace import router as ml_workspace_router
+app.include_router(ml_workspace_router)
 app.include_router(notifications_router)
 app.include_router(referrals_router)
 app.include_router(badges_router)

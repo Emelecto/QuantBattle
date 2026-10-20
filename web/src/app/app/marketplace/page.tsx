@@ -58,10 +58,10 @@ function EmptyMarketplaceState() {
         <circle cx="110" cy="15" r="1.5" fill="rgba(56,189,248,0.3)" />
       </svg>
       <p className="text-lg font-semibold text-ink">
-        El marketplace está vacío
+        Todavía no hay estrategias con evidencia publicada
       </p>
       <p className="max-w-md text-sm text-muted">
-        Sé el primero en publicar una estrategia y empieza a ganar QP con tus señales.
+        Las estrategias sin métricas respaldadas se conservan fuera del catálogo. Puedes preparar una estrategia y revisar su evidencia antes de publicarla.
       </p>
     </div>
   );
@@ -213,6 +213,8 @@ export default function MarketplacePage() {
           </span>
         </div>
       </div>
+
+      <p className="mx-auto mt-6 w-full max-w-6xl px-6 text-sm text-muted">Catálogo experimental. Los registros sin métricas guardadas o sin huella de evaluación quedan fuera de la vista pública. Una métrica de backtesting no garantiza resultados futuros.</p>
 
       {/* Grid */}
       <section>

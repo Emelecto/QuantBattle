@@ -54,7 +54,7 @@ if(process.env.QL_AUDIT_STAGE === 'after') {
  const {expect} = await import('@playwright/test');
  await page.goto(base+'/app');
  await expect(page.getByRole('heading',{name:'Tu espacio de investigación'})).toBeVisible();
- await expect(page.getByRole('link',{name:/Torneo ML · practice/})).toBeVisible({timeout:60000});
+ await expect(page.getByRole('link',{name:/Torneo ML · practice/}).first()).toBeVisible({timeout:60000});
  await expect(page.getByText('Validado; esperando cierre',{exact:true})).toBeVisible({timeout:30000});
  await page.getByRole('button',{name:'Más secciones'}).click();
  await expect(page.locator('#mobile-more').getByRole('link',{name:'API Keys',exact:true})).toBeVisible();
