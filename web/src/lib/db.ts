@@ -416,6 +416,7 @@ export async function getMyMlTournamentSubmissions(
     .select("id, tournament_id, round_number, status")
     .in("tournament_id", ids)
     .eq("kind", "live")
+    .eq("score_version", "spearman_era_v1")
     .eq("status", "ready");
 
   if (datasetError) throw new Error(datasetError.message);
@@ -467,6 +468,7 @@ export async function getMyMlTournamentSubmissions(
     .from("prediction_submissions")
     .select("dataset_id, status, score, submitted_at")
     .eq("user_id", user.id)
+    .eq("is_selected", true)
     .in("dataset_id", datasetIds);
 
   if (submissionError) throw new Error(submissionError.message);

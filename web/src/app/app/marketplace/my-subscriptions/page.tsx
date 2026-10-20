@@ -64,6 +64,8 @@ export default function MySubscriptionsPage() {
         await resumeSubscription(s.id);
       }
       await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo cambiar la suscripción.");
     } finally {
       setBusy(null);
     }
@@ -74,6 +76,8 @@ export default function MySubscriptionsPage() {
     try {
       await cancelSubscription(s.id);
       await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo cancelar la suscripción.");
     } finally {
       setBusy(null);
     }
@@ -89,7 +93,7 @@ export default function MySubscriptionsPage() {
     <main className="flex min-h-screen flex-col">
       <section className="border-b border-line">
         <div className="mx-auto w-full max-w-6xl px-6 pt-16 pb-10">
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">
                 Mis suscripciones

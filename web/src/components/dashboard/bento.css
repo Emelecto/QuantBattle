@@ -2,7 +2,7 @@
 .ql-bento-grid {
   display: grid;
   grid-template-columns: 1.7fr 0.7fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: auto auto;
   gap: 16px;
   width: 100%;
   max-width: 100%;
@@ -173,7 +173,7 @@
 
 .ql-competencias-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 10px;
 }
 .ql-competencia-mini {
@@ -227,7 +227,7 @@
   color: oklch(0.78 0.12 60);
 }
 .ql-competencia-mini-name {
-  font-size: clamp(0.72rem, 1.6vw, 0.82rem);
+  font-size: 1rem;
   font-weight: 600;
   color: var(--ql-ink);
   margin: 0;
@@ -710,6 +710,8 @@
   }
 }
 @media (max-width: 640px) {
+  .ql-competencias-grid { grid-template-columns: 1fr; }
+  .ql-competencia-mini { min-height: 160px; }
   .ql-bento-grid {
     grid-template-columns: 1fr;
   }

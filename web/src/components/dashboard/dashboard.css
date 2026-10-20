@@ -1056,7 +1056,8 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    min-height: 60px;
+    padding-bottom: env(safe-area-inset-bottom);
     background: var(--ql-surface-solid);
     border-top: 1px solid var(--ql-line);
     justify-content: space-around;
@@ -1097,5 +1098,23 @@
   .ql-back-nav-button svg {
     width: 18px;
     height: 18px;
+  }
+  .ql-mobile-more {
+    position: absolute;
+    bottom: 100%;
+    inset-inline: 12px;
+    max-height: 65dvh;
+    overflow-y: auto;
+    padding: 12px;
+    background: var(--ql-surface-solid);
+    border: 1px solid var(--ql-line);
+    border-radius: 12px 12px 0 0;
+  }
+  .ql-mobile-more a {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
   }
 }

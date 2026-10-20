@@ -5,6 +5,7 @@ import Link from "next/link";
 import { buttonClasses } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/useAuth";
+import { call } from "@/lib/tournaments";
 
 type ApiKeyRow = {
   id: string;
@@ -26,18 +27,10 @@ export default function ApiKeysPage() {
   const [copiedCmd, setCopiedCmd] = useState(false);
 
   const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const { createBrowserSupabaseClient } = await import("@/lib/supabase/client");
-      const supabase = createBrowserSupabaseClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) throw new Error("Sin sesión");
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_WORKER_URL}/account/api-keys`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.detail ?? json.error ?? "Error al cargar claves");
+      const json = await call<ApiKeyRow[]>("/account/api-keys");
       setKeys(json);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al cargar claves");
@@ -55,24 +48,9 @@ export default function ApiKeysPage() {
     setCreating(true);
     setError(null);
     try {
-      const { createBrowserSupabaseClient } = await import("@/lib/supabase/client");
-      const supabase = createBrowserSupabaseClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) throw new Error("Sin sesión");
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_WORKER_URL}/account/api-keys`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: keyName.trim() || "Mi clave" }),
-        },
-      );
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.detail ?? json.error ?? "Error al crear clave");
+      const json = await call<{key: string}>("/account/api-keys", {
+        method: "POST", body: JSON.stringify({ name: keyName.trim() || "Mi clave" }),
+      });
       setNewKey(json.key);
       setKeyName("");
       await load();
@@ -84,19 +62,13 @@ export default function ApiKeysPage() {
   }
 
   async function revoke(id: string) {
+    setError(null);
     try {
-      const { createBrowserSupabaseClient } = await import("@/lib/supabase/client");
-      const supabase = createBrowserSupabaseClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) return;
-      await fetch(
-        `${process.env.NEXT_PUBLIC_WORKER_URL}/account/api-keys/${id}`,
-        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
-      );
+      await call(`/account/api-keys/${id}`, { method: "DELETE" });
+      setNewKey(null);
       await load();
-    } catch {
-      /* noop */
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo revocar la clave. Vuelve a intentar.");
     }
   }
 
@@ -164,6 +136,7 @@ export default function ApiKeysPage() {
         <div className="ql-glass ql-elev-1 mt-8 rounded-xl p-5">
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
+              aria-label="Nombre de la clave"
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
               placeholder="Nombre de la clave (ej: Mi Claude Code)"
@@ -201,7 +174,7 @@ export default function ApiKeysPage() {
                   navigator.clipboard.writeText(newKey).then(() => {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
-                  });
+                  }).catch(() => setError("No se pudo copiar. Selecciona la clave y cópiala manualmente."));
                 }}
                 className={buttonClasses("secondary", "sm") + " shrink-0"}
               >
@@ -229,7 +202,7 @@ export default function ApiKeysPage() {
                       .then(() => {
                         setCopiedCmd(true);
                         setTimeout(() => setCopiedCmd(false), 2000);
-                      });
+                      }).catch(() => setError("No se pudo copiar. Selecciona el comando y cópialo manualmente."));
                   }}
                   className={buttonClasses("secondary", "sm") + " shrink-0"}
                 >
@@ -250,6 +223,8 @@ export default function ApiKeysPage() {
             <Skeleton variant="line" />
             <Skeleton variant="line" />
           </div>
+        ) : error && keys === null ? (
+          <div className="mt-4" role="alert"><p className="text-sm text-muted">No se pudieron consultar tus claves.</p><button type="button" onClick={() => void load()} className={buttonClasses("secondary", "sm") + " mt-3"}>Reintentar carga</button></div>
         ) : !keys || keys.length === 0 ? (
           <div className="ql-glass ql-elev-1 mt-4 rounded-xl px-6 py-10 text-center">
             <p className="text-sm text-muted">

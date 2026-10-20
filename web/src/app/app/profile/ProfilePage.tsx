@@ -90,11 +90,18 @@ export function ProfilePage() {
     (async () => {
       try {
         const supabase = createBrowserSupabaseClient();
-        const { count } = await supabase
-          .from("submissions")
-          .select("tournament_id", { count: "exact", head: true })
-          .eq("user_id", user.id);
-        if (active) setTournamentsEntered(count ?? 0);
+        const [legacy, predictions] = await Promise.all([
+          supabase.from("submissions").select("tournament_id").eq("user_id", user.id),
+          supabase.from("prediction_submissions").select("dataset_id, ml_datasets(tournament_id)").eq("user_id", user.id).eq("is_selected", true),
+        ]);
+        if (legacy.error) throw legacy.error;
+        if (predictions.error) throw predictions.error;
+        const entered = new Set((legacy.data ?? []).map((row) => row.tournament_id));
+        for (const row of predictions.data ?? []) {
+          const dataset = Array.isArray(row.ml_datasets) ? row.ml_datasets[0] : row.ml_datasets;
+          if (dataset?.tournament_id) entered.add(dataset.tournament_id);
+        }
+        if (active) setTournamentsEntered(entered.size);
       } catch {
         if (active) setTournamentsEntered(null);
       }
@@ -213,7 +220,7 @@ export function ProfilePage() {
   const tier = balance?.tier || "free";
   const tierInfo = TIER[tier as keyof typeof TIER] || TIER.free;
 
-  const completedModules = academiaDone.length;
+  const completedModules = new Set(academiaDone.filter((id) => LESSONS.some((lesson) => lesson.id === id && !lesson.draft))).size;
   const totalModules = LESSONS.filter((l) => !l.draft).length;
   const coursePercent =
     totalModules > 0
@@ -521,9 +528,9 @@ export function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-muted">
-                    Autenticacion en dos pasos
+                    Autenticación en dos pasos
                   </p>
-                  <p className="text-sm text-muted mt-0.5">Desactivada</p>
+                  <p className="text-sm text-muted mt-0.5">No gestionada desde este prototipo</p>
                 </div>
                 <Link
                   href="/app/profile/settings#security"

@@ -11,7 +11,7 @@ import "./dashboard.css";
 
 const ADMIN_USER_IDS = ["2ca7b197-86f5-4605-9789-266bf8a0df01"];
 
-const NAV = [
+export const DASHBOARD_NAV = [
   { href: "/app", label: "Inicio", icon: "home" },
   { href: "/app/tournaments", label: "Competencias", icon: "trophy" },
   { href: "/app/strategies", label: "Estrategias", icon: "strategies" },
@@ -32,10 +32,7 @@ const ADMIN_NAV = [
 ] as const;
 
 const SOCIAL_LINKS = [
-  { href: "#", label: "YouTube", icon: "youtube" },
-  { href: "#", label: "X", icon: "x" },
-  { href: "#", label: "Instagram", icon: "instagram" },
-  { href: "#", label: "TikTok", icon: "tiktok" },
+  { href: "https://github.com/Emelecto/QuantLab", label: "Repositorio de QuantLab", icon: "code" },
 ] as const;
 
 export function Icon({ name, size = 18 }: { name: string; size?: number }) {
@@ -50,6 +47,14 @@ export function Icon({ name, size = 18 }: { name: string; size?: number }) {
     strokeLinejoin: "round" as const,
   };
   switch (name) {
+    case "user":
+      return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0116 0v2" /></svg>;
+    case "arrow-left":
+      return <svg {...common}><path d="M19 12H5m7-7l-7 7 7 7" /></svg>;
+    case "menu":
+      return <svg {...common}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
+    case "code":
+      return <svg {...common}><path d="M8 5l-6 7 6 7m8-14l6 7-6 7m-3-17l-2 20" /></svg>;
     case "home":
       return (
         <svg {...common}>
@@ -371,8 +376,8 @@ export function Sidebar() {
       </div>
 
       {/* Nav items */}
-      <nav className="ql-nav">
-        {NAV.map((item) => (
+      <nav className="ql-nav" aria-label="Navegación principal">
+        {DASHBOARD_NAV.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -385,6 +390,8 @@ export function Sidebar() {
             }
             className={`ql-nav-item${isActive(item.href) ? " active" : ""}`}
             title={collapsed ? item.label : undefined}
+            aria-label={item.label}
+            aria-current={isActive(item.href) ? "page" : undefined}
           >
             <span className="ic">
               <Icon name={item.icon} />

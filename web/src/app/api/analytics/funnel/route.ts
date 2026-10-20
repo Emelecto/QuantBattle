@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { FUNNEL_STEPS } from "@/lib/analytics";
+import { FUNNEL_STEPS } from "@/lib/analytics-events";
 
 /**
  * GET /api/analytics/funnel — definición del funnel básico de activación.

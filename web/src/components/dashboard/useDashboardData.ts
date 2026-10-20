@@ -17,6 +17,7 @@ import type {
   TournamentSubmissionSnapshot,
 } from "@/lib/db";
 import { listTournaments, isAuthError, isCorsLikeError } from "@/lib/tournaments";
+import { listDatasets, type MlDataset } from "@/lib/mlTournaments";
 import type { Tournament } from "@/lib/tournaments";
 
 export type DashboardSourceState = "loading" | "ready" | "error";
@@ -31,7 +32,7 @@ export type DashboardTournament = {
   id: string;
   name: string;
   type: "code" | "ml";
-  asset_type: "crypto" | "stock" | "any";
+  asset_type: "crypto" | "stock" | "any" | "synthetic";
   symbol: string | null;
   qp_prize: number | null;
   deadline: string | null;
@@ -101,7 +102,7 @@ function toAssetType(assetType: unknown): DashboardTournament["asset_type"] {
   return "any";
 }
 
-function toDashboardTournament(tournament: Tournament): DashboardTournament {
+function toDashboardTournament(tournament: Tournament, dataset: MlDataset): DashboardTournament {
   const symbols = Array.isArray(tournament.symbols)
     ? tournament.symbols.map(stringOrNull).filter((symbol): symbol is string => Boolean(symbol))
     : [];
@@ -110,15 +111,30 @@ function toDashboardTournament(tournament: Tournament): DashboardTournament {
     id: tournament.id,
     name: stringOrNull(tournament.name) ?? "Nombre no disponible",
     type: tournament.type === "ml" ? "ml" : "code",
-    asset_type: toAssetType(tournament.asset_type),
+    asset_type: dataset.mode === "sintetico" ? "synthetic" : toAssetType(tournament.asset_type),
     symbol: symbols[0] ?? null,
-    qp_prize: numberOrNull(tournament.prize_pool_qp),
-    deadline: stringOrNull(tournament.submission_deadline),
+    qp_prize: 0,
+    deadline: dataset.closes_at,
     participants: numberOrNull(tournament.submission_count),
-    metric_label: stringOrNull(tournament.primary_metric),
+    metric_label: "Spearman medio por era",
     submission: null,
     submissionState: "loading",
   };
+}
+
+async function loadOpenMlRounds() {
+  const [tournaments, datasets] = await Promise.all([listTournaments({ type: "ml" }), listDatasets()]);
+  const latest = new Map<string, MlDataset>();
+  for (const dataset of datasets) {
+    if (dataset.kind !== "live" || dataset.score_version !== "spearman_era_v1") continue;
+    const previous = latest.get(dataset.tournament_id);
+    if (!previous || previous.round_number < dataset.round_number) latest.set(dataset.tournament_id, dataset);
+  }
+  return tournaments.flatMap((tournament) => {
+    const dataset = latest.get(tournament.id);
+    return dataset?.status === "ready" && dataset.closes_at && Date.parse(dataset.closes_at) > Date.now()
+      ? [toDashboardTournament(tournament, dataset)] : [];
+  }).sort((a, b) => Date.parse(a.deadline!) - Date.parse(b.deadline!));
 }
 
 function messageForFailedSources(labels: string[]): string | null {
@@ -149,7 +165,7 @@ export function useDashboardData(): DashboardData {
         await Promise.allSettled([
           getBalance(),
           getMyStrategies(),
-          listTournaments(),
+          loadOpenMlRounds(),
           getMyCourseProgress(),
           getMyQpRanking(),
         ]);
@@ -193,9 +209,7 @@ export function useDashboardData(): DashboardData {
         tournamentsResult.status === "fulfilled" && Array.isArray(tournamentsResult.value)
           ? tournamentsResult.value
           : [];
-      const tournaments = rawTournaments
-        .filter((tournament) => tournament.status === "open")
-        .map(toDashboardTournament);
+      const tournaments = rawTournaments;
       const course = courseResult.status === "fulfilled" ? courseResult.value : null;
       const ranking = rankingResult.status === "fulfilled" ? rankingResult.value : null;
 

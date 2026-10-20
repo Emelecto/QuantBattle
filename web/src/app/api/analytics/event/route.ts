@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ANALYTICS_EVENTS } from "@/lib/analytics";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 /**
  * POST /api/analytics/event — ingesta mínima privacy-first.

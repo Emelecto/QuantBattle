@@ -44,7 +44,9 @@ export function useAuth(): AuthState {
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase?.auth.signOut();
+    if (!supabase) throw new Error("La sesión todavía no está disponible.");
+    const { error } = await supabase.auth.signOut({ scope: "global" });
+    if (error) throw error;
   }, [supabase]);
 
   return { user, supabase, loading, signOut };

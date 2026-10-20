@@ -17,21 +17,21 @@ export default function LibraryPage() {
     <div className="ql-learn-wrap">
       <div className="ql-glass" style={{ padding: 32, marginTop: 40, textAlign: "center" }}>
         <p style={{ color: "var(--ql-muted)", fontSize: 13, margin: "0 0 8px" }}>
-          Academia QuantLab · Acceso libre
+          Datos para investigación
         </p>
         <h1 style={{ color: "var(--ql-ink)", margin: "0 0 8px" }}>
-          La Biblioteca ahora vive en la Academia
+          Datasets de QuantLab
         </h1>
         <p style={{ color: "var(--ql-muted)", margin: "0 0 20px" }}>
-          Los seis cursos están abiertos y sin gates. Avanza a tu ritmo,
-          lección a lección, y gana QP con cada quiz perfecto.
+          Los datos para competir se descargan desde cada ronda ML: train,
+          validation y live comparten una versión y sus propias reglas de envío.
         </p>
-        <Link href="/app/academia" className="btn-primary" style={{ display: "inline-block", textDecoration: "none" }}>
-          Ir a la Academia
+        <Link href="/app/tournaments" className="btn-primary" style={{ display: "inline-block", textDecoration: "none" }}>
+          Descargar datos de una ronda
         </Link>
         <div style={{ marginTop: 28 }}>
           <p style={{ color: "var(--ql-muted)", fontSize: 13, margin: "0 0 12px" }}>
-            Datasets con datos reales:
+            Exploración histórica independiente de los torneos. La disponibilidad depende de cada fuente externa:
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
             {DATASETS.map((d) => (
