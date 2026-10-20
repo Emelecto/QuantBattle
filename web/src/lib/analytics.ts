@@ -97,21 +97,8 @@ export function trackEvent(name: string, props?: Record<string, unknown>): Promi
  * GET /api/analytics/funnel y el dashboard de Plausible).
  * Orden = orden del funnel: inicio → tour → aha-moment → activación.
  */
-export const ANALYTICS_EVENTS = [
-  "onboarding_started",
-  "tour_started",
-  "tour_finished",
-  "tour_skipped",
-  "first_backtest",
-  "activation_step",
-] as const;
+import { ANALYTICS_EVENTS } from "./analytics-events";
+export { ANALYTICS_EVENTS } from "./analytics-events";
 
-export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number];
-
-export const FUNNEL_STEPS: ReadonlyArray<{ event: AnalyticsEventName; label: string }> = [
-  { event: "onboarding_started", label: "Inicio de onboarding" },
-  { event: "tour_started", label: "Tour iniciado" },
-  { event: "tour_finished", label: "Tour completado" },
-  { event: "first_backtest", label: "Primer backtest (aha-moment)" },
-  { event: "activation_step", label: "Paso de activación" },
-];
+export type { AnalyticsEventName } from "./analytics-events";
+export { FUNNEL_STEPS } from "./analytics-events";

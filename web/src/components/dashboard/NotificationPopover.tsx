@@ -51,10 +51,14 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
         setOpen(false);
       }
     }
+    function handleEscape(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false); }
     if (open) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () =>
+      document.addEventListener("keydown", handleEscape);
+      return () => {
         document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("keydown", handleEscape);
+      };
     }
   }, [open]);
 
@@ -118,6 +122,8 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
         className="ql-nav-item w-full"
         title="Notificaciones"
         aria-label={`Notificaciones${unread > 0 ? ` (${unread} sin leer)` : ""}`}
+        aria-expanded={open}
+        aria-controls="dashboard-notifications"
       >
         <span className="ic">
           <svg
@@ -142,7 +148,7 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
 
       {/* Popover */}
       {open && (
-        <div className="ql-notif-popover">
+        <div id="dashboard-notifications" className="ql-notif-popover">
           {/* Header */}
           <div className="ql-notif-popover-header">
             <span className="ql-notif-popover-title">Notificaciones</span>

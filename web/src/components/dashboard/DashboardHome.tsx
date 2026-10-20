@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDashboardData, type DashboardTournament } from "./useDashboardData";
-import { NextAction } from "@/components/onboarding/NextAction";
 import { LESSONS } from "@/lib/academia/catalog";
 import { loadAcademiaProgress } from "@/components/academia/progress-store";
 import {
@@ -47,7 +46,7 @@ function formatDateTime(value: string | null): string | null {
 function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
   const countdown = useCountdown(tournament.deadline);
   const deadline = formatDateTime(tournament.deadline);
-  const isEnding = tournament.deadline && new Date(tournament.deadline) > new Date();
+  const closed = !!tournament.deadline && Date.parse(tournament.deadline) <= Date.now();
 
   return (
     <Link
@@ -61,7 +60,7 @@ function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
           </span>
           {tournament.submission && (
             <span className={`ql-competencia-mini-status${tournament.submission.status === "pending" || tournament.submission.status === "running" ? " pending" : ""}`}>
-              {tournament.submission.status === "done" || tournament.submission.status === "scored" ? "Evaluada" : "Pendiente"}
+              {tournament.submission.status === "done" || tournament.submission.status === "scored" ? "Evaluada" : tournament.submission.status === "validated" ? "Validado; esperando cierre" : "Pendiente"}
             </span>
           )}
         </div>
@@ -69,18 +68,18 @@ function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
       </div>
       <div className="ql-competencia-mini-body">
         {tournament.symbol && <span className="ql-competencia-mini-badge">{tournament.symbol}</span>}
-        <span className="ql-competencia-mini-badge">{tournament.asset_type}</span>
+        <span className="ql-competencia-mini-badge">{tournament.asset_type === "synthetic" ? "Datos sintéticos" : tournament.asset_type}</span>
       </div>
       <div className="ql-competencia-mini-footer">
         <div className="ql-competencia-mini-prize">
-          <span className="ql-competencia-mini-prize-label">Premio</span>
-          <span className="ql-competencia-mini-prize-value">{formatNumber(tournament.qp_prize)} QP</span>
+          <span className="ql-competencia-mini-prize-label">Modalidad</span>
+          <span className="ql-competencia-mini-prize-value">Práctica sin premios QP</span>
         </div>
         <span className={`ql-competencia-mini-countdown${countdown ? " is-live" : ""}`}>
           {countdown ? (
             <>Cierra en {countdown}</>
           ) : (
-            <>{isEnding ? "Termina: " : "Inicia: "}{deadline}</>
+            <>{closed ? "Cerró: " : "Cierre: "}{deadline ?? "Por anunciar"}</>
           )}
         </span>
       </div>
@@ -227,14 +226,16 @@ function SkeletonEstrategias() {
 }
 
 function DashboardHome() {
-  const { strategies, tournaments, loading, error, errorDetail, retry, sources, authRequired } =
+  const { strategies, tournaments, loading, error, retry, sources, authRequired } =
     useDashboardData();
 
   const [rankingTab, setRankingTab] = useState<RankingTab>("qp");
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [qpRanking, setQpRanking] = useState<QPRankingEntry[]>([]);
   const [tournamentRanking, setTournamentRanking] = useState<TournamentRankingEntry[]>([]);
-  const [rankingLoading, setRankingLoading] = useState(false);
+  const [rankingLoading, setRankingLoading] = useState(true);
+  const [rankingError, setRankingError] = useState(false);
+  const [rankingRetry, setRankingRetry] = useState(0);
 
   // Progreso de Academia (51 piezas C1–C6): el quiz perfecto marca la
   // lección en el store local y la sincroniza a Supabase (completed_lessons).
@@ -243,28 +244,11 @@ function DashboardHome() {
     setAcademiaDone(loadAcademiaProgress().completed);
   }, []);
   const totalModules = LESSONS.filter((l) => !l.draft).length;
-    const completedCount = academiaDone.filter((id) =>
-      LESSONS.some((l) => l.id === id),
-    ).length;
+    const completedCount = new Set(academiaDone.filter((id) =>
+      LESSONS.some((l) => l.id === id && !l.draft),
+    )).size;
     const coursePct =
       totalModules > 0 ? Math.round((completedCount / totalModules) * 100) : 0;
-
-  const loadRanking = useCallback(async (tab: RankingTab, p: RankingPeriod) => {
-    setRankingLoading(true);
-    try {
-      if (tab === "qp") {
-        const { entries } = await getQPRanking(p);
-        setQpRanking(entries);
-      } else {
-        const { entries } = await getTournamentRanking(p);
-        setTournamentRanking(entries);
-      }
-    } catch {
-      /* ignore */
-    } finally {
-      setRankingLoading(false);
-    }
-  }, []);
 
   const handleTabChange = (tab: RankingTab) => {
     setRankingTab(tab);
@@ -289,19 +273,25 @@ function DashboardHome() {
       })
       .slice(0, 6);
 
-  // Ranking instantáneo al montar y recarga única ante cambio de tab/período.
   useEffect(() => {
-    loadRanking(rankingTab, period);
-  }, [loadRanking, rankingTab, period]);
+    let active = true;
+    setRankingLoading(true);
+    setRankingError(false);
+    const request = rankingTab === "qp" ? getQPRanking(period) : getTournamentRanking(period);
+    request.then(({ entries }) => {
+      if (!active) return;
+      if (rankingTab === "qp") setQpRanking(entries as QPRankingEntry[]);
+      else setTournamentRanking(entries as TournamentRankingEntry[]);
+    }).catch(() => { if (active) setRankingError(true); })
+      .finally(() => { if (active) setRankingLoading(false); });
+    return () => { active = false; };
+  }, [rankingTab, period, rankingRetry]);
 
   return (
     <main className="ql-dash-content" aria-busy={loading}>
       {error && (
         <div className="ql-dashboard-notice ql-dashboard-notice--error" role="alert">
           <span>{error}</span>
-          {errorDetail && (
-            <small className="ql-dashboard-notice-detail">{errorDetail}</small>
-          )}
           <div className="flex items-center gap-2">
             {authRequired && (
               <Link href="/login" className="ql-btn-primary">
@@ -315,13 +305,14 @@ function DashboardHome() {
         </div>
       )}
 
-      {!loading && (
-        <NextAction
-          strategyCount={strategies.length}
-          ranBacktest={strategies.some((s) => s.last_sharpe_oos != null)}
-          competing={tournaments.some((t) => t.submission != null)}
-        />
-      )}
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold text-ink">Tu espacio de investigación</h1>
+        <p className="mt-2 max-w-2xl text-base text-muted">Participa en torneos de machine learning, consulta tus envíos y continúa aprendiendo.</p>
+        <div className="mt-4 flex flex-wrap gap-4 text-sm">
+          <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Cómo enviar predicciones</Link>
+          <Link href="/docs#evaluacion" className="text-accent underline underline-offset-4">Resultados del piloto técnico</Link>
+        </div>
+      </header>
 
       <div className="ql-bento-grid">
         {/* Competencias — fila 1 izquierda */}
@@ -334,16 +325,18 @@ function DashboardHome() {
               </svg>
             }
             title="Competencias"
-            subtitle="Torneos activos y próximos"
+            subtitle="Rondas ML abiertas para enviar predicciones"
             badge={myTournaments.length > 0 ? `${myTournaments.length} activas` : undefined}
             action={<SectionLink href="/app/tournaments" label="Ver todas" />}
           />
           <div className="ql-bento-competencias-body">
             {sources.tournaments === "loading" ? (
               <SkeletonCompetencias />
+            ) : sources.tournaments === "error" ? (
+              <div className="ql-bento-empty">No se pudieron cargar las rondas. Usa Reintentar para volver a consultarlas.</div>
             ) : myTournaments.length === 0 ? (
               <div className="ql-bento-empty">
-                <p>Paso 4 de tu activación: compite y gana QP.</p>
+                <p>No hay rondas abiertas en este momento. Puedes consultar resultados y la guía.</p>
                 <Link href="/app/tournaments" className="ql-btn-primary">
                   Explorar competencias
                 </Link>
@@ -375,7 +368,7 @@ function DashboardHome() {
                 </svg>
               }
               title="Ranking en la comunidad"
-              subtitle="Top traders esta semana"
+              subtitle={rankingTab === "tournaments" ? "Victorias acumuladas; participación filtrada por período" : `QP ganados en el último ${period === "week" ? "período de 7 días" : period === "month" ? "mes" : "período de 3 meses"}`}
             />
             <div className="ql-ranking-filters">
               <div className="ql-ranking-tabs">
@@ -412,6 +405,11 @@ function DashboardHome() {
           <div className="ql-ranking-body">
             {rankingLoading ? (
               <SkeletonRanking />
+            ) : rankingError ? (
+              <div className="ql-bento-empty" role="alert">
+                <p>No se pudo cargar el ranking.</p>
+                <button type="button" className="ql-btn-secondary" onClick={() => setRankingRetry((n) => n + 1)}>Reintentar ranking</button>
+              </div>
             ) : rankingEntries.length === 0 ? (
               <div className="ql-bento-empty">
                 No hay datos para este período.
@@ -487,9 +485,11 @@ function DashboardHome() {
             <div className="ql-estrategias-body">
               {sources.strategies === "loading" ? (
                 <SkeletonEstrategias />
+              ) : sources.strategies === "error" ? (
+                <div className="ql-bento-empty">No se pudieron cargar tus estrategias.</div>
               ) : myStrategies.length === 0 ? (
                 <div className="ql-bento-empty">
-                  <p>Paso 1 de tu activación: crea con la plantilla lista en &lt;1 min (+10 QP).</p>
+                  <p>Todavía no has guardado estrategias de backtesting.</p>
                   <Link href="/app/strategies/new?demo=1" className="ql-btn-primary">
                     Crear mi primer backtest
                   </Link>
@@ -534,7 +534,7 @@ function DashboardHome() {
                 </svg>
               }
               title="Academia"
-              subtitle="Los 6 cursos están abiertos"
+              subtitle="Cursos abiertos · progreso guardado en este navegador"
             />
             <div className="ql-aprendizaje-body">
               <div className="ql-aprendizaje-progress">

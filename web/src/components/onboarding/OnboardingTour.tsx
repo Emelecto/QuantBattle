@@ -18,33 +18,10 @@ type TourStep = {
 };
 
 const STEPS: TourStep[] = [
-  {
-    title: "Tu primer backtest en <3 minutos",
-    text: "Este tour toma 30 segundos. Al terminar podrás correr tu primer backtest con datos reales y ganar tus primeros QP.",
-    selector: null,
-  },
-  {
-    title: "Paso 1: prueba sin cuenta",
-    text: "La demo corre un backtest SMA con datos reales de BTC en ~30 segundos. Sin registro, sin riesgo.",
-    selector: null,
-    cta: { label: "Probar demo (30 s) →", href: "/demo" },
-  },
-  {
-    title: "Paso 2: crea tu estrategia",
-    text: "La plantilla SMA ya viene precargada con datos reales: solo pulsa Ejecutar backtest OOS.",
-    selector: '[data-tour="nueva-estrategia"], a[href="/app/strategies"]',
-  },
-  {
-    title: "Paso 3: compite y gana QP",
-    text: "Envía tu estrategia al round activo, súbete en el ranking y gana hasta 50 QP por activación.",
-    selector: '[data-tour="tournaments-link"], a[href="/app/tournaments"]',
-  },
-  {
-    title: "Tu wallet de QuantPoints",
-    text: "Aquí ves tu balance QP en vivo: ganas al completar pasos y en torneos, los gastas en el marketplace.",
-    selector: '[data-tour="qp-badge"], a[href="/app/wallet"]',
-    cta: { label: "Crear mi primer backtest →", href: "/app/strategies/new?demo=1" },
-  },
+  { title: "Investiga con QuantLab", text: "Participa en torneos de machine learning: descarga datos, entrena un modelo y envía sus predicciones.", selector: null },
+  { title: "Consulta las rondas publicadas", text: "La práctica usa datos sintéticos. Cada ronda tiene su propia versión y fecha de cierre; no otorga premios QP.", selector: '[data-tour="tournaments-link"], a[href="/app/tournaments"]', cta: { label: "Ver torneos", href: "/app/tournaments" } },
+  { title: "Prepara tu primer envío", text: "La guía explica las particiones train, validation y live, el formato del CSV y cuándo se publica la puntuación.", selector: null, cta: { label: "Leer la guía", href: "/app/tournaments/guide" } },
+  { title: "Revisa la evidencia", text: "Puedes inspeccionar el protocolo y los resultados del piloto técnico. La Academia complementa tu aprendizaje.", selector: null, cta: { label: "Ver evidencia", href: "/docs#evaluacion" } },
 ];
 
 type Rect = { top: number; left: number; width: number; height: number };

@@ -3,14 +3,14 @@
 // localStorage permite lectura instantánea sin esperar la red.
 import type { BacktestResult } from "@/lib/api";
 
-const KEY = "ql_runs";
+const cacheKey = (userId?: string) => `ql_runs:${userId || "guest"}`;
 
 // --- Helpers localStorage ---
-function readAll(): BacktestResult[] {
+function readAll(userId?: string): BacktestResult[] {
   if (typeof window === "undefined") return [];
-  const raw = window.localStorage.getItem(KEY);
-  if (!raw) return [];
   try {
+    const raw = window.localStorage.getItem(cacheKey(userId));
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? (parsed as BacktestResult[]) : [];
   } catch {
@@ -18,9 +18,9 @@ function readAll(): BacktestResult[] {
   }
 }
 
-function writeAll(runs: BacktestResult[]): void {
+function writeAll(runs: BacktestResult[], userId?: string): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(runs));
+  try { window.localStorage.setItem(cacheKey(userId), JSON.stringify(runs)); } catch { /* La nube sigue siendo la fuente de verdad. */ }
 }
 
 // --- API Supabase ---
@@ -64,7 +64,8 @@ async function supabaseFetch(userId: string): Promise<BacktestResult[]> {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (error || !data) return [];
+  if (error) throw new Error("No se pudieron sincronizar tus estrategias.");
+  if (!data) return [];
 
   // Filas del schema viejo (estrategias sin resultado) NO son runs válidos:
   // carecen de métricas numéricas y crashearían cualquier .toFixed(). Se omiten.
@@ -104,14 +105,13 @@ async function supabaseFetch(userId: string): Promise<BacktestResult[]> {
  *  El run YA quedó en localStorage, así que nunca se pierde el trabajo. */
 export async function saveRun(run: BacktestResult): Promise<void> {
   if (typeof window === "undefined") return;
-  const all = readAll();
-  all.unshift(run);
-  writeAll(all);
-
   const { createBrowserSupabaseClient } = await import("@/lib/supabase/client");
   const sb = createBrowserSupabaseClient();
   const { data } = await sb.auth.getSession();
   const userId = data.session?.user?.id;
+  const all = readAll(userId);
+  all.unshift(run);
+  writeAll(all, userId);
   if (!userId) return; // sin sesión: solo cache local, sin error
   await supabaseUpsert(run, userId);
 }
@@ -119,36 +119,29 @@ export async function saveRun(run: BacktestResult): Promise<void> {
 /** Guarda un run con user_id explícito (preferido). */
 export function saveRunForUser(run: BacktestResult, userId: string): void {
   if (typeof window === "undefined") return;
-  const all = readAll();
+  const all = readAll(userId);
   all.unshift(run);
-  writeAll(all);
+  writeAll(all, userId);
   supabaseUpsert(run, userId).catch(() => {});
 }
 
 /** Busca un run por id en localStorage. */
-export function getRun(id: string): BacktestResult | null {
-  return readAll().find((r) => r.id === id) ?? null;
+export function getRun(id: string, userId?: string): BacktestResult | null {
+  return readAll(userId).find((r) => r.id === id) ?? null;
 }
 
 /** Lista todos los runs de localStorage (más recientes primero). */
-export function getRuns(): BacktestResult[] {
-  return readAll();
+export function getRuns(userId?: string): BacktestResult[] {
+  return readAll(userId);
 }
 
 /** Carga runs desde Supabase y los sincroniza a localStorage.
  *  Usar al montar el dashboard para recuperar estrategias perdidas. */
 export async function syncRunsFromSupabase(userId: string): Promise<BacktestResult[]> {
-  try {
-    const remote = await supabaseFetch(userId);
-    if (remote.length > 0) {
-      // Merge: priorizar remotos, añadir locales que no estén en remotos.
-      const local = readAll();
-      const ids = new Set(remote.map((r) => r.id));
-      const merged = [...remote, ...local.filter((r) => !ids.has(r.id))];
-      writeAll(merged);
-    }
-    return remote;
-  } catch {
-    return [];
-  }
+  const remote = await supabaseFetch(userId);
+  const local = readAll(userId);
+  const ids = new Set(remote.map((run) => run.id));
+  const merged = [...remote, ...local.filter((run) => !ids.has(run.id))];
+  writeAll(merged, userId);
+  return merged;
 }

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { EquityChart } from "@/components/EquityChart";
 import { BenchmarkComparator } from "@/components/studio/BenchmarkComparator";
 import { buttonClasses } from "@/components/ui/Button";
-import { getRun } from "@/lib/runs";
+import { getRun, syncRunsFromSupabase } from "@/lib/runs";
 import { getPublicStrategy, supabaseRunToResult } from "@/lib/db";
 import { publishStrategy } from "@/lib/tournaments";
 import type { BacktestResult } from "@/lib/api";
@@ -34,7 +34,10 @@ function Metric({
   );
 }
 
+import { useAuth } from "@/lib/useAuth";
+
 export default function ResultsPage() {
+  const { user, loading: authLoading } = useAuth();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [run, setRun] = useState<BacktestResult | null>(null);
@@ -45,15 +48,22 @@ export default function ResultsPage() {
   const [priceQpWeek, setPriceQpWeek] = useState(0);
 
   useEffect(() => {
-    const local = getRun(params.id);
+    if (authLoading) return;
+    const local = getRun(params.id, user?.id);
     if (local) {
       setRun(local);
       setLoaded(true);
       return;
     }
     let active = true;
-    getPublicStrategy(params.id)
-      .then((res) => {
+    (async () => {
+      if (user) {
+        await syncRunsFromSupabase(user.id).catch(() => undefined);
+        const own = getRun(params.id, user.id);
+        if (own) { if (active) { setRun(own); setLoaded(true); } return null; }
+      }
+      return getPublicStrategy(params.id);
+    })().then((res) => {
         if (!active) return;
         if (res && res.run) setRun(supabaseRunToResult(res.strategy, res.run));
         setLoaded(true);
@@ -62,7 +72,7 @@ export default function ResultsPage() {
     return () => {
       active = false;
     };
-  }, [params.id]);
+  }, [params.id, user, authLoading]);
 
   if (loaded && !run) {
     return (

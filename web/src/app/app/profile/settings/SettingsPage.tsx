@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/useAuth";
 import { buttonClasses } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { call } from "@/lib/tournaments";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 type ApiKeyRow = {
   id: string;
@@ -15,56 +17,30 @@ type ApiKeyRow = {
   revoked_at: string | null;
 };
 
-type TabKey = "notifications" | "api" | "danger";
+type TabKey = "notifications" | "api" | "security" | "danger";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "notifications", label: "Notificaciones" },
   { key: "api", label: "Conexiones / API" },
+  { key: "security", label: "Seguridad" },
   { key: "danger", label: "Zona de peligro" },
 ];
-
-function Toggle({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  label: string;
-}) {
-  return (
-    <label className="flex items-center justify-between gap-4 py-2">
-      <span className="text-sm text-ink">{label}</span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${
-          checked
-            ? "border-accent/40 bg-accent/20"
-            : "border-line bg-surface"
-        }`}
-      >
-        <span
-          className={`inline-block h-3.5 w-3.5 rounded-full transition-transform ${
-            checked ? "translate-x-4 bg-accent" : "translate-x-0.5 bg-muted"
-          }`}
-        />
-      </button>
-    </label>
-  );
-}
 
 export function SettingsPage() {
   const { user, loading: authLoading, signOut } = useAuth();
   const [tab, setTab] = useState<TabKey>("notifications");
 
-  // Notificaciones
-  const [notifTournament, setNotifTournament] = useState(true);
-  const [notifRound, setNotifRound] = useState(true);
-  const [notifMention, setNotifMention] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
+  const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  useEffect(() => {
+    const updateTab = () => { if (window.location.hash === "#security") setTab("security"); };
+    updateTab();
+    window.addEventListener("hashchange", updateTab);
+    return () => window.removeEventListener("hashchange", updateTab);
+  }, []);
   // API Keys
   const [keys, setKeys] = useState<ApiKeyRow[] | null>(null);
   const [keysLoading, setKeysLoading] = useState(false);
@@ -73,27 +49,15 @@ export function SettingsPage() {
 
   // Danger
   const [signingOutAll, setSigningOutAll] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   const loadKeys = useCallback(async () => {
     if (!user) return;
     setKeysLoading(true);
+    setError(null);
     try {
-      const { createBrowserSupabaseClient } = await import(
-        "@/lib/supabase/client"
-      );
-      const supabase = createBrowserSupabaseClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) return;
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_WORKER_URL}/account/api-keys`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const json = await res.json();
-      if (res.ok) setKeys(json);
-    } catch {
-      /* noop */
+      setKeys(await call<ApiKeyRow[]>("/account/api-keys"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudieron cargar las claves.");
     } finally {
       setKeysLoading(false);
     }
@@ -106,32 +70,13 @@ export function SettingsPage() {
   const handleRegenerate = useCallback(async () => {
     if (!user) return;
     setRegenerating(true);
+    setError(null);
     try {
-      const { createBrowserSupabaseClient } = await import(
-        "@/lib/supabase/client"
-      );
-      const supabase = createBrowserSupabaseClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) return;
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_WORKER_URL}/account/api-keys`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: "Clave de perfil" }),
-        },
-      );
-      const json = await res.json();
-      if (res.ok && json.key) {
-        setApiKey(json.key);
-        await loadKeys();
-      }
-    } catch {
-      /* noop */
+      const json = await call<{key: string}>("/account/api-keys", {method: "POST", body: JSON.stringify({name: "Clave de perfil"})});
+      setApiKey(json.key);
+      await loadKeys();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo crear la clave.");
     } finally {
       setRegenerating(false);
     }
@@ -142,31 +87,26 @@ export function SettingsPage() {
     try {
       await signOut();
       window.location.href = "/login";
-    } catch {
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo cerrar la sesión.");
       setSigningOutAll(false);
     }
   }, [signOut]);
 
-  const handleDeleteAccount = useCallback(async () => {
-    if (!window.confirm("Estas seguro de que quieres borrar tu cuenta? Esta accion no se puede deshacer.")) return;
-    setDeleting(true);
+  async function changePassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setPasswordSaved(false);
+    if (password.length < 8) { setError("Usa al menos 8 caracteres."); return; }
+    if (password !== confirmation) { setError("Las contraseñas no coinciden."); return; }
+    setSavingPassword(true);
     try {
-      const { createBrowserSupabaseClient } = await import(
-        "@/lib/supabase/client"
-      );
-      const supabase = createBrowserSupabaseClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) return;
-      await fetch(`${process.env.NEXT_PUBLIC_WORKER_URL}/account/delete`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      window.location.href = "/";
-    } catch {
-      setDeleting(false);
-    }
-  }, []);
+      const {error: updateError} = await createBrowserSupabaseClient().auth.updateUser({password});
+      if (updateError) throw updateError;
+      setPassword(""); setConfirmation(""); setPasswordSaved(true);
+    } catch (e) { setError(e instanceof Error ? e.message : "No se pudo actualizar la contraseña."); }
+    finally { setSavingPassword(false); }
+  }
 
   if (authLoading) {
     return (
@@ -209,13 +149,15 @@ export function SettingsPage() {
           Gestiona tu cuenta, notificaciones y conexiones.
         </p>
 
+        {error && <p role="alert" className="mt-6 break-words text-sm text-short">{error}</p>}
         {/* Tabs */}
-        <div className="mt-8 flex gap-1 border-b border-line animate-fadeIn">
+        <div className="mt-8 flex flex-wrap gap-1 border-b border-line animate-fadeIn">
           {TABS.map((t) => (
             <button
               key={t.key}
               type="button"
-              onClick={() => setTab(t.key)}
+              onClick={() => { setTab(t.key); setError(null); }}
+              aria-pressed={tab === t.key}
               className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
                 tab === t.key
                   ? "border-accent text-ink"
@@ -235,26 +177,7 @@ export function SettingsPage() {
                 <h2 className="text-sm font-semibold text-ink mb-4">
                   Preferencias de notificacion
                 </h2>
-                <div className="space-y-1">
-                  <Toggle
-                    checked={notifTournament}
-                    onChange={setNotifTournament}
-                    label="Nuevo torneo disponible"
-                  />
-                  <Toggle
-                    checked={notifRound}
-                    onChange={setNotifRound}
-                    label="Resultado de ronda"
-                  />
-                  <Toggle
-                    checked={notifMention}
-                    onChange={setNotifMention}
-                    label="Mencion en marketplace"
-                  />
-                </div>
-                <p className="mt-4 text-[11px] text-muted">
-                  Los cambios se guardan automaticamente en tu navegador.
-                </p>
+                <p className="text-sm leading-relaxed text-muted">Los avisos de actividad aparecen en el menú de notificaciones cuando hay mensajes pendientes. La configuración de canales y los correos automáticos todavía no están disponibles.</p>
               </CardBody>
             </Card>
           )}
@@ -282,6 +205,8 @@ export function SettingsPage() {
                     </div>
                   ) : keysLoading ? (
                     <Skeleton variant="line" className="w-full h-10" />
+                  ) : error && keys === null ? (
+                    <button type="button" onClick={() => void loadKeys()} className={buttonClasses("secondary", "sm")}>Reintentar consulta</button>
                   ) : !keys || keys.length === 0 ? (
                     <p className="text-sm text-muted">
                       Aun no tienes claves de API.
@@ -342,6 +267,22 @@ export function SettingsPage() {
             </div>
           )}
 
+          {tab === "security" && (
+            <Card><CardBody className="p-6">
+              <h2 id="security" className="font-semibold text-ink">Cambiar contraseña</h2>
+              <form className="mt-4 max-w-md space-y-4" onSubmit={changePassword}>
+                <label className="block text-sm text-ink">Nueva contraseña
+                  <input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 block w-full rounded-md border border-line bg-bg px-3 py-2 text-base" />
+                </label>
+                <label className="block text-sm text-ink">Confirmar contraseña
+                  <input type="password" autoComplete="new-password" minLength={8} required value={confirmation} onChange={(e) => setConfirmation(e.target.value)} className="mt-2 block w-full rounded-md border border-line bg-bg px-3 py-2 text-base" />
+                </label>
+                <button type="submit" disabled={savingPassword} className={buttonClasses("primary", "sm")}>{savingPassword ? "Guardando…" : "Actualizar contraseña"}</button>
+                {passwordSaved && <p role="status" className="text-sm text-long">Contraseña actualizada.</p>}
+              </form>
+            </CardBody></Card>
+          )}
+
           {tab === "danger" && (
             <Card>
               <CardBody className="p-6">
@@ -367,22 +308,9 @@ export function SettingsPage() {
                       {signingOutAll ? "Cerrando..." : "Cerrar sesion"}
                     </button>
                   </div>
-                  <div className="border-t border-line" />
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-ink">Borrar cuenta</p>
-                      <p className="text-[12px] text-muted mt-0.5">
-                        Esta accion es permanente e irreversible.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleDeleteAccount}
-                      disabled={deleting}
-                      className="rounded-md border border-short/30 bg-short/10 px-3 py-1.5 text-sm font-medium text-short transition-colors hover:bg-short/20 disabled:opacity-50"
-                    >
-                      {deleting ? "Borrando..." : "Borrar cuenta"}
-                    </button>
+                  <div className="border-t border-line pt-4">
+                    <p className="text-sm text-ink">Eliminación de cuenta</p>
+                    <p className="mt-1 text-sm text-muted">La eliminación de cuentas desde la web todavía no está disponible. No se ejecutará ninguna eliminación desde esta pantalla.</p>
                   </div>
                 </div>
               </CardBody>

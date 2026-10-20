@@ -62,7 +62,8 @@ export async function getQPRanking(
     .gt("amount", 0)
     .gte("created_at", since);
 
-  if (error || !rows) return { entries: [], my_rank: null };
+  if (error) throw new Error("No se pudo consultar la actividad QP.");
+  if (!rows) return { entries: [], my_rank: null };
 
   // Agregar QP por usuario
   const qpMap = new Map<string, number>();
@@ -74,10 +75,11 @@ export async function getQPRanking(
   const userIds = Array.from(qpMap.keys());
   if (userIds.length === 0) return { entries: [], my_rank: null };
 
-  const { data: profiles } = await supabase
+  const { data: profiles, error: profileError } = await supabase
     .from("profiles")
     .select("id, username, avatar_url, country")
     .in("id", userIds);
+  if (profileError) throw new Error("No se pudieron consultar los perfiles del ranking.");
 
   const profileMap = new Map(
     (profiles ?? []).map((p: { id: string; username: string; avatar_url?: string | null; country?: string | null }) => [p.id, p]),
@@ -137,13 +139,15 @@ export async function getTournamentRanking(
     .order("tournaments_won", { ascending: false })
     .limit(50);
 
-  if (error || !profiles) return { entries: [], my_rank: null };
+  if (error) throw new Error("No se pudo consultar el ranking de torneos.");
+  if (!profiles) return { entries: [], my_rank: null };
 
   // Cuantos torneos participa cada usuario en el período
-  const { data: participations } = await supabase
+  const { data: participations, error: participationError } = await supabase
     .from("tournament_participants")
     .select("user_id, tournament_id")
     .gte("joined_at", since);
+  if (participationError) throw new Error("No se pudieron consultar las participaciones.");
 
   const enteredMap = new Map<string, Set<string>>();
   for (const p of (participations ?? []) as { user_id: string; tournament_id: string }[]) {
