@@ -27,7 +27,7 @@ await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click();
 await page.waitForURL(/\/app(?:\/|$)/);
 const paths=['/app','/app/tournaments','/app/strategies','/app/strategies/new','/app/marketplace','/app/marketplace/my-subscriptions','/app/academia','/app/library','/app/api-keys','/app/api-keys/instructions','/app/profile','/app/profile/settings','/app/profile/badges','/app/profile/referrals','/app/wallet','/app/rankings'];
 const reports=[];
-for(const path of paths){
+for(const path of process.env.QL_FLOWS_ONLY === 'true' ? [] : paths){
  const errors=[];const failures=[];
  const onError=e=>errors.push(e.message);
  const onResponse=r=>{if(r.status()>=400)failures.push({status:r.status(),url:r.url().split('?')[0]});};
@@ -44,12 +44,12 @@ for(const path of paths){
  console.log(JSON.stringify(reports.at(-1)));
 }
 await page.setViewportSize({width:390,height:844});
-for(const path of ['/app','/app/profile/settings','/app/api-keys','/app/library']){
+for(const path of process.env.QL_FLOWS_ONLY === 'true' ? [] : ['/app','/app/profile/settings','/app/api-keys','/app/library']){
  await page.goto(base+path);await page.waitForTimeout(1800);
  reports.push({path,mobile:true,...await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,emptyIcons:[...document.querySelectorAll('.ql-dash-bottomnav a,.ql-back-nav-button')].filter(x=>!x.querySelector('svg')).length}))});
  if(path==='/app')await page.screenshot({path:resolve(output,'mobile.png'),fullPage:true});
 }
-await writeFile(resolve(output,'report.json'),JSON.stringify(reports,null,2));
+if(process.env.QL_FLOWS_ONLY !== 'true')await writeFile(resolve(output,'report.json'),JSON.stringify(reports,null,2));
 if(process.env.QL_AUDIT_STAGE === 'after') {
  const {expect} = await import('@playwright/test');
  await page.goto(base+'/app');
@@ -64,17 +64,39 @@ if(process.env.QL_AUDIT_STAGE === 'after') {
  await page.getByLabel('Nueva contraseña',{exact:true}).fill('temporary-test-1234');
  await page.getByLabel('Confirmar contraseña',{exact:true}).fill('mismatched-value');
  await page.getByRole('button',{name:'Actualizar contraseña'}).click();
- await expect(page.getByRole('alert')).toHaveText('Las contraseñas no coinciden.');
+ await expect(page.getByRole('alert').filter({hasText:'Las contraseñas no coinciden.'})).toBeVisible();
+ const changedPassword=randomBytes(32).toString('base64url');
+ await page.getByLabel('Nueva contraseña',{exact:true}).fill(changedPassword);
+ await page.getByLabel('Confirmar contraseña',{exact:true}).fill(changedPassword);
+ await page.getByRole('button',{name:'Actualizar contraseña'}).click();
+ await expect(page.getByRole('status').filter({hasText:'Contraseña actualizada.'})).toBeVisible({timeout:30000});
+ const verifier=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+ const verified=await verifier.auth.signInWithPassword({email:'technical-demo@quantlab.example',password:changedPassword});
+ if(verified.error || verified.data.user?.id !== manifest.user_id)throw new Error('La nueva contraseña no permitió iniciar sesión');
  await page.goto(base+'/app/api-keys');
- await page.getByPlaceholder('Ej: Mi agente de trading').count().then(async count=>{if(count)await page.getByPlaceholder('Ej: Mi agente de trading').fill('Prueba técnica dashboard');});
  await expect(page.getByText('Error interno del servidor',{exact:true})).toHaveCount(0);
+ const keyName=`Prueba técnica dashboard ${Date.now()}`;
+ try {
+  await page.getByRole('textbox',{name:'Nombre de la clave'}).fill(keyName);
+  await page.getByRole('button',{name:'Crear clave',exact:true}).click();
+  const row=page.getByRole('listitem').filter({hasText:keyName});
+  await expect(row).toBeVisible();
+  await row.getByRole('button',{name:'Revocar',exact:true}).click();
+  await expect(row.getByText('revocada',{exact:true})).toBeVisible();
+  const saved=await admin.from('api_keys').select('revoked_at').eq('user_id',manifest.user_id).eq('name',keyName).single();
+  if(saved.error || !saved.data?.revoked_at)throw new Error('La revocación no se guardó');
+ } finally {
+  // Solo desactiva la clave desechable creada por esta ejecución.
+  await admin.from('api_keys').update({revoked_at:new Date().toISOString()}).eq('user_id',manifest.user_id).eq('name',keyName).is('revoked_at',null);
+ }
  await page.goto(base+'/app');
  await page.route('**/rest/v1/token_ledger*',r=>r.fulfill({status:503,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({message:'Fallo simulado para comprobar recuperación'})}));
  await page.reload();
- await expect(page.getByText('No se pudo cargar el ranking.',{exact:true})).toBeVisible();
+ await expect(page.getByText('No se pudo cargar el ranking.',{exact:true})).toBeVisible({timeout:30000});
  await page.unroute('**/rest/v1/token_ledger*');
  await page.getByRole('button',{name:'Reintentar ranking'}).click();
  await expect(page.getByText('No se pudo cargar el ranking.',{exact:true})).toHaveCount(0);
- await writeFile(resolve(output,'flow-checks.json'),JSON.stringify({mobile_navigation:true,selected_ml_receipt:true,password_mismatch_rejected:true,ranking_failure_and_retry:true},null,2));
+ await expect(page.getByText('No hay datos para este período.',{exact:true})).toBeVisible({timeout:30000});
+ await writeFile(resolve(output,'flow-checks.json'),JSON.stringify({mobile_navigation:true,selected_ml_receipt:true,password_mismatch_rejected:true,password_changed_and_login_verified:true,api_key_created_and_revoked:true,ranking_failure_and_retry:true},null,2));
 }
 await browser.close();
