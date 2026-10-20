@@ -21,6 +21,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.setDefaultTimeout(90_000);
   await page.goto(`${base}/login`);
+  if (new URL(page.url()).origin !== new URL(base).origin) throw new Error("El entorno de prueba redirigió a otro host");
   await page.getByLabel("Correo electrónico", { exact: true }).fill("technical-demo@quantlab.example");
   await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Iniciar sesión", exact: true }).click();
