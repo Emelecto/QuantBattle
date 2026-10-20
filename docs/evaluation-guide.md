@@ -23,6 +23,7 @@ El modelo de referencia es HistGradientBoostingRegressor. Se ajustan dos tamaño
 - La métrica mide orden relativo entre activos artificiales. No incluye costos, ejecución, cartera ni rentabilidad.
 - Las rondas reales requieren resolver las condiciones de distribución de los datos. La programación automática publica práctica por defecto.
 - El uso de Hermes Agent en el desarrollo fue informado por el autor. Las trazas de sus sesiones deben aportarse por separado para estudiar su contribución; el piloto no mide causalmente productividad ni calidad atribuible al agente.
+- La preparación de esta versión para evaluación incluyó cambios y pruebas asistidos por Codex. Al reconstruir la procedencia del código, distinguir esas intervenciones de las sesiones anteriores de Hermes y de las decisiones humanas del autor.
 
 ## Contingencia durante la presentación
 

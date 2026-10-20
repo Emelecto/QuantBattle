@@ -48,7 +48,7 @@ export function ResearchEvidence() {
         <a href="https://github.com/Emelecto/QuantLab/blob/main/docs/evaluation-guide.md" className="text-accent underline underline-offset-4">Guía para evaluadores</a>
       </div>
       <p className="border-t border-line pt-4 text-sm">
-        El autor reporta el uso de Hermes Agent, subagentes y memoria persistente durante el desarrollo. El piloto verifica el sistema resultante; estudiar la contribución del agente requiere analizar sus sesiones exportadas por separado.
+        El autor reporta el uso de Hermes Agent, subagentes y memoria persistente durante el desarrollo. Esta versión de evaluación también recibió cambios y pruebas asistidos por Codex. Estudiar la contribución de cada herramienta requiere analizar sus sesiones y el historial del código por separado.
       </p>
     </div>
   );
