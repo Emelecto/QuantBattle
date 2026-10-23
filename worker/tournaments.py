@@ -41,12 +41,12 @@ def get_supabase():
     global _supabase
     if _supabase is None:
         import os
-        from supabase import create_client
+        from db_client import create_worker_client
         url = os.environ.get("SUPABASE_URL")
         key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
         if not url or not key:
             raise RuntimeError("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY no configuradas")
-        _supabase = create_client(url, key)
+        _supabase = create_worker_client(url, key)
     return _supabase
 
 

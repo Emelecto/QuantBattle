@@ -18,6 +18,7 @@ const updated = await admin.auth.admin.updateUserById(manifest.user_id, { passwo
 if (updated.error) throw updated.error;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+await page.addInitScript(() => localStorage.setItem("ql_onboarded", "1"));
 try {
   page.setDefaultTimeout(90_000);
   page.setDefaultNavigationTimeout(45_000);
