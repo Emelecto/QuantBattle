@@ -9,13 +9,18 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
  * y enviamos al usuario a /app. Si no hay code, dejamos pasar a /app y el
  * AuthGuard decide.
  *
- * También captura errores que Supabase pueda inyectar en el hash (#error=...)
- * y los pasa como query legible a /login para mostrarlos con claridad.
+ * Los errores recibidos en la query pasan a /login. Los fragmentos de URL
+ * no llegan al servidor. El destino siempre permanece en este mismo sitio.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/app";
+  const requestedNext = searchParams.get("next");
+  let next = "/app";
+  if (requestedNext?.startsWith("/") && !requestedNext.startsWith("//") && !requestedNext.includes("\\")) {
+    const destination = new URL(requestedNext, origin);
+    if (destination.origin === origin) next = destination.pathname + destination.search + destination.hash;
+  }
 
   // Errores que Supabase a veces anexa en el hash (p.ej. otp_expired).
   const error = searchParams.get("error");

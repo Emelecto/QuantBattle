@@ -452,9 +452,11 @@ export async function getGlobalLeaderboard(
     const { data, error } = await supabase
       .from("profiles")
       .select(common)
+      .gt("total_qp_earned", 0)
       .order("total_qp_earned", { ascending: false })
       .limit(limit);
-    if (error || !data) return [];
+    if (error) throw new Error("No se pudo cargar el ranking. Vuelve a intentarlo.");
+    if (!data) return [];
     return data.map((p: any, i: number) => ({
       rank: i + 1,
       user_id: p.id,
@@ -472,10 +474,12 @@ export async function getGlobalLeaderboard(
     const { data, error } = await supabase
       .from("profiles")
       .select(common)
+      .gt("tournaments_won", 0)
       .order("tournaments_won", { ascending: false })
       .order("total_qp_earned", { ascending: false })
       .limit(limit);
-    if (error || !data) return [];
+    if (error) throw new Error("No se pudo cargar el ranking. Vuelve a intentarlo.");
+    if (!data) return [];
     return data.map((p: any, i: number) => ({
       rank: i + 1,
       user_id: p.id,
@@ -493,9 +497,11 @@ export async function getGlobalLeaderboard(
   const { data, error } = await supabase
     .from("profiles")
     .select(common)
+    .gt("total_qp_earned", 0)
     .order("total_qp_earned", { ascending: false })
     .limit(limit * 2);
-  if (error || !data) return [];
+  if (error) throw new Error("No se pudo cargar el ranking. Vuelve a intentarlo.");
+  if (!data) return [];
 
   const grouped = new Map<string, PublicLeaderboardEntry>();
   for (const p of data as any[]) {

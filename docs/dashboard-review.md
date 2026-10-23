@@ -25,13 +25,19 @@ El script `web/scripts/dashboard-audit.mjs` requiere `QL_ENABLE_LIVE_UI_TEST=tru
 
 La comprobación de escritorio y móvil no certifica todos los proveedores históricos, operaciones comerciales ni combinaciones posibles de datos. En la revisión inicial hubo respuestas 500 intermitentes del worker en balance/claves; las consultas directas posteriores respondieron 200. Se reforzó la recuperación y no se atribuyó una causa no demostrada. La política CORS de producción se mantuvo cerrada para orígenes locales; la integración completa se comprueba en el preview publicado.
 
-## Mejoras propuestas, por prioridad
+## Cierre de las prioridades · 23 de octubre de 2026
 
-1. **Resumen personal de ML:** ronda, fecha de cierre en Colombia, estado del archivo seleccionado, versión y acceso al comprobante. Después del cierre, mostrar score por era y referencias de esa misma ronda. No mezclar scores de rondas diferentes en un único ranking.
-2. **Historial de experimentos:** vincular cada envío con nombre del modelo, configuración, semilla, versión del dataset y nota del participante. Facilita reproducibilidad e informe científico.
-3. **Revisión del CSV antes de enviar:** mostrar cantidad de filas, cobertura de IDs, duplicados y valores inválidos. El servidor conserva la validación definitiva.
-4. **Estado del servicio:** distinguir inicio del worker, desconexión y consulta fallida; conservar el trabajo del participante y ofrecer recuperación contextual.
-5. **Recordatorios opcionales:** implementarlos con consentimiento, preferencias persistidas y un canal real antes de exponer controles de configuración.
-6. **Prueba con personas externas:** observar de tres a cinco participantes descargando datos y enviando predicciones; registrar bloqueos, tiempos y comentarios como observaciones reales.
+El resumen personal, historial de experimentos y revisión previa del CSV están implementados y publicados; el flujo se comprobó en producción con 42 000 predicciones de la cuenta técnica. Se archivaron nueve publicaciones del catálogo sin evidencia suficiente y se protegieron tres por suscripciones.
+
+La revisión posterior de las dieciséis rutas autenticadas no registró errores de página ni solicitudes fallidas. Se comprobó cambio de contraseña con inicio de sesión posterior, creación y revocación de una clave desechable y recuperación del ranking ante un fallo simulado. Las consultas concurrentes se verificaron después de corregir el transporte compartido del cliente de base de datos.
+
+Se corrigieron el destino de recuperación de contraseña, mensajes de autenticación con caracteres %, reenvío de confirmación y destinos del callback. El ranking histórico diferencia ausencia de actividad de un error, excluye cuentas en cero y muestra también listas con uno o dos registros. La demo pública remite al piloto ML reproducible; las páginas informativas distinguen datos sintéticos y resultados históricos.
+
+La página Estado comprueba conectividad de la API y espera el posible arranque inicial. Explica expresamente que esa consulta no certifica base de datos, archivos ni puntuación. Los fallos concretos se recuperan desde el historial, comprobante o ranking correspondiente.
+
+## Próximas mejoras que requieren trabajo adicional
+
+1. **Recordatorios opcionales:** implementarlos con consentimiento, preferencias persistidas y un canal real antes de exponer controles de configuración.
+2. **Prueba con personas externas:** observar de tres a cinco participantes descargando datos y enviando predicciones; registrar bloqueos, tiempos y comentarios como observaciones reales.
 
 Conviene completar estas mejoras alrededor de los torneos antes de ampliar premios, pagos o nuevas funcionalidades de backtesting.

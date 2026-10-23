@@ -8,6 +8,7 @@ import {
 } from "@/lib/tournaments";
 import { LeaderboardRow } from "../components/LeaderboardRow";
 import { useAuth } from "@/lib/useAuth";
+import Link from "next/link";
 
 type RankMode = "global" | "country";
 
@@ -164,6 +165,7 @@ export default function RankingsPage() {
   const [rows, setRows] = useState<PublicLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -185,7 +187,7 @@ export default function RankingsPage() {
     return () => {
       active = false;
     };
-  }, [mode, tab]);
+  }, [mode, tab, retry]);
 
   // Países presentes en los datos, ordenados alfabéticamente por nombre legible
   const countries = useMemo(
@@ -220,18 +222,19 @@ export default function RankingsPage() {
 
   // Top 3 podio
   const top3 = displayRows.slice(0, 3);
-  const rest = displayRows.slice(3);
+  const rest = top3.length >= 3 ? displayRows.slice(3) : displayRows;
 
   return (
     <main className="flex min-h-screen flex-col">
       <section className="border-b border-line">
         <div className="mx-auto w-full max-w-6xl px-6 pt-16 pb-10">
           <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl animate-fadeIn">
-            Leaderboard Global
+            Ranking de puntos virtuales
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted md:text-base animate-fadeIn">
-            Los mejores traders de QuantLab, rankeados por QP ganados y torneos.
+            QP y victorias del sistema histórico. Solo se muestran cuentas con actividad en la métrica elegida; los puntos no tienen valor monetario ni miden rentabilidad.
           </p>
+          <p className="mt-3 max-w-2xl text-sm text-muted">Los torneos ML gratuitos no otorgan QP. Sus resultados se comparan únicamente dentro de cada ronda. <Link href="/app/tournaments" className="text-accent underline">Consultar rondas y rankings ML</Link></p>
         </div>
       </section>
 
@@ -316,16 +319,17 @@ export default function RankingsPage() {
           ) : error ? (
             <div className="rounded-lg border border-short/40 bg-short/[0.08] px-4 py-3 text-sm text-short animate-fadeIn">
               {error}
+              <button type="button" className="ml-3 underline" onClick={()=>setRetry(value=>value+1)}>Reintentar ranking</button>
             </div>
-          ) : rows.length === 0 ? (
+          ) : displayRows.length === 0 ? (
             <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center animate-fadeIn">
               <p className="text-lg font-semibold text-ink">
-                Sin datos todavía
+                Sin actividad en esta clasificación
               </p>
               <p className="max-w-md text-sm text-muted">
-                El ranking se llena automáticamente cuando los usuarios
-                participan en torneos y ganan QP.
+                No hay registros con QP ganados o victorias para este filtro. Puedes consultar la evidencia y los resultados por ronda en Torneos ML.
               </p>
+              <Link href="/app/tournaments" className="text-sm text-accent underline">Ir a Torneos ML</Link>
             </div>
           ) : (
             <>

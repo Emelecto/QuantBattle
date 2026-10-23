@@ -31,8 +31,8 @@ function LoginInner() {
   useEffect(() => {
     const err = searchParams.get("error_description") || searchParams.get("error");
     if (err) {
-      const clean = err.replace(/\+/g, " ");
-      setError(decodeURIComponent(clean));
+      // URLSearchParams ya decodificó el valor; un segundo decode falla con «%».
+      setError(err);
     }
   }, [searchParams]);
 
@@ -93,8 +93,9 @@ function LoginInner() {
 
     try {
       const supabase = createBrowserSupabaseClient();
-      const redirectTo = `${window.location.origin}/auth/callback?next=/app`;
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, { redirectTo });
+      const redirectTo = new URL("/auth/callback", window.location.origin);
+      redirectTo.searchParams.set("next", "/app/profile/settings#security");
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), { redirectTo: redirectTo.toString() });
 
       if (error) {
         const msg = error.message.toLowerCase();
@@ -128,7 +129,7 @@ function LoginInner() {
   return (
     <AuthShell
       title="Iniciar sesión"
-      subtitle="Accede a tu panel de estrategias y corridas fuera de muestra."
+      subtitle="Consulta tus experimentos y participa en los torneos de predicción ML."
       footer={
         <>
           ¿No tienes cuenta?{" "}

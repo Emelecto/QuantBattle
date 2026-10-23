@@ -4,28 +4,28 @@ import { SpotlightCard } from "@/components/SpotlightCard";
 
 const FEATURES = [
   {
-    title: "Crea en el navegador",
-    text: "Escribe tu estrategia en un editor que ya viene configurado: sin Python local, sin entornos virtuales ni librerías que se rompen. Empiezas desde una plantilla y la ajustas hasta que refleje tu idea.",
+    title: "Rondas de predicción ML",
+    text: "Descarga train, validation y live de una misma versión. Entrena con train, elige tu configuración con validation y envía las predicciones de live antes del cierre. Las rondas disponibles de práctica usan activos artificiales.",
   },
   {
-    title: "Pruebas honestas (sin overfitting)",
-    text: "Separamos los datos por ti: tú optimizas en un tramo y la evaluación final ocurre en un tramo que tu estrategia nunca vio. Si el resultado solo existía en el pasado ajustado, aquí se cae — y eso es exactamente lo que quieres saber antes de arriesgar dinero.",
+    title: "Revisión de archivos",
+    text: "El navegador revisa la cabecera, cobertura de IDs, duplicados y valores. El servidor vuelve a validar el archivo y el plazo antes de seleccionar el envío. Un archivo rechazado conserva la selección válida anterior.",
   },
   {
-    title: "Métricas claras",
-    text: "Sharpe desinflado, máxima caída, win rate, número de operaciones y costos, todos explicados en lenguaje humano. Penalizamos el exceso de pruebas: cada combinación que intentas encarece la evidencia que necesitas.",
+    title: "Evaluación después del cierre",
+    text: "Las etiquetas de live permanecen privadas. El score se publica tras cerrar y evaluar la ronda: Spearman por era, promediado entre eras. Se compara dentro de esa ronda y no representa rentabilidad.",
   },
   {
-    title: "Comunidad y clonado",
-    text: "Publica tu estrategia con su reporte out-of-sample completo o clona la de alguien más y modifícala en un clic. Aprender de un backtest verificado ajeno es más rápido que empezar de cero.",
+    title: "Historial de experimentos",
+    text: "Cada envío puede conservar nombre del modelo, parámetros declarados, semilla y nota, vinculados a la versión y huella del CSV. El historial es privado y permite exportar la página consultada en JSON.",
   },
   {
-    title: "Ranking justo",
-    text: "El leaderboard solo ordena por desempeño fuera de muestra desinflado, nunca por la curva bonita del entrenamiento. No se puede escalar el ranking probando mil variantes hasta que una acierte por azar.",
+    title: "Evidencia inspeccionable",
+    text: "El piloto técnico publica configuración, referencias, resultados por era y verificaciones del ciclo completo. Se ejecutó con una cuenta técnica sobre datos sintéticos; no representa usuarios externos ni beneficios financieros.",
   },
   {
-    title: "Cripto y acciones",
-    text: "BTC, ETH y equities con datos históricos, comisiones y slippage realistas. Un backtest sin costos es una fantasía, así que los incluimos desde el primer run.",
+    title: "Comunidad en desarrollo",
+    text: "QuantLab busca reunir una comunidad de investigación cuantitativa en español. El prototipo incluye recursos educativos, código y módulos experimentales de estrategias; la evaluación del semillero se centra en el flujo de torneos ML.",
   },
 ];
 
@@ -38,9 +38,9 @@ export default function FeaturesPage() {
             Qué hace QuantLab
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted md:text-base">
-            Una plataforma de investigación cuantitativa pensada para que la
-            evidencia sea difícil de falsear: pruebas fuera de muestra, métricas
-            desinfladas y todo el proceso a la vista.
+            Un prototipo del semillero DeepFin de la Universidad EIA para
+            investigar modelos de predicción y documentar su evaluación.
+            Participar en las rondas ML es gratuito y no genera premios QP.
           </p>
         </div>
       </section>
@@ -70,11 +70,11 @@ export default function FeaturesPage() {
 
       <section>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-6 py-14">
-          <Link href="/register" className={buttonClasses("primary", "lg")}>
-            Crea tu estrategia
+          <Link href="/app/tournaments" className={buttonClasses("primary", "lg")}>
+            Explorar torneos ML
           </Link>
-          <Link href="/leaderboard" className={buttonClasses("secondary", "lg")}>
-            Ver el ranking OOS
+          <Link href="/docs#evaluacion" className={buttonClasses("secondary", "lg")}>
+            Ver evaluación técnica
           </Link>
         </div>
       </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 
 /**
  * /status — Estado del sistema en vivo.
@@ -27,7 +28,7 @@ const STATUS_META: Record<
     text: "text-amber-400",
   },
   down: {
-    label: "Caído",
+    label: "Sin respuesta",
     dot: "bg-short",
     text: "text-short",
   },
@@ -42,12 +43,11 @@ export default function StatusPage() {
     setStatus("checking");
     setLatency(null);
     const start = performance.now();
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 55_000);
     try {
       if (!WORKER_URL) throw new Error("WORKER_URL no configurada");
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 15000);
-      const res = await fetch(`${WORKER_URL}/health`, { signal: ctrl.signal });
-      clearTimeout(t);
+      const res = await fetch(`${WORKER_URL}/health`, { signal: ctrl.signal, cache: "no-store" });
       const ms = Math.round(performance.now() - start);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await res.json();
@@ -57,6 +57,8 @@ export default function StatusPage() {
     } catch {
       setStatus("down");
       setCheckedAt(new Date().toLocaleTimeString("es-CO", { hour12: false }));
+    } finally {
+      clearTimeout(timer);
     }
   }, []);
 
@@ -78,8 +80,9 @@ export default function StatusPage() {
           Estado del sistema
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Transparencia técnica: salud y latencia del worker de backtests,
-          medidas en vivo desde tu navegador.
+          Conectividad y tiempo de respuesta de la API de QuantLab, medidos desde
+          tu navegador. Esta consulta no verifica la base de datos, los archivos
+          ni la evaluación de una ronda.
         </p>
 
         <div className="ql-glass ql-elev-1 mt-8 p-6">
@@ -91,7 +94,7 @@ export default function StatusPage() {
                   {meta.label}
                 </div>
                 <div className="metric mt-0.5 text-[11px] text-muted">
-                  Worker · quantlab-worker
+                  API de torneos y estrategias
                 </div>
               </div>
             </div>
@@ -109,8 +112,8 @@ export default function StatusPage() {
               <dd className="metric mt-0.5 text-ink">{checkedAt ?? "—"}</dd>
             </div>
             <div>
-              <dt className="text-muted">Fuentes de datos</dt>
-              <dd className="metric mt-0.5 text-ink">Bybit · Binance · Yahoo</dd>
+              <dt className="text-muted">Rondas ML de práctica</dt>
+              <dd className="metric mt-0.5 text-ink">Datos sintéticos</dd>
             </div>
           </dl>
 
@@ -124,10 +127,12 @@ export default function StatusPage() {
         </div>
 
         <p className="mt-4 text-[12px] leading-relaxed text-muted">
-          El worker se auto-refresca cada 60 segundos. Si el servicio aparece
-          caído puede ser un cold start del plan gratuito de Render (hasta ~50 s
-          de arranque); reintenta en un minuto.
+          La consulta se repite cada 60 segundos. El primer inicio del servicio
+          puede tardar cerca de un minuto. Si no responde, revisa tu conexión y
+          vuelve a intentar. La documentación y la evidencia siguen disponibles
+          desde la web.
         </p>
+        <Link href="/docs#evaluacion" className="mt-4 inline-block text-sm text-accent underline">Consultar evidencia técnica</Link>
       </section>
     </main>
   );
