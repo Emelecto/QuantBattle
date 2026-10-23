@@ -31,3 +31,20 @@ test("la documentación se lee sin desbordamiento y el notebook se descarga", as
   expect((await notebook.json()).nbformat).toBe(4);
   await page.locator("#evaluacion").screenshot({ path: `../artifacts/judge-ui/${testInfo.project.name}.png` });
 });
+
+test("la demo conduce a evidencia ML y las funciones identifican datos sintéticos", async ({ page }) => {
+  await page.goto("/demo");
+  await expect(page).toHaveURL(/\/docs#evaluacion$/);
+  await page.goto("/features");
+  await expect(page.getByRole("heading",{name:"Rondas de predicción ML"})).toBeVisible();
+  await expect(page.getByText(/activos artificiales/)).toBeVisible();
+  await expect(page.getByRole("link",{name:"Ver evaluación técnica",exact:true})).toHaveAttribute("href","/docs#evaluacion");
+});
+
+test("el estado comunica el alcance real de la consulta de salud", async ({ page }) => {
+  await page.route("**/health", route=>route.fulfill({status:200,contentType:"application/json",body:'{"status":"ok"}'}));
+  await page.goto("/status");
+  await expect(page.getByText("Operativo",{exact:true})).toBeVisible();
+  await expect(page.getByText(/no verifica la base de datos/)).toBeVisible();
+  await expect(page.getByRole("link",{name:"Consultar evidencia técnica"})).toBeVisible();
+});

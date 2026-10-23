@@ -43,9 +43,11 @@ export default function LeaderboardPage() {
             Ranking OOS
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted md:text-base">
-            Rankeado por Sharpe desinflado out-of-sample — la métrica que no
-            premia el overfitting.
+            Archivo de ejecuciones públicas del módulo experimental de backtesting,
+            ordenado por Sharpe desinflado fuera de muestra. Esta métrica no elimina
+            el riesgo de sobreajuste ni acredita rentabilidad futura.
           </p>
+          <p className="mt-3 max-w-2xl text-sm text-muted">Los resultados de torneos ML se consultan por ronda y utilizan Spearman por era. <Link href="/app/tournaments" className="text-accent underline">Ir a Torneos ML</Link></p>
         </div>
       </section>
 

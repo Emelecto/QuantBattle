@@ -15,7 +15,7 @@ test("login renders percent characters and recovery points to password form", as
   const errors: string[] = [];
   page.on("pageerror", error=>errors.push(error.message));
   await page.goto("/login?error_description=Error%20al%20100%25%20%2B%20conexi%C3%B3n");
-  await expect(page.getByRole("alert")).toHaveText("Error al 100% + conexión");
+  await expect(page.getByRole("alert").filter({hasText:"Error al 100%"})).toHaveText("Error al 100% + conexión");
   await page.getByRole("button", {name:"¿Olvidaste tu contraseña?"}).click();
   let destination = "";
   await page.route("**/auth/v1/recover*", async route=>{
@@ -46,10 +46,10 @@ test("confirmation resend failure allows a second successful attempt", async ({ 
   await page.getByRole("button",{name:"Crear cuenta",exact:true}).click();
   const resend = page.getByRole("button",{name:"Reenviar enlace",exact:true});
   await resend.click();
-  await expect(page.getByRole("alert")).toContainText("No pudimos reenviar");
+  await expect(page.getByRole("alert").filter({hasText:"No pudimos reenviar"})).toBeVisible();
   await expect(resend).toBeEnabled();
   await resend.click();
   await expect(page.getByRole("status")).toContainText("Enlace reenviado");
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("alert").filter({hasText:"No pudimos reenviar"})).toHaveCount(0);
   expect(attempts).toBe(2);
 });

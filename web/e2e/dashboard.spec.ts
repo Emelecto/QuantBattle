@@ -56,5 +56,6 @@ test("historical leaderboard excludes inactive accounts and exposes query errors
   expect(Array.from(await exports.getGlobalLeaderboard("qp"),row=>row.user_id)).toEqual(["points"]);
   expect(Array.from(await exports.getGlobalLeaderboard("tournaments"),row=>row.user_id)).toEqual(["winner"]);
   failure = true;
-  await expect(exports.getGlobalLeaderboard("qp")).rejects.toThrow("No se pudo cargar");
+  const error = await exports.getGlobalLeaderboard("qp").then(()=>"", error=>String(error.message));
+  expect(error).toContain("No se pudo cargar");
 });
