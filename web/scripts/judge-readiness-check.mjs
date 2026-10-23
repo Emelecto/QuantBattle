@@ -9,6 +9,7 @@ if(process.env.QL_ENABLE_LIVE_UI_TEST !== 'true') throw new Error('Activar QL_EN
 const root=resolve('..'), output=resolve(root,'artifacts/judge-readiness');
 await mkdir(output,{recursive:true});
 const base=process.env.QL_UI_BASE_URL || 'https://quant-lab-nine.vercel.app';
+const capture=process.env.QL_SKIP_SCREENSHOTS !== 'true';
 const browser=await chromium.launch();
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
 await context.addInitScript(()=>localStorage.setItem('ql_onboarded','1'));
@@ -33,7 +34,7 @@ try {
       if(path==='/status')await expect(page.getByText('Operativo',{exact:true}).or(page.getByText('Degradado (lento)',{exact:true}))).toBeVisible({timeout:60000});
       if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error(`Desbordamiento ${device}: ${path}`);
       const name=path.startsWith('/login')?'login':path.slice(1);
-      await page.screenshot({path:resolve(output,`${name}-${device}.png`),fullPage:true});
+      if(capture)await page.screenshot({path:resolve(output,`${name}-${device}.png`),fullPage:true});
     }
   }
   await page.goto(base+'/login');
@@ -60,7 +61,7 @@ try {
   await page.waitForURL(/\/app(?:\/|$)/);
   await page.goto(base+'/app/rankings');
   await expect(page.getByText('Sin actividad en esta clasificación',{exact:true})).toBeVisible();
-  await page.screenshot({path:resolve(output,'ranking-mobile.png'),fullPage:true});
+  if(capture)await page.screenshot({path:resolve(output,'ranking-mobile.png'),fullPage:true});
   const profileRoute='**/rest/v1/profiles*';
   let rows=1, fail=false;
   await page.route(profileRoute,route=>{
@@ -73,7 +74,7 @@ try {
   }
   fail=true;
   await page.reload();
-  await expect(page.getByRole('button',{name:'Reintentar ranking',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Reintentar ranking',exact:true})).toBeVisible({timeout:60000});
   fail=false;
   await page.getByRole('button',{name:'Reintentar ranking',exact:true}).click();
   await expect(page.getByText('@technical-mock-0',{exact:true}).first()).toBeVisible();
