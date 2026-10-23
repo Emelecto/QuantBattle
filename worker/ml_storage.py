@@ -17,6 +17,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import io
+import json
 import logging
 import os
 import random
@@ -182,6 +183,29 @@ def upload_csv(csv_text: str | bytes, path: str) -> str:
     _upload_immutable(sb, SUBMISSIONS_BUCKET, path, data, "text/csv")
     _write_sidecar_best_effort(sb, SUBMISSIONS_BUCKET, path, digest)
     return path
+
+
+def upload_experiment(document: dict, path: str) -> None:
+    require_private_buckets()
+    data = json.dumps(document, ensure_ascii=False, allow_nan=False).encode("utf-8")
+    _upload_immutable(_client(), SUBMISSIONS_BUCKET, path, data, "application/json")
+
+
+def download_experiment(path: str) -> dict | None:
+    require_private_buckets()
+    try:
+        data = _with_retry(lambda: _client().storage.from_(SUBMISSIONS_BUCKET).download(path),
+                           op="download experiment", fatal=_is_not_found)
+    except Exception as exc:
+        if _is_not_found(exc):
+            return None
+        raise
+    if len(data) > 8192:
+        raise ValueError("Ficha demasiado grande")
+    result = json.loads(data)
+    if not isinstance(result, dict):
+        raise ValueError("Ficha inválida")
+    return result
 
 
 def upload_parquet(df: pd.DataFrame, path: str) -> str:

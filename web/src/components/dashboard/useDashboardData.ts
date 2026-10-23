@@ -29,6 +29,8 @@ export type SubmissionLoadState =
   | "round-unavailable";
 
 export type DashboardTournament = {
+  datasetId: string;
+  datasetVersion: string | null;
   id: string;
   name: string;
   type: "code" | "ml";
@@ -108,6 +110,8 @@ function toDashboardTournament(tournament: Tournament, dataset: MlDataset): Dash
     : [];
 
   return {
+    datasetId: dataset.id,
+    datasetVersion: dataset.version,
     id: tournament.id,
     name: stringOrNull(tournament.name) ?? "Nombre no disponible",
     type: tournament.type === "ml" ? "ml" : "code",

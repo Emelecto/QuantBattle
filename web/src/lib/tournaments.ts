@@ -108,6 +108,7 @@ export interface TokenLedgerEntry {
 }
 
 export interface MarketplaceStrategy {
+  catalog_available?: boolean;
   id: string;
   author_id: string;
   title: string;
@@ -209,7 +210,8 @@ function preflight(): string {
   const worker = resolveWorkerUrl();
   if (
     (worker.startsWith("http://localhost") || worker.startsWith("http://127.0.0.1")) &&
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === "production" &&
+    (typeof window === "undefined" || !["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname))
   ) {
     throw new Error(
       "NEXT_PUBLIC_WORKER_URL no está configurada en Vercel. Ve a Settings → Environment Variables y añade la URL de tu worker en Render (ej: https://tu-worker.onrender.com).",
@@ -586,8 +588,8 @@ export async function publishStrategy(data: {
   is_public_code?: boolean;
   config: Record<string, unknown>;
   price_qp_week?: number;
-}): Promise<{ id: string }> {
-  return call<{ id: string }>(`/marketplace/publish`, {
+}): Promise<{ id: string; status: "published" | "needs_review" }> {
+  return call<{ id: string; status: "published" | "needs_review" }>(`/marketplace/publish`, {
     method: "POST",
     body: JSON.stringify(data),
   });

@@ -69,7 +69,7 @@ def test_publish_writes_integrity_seal(mock_supabase):
         )
         result = marketplace_publish(body, MagicMock())
 
-    assert result == {"id": "strat-xyz"}
+    assert result == {"id": "strat-xyz", "status": "published"}
 
     # El Sello de Integridad se escribió en la fila (UPDATE).
     assert updated.get("integrity_label") == "Alta"
@@ -108,8 +108,8 @@ def test_publish_with_failed_backtest_still_publishes(mock_supabase):
         )
         result = marketplace_publish(body, MagicMock())
 
-    assert result == {"id": "strat-fail"}
-    # Publicó igual, sello en estado 'sin datos'.
+    assert result == {"id": "strat-fail", "status": "needs_review"}
+    # Se conservó fuera del catálogo público, sello en estado 'sin datos'.
     assert updated.get("backtest_metrics") is None
     assert updated.get("replicable") is False
 

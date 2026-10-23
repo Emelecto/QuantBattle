@@ -6,6 +6,7 @@
  * del token de sesión de Supabase y hace anti-cache.
  */
 import { call } from "@/lib/tournaments";
+import { experimentHeader } from "@/lib/prediction-review";
 
 /* ------------------------------------------------------------------ */
 /* Tipos                                                               */
@@ -128,11 +129,26 @@ export async function downloadDatasetUrl(
 export async function submitPredictions(
   datasetId: string,
   file: File,
+  experiment?: {model_name: string; parameters: Record<string, unknown>; seed: number | null; note: string},
 ): Promise<{ id: string; row_count: number; status: string; submission?: MlSubmission }> {
   return call<{ id: string; row_count: number; status: string; submission?: MlSubmission }>(
     `/ml/datasets/${datasetId}/predictions`,
-    { method: "POST", headers: { "Content-Type": "text/csv" }, body: file },
+    { method: "POST", headers: { "Content-Type": "text/csv", ...(experiment ? {"X-QuantLab-Experiment": experimentHeader(experiment)} : {}) }, body: file },
   );
+}
+
+export type MlExperiment = {
+  id: string; dataset_id: string; submitted_at: string; status: string; row_count: number;
+  is_selected: boolean; score: number | null; file_sha256: string; dataset_version: string;
+  experiment: {model_name: string; parameters: Record<string, unknown>; seed: number | null; note: string} | null;
+  metadata_status: "ready" | "legacy" | "unavailable";
+  round: {tournament_id: string; round_number: number; name: string; status: string; mode: string; closes_at: string; version: string; score_version: string; benchmarks: Record<string, number> | null};
+};
+export type ExperimentPage = {entries: MlExperiment[]; has_more: boolean; next_offset: number | null; snapshot: string};
+export async function experimentHistory(offset = 0, snapshot?: string): Promise<ExperimentPage> {
+  const query = new URLSearchParams({limit: "10", offset: String(offset)});
+  if (snapshot) query.set("snapshot", snapshot);
+  return call<ExperimentPage>(`/ml/experiments?${query}`);
 }
 
 /** Mi envío para una ronda, o `null` si aún no envié nada. */

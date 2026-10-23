@@ -46,7 +46,7 @@ def test_publish_strategy_inserts_and_returns_id(mock_supabase):
         )
         result = marketplace_publish(body, MagicMock())
         # Devuelve el id generado.
-        assert result == {"id": "gen-strat-id"}
+        assert result == {"id": "gen-strat-id", "status": "published"}
 
         # Campos requeridos por el esquema (NOT NULL / obligatorios del flujo).
         for field in (
@@ -66,7 +66,7 @@ def test_publish_strategy_inserts_and_returns_id(mock_supabase):
             assert field in inserted, f"Falta el campo requerido '{field}' en el insert"
 
         # Valores correctos.
-        assert inserted["status"] == "published"
+        assert inserted["status"] == "needs_review"
         assert inserted["author_id"] == "00000000-0000-0000-0000-000000000001"  # uid fijo TESTING
         assert inserted["title"] == "BTC · 1d"
         assert inserted["symbol"] == "BTCUSDT"
@@ -81,7 +81,7 @@ def test_publish_strategy_inserts_and_returns_id(mock_supabase):
 def test_marketplace_list(mock_supabase):
     mock_supabase.table.return_value.select.return_value.eq.return_value.order.return_value.execute.return_value = MagicMock(
         data=[
-            {"id": "s1", "title": "Strat 1", "price_qp_week": 10, "subscribers": 5},
+            {"id": "s1", "title": "Strat 1", "backtest_metrics": {"sharpe_oos": 1.0}, "data_hash": "hash", "price_qp_week": 10, "subscribers": 5},
         ]
     )
     with patch("tournaments.get_supabase", return_value=mock_supabase):
@@ -107,7 +107,7 @@ def test_subscribe_to_strategy(mock_supabase):
     )
     # Mock: estrategia existe
     mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value = MagicMock(
-        data=[{"id": "strat-1", "price_qp_week": 0, "author_id": "author-1"}]
+        data=[{"id": "strat-1", "status": "published", "title": "Estrategia", "backtest_metrics": {"sharpe_oos": 1.0}, "data_hash": "hash", "price_qp_week": 0, "author_id": "author-1"}]
     )
     with patch("tournaments.get_supabase", return_value=mock_supabase):
         from tournaments import marketplace_subscribe

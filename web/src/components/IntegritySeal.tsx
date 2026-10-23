@@ -47,7 +47,7 @@ export function IntegritySeal({
   const methodText =
     (typeof method === "string" && method.trim()) ||
     (typeof m?.method === "string" && m.method.trim()) ||
-    "walk-forward OOS";
+    "Método no registrado";
 
   const badgeCls = size === "lg" ? "text-[12px] px-2.5 py-1" : "";
 
@@ -58,7 +58,7 @@ export function IntegritySeal({
         mono
         className={badgeCls}
       >
-        {isReplicable ? "✓" : "✗"} Replicable
+        {isReplicable ? "Replicabilidad comprobada" : "Sin sello de replicabilidad"}
       </Badge>
 
       <Badge

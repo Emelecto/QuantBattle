@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 # no acopla a red en los tests unitarios. Permite monkear tournaments.run_backtest.
 from engine import run_backtest  # noqa: E402
 from schemas import StrategyConfig  # noqa: E402
+from marketplace_quality import review_reasons
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +41,12 @@ def get_supabase():
     global _supabase
     if _supabase is None:
         import os
-        from supabase import create_client
+        from db_client import create_worker_client
         url = os.environ.get("SUPABASE_URL")
         key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
         if not url or not key:
             raise RuntimeError("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY no configuradas")
-        _supabase = create_client(url, key)
+        _supabase = create_worker_client(url, key)
     return _supabase
 
 
@@ -214,7 +215,7 @@ def _check_referral_badges(user_id: str) -> None:
         sb = get_supabase()
         refs = sb.table("referrals").select("id").eq("referrer_id", user_id).execute()
         total = len(refs.data or [])
-        
+
         from badges import award_badge
         if total >= 1:
             award_badge(user_id, "first_referral")
@@ -437,7 +438,7 @@ def marketplace_list(asset_type: str | None = None, symbol: str | None = None):
     if symbol:
         q = q.eq("symbol", symbol)
     q = q.order("subscribers", desc=True)
-    return q.execute().data or []
+    return [row for row in q.execute().data or [] if not review_reasons(row)]
 
 
 # ---------------------------------------------------------------------------
@@ -511,31 +512,18 @@ def marketplace_publish(body: PublishBody, request: Request):
         "is_public_code": body.is_public_code,
         "config": body.config,
         "price_qp_week": body.price_qp_week,
-        "status": "published",
+        "status": "needs_review",
         "published_at": datetime.now(timezone.utc).isoformat(),
     }).execute()
-
-    # Actividad: estrategia publicada (best-effort, jamás rompe el flujo).
-    try:
-        from social import log_activity
-
-        log_activity(
-            uid,
-            "published_strategy",
-            target_type="marketplace_strategy",
-            target_id=res.data[0]["id"],
-            meta={"title": body.title},
-        )
-    except Exception:  # noqa: BLE001
-        pass
 
     # -----------------------------------------------------------------------
     # SELLO DE INTEGRIDAD REAL (item 1 del rediseño del marketplace).
     # Corre el backtest OOS con datos REALES y escribe los campos de sello en
     # la fila recién insertada. Si el backtest falla, publica igual pero deja
-    # backtest_metrics=None (no rompe el flujo de publicación).
+    # backtest_metrics=None (sin anunciar una publicación válida).
     # -----------------------------------------------------------------------
     strategy_id = res.data[0]["id"]
+    publication_status = "needs_review"
     try:
         # Construir StrategyConfig desde body.config + metadatos del marketplace.
         cfg = dict(body.config) if isinstance(body.config, dict) else {}
@@ -556,6 +544,8 @@ def marketplace_publish(body: PublishBody, request: Request):
             "data_hash": bt.get("data_hash"),
             "replicable": False,
         }
+        publication_status = "published" if not review_reasons({"title": body.title, **seal}) else "needs_review"
+        seal["status"] = publication_status
 
         # Benchmarks vs estrategias naive (buy&hold y media móvil simple 20).
         try:
@@ -583,21 +573,38 @@ def marketplace_publish(body: PublishBody, request: Request):
             # pendiente de aplicar): reintentar el sello sin ella, best-effort.
             logger.warning("Sello: columna data_hash ausente, se reintenta sin ella")
             seal_sin_hash = {k: v for k, v in seal.items() if k != "data_hash"}
+            seal_sin_hash["status"] = "needs_review"
+            publication_status = "needs_review"
             sb.table("marketplace_strategies").update(seal_sin_hash).eq("id", strategy_id).execute()
     except Exception as seal_exc:  # noqa: BLE001
+        publication_status = "needs_review"
         logger.warning(
-            "Sello de Integridad falló al publicar (se publica igual, backtest_metrics=None): %s",
+            "Sello de Integridad falló; se conserva pendiente de revisión: %s",
             seal_exc,
         )
-        # Publica igual, pero deja el sello en estado 'sin datos' y no replicable.
+        # Conserva el registro con el sello en estado 'sin datos' y no replicable.
         try:
             sb.table("marketplace_strategies").update(
-                {"backtest_metrics": None, "replicable": False}
+                {"backtest_metrics": None, "replicable": False, "status": "needs_review"}
             ).eq("id", strategy_id).execute()
         except Exception:  # noqa: BLE001
             pass
 
-    return {"id": strategy_id}
+    if publication_status == "published":
+        # Actividad: estrategia publicada (best-effort, jamás rompe el flujo).
+        try:
+            from social import log_activity
+
+            log_activity(
+                uid,
+                "published_strategy",
+                target_type="marketplace_strategy",
+                target_id=res.data[0]["id"],
+                meta={"title": body.title},
+            )
+        except Exception:  # noqa: BLE001
+            pass
+    return {"id": strategy_id, "status": publication_status}
 
 
 @router.get("/marketplace/{strategy_id}/replicate")
@@ -722,9 +729,11 @@ def marketplace_subscribe(strategy_id: str, request: Request):
     existing = sb.table("strategy_subscriptions").select("id").eq("strategy_id", strategy_id).eq("subscriber_id", uid).execute()
     if existing.data:
         raise HTTPException(400, "Ya estás suscrito a esta estrategia")
-    s = sb.table("marketplace_strategies").select("price_qp_week,author_id").eq("id", strategy_id).execute()
+    s = sb.table("marketplace_strategies").select("price_qp_week,author_id,status,title,backtest_metrics,data_hash").eq("id", strategy_id).execute()
     if not s.data:
         raise HTTPException(404, "Estrategia no encontrada")
+    if s.data[0].get("status") != "published" or review_reasons(s.data[0]):
+        raise HTTPException(409, "La estrategia no está disponible para nuevas suscripciones")
     price = s.data[0]["price_qp_week"]
     # Cobrar si hay precio
     if price > 0:
@@ -852,8 +861,14 @@ def marketplace_detail(strategy_id: str, request: Request = None):  # noqa: RUF0
     if not res.data:
         raise HTTPException(404, "Estrategia no encontrada")
     row = res.data[0]
+    reader = get_optional_user(request) if request is not None else None
+    row["catalog_available"] = row.get("status") == "published" and not review_reasons(row)
+    if row.get("status") != "published" or review_reasons(row):
+        if reader != row.get("author_id"):
+            subscriptions = sb.table("strategy_subscriptions").select("id").eq("strategy_id", strategy_id).eq("subscriber_id", reader).in_("status", ["active", "paused"]).execute().data if reader else []
+            if not subscriptions:
+                raise HTTPException(404, "Estrategia no disponible en el catálogo público")
     if not row.get("is_public_code"):
-        reader = get_optional_user(request) if request is not None else None
         if reader != row.get("author_id"):
             row = {k: v for k, v in row.items() if k != "code"}
     return row
