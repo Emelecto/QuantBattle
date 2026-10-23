@@ -31,3 +31,30 @@ test("strategy cache isolates accounts and tolerates unavailable storage", () =>
   window.localStorage.getItem=()=>{throw new Error("Storage blocked");};
   expect(exports.getRuns("alice")).toEqual([]);
 });
+
+test("historical leaderboard excludes inactive accounts and exposes query errors", async () => {
+  const source = readFileSync("src/lib/tournaments.ts", "utf8");
+  const compiled = ts.transpileModule(source, {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+  const profiles = [
+    {id:"inactive",username:"inactive",total_qp_earned:0,tournaments_won:0},
+    {id:"points",username:"points",total_qp_earned:10,tournaments_won:0},
+    {id:"winner",username:"winner",total_qp_earned:0,tournaments_won:1},
+  ];
+  let failure = false;
+  const client = {from:()=>{
+    let rows = [...profiles];
+    const query = {
+      select:()=>query,
+      gt:(key: keyof typeof profiles[number], value: number)=>{rows=rows.filter(row=>Number(row[key])>value);return query;},
+      order:()=>query,
+      limit:()=>Promise.resolve({data:rows,error:failure?{message:"Unavailable"}:null}),
+    };
+    return query;
+  }};
+  const exports: Record<string, (...args: unknown[]) => Promise<{user_id:string}[]>> = {};
+  vm.runInNewContext(compiled,{exports,require:(name:string)=>name.includes("supabase/client")?{createBrowserSupabaseClient:()=>client}:{},process:{env:{}}});
+  expect(Array.from(await exports.getGlobalLeaderboard("qp"),row=>row.user_id)).toEqual(["points"]);
+  expect(Array.from(await exports.getGlobalLeaderboard("tournaments"),row=>row.user_id)).toEqual(["winner"]);
+  failure = true;
+  await expect(exports.getGlobalLeaderboard("qp")).rejects.toThrow("No se pudo cargar");
+});

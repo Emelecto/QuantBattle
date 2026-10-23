@@ -118,27 +118,27 @@ function RegisterForm() {
     }
   }
 
-  function handleResend() {
-    setInfo("Reenviando enlace…");
+  async function handleResend() {
+    if (loading) return;
+    setError(null);
     setLoading(true);
-    const supabase = createBrowserSupabaseClient();
-    const redirectTo = `${window.location.origin}/auth/callback`;
-    supabase.auth
-      .resend({ type: "signup", email, options: { emailRedirectTo: redirectTo } })
-      .then(({ error }) => {
-        setLoading(false);
-        setInfo(
-          error
-            ? "No pudimos reenviar el enlace. Inténtalo en unos minutos."
-            : "Enlace reenviado. Revisa tu correo (también la bandeja de spam).",
-        );
-      });
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      const { error } = await supabase.auth.resend({ type: "signup", email: email.trim(), options: { emailRedirectTo: redirectTo } });
+      if (error) throw error;
+      setInfo("Enlace reenviado. Revisa tu correo (también la bandeja de spam).");
+    } catch {
+      setError("No pudimos reenviar el enlace. Revisa tu conexión e inténtalo en unos minutos.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <AuthShell
       title="Crear cuenta"
-      subtitle="Empieza a construir y validar tus estrategias fuera de muestra."
+      subtitle="Entrena modelos y valida tus predicciones en rondas de investigación."
       footer={
         <>
           ¿Ya tienes cuenta?{" "}
