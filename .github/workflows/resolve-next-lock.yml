@@ -1,0 +1,22 @@
+name: resolve-next-lock
+on:
+  push:
+    paths: [".github/workflows/resolve-next-lock.yml"]
+permissions:
+  contents: read
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install next@16.4.1 eslint-config-next@16.4.1 --package-lock-only --ignore-scripts --no-audit
+        working-directory: web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-next-lock
+          path: |
+            web/package.json
+            web/package-lock.json
