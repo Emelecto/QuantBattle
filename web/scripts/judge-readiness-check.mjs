@@ -69,14 +69,14 @@ try {
   });
   for(rows of [1,2]){
     await page.reload();
-    for(let i=0;i<rows;i++)await expect(page.getByText(`@technical-mock-${i}`,{exact:true})).toBeVisible();
+    for(let i=0;i<rows;i++)await expect(page.getByText(`@technical-mock-${i}`,{exact:true}).first()).toBeVisible();
   }
   fail=true;
   await page.reload();
   await expect(page.getByRole('button',{name:'Reintentar ranking',exact:true})).toBeVisible();
   fail=false;
   await page.getByRole('button',{name:'Reintentar ranking',exact:true}).click();
-  await expect(page.getByText('@technical-mock-0',{exact:true})).toBeVisible();
+  await expect(page.getByText('@technical-mock-0',{exact:true}).first()).toBeVisible();
   await page.unroute(profileRoute);
   if(errors.length)throw new Error(`Errores de navegador: ${errors.join('; ')}`);
   const result={completed_at:new Date().toISOString(),base_url:base,public_routes:publicChecks,browser_errors:errors,
