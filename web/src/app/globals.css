@@ -1,28 +1,23 @@
 @import "tailwindcss";
 
-/* ============================================================
-   QuantLab — tema dark quant minimalista / futurista / 3D
-   Palette OKLCH adaptada de iamsajid.com/ui-colors.
-   4-color system (Sajid): bg/text + accent violeta (264)
-   + accent amber (84). Light/dark comparten hue.
-   ============================================================ */
+/* QuantLab research system: graphite surfaces, ice-blue actions. */
 :root {
-  --ql-bg: oklch(0.12 0.022 264);          /* fondo base */
-  --ql-surface: oklch(0.15 0.018 264);     /* glass card */
-  --ql-surface-solid: oklch(0.17 0.018 264);
-  --ql-line: oklch(0.31 0.020 264);        /* borde sutil */
-  --ql-line-muted: oklch(0.24 0.018 264);  /* borde más tenue */
-  --ql-ink: oklch(0.96 0.045 264);         /* texto principal */
-  --ql-muted: oklch(0.74 0.030 264);       /* texto secundario */
-  --ql-highlight: oklch(0.52 0.05 264);    /* highlight/interacción */
-  --ql-accent: oklch(0.93 0.075 264);      /* acento violeta (primary) */
-  --ql-accent-2: oklch(0.76 0.11 264);     /* violeta más fuerte */
-  --ql-tertiary: oklch(0.92 0.12 84);      /* amber personality (secondary) */
-  --ql-long: oklch(0.78 0.12 160);         /* green / positivo */
-  --ql-short: oklch(0.72 0.13 30);         /* red / negativo */
-  --ql-warning: oklch(0.72 0.12 100);      /* warning */
-  --ql-info: oklch(0.72 0.12 260);         /* info */
-  --ql-glow: hsla(224, 64%, 97%, 0.10);    /* glow con alpha real */
+  --ql-bg: #0b0e12;
+  --ql-surface: #11161c;
+  --ql-surface-solid: #181e26;
+  --ql-line: #303a46;
+  --ql-line-muted: #222b35;
+  --ql-ink: #edf2f7;
+  --ql-muted: #aab7c6;
+  --ql-highlight: #50657b;
+  --ql-accent: #b9dcf6;
+  --ql-accent-2: #85bce6;
+  --ql-tertiary: #b9dcf6;
+  --ql-long: #78d6ad;
+  --ql-short: #f29b91;
+  --ql-warning: #e9c785;
+  --ql-info: #99c8ef;
+  --ql-glow: rgba(185, 220, 246, .15);
 }
 
 @theme inline {
@@ -129,7 +124,7 @@ body {
 
 /* gradiente de acento para palabras clave */
 .ql-gradient-text {
-  background: linear-gradient(135deg, var(--ql-accent), var(--ql-tertiary));
+  background: var(--ql-accent);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -171,7 +166,7 @@ body {
    BOTONES
    ------------------------------------------------------------ */
 .ql-btn-primary {
-  background: linear-gradient(135deg, var(--ql-accent), var(--ql-tertiary));
+  background: var(--ql-accent);
   color: oklch(0.12 0.022 264);
   border: 1px solid hsla(224, 96%, 97%, 0.12);
   box-shadow: inset 0 1px 0 hsla(224, 96%, 97%, 0.25);
@@ -514,3 +509,23 @@ p {
 h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
 h2 { font-size: clamp(1.35rem, 3vw, 1.9rem); }
 h3 { font-size: clamp(1.05rem, 2.5vw, 1.3rem); }
+
+/* Shared interaction and reading defaults. */
+html { scrollbar-color: var(--ql-highlight) var(--ql-bg); }
+body { caret-color: var(--ql-accent); }
+:focus-visible { outline: 2px solid var(--ql-accent); outline-offset: 4px; }
+a { text-underline-offset: 4px; }
+.ql-glass { background: var(--ql-surface); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+.ql-elev-1 { box-shadow: none; }
+.ql-glow-soft { box-shadow: 0 16px 40px rgba(0,0,0,.18); }
+.ql-btn-primary { box-shadow: none; color: var(--ql-bg); }
+.ql-btn-primary:hover { background: #d1e9fa; box-shadow: none; }
+.ql-btn-secondary { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.ql-gradient-text { background: none; -webkit-text-fill-color: var(--ql-accent); color: var(--ql-accent); }
+.ql-research-workspace { background: var(--ql-surface); }
+.ql-research-workspace summary { padding-block: 6px; }
+.ql-research-workspace summary:hover { color: var(--ql-accent); }
+@media (prefers-reduced-motion: reduce) {
+  .ql-tilt, .ql-btn-primary, .ql-btn-secondary { transition: none; }
+  .ql-tilt:hover, .ql-btn-primary:hover, .ql-btn-secondary:hover { transform: none; }
+}

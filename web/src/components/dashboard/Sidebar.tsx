@@ -14,10 +14,10 @@ const ADMIN_USER_IDS = ["2ca7b197-86f5-4605-9789-266bf8a0df01"];
 export const DASHBOARD_NAV = [
   { href: "/app", label: "Inicio", icon: "home" },
   { href: "/app/tournaments", label: "Competencias", icon: "trophy" },
+  { href: "/app/library", label: "Datasets", icon: "database" },
+  { href: "/app/academia", label: "Academia", icon: "book" },
   { href: "/app/strategies", label: "Estrategias", icon: "strategies" },
   { href: "/app/marketplace", label: "Marketplace", icon: "store" },
-  { href: "/app/academia", label: "Academia", icon: "book" },
-  { href: "/app/library", label: "Datasets", icon: "database" },
   { href: "/app/api-keys", label: "API Keys", icon: "key" },
 ] as const;
 

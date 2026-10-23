@@ -728,3 +728,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Content panels stay still; only actionable controls respond to hover. */
+.ql-bento-card:hover { transform: none; box-shadow: none; border-color: var(--ql-line); }
+.ql-bento-card-header-title h3 { font-size: 16px; }
+.ql-bento-card-subtitle { font-size: 14px; line-height: 1.5; }
