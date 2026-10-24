@@ -1,0 +1,253 @@
+.ql-research-workspace {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  margin-bottom: 8px;
+  background: transparent;
+}
+
+.ql-ml-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(290px, 0.8fr);
+  min-height: 400px;
+  overflow: hidden;
+  border: 1px solid var(--ql-line);
+  border-radius: 18px;
+  background: var(--ql-surface-solid);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.26), 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+.ql-ml-hero-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(24px, 3.3vw, 46px);
+  min-width: 0;
+  background-color: var(--ql-surface);
+  background-image: radial-gradient(circle at 1px 1px, rgba(185, 220, 246, 0.11) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.ql-ml-hero-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--ql-surface) 7%, rgba(17, 22, 28, 0.95) 45%, rgba(17, 22, 28, 0.7));
+  pointer-events: none;
+}
+
+.ql-ml-hero-main > * { position: relative; }
+
+.ql-ml-hero-topline,
+.ql-ml-status-heading,
+.ql-ml-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.ql-ml-eyebrow,
+.ql-ml-field-label {
+  color: var(--ql-accent);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+}
+
+.ql-ml-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ql-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ql-ml-live span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ql-accent);
+  box-shadow: 0 0 0 3px rgba(185, 220, 246, 0.12);
+}
+
+.ql-ml-hero h2 {
+  max-width: 620px;
+  margin: 30px 0 12px;
+  color: var(--ql-ink);
+  font-size: clamp(32px, 3.6vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.06;
+}
+
+.ql-ml-hero-intro {
+  max-width: 470px;
+  color: var(--ql-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ql-ml-round {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 26px;
+}
+.ql-ml-round > .ql-ml-field-label { display: block; }
+
+.ql-ml-round-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+  margin-top: 10px;
+  color: var(--ql-ink);
+  font-size: clamp(19px, 2vw, 26px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+.ql-ml-round-name:hover { color: var(--ql-accent); }
+.ql-ml-round-name span { color: var(--ql-accent); font-size: 18px; }
+.ql-ml-round-none { margin-top: 10px; color: var(--ql-muted); }
+
+.ql-ml-round-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 10px;
+  color: var(--ql-muted);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.ql-ml-hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  margin-top: 26px;
+}
+
+.ql-research-workspace .ql-ml-main-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 46px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+}
+
+.ql-ml-guide-link {
+  color: var(--ql-muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+.ql-ml-guide-link:hover { color: var(--ql-accent); }
+
+.ql-ml-hero-status {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: clamp(24px, 2.8vw, 38px);
+  border-left: 1px solid var(--ql-line);
+  background: var(--ql-surface-solid);
+}
+
+.ql-ml-status-mark {
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  flex: none;
+  border: 1px solid var(--ql-line);
+  border-radius: 8px;
+  color: var(--ql-accent);
+  font-size: 18px;
+}
+
+.ql-ml-status-title {
+  margin: 30px 0 10px;
+  color: var(--ql-ink);
+  font-size: clamp(22px, 2.3vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+
+.ql-ml-status-copy {
+  min-height: 48px;
+  color: var(--ql-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ql-ml-status-score { margin-top: 12px; color: var(--ql-accent); font-size: 13px; }
+
+.ql-ml-process {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 32px;
+}
+
+.ql-ml-process > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding-top: 13px;
+  border-top: 2px solid var(--ql-line);
+}
+.ql-ml-process > div.is-current { border-color: var(--ql-accent); }
+.ql-ml-process span { color: var(--ql-accent); font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 11px; }
+.ql-ml-process strong { color: var(--ql-ink); font-size: 12px; font-weight: 600; }
+.ql-ml-process small { color: var(--ql-muted); font-size: 11px; }
+
+.ql-ml-history {
+  min-width: 0;
+  padding: clamp(22px, 2.8vw, 36px);
+  border: 1px solid var(--ql-line);
+  border-radius: 16px;
+  background: var(--ql-surface);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+}
+
+.ql-ml-history-heading { align-items: flex-end; }
+.ql-ml-history-heading h3 { margin-top: 8px; color: var(--ql-ink); font-size: 23px; font-weight: 600; letter-spacing: -0.035em; }
+.ql-ml-history-heading p { max-width: 390px; color: var(--ql-muted); font-size: 12px; line-height: 1.5; }
+.ql-ml-history li { border-color: var(--ql-line); }
+.ql-ml-history summary { border-radius: 6px; }
+.ql-ml-history summary:focus-visible,
+.ql-ml-round-name:focus-visible,
+.ql-ml-guide-link:focus-visible { outline: 2px solid var(--ql-accent); outline-offset: 4px; }
+
+@media (max-width: 1050px) {
+  .ql-ml-hero { grid-template-columns: 1fr; }
+  .ql-ml-hero-status { border-left: 0; border-top: 1px solid var(--ql-line); }
+  .ql-ml-process { margin-top: 12px; }
+}
+
+@media (max-width: 640px) {
+  .ql-ml-hero { min-height: 0; }
+  .ql-ml-hero-main, .ql-ml-hero-status { padding: 23px; }
+  .ql-ml-hero-topline { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .ql-ml-hero h2 { margin-top: 22px; font-size: clamp(31px, 9vw, 40px); }
+  .ql-ml-round { margin-top: 4px; }
+  .ql-ml-round-name { font-size: 20px; }
+  .ql-ml-history-heading { align-items: flex-start; flex-direction: column; }
+  .ql-ml-process { gap: 5px; }
+  .ql-ml-process strong { font-size: 11px; }
+  .ql-ml-process small { font-size: 10px; }
+}

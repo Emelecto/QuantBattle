@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { experimentHistory, type ExperimentPage, type MlExperiment } from "@/lib/mlTournaments";
 import type { DashboardTournament } from "@/components/dashboard/useDashboardData";
+import "./ml-workspace.css";
 
 const date = (value: string) => new Intl.DateTimeFormat("es-CO", {dateStyle:"medium",timeStyle:"short",timeZone:"America/Bogota"}).format(new Date(value));
 const score = (value: number | null) => value == null ? "Pendiente de cierre y evaluación" : value.toFixed(6);
@@ -40,25 +41,49 @@ export function MlWorkspace({nextRound, roundsLoading}: {nextRound?: DashboardTo
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   const selected = page?.entries.find(entry=>entry.is_selected && entry.dataset_id === nextRound?.datasetId);
-  return <section id="historial-ml" aria-labelledby="workspace-heading" className="ql-research-workspace mb-6 rounded-xl border border-line p-5 sm:p-6">
-    <h2 id="workspace-heading" className="text-xl font-semibold text-ink">Mi investigación ML</h2>
-    <p className="mt-2 text-sm text-muted">Fechas en hora de Colombia. Cada resultado pertenece a una versión y una ronda; no se suman scores de datasets diferentes.</p>
-    <div className="mt-5 grid gap-6 border-y border-line py-5 sm:grid-cols-2">
-      <div><h3 className="font-medium text-ink">Próximo cierre</h3>
-        {roundsLoading ? <p className="mt-2 text-sm text-muted">Consultando rondas…</p> : nextRound ? <>
-          <Link href={`/app/tournaments/${nextRound.id}`} className="mt-2 block text-accent underline">{nextRound.name}</Link>
-          <p className="mt-2 text-base text-ink">{nextRound.deadline ? date(nextRound.deadline) : "Por anunciar"}</p>
-          <p className="mt-2 break-all font-mono text-xs text-muted">{nextRound.datasetVersion}</p>
-          <Link href={`/app/tournaments/${nextRound.id}`} className="ql-btn-primary mt-5 inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium">{nextRound.submission ? "Revisar mi envío" : "Preparar mis predicciones"}</Link>
-        </> : <p className="mt-2 text-sm text-muted">No se encontró una ronda abierta. Consulta Torneos para revisar su disponibilidad.</p>}
+  const submissionStatus = nextRound?.submission?.status;
+  const evaluated = submissionStatus === "scored" || submissionStatus === "done";
+  const validated = submissionStatus === "validated" || evaluated;
+  return <section id="historial-ml" aria-labelledby="workspace-heading" className="ql-research-workspace">
+    <div className="ql-ml-hero">
+      <div className="ql-ml-hero-main">
+        <div className="ql-ml-hero-topline">
+          <span className="ql-ml-eyebrow">ESTACIÓN DE INVESTIGACIÓN / ML</span>
+          <span className="ql-ml-live"><span aria-hidden="true" />{roundsLoading ? "Consultando ronda" : nextRound ? "Ronda disponible" : "Sin ronda abierta"}</span>
+        </div>
+        <h2 id="workspace-heading">Tu próxima decisión empieza con los datos.</h2>
+        <p className="ql-ml-hero-intro">{roundsLoading ? "Consultando las rondas disponibles…" : nextRound ? "Descarga el dataset, prepara tus predicciones y comprueba el estado de tu envío." : "Consulta las competencias para encontrar la próxima ronda disponible."}</p>
+        <div className="ql-ml-round">
+          <span className="ql-ml-field-label">RONDA ACTIVA</span>
+          {nextRound ? <>
+            <Link href={`/app/tournaments/${nextRound.id}`} className="ql-ml-round-name">{nextRound.name}<span aria-hidden="true">↗</span></Link>
+            <div className="ql-ml-round-meta"><span>Cierre · {nextRound.deadline ? date(nextRound.deadline) : "Por anunciar"}</span><span>Dataset · {nextRound.datasetVersion}</span></div>
+          </> : <p className="ql-ml-round-none">{roundsLoading ? "Cargando…" : "No se encontró una ronda abierta."}</p>}
+        </div>
+        <div className="ql-ml-hero-actions">
+          <Link href={nextRound ? `/app/tournaments/${nextRound.id}` : "/app/tournaments"} className="ql-btn-primary ql-ml-main-action">{nextRound ? nextRound.submission ? "Revisar mi envío" : "Preparar mis predicciones" : "Explorar torneos"}<span aria-hidden="true">↗</span></Link>
+          <Link href="/app/tournaments/guide" className="ql-ml-guide-link">Cómo funciona una ronda <span aria-hidden="true">→</span></Link>
+        </div>
       </div>
-      <div><h3 className="font-medium text-ink">Envío seleccionado para esta ronda</h3>
-        <p className="mt-2 text-sm text-muted">{loading ? "Consultando tus envíos…" : error ? "No se pudo consultar el estado." : selected ? `${selected.row_count.toLocaleString("es-CO")} filas · ${selected.experiment?.model_name ?? "Envío sin ficha de modelo"}` : nextRound?.submission ? "Hay un envío seleccionado. Abre la ronda para consultar su comprobante." : "No aparece un envío seleccionado en esta página del historial. Puedes comprobarlo en la ronda."}</p>
-        {selected && <p className="mt-2 text-sm text-ink">{score(selected.score)}</p>}
-      </div>
+      <aside className="ql-ml-hero-status" aria-label="Estado de tu investigación">
+        <div className="ql-ml-status-heading"><span className="ql-ml-field-label">ESTADO DEL ENVÍO</span><span className="ql-ml-status-mark" aria-hidden="true">↗</span></div>
+        <p className="ql-ml-status-title">{loading ? "Consultando…" : error ? "Estado no disponible" : evaluated ? "Resultado disponible" : validated ? "Predicción validada" : nextRound?.submission ? "Predicción registrada" : "Lista para empezar"}</p>
+        <p className="ql-ml-status-copy">{loading ? "Consultando tus envíos…" : error ? "No se pudo consultar el estado." : selected ? `${selected.row_count.toLocaleString("es-CO")} filas · ${selected.experiment?.model_name ?? "Envío sin ficha de modelo"}` : nextRound?.submission ? "Hay un envío seleccionado. Abre la ronda para consultar su comprobante." : "Descarga el dataset de la ronda y envía tus predicciones para iniciar tu registro."}</p>
+        {selected && <p className="ql-ml-status-score">{score(selected.score)}</p>}
+        <div className="ql-ml-process" aria-label="Etapas del torneo">
+          <div className={nextRound ? "is-current" : ""}><span>01</span><strong>Datos</strong><small>{nextRound ? "Disponibles" : "Pendientes"}</small></div>
+          <div className={nextRound?.submission ? "is-current" : ""}><span>02</span><strong>Predicción</strong><small>{validated ? "Validada" : nextRound?.submission ? "Enviada" : "Por enviar"}</small></div>
+          <div className={evaluated ? "is-current" : ""}><span>03</span><strong>Evaluación</strong><small>{evaluated ? "Publicada" : "Pendiente"}</small></div>
+        </div>
+      </aside>
+    </div>
+    <div className="ql-ml-history">
+    <div className="ql-ml-history-heading">
+      <div><span className="ql-ml-field-label">BITÁCORA / EXPERIMENTOS</span><h3>Historial de experimentos</h3></div>
+      <p>Fechas en hora de Colombia. Cada resultado pertenece a una versión y una ronda; no se suman scores de datasets diferentes.</p>
     </div>
     <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-      <h3 className="font-semibold text-ink">Historial de experimentos</h3>
+      <span className="text-sm text-muted">{!loading && !error && page ? `${page.entries.length} envíos en esta página` : "Registro de envíos"}</span>
       <div className="flex flex-wrap gap-4 text-sm">
         <button type="button" className="text-accent underline disabled:opacity-50" disabled={loading} onClick={()=>{setOffset(0);setSnapshot(undefined);setRetry(value=>value+1);}}>Actualizar historial</button>
         <button type="button" className="text-accent underline disabled:opacity-50" disabled={loading || error || !page?.entries.length} onClick={exportPage}>Descargar esta página (JSON)</button>
@@ -73,6 +98,7 @@ export function MlWorkspace({nextRound, roundsLoading}: {nextRound?: DashboardTo
         <button className="text-accent underline disabled:opacity-40" disabled={!page.has_more || loading} onClick={()=>{setSnapshot(page.snapshot);setOffset(page.next_offset ?? offset);}}>Más antiguos</button>
       </nav>
     </>}
+    </div>
   </section>;
 }
 

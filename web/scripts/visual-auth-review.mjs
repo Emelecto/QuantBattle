@@ -23,6 +23,11 @@ await page.goto(base+'/login');await page.getByLabel('Correo electrónico').fill
 await expect(page.locator('#historial-ml ol')).toBeVisible({timeout:60000});
 const rows=page.locator('#historial-ml ol > li');await expect(rows).toHaveCount(3);
 await page.screenshot({path:out+'/dashboard-ready.png',fullPage:true});
+await page.setViewportSize({width:390,height:844});
+await page.screenshot({path:out+'/dashboard-mobile.png',fullPage:true});
+const dashboardGeometry=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));
+if(dashboardGeometry.scroll>dashboardGeometry.width)throw Error('Dashboard horizontal overflow');
+await page.setViewportSize({width:1440,height:1000});
 await page.locator('#historial-ml ol').screenshot({path:productShots+'/history.png'});
 await page.getByRole('button',{name:/Ver los .* experimentos de esta página/}).click();
 if(await rows.count()<=3)throw Error('History did not expand');await page.getByRole('button',{name:'Mostrar solo los tres más recientes'}).click();await expect(rows).toHaveCount(3);
@@ -48,4 +53,4 @@ for(const width of [1440,390]) {
  }
 }
 await writeFile(out+'/surface-check.json',JSON.stringify(surfaces,null,2));
-await writeFile(out+'/authenticated-check.json',JSON.stringify({historyExpansion:true,errors,geometry},null,2));console.log(JSON.stringify({historyExpansion:true,errors,geometry}));await page.unrouteAll({behavior:'wait'});await browser.close();
+await writeFile(out+'/authenticated-check.json',JSON.stringify({historyExpansion:true,errors,dashboardGeometry,geometry},null,2));console.log(JSON.stringify({historyExpansion:true,errors,dashboardGeometry,geometry}));await page.unrouteAll({behavior:'ignoreErrors'});await browser.close();

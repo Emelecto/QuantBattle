@@ -306,11 +306,11 @@ function DashboardHome() {
         </div>
       )}
 
-      <header className="mb-6">
+      <header className="ql-home-intro">
+        <span className="ql-home-intro-kicker">QUANTLAB / INICIO</span>
         <h1 className="text-2xl font-semibold text-ink">Tu espacio de investigación</h1>
         <p className="mt-2 max-w-2xl text-base text-muted">Participa en torneos de machine learning, consulta tus envíos y continúa aprendiendo.</p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
-          <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Cómo enviar predicciones</Link>
           <Link href="/docs#evaluacion" className="text-accent underline underline-offset-4">Resultados del piloto técnico</Link>
         </div>
       </header>
