@@ -1,47 +1,25 @@
 import Link from "next/link";
-import "./library.css";
+import { buttonClasses } from "@/components/ui/Button";
 
-// La biblioteca heredada (Ruta Aprendiz) se retiró: todo el contenido
-// vive ahora en la Academia, abierta y sin gates. Los datasets con datos
-// reales siguen disponibles en sus páginas de detalle.
 const DATASETS = [
-  { id: "btc-daily", name: "BTC/USD Diario" },
-  { id: "eth-daily", name: "ETH/USD Diario" },
-  { id: "aapl-daily", name: "AAPL Diario" },
-  { id: "sp500-daily", name: "S&P 500 (índice)" },
-  { id: "us-cpi-monthly", name: "IPC de EE.UU. Mensual" },
+  { id: "btc-daily", name: "Bitcoin", detail: "BTC/USD · diario" },
+  { id: "eth-daily", name: "Ethereum", detail: "ETH/USD · diario" },
+  { id: "aapl-daily", name: "Apple", detail: "AAPL · diario" },
+  { id: "sp500-daily", name: "S&P 500", detail: "Índice · diario" },
+  { id: "us-cpi-monthly", name: "Inflación de EE. UU.", detail: "IPC · mensual" },
 ];
 
 export default function LibraryPage() {
-  return (
-    <div className="ql-learn-wrap">
-      <div className="ql-glass" style={{ padding: 32, marginTop: 40, textAlign: "center" }}>
-        <p style={{ color: "var(--ql-muted)", fontSize: 13, margin: "0 0 8px" }}>
-          Datos para investigación
-        </p>
-        <h1 style={{ color: "var(--ql-ink)", margin: "0 0 8px" }}>
-          Datasets de QuantLab
-        </h1>
-        <p style={{ color: "var(--ql-muted)", margin: "0 0 20px" }}>
-          Los datos para competir se descargan desde cada ronda ML: train,
-          validation y live comparten una versión y sus propias reglas de envío.
-        </p>
-        <Link href="/app/tournaments" className="btn-primary" style={{ display: "inline-block", textDecoration: "none" }}>
-          Descargar datos de una ronda
-        </Link>
-        <div style={{ marginTop: 28 }}>
-          <p style={{ color: "var(--ql-muted)", fontSize: 13, margin: "0 0 12px" }}>
-            Exploración histórica independiente de los torneos. La disponibilidad depende de cada fuente externa:
-          </p>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-            {DATASETS.map((d) => (
-              <Link key={d.id} href={`/app/library/${d.id}`} className="btn-secondary" style={{ textDecoration: "none" }}>
-                {d.name}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="ql-page">
+    <header className="ql-page-heading"><h1>Datasets de QuantLab</h1><p>Encuentra los datos de tu próxima investigación y consulta el contexto de cada fuente.</p></header>
+    <section className="ql-dataset-entry" aria-labelledby="round-data-heading">
+      <div><h2 id="round-data-heading">Datos para competir</h2><p>Descarga train, validation y live desde la ronda en la que vas a participar. Cada versión tiene sus propias filas, plazo y reglas de envío.</p></div>
+      <Link href="/app/tournaments" className={buttonClasses("primary", "lg")}>Descargar datos de una ronda</Link>
+    </section>
+    <section className="mt-12" aria-labelledby="historical-data-heading">
+      <h2 id="historical-data-heading" className="text-xl font-semibold">Exploración histórica</h2>
+      <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">Series independientes de los torneos. Su disponibilidad depende de cada fuente externa; consulta su detalle antes de usarlas.</p>
+      <ul className="ql-dataset-list mt-6">{DATASETS.map(d=><li key={d.id}><Link href={`/app/library/${d.id}`}><span><strong>{d.name}</strong><span>{d.detail}</span></span><span aria-hidden="true">↗</span></Link></li>)}</ul>
+    </section>
+  </div>;
 }

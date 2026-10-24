@@ -124,7 +124,7 @@ export default function ApiKeysPage() {
 
   return (
     <main className="flex min-h-screen flex-col">
-      <section className="mx-auto w-full max-w-4xl flex-1 px-6 py-14">
+      <section className="ql-page flex-1">
         <h1 className="text-3xl font-semibold tracking-tight text-ink">Claves de API</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           Conecta agentes de IA y herramientas externas a QuantLab con una clave
@@ -152,7 +152,7 @@ export default function ApiKeysPage() {
             </button>
           </div>
           {error && (
-            <p className="mt-2 rounded-md border border-short/30 bg-short/10 px-3 py-2 text-[12px] text-short">
+            <p className="mt-2 rounded-md border border-short/30 bg-short/10 px-3 py-2 text-sm text-short">
               {error}
             </p>
           )}
@@ -185,12 +185,12 @@ export default function ApiKeysPage() {
             {/* Comando completo listo para pegar */}
             <div className="mt-5">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[12px] font-medium text-muted">
+                <p className="text-sm font-medium text-muted">
                   O copia el comando completo para Claude Code (incluye tu clave):
                 </p>
               </div>
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                <code className="flex-1 overflow-x-auto rounded-md border border-line bg-black/40 px-3 py-2 font-mono text-[12px] text-muted">
+                <code className="flex-1 overflow-x-auto rounded-md border border-line bg-black/40 px-3 py-2 font-mono text-sm text-muted">
                   claude mcp add quantlab -e QUANTLAB_TOKEN={newKey} -- python mcp_server.py
                 </code>
                 <button
@@ -209,7 +209,7 @@ export default function ApiKeysPage() {
                   {copiedCmd ? "✓ Copiado" : "Copiar comando"}
                 </button>
               </div>
-              <p className="mt-2 font-mono text-[11px] text-muted">
+              <p className="mt-2 font-mono text-[13px] text-muted">
                 Ejecútalo en tu terminal y reinicia Claude Code. Guía para Cursor/Codex en el README del repo (mcp-server/).
               </p>
             </div>
@@ -240,7 +240,7 @@ export default function ApiKeysPage() {
                   <li key={k.id} className="flex items-center gap-4 px-5 py-4">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-ink">{k.name}</p>
-                      <p className="metric text-[11px] text-muted">
+                      <p className="metric text-[13px] text-muted">
                         Creada {new Date(k.created_at).toLocaleDateString("es-CO")}
                         {" · "}
                         {k.revoked_at
@@ -280,7 +280,7 @@ export default function ApiKeysPage() {
                       <li key={k.id} className="flex items-center gap-4 px-5 py-4">
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-ink">{k.name}</p>
-                          <p className="metric text-[11px] text-muted">
+                          <p className="metric text-[13px] text-muted">
                             Creada {new Date(k.created_at).toLocaleDateString("es-CO")}
                             {" · "}
                             {k.revoked_at
@@ -315,10 +315,10 @@ export default function ApiKeysPage() {
           <p className="mt-2 text-[13px] leading-relaxed text-muted">
             Con tu clave copiada, registra el servidor MCP de QuantLab:
           </p>
-          <pre className="mt-3 overflow-x-auto rounded-md border border-line bg-black/40 p-3 font-mono text-[12px] text-muted">
+          <pre className="mt-3 overflow-x-auto rounded-md border border-line bg-black/40 p-3 font-mono text-sm text-muted">
 {`claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python mcp_server.py`}
           </pre>
-          <p className="mt-2 text-[12px] text-muted">
+          <p className="mt-2 text-sm text-muted">
             Guía completa en{" "}
             <Link href="/app/api-keys/instructions" className="text-accent hover:underline">
               instrucciones del servidor MCP

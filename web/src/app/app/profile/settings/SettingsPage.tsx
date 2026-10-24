@@ -111,7 +111,7 @@ export function SettingsPage() {
   if (authLoading) {
     return (
       <main className="flex min-h-screen flex-col">
-        <div className="mx-auto w-full max-w-4xl flex-1 px-6 py-14">
+        <div className="ql-page flex-1">
           <div className="ql-skeleton-line w-48 h-8" />
           <div className="ql-skeleton-line w-72 h-4 mt-2" />
         </div>
@@ -132,12 +132,12 @@ export function SettingsPage() {
 
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="mx-auto w-full max-w-4xl flex-1 px-6 py-14">
+      <div className="ql-page flex-1">
         {/* Header */}
         <div className="flex flex-wrap items-center gap-4 animate-fadeIn">
           <Link
             href="/app/profile"
-            className="metric text-[12px] text-muted hover:text-accent transition-colors"
+            className="metric text-sm text-muted hover:text-accent transition-colors"
           >
             ← Perfil
           </Link>
@@ -196,7 +196,7 @@ export function SettingsPage() {
                   </p>
                   {apiKey ? (
                     <div className="rounded-lg border border-accent/40 bg-accent/[0.07] p-4">
-                      <p className="text-[12px] font-medium text-accent mb-2">
+                      <p className="text-sm font-medium text-accent mb-2">
                         Clave recien generada — copiala ahora
                       </p>
                       <code className="block overflow-x-auto rounded-md border border-line bg-black/40 px-3 py-2 font-mono text-sm text-ink">
@@ -221,7 +221,7 @@ export function SettingsPage() {
                           <code className="flex-1 font-mono text-xs text-muted truncate">
                             qlk_••••••••••••••••
                           </code>
-                          <span className="metric text-[11px] text-muted">
+                          <span className="metric text-[13px] text-muted">
                             {new Date(k.created_at).toLocaleDateString("es-CO")}
                           </span>
                         </div>
@@ -249,10 +249,10 @@ export function SettingsPage() {
                     Conecta tu agente de IA directamente con el motor de
                     backtest de QuantLab.
                   </p>
-                  <pre className="overflow-x-auto rounded-md border border-line bg-black/40 p-3 font-mono text-[12px] text-muted">
+                  <pre className="overflow-x-auto rounded-md border border-line bg-black/40 p-3 font-mono text-sm text-muted">
 {`claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python mcp_server.py`}
                   </pre>
-                  <p className="mt-2 text-[11px] text-muted">
+                  <p className="mt-2 text-[13px] text-muted">
                     Guia completa en{" "}
                     <Link
                       href="/app/api-keys/instructions"
@@ -295,7 +295,7 @@ export function SettingsPage() {
                       <p className="text-sm text-ink">
                         Cerrar sesion en todos los dispositivos
                       </p>
-                      <p className="text-[12px] text-muted mt-0.5">
+                      <p className="text-sm text-muted mt-0.5">
                         Tu sesion actual tambien se cerrara.
                       </p>
                     </div>

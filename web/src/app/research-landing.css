@@ -48,3 +48,13 @@
  .research-hero h1 { animation: research-enter 650ms cubic-bezier(.16, 1, .3, 1) both; }
  @keyframes research-enter { from { transform: translateY(14px); clip-path: inset(0 0 12% 0); } to { transform: translateY(0); clip-path: inset(0); } }
 }
+.research-stages > li { grid-template-columns: 30px minmax(0, 1fr) minmax(260px, .9fr); column-gap: 28px; padding-block: 40px; align-items: start; }
+.research-product-view { align-self: center; min-width: 0; }
+.research-product-view a { display: block; border-radius: 12px; overflow: hidden; }
+.research-product-view img { width: 100%; height: auto; }
+.research-product-view figcaption { color: var(--ql-muted); font-size: 14px; line-height: 1.6; margin-top: 12px; }
+.research-process > .research-footnote { margin-top: 32px; max-width: 75ch; font-size: 14px; line-height: 1.7; color: var(--ql-muted); }
+@media (max-width: 760px) {
+ .research-stages > li { grid-template-columns: 24px minmax(0,1fr); gap: 12px; }
+ .research-product-view { grid-column: 2; margin-top: 16px; }
+}

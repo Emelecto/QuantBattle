@@ -733,3 +733,6 @@
 .ql-bento-card:hover { transform: none; box-shadow: none; border-color: var(--ql-line); }
 .ql-bento-card-header-title h3 { font-size: 16px; }
 .ql-bento-card-subtitle { font-size: 14px; line-height: 1.5; }
+
+.ql-bento-ranking.is-empty { align-self: start; }
+.ql-bento-ranking.is-empty .ql-ranking-body { min-height: 100px; }

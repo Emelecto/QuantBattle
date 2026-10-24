@@ -361,7 +361,7 @@ function DashboardHome() {
         </Card>
 
         {/* Ranking — columna derecha, ambas filas */}
-        <Card className="ql-bento-ranking">
+        <Card className={`ql-bento-ranking${!rankingLoading && !rankingError && rankingEntries.length === 0 ? " is-empty" : ""}`}>
           <div className="ql-ranking-header">
             <CardHeaderWithIcon
               icon={

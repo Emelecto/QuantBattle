@@ -6,7 +6,7 @@ export function Card({ className, ...props }: DivProps) {
   return (
     <div
       className={cn(
-        "ql-glass ql-glass-hover transition-[transform,box-shadow,border-color] rounded-xl",
+        "ql-glass rounded-xl",
         className,
       )}
       {...props}

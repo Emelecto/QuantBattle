@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { buttonClasses } from "@/components/ui/Button";
 import "./research-landing.css";
 
@@ -7,6 +8,13 @@ const stages = [
   { title: "Construye tu modelo", file: "Tu entorno. Tu hipótesis.", text: "Trabaja con tus propias herramientas. Registra el nombre del modelo, sus parámetros y la semilla para conservar el contexto de cada experimento.", detail: "El historial es privado. Puedes consultar tus envíos y exportar sus metadatos para documentar tu investigación." },
   { title: "Envía predicciones", file: "id,prediction", text: "Sube un CSV con una predicción por fila. QuantLab comprueba identificadores, cobertura, duplicados y valores antes de aceptar el envío.", detail: "Conserva el comprobante y la huella SHA-256 del archivo. Revisa en la ronda cuál de tus envíos quedó seleccionado antes del cierre." },
   { title: "Evalúa la evidencia", file: "Cierre → evaluación → resultados", text: "Después del cierre y la evaluación, compara el resultado con las referencias de esa misma ronda. El score mide correlación de orden por era.", detail: "Spearman no mide rentabilidad. Los resultados de distintas versiones o datasets no deben sumarse como si fueran equivalentes." },
+];
+
+const productViews = [
+  {file:"dataset", width:534, height:223, alt:"Ficha real de entrenamiento de la ronda sintética: activos, eras, variables y descarga.", caption:"Un dataset con contexto"},
+  {file:"experiment", width:1084, height:574, alt:"Formulario real para registrar el modelo, parámetros, semilla y nota del experimento.", caption:"Una ficha por experimento"},
+  {file:"receipt", width:1084, height:240, alt:"Comprobante de la cuenta técnica con estado validado, número de filas, versión y huella del archivo.", caption:"Un comprobante verificable"},
+  {file:"history", width:1066, height:278, alt:"Historial de tres envíos de la cuenta técnica de QuantLab, con fechas y selección de la ronda.", caption:"Un historial que puedes consultar"},
 ];
 
 export default function Home() {
@@ -27,8 +35,14 @@ export default function Home() {
       <ol className="research-stages">{stages.map((stage, index) => <li key={stage.title}>
         <span className="research-step-number" aria-hidden="true">0{index + 1}</span>
         <div><h3>{stage.title}</h3><p>{stage.text}</p><details><summary>Qué debes tener en cuenta</summary><p>{stage.detail}</p></details></div>
-        <span className="research-stage-artifact">{stage.file}</span>
+        <figure className="research-product-view">
+          <a href={`/research/product/${productViews[index].file}.png`} target="_blank" rel="noreferrer" aria-label={`Ampliar captura: ${productViews[index].caption}`}>
+            <Image src={`/research/product/${productViews[index].file}.png`} alt={productViews[index].alt} width={productViews[index].width} height={productViews[index].height} sizes="(max-width: 760px) 85vw, 420px" />
+          </a>
+          <figcaption>{productViews[index].caption} · ampliar</figcaption>
+        </figure>
       </li>)}</ol>
+      <p className="research-footnote">Capturas del prototipo, 23 de octubre de 2026. Los registros mostrados pertenecen a la cuenta técnica y a una ronda sintética; no representan actividad de usuarios externos.</p>
     </section>
     <section className="research-evidence" aria-labelledby="evidence-title">
       <div className="research-wrap research-evidence-grid">

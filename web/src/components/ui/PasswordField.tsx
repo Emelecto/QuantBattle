@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
  * no depender del orden de conflictos de Tailwind.
  */
 const passwordInputClasses = cn(
-  "ql-input h-10 w-full rounded-md pl-3 pr-11 text-sm",
+  "ql-input h-11 w-full rounded-md pl-3 pr-11 text-base",
   "outline-none",
 );
 
@@ -82,7 +82,7 @@ export function PasswordField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium text-ink">
+      <label htmlFor={id} className="text-sm font-medium text-ink">
         {label}
       </label>
 

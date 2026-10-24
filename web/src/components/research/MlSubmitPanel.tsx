@@ -6,7 +6,7 @@ import { submitPredictions, type MlDataset, type MlSubmission } from "@/lib/mlTo
 import { reviewPredictionCsv, type CsvReview } from "@/lib/prediction-review";
 import { buttonClasses } from "@/components/ui/Button";
 
-const input = "mt-2 block w-full rounded-md border border-line bg-bg px-3 py-2 text-base text-ink";
+const input = "mt-2 block w-full ql-input min-h-11 rounded-md px-3 py-2 text-base text-ink";
 const date = (value: string) => new Intl.DateTimeFormat("es-CO", {dateStyle:"medium",timeStyle:"short",timeZone:"America/Bogota"}).format(new Date(value));
 
 export function MlSubmitPanel({liveDataset, canSubmit}: {liveDataset: MlDataset | null; canSubmit: boolean}) {
@@ -109,7 +109,7 @@ export function MlSubmitPanel({liveDataset, canSubmit}: {liveDataset: MlDataset 
         <p className="mt-4 text-sm text-muted">Esta revisión usa únicamente IDs y eras públicos. El servidor hace la validación definitiva; no calcula ni anticipa el score.</p>
         <p className="mt-3 break-all font-mono text-xs text-muted">SHA-256: {digest}</p>
       </section>}
-      <fieldset disabled={sending} className="space-y-4 rounded-xl border border-line p-5">
+      <fieldset disabled={sending} className="space-y-5 rounded-xl border border-line bg-surface p-5 sm:p-6">
         <legend className="px-2 font-semibold text-ink">Ficha del experimento</legend>
         <p className="text-sm text-muted">Privada, asociada a este archivo y conservada aunque envíes una corrección. Declara solo los datos que realmente utilizaste.</p>
         <label className="block text-sm text-ink">Nombre del modelo<input value={model} onChange={e=>setModel(e.target.value)} maxLength={100} required className={input} placeholder="Ej.: HistGradientBoosting v1" /></label>

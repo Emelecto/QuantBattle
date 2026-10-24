@@ -321,11 +321,9 @@ a[role="button"]:active {
 }
 
 /* Entrada suave de páginas y tarjetas principales */
-main, .ql-glass {
-  animation: ql-fade-in 280ms ease backwards;
-}
+
 /* Evita doble animación pesada en grids anidados */
-.grid > .ql-glass { animation: ql-pop 220ms ease both; }
+
 
 /* Transición base para todo lo interactivo (ya usada en botones) */
 a, button, input, select, textarea, [role="button"] {
@@ -505,10 +503,12 @@ p {
   text-decoration: none;
 }
 
-/* ===== Sajid: Fluid typography con clamp() ===== */
-h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
-h2 { font-size: clamp(1.35rem, 3vw, 1.9rem); }
-h3 { font-size: clamp(1.05rem, 2.5vw, 1.3rem); }
+/* Defaults stay in the base layer so component hierarchy can override them. */
+@layer base {
+ h1 { font-size: 2rem; }
+ h2 { font-size: 1.5rem; }
+ h3 { font-size: 1.125rem; }
+}
 
 /* Shared interaction and reading defaults. */
 html { scrollbar-color: var(--ql-highlight) var(--ql-bg); }
@@ -528,4 +528,30 @@ a { text-underline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) {
   .ql-tilt, .ql-btn-primary, .ql-btn-secondary { transition: none; }
   .ql-tilt:hover, .ql-btn-primary:hover, .ql-btn-secondary:hover { transform: none; }
+}
+
+/* Page rhythm shared by research surfaces. */
+.ql-page { width: 100%; max-width: 1120px; margin-inline: auto; padding: 24px 16px 48px; }
+.ql-page-heading { margin-bottom: 32px; }
+.ql-page-heading h1 { font-size: 32px; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; }
+.ql-page-heading p { margin-top: 12px; max-width: 65ch; color: var(--ql-muted); font-size: 16px; line-height: 1.7; }
+.ql-dataset-entry { display: flex; justify-content: space-between; align-items: center; gap: 32px; background: var(--ql-surface-solid); border-radius: 12px; padding: 28px; }
+.ql-dataset-entry h2 { font-size: 22px; font-weight: 600; }
+.ql-dataset-entry p { max-width: 60ch; color: var(--ql-muted); line-height: 1.7; margin-top: 12px; }
+.ql-dataset-entry > a { flex-shrink: 0; }
+.ql-dataset-list { list-style: none; border-top: 1px solid var(--ql-line); }
+.ql-dataset-list li { border-bottom: 1px solid var(--ql-line); }
+.ql-dataset-list a { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 12px; transition: background 160ms ease; }
+.ql-dataset-list a:hover { background: var(--ql-surface); }
+.ql-dataset-list strong { display: block; font-size: 16px; font-weight: 500; }
+.ql-dataset-list a > span > span { display: block; color: var(--ql-muted); margin-top: 4px; font-size: 14px; }
+.ql-round-tabs button { min-height: 44px; }
+body::before, body::after { display: none; }
+@media (max-width: 900px) { .ql-dataset-entry { flex-direction: column; align-items: start; } }
+@media (max-width: 640px) {
+ .ql-page { padding: 16px 4px 32px; }
+ .ql-page-heading h1 { font-size: 28px; }
+ .ql-dataset-entry { padding: 20px; }
+ .ql-dataset-entry > a { white-space: normal; height: auto; min-height: 44px; text-align: center; }
+ .ql-round-tabs button { padding-inline: 6px; }
 }

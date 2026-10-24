@@ -46,7 +46,7 @@ export function MobileBottomNav() {
           title="Volver atrás"
           aria-label="Volver atrás"
         >
-          <Icon name="arrow-left" size={18} />
+          <Icon name="arrow-left" size={18} /><span className="ql-mobile-nav-label">Volver</span>
         </button>
       )}
       {ITEMS.map((item) => (
@@ -58,10 +58,10 @@ export function MobileBottomNav() {
           aria-current={active(item.href) ? "page" : undefined}
           onClick={() => setMenuOpen(false)}
         >
-          <Icon name={item.icon} size={18} />
+          <Icon name={item.icon} size={18} /><span className="ql-mobile-nav-label">{item.label === "Competencias" ? "Torneos" : item.label}</span>
         </Link>
       ))}
-      <button type="button" className="ql-back-nav-button" aria-label={menuOpen ? "Cerrar menú" : "Más secciones"} aria-expanded={menuOpen} aria-controls="mobile-more" onClick={() => setMenuOpen((open) => !open)}><Icon name="menu" /></button>
+      <button type="button" className="ql-back-nav-button" aria-label={menuOpen ? "Cerrar menú" : "Más secciones"} aria-expanded={menuOpen} aria-controls="mobile-more" onClick={() => setMenuOpen((open) => !open)}><Icon name="menu" /><span className="ql-mobile-nav-label">Más</span></button>
     </nav>
   );
 }

@@ -31,7 +31,7 @@ const typeLabels: Record<TournamentSummary["type"], string> = {
 
 /** Los torneos ML llevan un color propio (violeta) para distinguirse del resto. */
 const ML_BADGE_CLASS =
-  "border-[#a78bfa]/35 bg-[#a78bfa]/12 text-[#c4b5fd]";
+  "border-line bg-surface-solid text-accent";
 
 const statusTones: Record<TournamentSummary["status"], "long" | "cyan" | "neutral"> = {
   active: "long",
@@ -55,14 +55,14 @@ export function TournamentCard({
   const esML = tournament.type === "ml";
 
   return (
-    <Card className="ql-tilt ql-glass-hover h-full flex flex-col overflow-hidden">
+    <Card className="h-full flex flex-col overflow-hidden">
       <Link
         href={`/app/tournaments/${tournament.id}`}
-        className="block ql-perspective flex flex-1 flex-col"
+        className="flex flex-1 flex-col hover:bg-surface-solid/40 transition-colors"
       >
         <CardBody className="flex-1 flex flex-col gap-4 p-6">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-[15px] font-semibold text-ink leading-tight">
+            <h3 className="text-xl font-semibold text-ink leading-snug">
               {tournament.name}
             </h3>
             <Badge tone={statusTones[tournament.status]}>
@@ -94,16 +94,16 @@ export function TournamentCard({
 
           <div className="mt-auto pt-2 mb-2 flex items-end justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted">
-                {esML ? "Recompensa" : "Premio"}
+              <p className="text-sm text-muted">
+                {esML ? "Participación" : "Premio"}
               </p>
-              <p className="metric text-accent ql-glow-text text-lg font-semibold">
-                {esML ? "Sin QP" : `${tournament.qp_prize.toLocaleString()} QP`}
+              <p className="text-ink text-base font-medium">
+                {esML ? "Gratuita · sin premios QP" : `${tournament.qp_prize.toLocaleString()} QP`}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[11px] uppercase tracking-wider text-muted">
-                Participantes
+              <p className="text-sm text-muted">
+                {esML ? "Envíos" : "Participantes"}
               </p>
               <p className="metric text-ink text-sm">
                 {tournament.participants ?? "—"}
@@ -118,12 +118,12 @@ export function TournamentCard({
           </div>
         </CardBody>
 
-        <CardFooter className="justify-between px-6 py-4">
+        <CardFooter className="flex-wrap justify-between gap-4 px-6 py-4">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted">
+            <p className="text-sm text-muted">
               Métrica
             </p>
-            <p className="text-xs text-ink">{tournament.metric_label}</p>
+            <p className="text-sm text-ink">{tournament.metric_label}</p>
           </div>
           <CountdownTimer deadline={tournament.deadline} />
         </CardFooter>
@@ -134,7 +134,7 @@ export function TournamentCard({
         <div className="border-t border-line px-5 py-3">
           <Link
             href={`/app/tournaments/${tournament.id}`}
-            className={buttonClasses("secondary", "sm", "w-full")}
+            className={buttonClasses(tournament.status === "active" ? "primary" : "secondary", "md", "w-full")}
           >
             Ver ronda
           </Link>
