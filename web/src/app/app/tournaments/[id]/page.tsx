@@ -87,7 +87,7 @@ function CodeTournamentDetail({
 
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-14">
+      <div className="ql-page flex-1">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-ink">
@@ -185,7 +185,7 @@ function CodeTournamentDetail({
         )}
 
         {/* Disclaimer */}
-        <p className="mt-8 text-[11px] text-muted">
+        <p className="mt-8 text-sm text-muted">
           QuantLab es una herramienta de investigación. No es asesoría financiera ni recomendación de inversión.
         </p>
       </div>
@@ -211,7 +211,7 @@ const KIND_LABEL: Record<string, string> = {
   live: "Predicciones de la ronda",
 };
 
-const ML_BADGE_CLASS = "border-[#a78bfa]/35 bg-[#a78bfa]/12 text-[#c4b5fd]";
+const ML_BADGE_CLASS = "border-line bg-surface-solid text-accent";
 
 function num(v: number | null | undefined, digits = 4): string {
   return v == null || !Number.isFinite(v) ? "—" : v.toFixed(digits);
@@ -305,7 +305,7 @@ function MlTournamentDetail({
 
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-14">
+      <div className="ql-page flex-1">
         {/* Cabecera */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -390,7 +390,7 @@ function MlTournamentDetail({
         <div
           role="tablist"
           aria-label="Secciones del torneo ML"
-          className="mt-8 grid grid-cols-3 gap-2 rounded-lg bg-surface/60 p-1"
+          className="ql-round-tabs mt-8 grid grid-cols-3 gap-2 rounded-lg bg-surface p-1"
         >
           {TABS.map((t) => (
             <button
@@ -430,7 +430,7 @@ function MlTournamentDetail({
         )}
 
         {/* Disclaimer */}
-        <p className="mt-10 text-[11px] text-muted">
+        <p className="mt-10 text-sm text-muted">
           QuantLab es una herramienta de investigación. No es asesoría financiera ni
           recomendación de inversión.
         </p>
@@ -551,7 +551,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
                 >
                   {bajando === ds.id ? "Obteniendo..." : `Descargar ${ds.kind}.parquet`}
                 </button>
-                <span className="text-[11px] text-muted">
+                <span className="text-sm text-muted">
                   {ds.download_url ? ds.status : "Archivo no disponible en esta ronda"}
                 </span>
               </div>

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { buttonClasses } from "@/components/ui/Button";
-import { SpotlightCard } from "@/components/SpotlightCard";
 
 const FEATURES = [
   {
@@ -48,21 +47,18 @@ export default function FeaturesPage() {
       <section className="border-b border-line">
         <div className="mx-auto w-full max-w-6xl px-6 py-12">
           <div className="grid gap-4 md:grid-cols-2">
-            {FEATURES.map((f, i) => (
-              <SpotlightCard
+            {FEATURES.map((f) => (
+              <article
                 key={f.title}
                 className="border-t border-line pt-5"
               >
-                <span className="metric text-[11px] tracking-widest text-muted">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h2 className="mt-3 text-base font-semibold text-ink">
+                <h2 className="mt-3 text-xl font-semibold text-ink">
                   {f.title}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted">
+                <p className="mt-3 text-base leading-relaxed text-muted">
                   {f.text}
                 </p>
-              </SpotlightCard>
+              </article>
             ))}
           </div>
         </div>

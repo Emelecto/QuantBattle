@@ -6,37 +6,37 @@ export default function TournamentsGuidePage() {
   return (
     <main className="flex min-h-screen flex-col">
       <section className="border-b border-line">
-        <div className="mx-auto w-full max-w-4xl px-6 py-16">
+        <div className="ql-page">
           <h1 className="text-3xl font-semibold tracking-tight text-ink">
             Guía de Torneos
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+          <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted">
             Cómo funcionan los torneos de predicción ML de QuantLab: datasets,
             envío de predicciones, evaluación y condiciones de uso de los datos.
           </p>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-4xl flex-1 px-6 py-14">
+      <section className="ql-page flex-1">
         <div className="prose prose-invert max-w-none">
           {/* ¿Qué son los torneos? */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">¿Qué son los torneos?</h2>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               Los torneos son competiciones periódicas donde los participantes
               envían predicciones sobre el comportamiento de mercados financieros.
               En los torneos de predicción ML no se ejecuta dinero real: descargas
               datos, entrenas un modelo y envías predicciones para una evaluación
               fuera de muestra.
             </p>
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-base leading-relaxed text-muted">
               Las rondas ML no tienen premios QP. Los puntos de QuantLab se usan
               en otros flujos de la plataforma, pero no en estos torneos.
             </p>
           </div>
 
           {/* Tipos de torneos */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Tipos de torneos</h2>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-lg border border-line/50 p-4">
@@ -59,11 +59,11 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* Los Datasets */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Los Datasets</h2>
             
             <h3 className="text-sm font-semibold text-ink mb-2">¿De dónde vienen los datos?</h3>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               Los datasets se generan automáticamente antes de cada ronda del torneo.
               Hay rondas de práctica sintéticas y rondas reales con datos de mercado:
             </p>
@@ -82,7 +82,7 @@ export default function TournamentsGuidePage() {
 
             <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 mb-5">
               <h3 className="text-sm font-semibold text-ink mb-2">Atribución y licencia</h3>
-              <p className="text-sm leading-relaxed text-muted">
+              <p className="text-base leading-relaxed text-muted">
                 Los datasets reales derivados se atribuyen a Binance Vision y se
                 distribuyen bajo CC BY-NC-SA 4.0 para investigación y educación no
                 comercial. Las redistribuciones deben conservar esa licencia.
@@ -103,13 +103,13 @@ export default function TournamentsGuidePage() {
             </div>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Estructura del dataset</h3>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               En las rondas prospectivas, los envíos se reciben durante 24 horas.
               El precio base se fija en el primer cierre diario común posterior al
               plazo y la evaluación compara ese precio con los cinco cierres que le
               siguen. La etiqueta permanece privada hasta que se complete el horizonte.
             </p>
-            <p className="text-sm leading-relaxed text-muted mb-3">
+            <p className="text-base leading-relaxed text-muted mb-3">
               Cada dataset contiene tres particiones:
             </p>
             <div className="overflow-x-auto rounded-lg border border-line/50 mb-4">
@@ -138,7 +138,7 @@ export default function TournamentsGuidePage() {
             </div>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Obtención del dataset</h3>
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-base leading-relaxed text-muted">
               Los datasets se descargan desde Supabase Storage (bucket
               <code className="font-mono text-accent text-xs">tournament-datasets</code>).
               El worker expone endpoints para listar y descargar las particiones
@@ -147,11 +147,11 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* Las Predicciones */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Las Predicciones</h2>
             
             <h3 className="text-sm font-semibold text-ink mb-2">¿Cómo se hacen predicciones?</h3>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               Una vez entrenado tu modelo con la partición de train y validado con
               validation, usas el modelo final para generar predicciones sobre la
               partición live. El proceso general es:
@@ -166,7 +166,7 @@ export default function TournamentsGuidePage() {
             </ol>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Formato del CSV de predicciones</h3>
-            <p className="text-sm leading-relaxed text-muted mb-3">
+            <p className="text-base leading-relaxed text-muted mb-3">
               Para torneos de predicciones ML, el CSV debe contener al menos:
             </p>
             <ul className="text-sm text-muted space-y-1 mb-4 list-disc pl-5">
@@ -181,11 +181,11 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* El Submit */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">El Submit (Envío)</h2>
             
             <h3 className="text-sm font-semibold text-ink mb-2">¿Cómo se envía una predicción?</h3>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               El envío se hace a través del endpoint{" "}
               <code className="font-mono text-accent text-xs">POST /ml/datasets/{'{dataset_id}'}/predictions</code>{" "}
               del worker. Tienes dos opciones:
@@ -209,14 +209,14 @@ export default function TournamentsGuidePage() {
             </div>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Reemplazo de submissions</h3>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               Si ya enviaste una submission previamente, el nuevo envío{" "}
               <strong className="text-ink">reemplaza</strong> al anterior. Solo se
               evalúa la última submission recibida antes del cierre.
             </p>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Validación del CSV</h3>
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-base leading-relaxed text-muted">
               El worker comprueba columnas, IDs, valores, versión del dataset y
               número de filas. Solo el último envío válido antes del cierre se
               incluye en el ranking. No se muestra score mientras la ronda está abierta.
@@ -224,11 +224,11 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* Evaluación */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Evaluación y Scoring</h2>
             
             <h3 className="text-sm font-semibold text-ink mb-2">¿Cómo se evalúan las submissions?</h3>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               Una vez cerrado el torneo, el worker ejecuta el proceso de scoring
               automáticamente:
             </p>
@@ -241,7 +241,7 @@ export default function TournamentsGuidePage() {
             </ol>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Métricas de evaluación</h3>
-            <p className="text-sm leading-relaxed text-muted mb-3">
+            <p className="text-base leading-relaxed text-muted mb-3">
               Las métricas principales son:
             </p>
             <div className="overflow-x-auto rounded-lg border border-line/50 mb-4">
@@ -266,7 +266,7 @@ export default function TournamentsGuidePage() {
             </div>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Anti-trampas</h3>
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-base leading-relaxed text-muted">
               El holdout se mantiene privado y la puntuación se calcula en el
               servidor después del plazo. Las features están ofuscadas, pero no
               cifradas; como los datos de origen son públicos, pueden ser
@@ -275,14 +275,14 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* Reparto de QP */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Reparto de QP</h2>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               Los torneos de predicción ML no reparten QP ni recompensas. Esta
               condición permite usar los datos derivados de Binance Vision bajo
               los términos no comerciales aplicables.
             </p>
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-base leading-relaxed text-muted">
               El ranking sirve para comparar submissions dentro de la ronda. Un
               resultado positivo no demuestra rentabilidad ni garantiza que el
               modelo funcione en otros períodos.
@@ -290,11 +290,11 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* Uso del MCP */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Uso del MCP (Model Context Protocol)</h2>
             
             <h3 className="text-sm font-semibold text-ink mb-2">¿Qué es el MCP?</h3>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               El MCP es un servidor que permite a tu agente de IA (Claude Code,
               Cursor, Codex CLI) interactuar con QuantLab usando lenguaje natural.
               No necesitas escribir código: dile a tu agente lo que quieres hacer
@@ -362,9 +362,9 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* Endpoints del Worker */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 mb-8">
+          <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Endpoints del Worker</h2>
-            <p className="text-sm leading-relaxed text-muted mb-4">
+            <p className="text-base leading-relaxed text-muted mb-4">
               El worker de QuantLab expone los siguientes endpoints relevantes para
               torneos:
             </p>

@@ -2,7 +2,7 @@ import { cn } from "@/lib/cn";
 
 /** Clases compartidas para inputs de formularios en tema dark. */
 export const inputClasses = cn(
-  "ql-input h-10 w-full rounded-md px-3 text-sm",
+  "ql-input h-11 w-full rounded-md px-3 text-base",
   "outline-none",
 );
 
@@ -17,7 +17,7 @@ export function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium text-ink">
+      <label htmlFor={id} className="text-sm font-medium text-ink">
         {label}
       </label>
       {children}
@@ -38,18 +38,18 @@ export function AuthShell({
   footer: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-start justify-center px-6 py-16">
-      <div className="w-full max-w-sm">
-        <div className="ql-glass ql-glow-soft rounded-xl p-6">
-          <h1 className="text-xl font-semibold tracking-tight text-ink">
+    <div className="flex flex-1 items-start justify-center px-5 py-12 sm:py-20">
+      <div className="w-full max-w-md">
+        <div className="ql-glass rounded-xl p-6 sm:p-8">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
             {title}
           </h1>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+          <p className="mt-3 text-base leading-relaxed text-muted">
             {subtitle}
           </p>
           <div className="mt-6">{children}</div>
         </div>
-        <p className="mt-4 text-center text-[13px] text-muted">{footer}</p>
+        <p className="mt-5 text-center text-sm text-muted">{footer}</p>
       </div>
     </div>
   );

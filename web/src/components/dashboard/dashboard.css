@@ -1118,3 +1118,14 @@
     padding: 10px 12px;
   }
 }
+
+/* Research navigation uses the same solid surfaces as the workspace. */
+.ql-sidebar { background: var(--ql-surface); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+.ql-sidebar-glow { display: none; }
+.ql-user-name { font-size: 14px; }
+.ql-user-username { font-size: 12px; }
+
+@media (max-width: 900px) {
+ .ql-dash-bottomnav > a, .ql-dash-bottomnav > button { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 48px; height: 52px; }
+ .ql-mobile-nav-label { font-size: 10px; line-height: 1; }
+}

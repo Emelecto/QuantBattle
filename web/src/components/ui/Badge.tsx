@@ -8,7 +8,7 @@ export type BadgeTone =
   | "violet";
 
 const tones: Record<BadgeTone, string> = {
-  neutral: "border-line bg-[#1a2131] text-muted",
+  neutral: "border-line bg-surface-solid text-muted",
   long: "border-long/30 bg-long/10 text-long",
   short: "border-short/30 bg-short/10 text-short",
   cyan: "border-cyan/30 bg-cyan/10 text-cyan",
@@ -29,7 +29,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] font-medium tracking-wide ql-badge-qp",
+        "inline-flex items-center gap-1 rounded border px-2 py-1 text-[13px] font-medium ql-badge-qp",
         tones[tone],
         mono && "metric",
         className,

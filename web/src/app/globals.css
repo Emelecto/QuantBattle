@@ -1,28 +1,23 @@
 @import "tailwindcss";
 
-/* ============================================================
-   QuantLab — tema dark quant minimalista / futurista / 3D
-   Palette OKLCH adaptada de iamsajid.com/ui-colors.
-   4-color system (Sajid): bg/text + accent violeta (264)
-   + accent amber (84). Light/dark comparten hue.
-   ============================================================ */
+/* QuantLab research system: graphite surfaces, ice-blue actions. */
 :root {
-  --ql-bg: oklch(0.12 0.022 264);          /* fondo base */
-  --ql-surface: oklch(0.15 0.018 264);     /* glass card */
-  --ql-surface-solid: oklch(0.17 0.018 264);
-  --ql-line: oklch(0.31 0.020 264);        /* borde sutil */
-  --ql-line-muted: oklch(0.24 0.018 264);  /* borde más tenue */
-  --ql-ink: oklch(0.96 0.045 264);         /* texto principal */
-  --ql-muted: oklch(0.74 0.030 264);       /* texto secundario */
-  --ql-highlight: oklch(0.52 0.05 264);    /* highlight/interacción */
-  --ql-accent: oklch(0.93 0.075 264);      /* acento violeta (primary) */
-  --ql-accent-2: oklch(0.76 0.11 264);     /* violeta más fuerte */
-  --ql-tertiary: oklch(0.92 0.12 84);      /* amber personality (secondary) */
-  --ql-long: oklch(0.78 0.12 160);         /* green / positivo */
-  --ql-short: oklch(0.72 0.13 30);         /* red / negativo */
-  --ql-warning: oklch(0.72 0.12 100);      /* warning */
-  --ql-info: oklch(0.72 0.12 260);         /* info */
-  --ql-glow: hsla(224, 64%, 97%, 0.10);    /* glow con alpha real */
+  --ql-bg: #0b0e12;
+  --ql-surface: #11161c;
+  --ql-surface-solid: #181e26;
+  --ql-line: #303a46;
+  --ql-line-muted: #222b35;
+  --ql-ink: #edf2f7;
+  --ql-muted: #aab7c6;
+  --ql-highlight: #50657b;
+  --ql-accent: #b9dcf6;
+  --ql-accent-2: #85bce6;
+  --ql-tertiary: #b9dcf6;
+  --ql-long: #78d6ad;
+  --ql-short: #f29b91;
+  --ql-warning: #e9c785;
+  --ql-info: #99c8ef;
+  --ql-glow: rgba(185, 220, 246, .15);
 }
 
 @theme inline {
@@ -129,7 +124,7 @@ body {
 
 /* gradiente de acento para palabras clave */
 .ql-gradient-text {
-  background: linear-gradient(135deg, var(--ql-accent), var(--ql-tertiary));
+  background: var(--ql-accent);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -171,7 +166,7 @@ body {
    BOTONES
    ------------------------------------------------------------ */
 .ql-btn-primary {
-  background: linear-gradient(135deg, var(--ql-accent), var(--ql-tertiary));
+  background: var(--ql-accent);
   color: oklch(0.12 0.022 264);
   border: 1px solid hsla(224, 96%, 97%, 0.12);
   box-shadow: inset 0 1px 0 hsla(224, 96%, 97%, 0.25);
@@ -326,11 +321,9 @@ a[role="button"]:active {
 }
 
 /* Entrada suave de páginas y tarjetas principales */
-main, .ql-glass {
-  animation: ql-fade-in 280ms ease backwards;
-}
+
 /* Evita doble animación pesada en grids anidados */
-.grid > .ql-glass { animation: ql-pop 220ms ease both; }
+
 
 /* Transición base para todo lo interactivo (ya usada en botones) */
 a, button, input, select, textarea, [role="button"] {
@@ -510,7 +503,55 @@ p {
   text-decoration: none;
 }
 
-/* ===== Sajid: Fluid typography con clamp() ===== */
-h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
-h2 { font-size: clamp(1.35rem, 3vw, 1.9rem); }
-h3 { font-size: clamp(1.05rem, 2.5vw, 1.3rem); }
+/* Defaults stay in the base layer so component hierarchy can override them. */
+@layer base {
+ h1 { font-size: 2rem; }
+ h2 { font-size: 1.5rem; }
+ h3 { font-size: 1.125rem; }
+}
+
+/* Shared interaction and reading defaults. */
+html { scrollbar-color: var(--ql-highlight) var(--ql-bg); }
+body { caret-color: var(--ql-accent); }
+:focus-visible { outline: 2px solid var(--ql-accent); outline-offset: 4px; }
+a { text-underline-offset: 4px; }
+.ql-glass { background: var(--ql-surface); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+.ql-elev-1 { box-shadow: none; }
+.ql-glow-soft { box-shadow: 0 16px 40px rgba(0,0,0,.18); }
+.ql-btn-primary { box-shadow: none; color: var(--ql-bg); }
+.ql-btn-primary:hover { background: #d1e9fa; box-shadow: none; }
+.ql-btn-secondary { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.ql-gradient-text { background: none; -webkit-text-fill-color: var(--ql-accent); color: var(--ql-accent); }
+.ql-research-workspace { background: var(--ql-surface); }
+.ql-research-workspace summary { padding-block: 6px; }
+.ql-research-workspace summary:hover { color: var(--ql-accent); }
+@media (prefers-reduced-motion: reduce) {
+  .ql-tilt, .ql-btn-primary, .ql-btn-secondary { transition: none; }
+  .ql-tilt:hover, .ql-btn-primary:hover, .ql-btn-secondary:hover { transform: none; }
+}
+
+/* Page rhythm shared by research surfaces. */
+.ql-page { width: 100%; max-width: 1120px; margin-inline: auto; padding: 24px 16px 48px; }
+.ql-page-heading { margin-bottom: 32px; }
+.ql-page-heading h1 { font-size: 32px; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; }
+.ql-page-heading p { margin-top: 12px; max-width: 65ch; color: var(--ql-muted); font-size: 16px; line-height: 1.7; }
+.ql-dataset-entry { display: flex; justify-content: space-between; align-items: center; gap: 32px; background: var(--ql-surface-solid); border-radius: 12px; padding: 28px; }
+.ql-dataset-entry h2 { font-size: 22px; font-weight: 600; }
+.ql-dataset-entry p { max-width: 60ch; color: var(--ql-muted); line-height: 1.7; margin-top: 12px; }
+.ql-dataset-entry > a { flex-shrink: 0; }
+.ql-dataset-list { list-style: none; border-top: 1px solid var(--ql-line); }
+.ql-dataset-list li { border-bottom: 1px solid var(--ql-line); }
+.ql-dataset-list a { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 12px; transition: background 160ms ease; }
+.ql-dataset-list a:hover { background: var(--ql-surface); }
+.ql-dataset-list strong { display: block; font-size: 16px; font-weight: 500; }
+.ql-dataset-list a > span > span { display: block; color: var(--ql-muted); margin-top: 4px; font-size: 14px; }
+.ql-round-tabs button { min-height: 44px; }
+body::before, body::after { display: none; }
+@media (max-width: 900px) { .ql-dataset-entry { flex-direction: column; align-items: start; } }
+@media (max-width: 640px) {
+ .ql-page { padding: 16px 4px 32px; }
+ .ql-page-heading h1 { font-size: 28px; }
+ .ql-dataset-entry { padding: 20px; }
+ .ql-dataset-entry > a { white-space: normal; height: auto; min-height: 44px; text-align: center; }
+ .ql-round-tabs button { padding-inline: 6px; }
+}

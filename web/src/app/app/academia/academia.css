@@ -18,7 +18,7 @@
   --ac-radius: 10px;
   background: var(--ac-bg);
   color: var(--ac-body);
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
   border: 1px solid var(--ac-line);
   border-radius: 12px;
   padding: clamp(20px, 4vw, 44px);
@@ -161,10 +161,10 @@
   border: 1px solid transparent;
   transition: filter 0.15s ease, border-color 0.15s ease;
 }
-/* Contraste verificado ≥4.5:1 (WCAG AA). Fondo fijo #5e6ad2: el token
+/* Shared ice-blue actions with dark text. Legacy note: the token
    --ql-accent en tema claro (oklch L≈0.93) no contrasta con texto claro. */
-.academia-btn-primary { background: #5e6ad2; border-color: #5e6ad2; color: #fff; }
-.academia-btn-primary:hover { background: #828fff; border-color: #828fff; color: #060709; }
+.academia-btn-primary { background: var(--ql-accent); border-color: var(--ql-accent); color: var(--ql-bg); }
+.academia-btn-primary:hover { background: #d1e9fa; border-color: #d1e9fa; color: var(--ql-bg); }
 .academia-btn-primary:focus-visible,
 .academia-btn-secondary:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .academia-btn-secondary {
@@ -479,7 +479,7 @@
   font-weight: 600;
   cursor: pointer;
 }
-.academia-pill-activa { background: #5e6ad2; border-color: #5e6ad2; color: #fff; }
+.academia-pill-activa { background: var(--ql-accent); border-color: var(--ql-accent); color: var(--ql-bg); }
 .academia-simulador-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
 .academia-control label { display: block; color: var(--ac-body); font-size: 13px; margin-bottom: 6px; }
 .academia-deslizador { width: 100%; accent-color: var(--ac-accent); cursor: pointer; }

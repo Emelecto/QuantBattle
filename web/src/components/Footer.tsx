@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-line">
+    <footer className="mt-auto bg-surface">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
           <Link href="/docs" className="transition-colors hover:text-ink">
@@ -44,7 +44,7 @@ export function Footer() {
             GitHub
           </a>
         </div>
-        <p className="max-w-xl text-[12px] leading-relaxed text-muted">
+        <p className="max-w-xl text-[13px] leading-relaxed text-muted">
           QuantLab es una herramienta de investigación. No es asesoría
           financiera ni recomendación de inversión.
         </p>
