@@ -4,7 +4,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, devices } from '@playwright/test';
-import { loadEnvConfig } from '@next/env';
+import nextEnv from '@next/env';
+const { loadEnvConfig } = nextEnv;
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 loadEnvConfig(path.join(root, 'web'));
