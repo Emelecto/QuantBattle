@@ -20,15 +20,23 @@ const productViews = [
 export default function Home() {
   return <div className="research-landing">
     <section className="research-hero research-wrap">
-      <h1>Investiga.<br /><span>Predice.</span></h1>
-      <div className="research-hero-bottom">
-        <p>Un laboratorio de machine learning financiero en español. Construye modelos y pon tus predicciones a prueba en torneos.</p>
-        <div className="research-actions">
-          <Link href="/app/tournaments" className={buttonClasses("primary", "lg")}>Explorar torneos ML <span aria-hidden="true">↗</span></Link>
-          <Link href="/docs#evaluacion" className="research-text-link">Ver evaluación técnica</Link>
+      <div className="research-hero-layout">
+        <div className="research-hero-copy">
+          <h1>Investiga.<br /><span>Predice.</span></h1>
+          <p className="research-hero-lead">Un laboratorio de machine learning financiero en español. Construye modelos y pon tus predicciones a prueba en torneos.</p>
+          <div className="research-actions">
+            <Link href="/app/tournaments" className={buttonClasses("primary", "lg")}>Explorar torneos ML <span aria-hidden="true">↗</span></Link>
+            <Link href="/docs#evaluacion" className="research-text-link">Ver evaluación técnica</Link>
+          </div>
+          <p className="research-origin">QuantLab · Semillero DeepFin · Universidad EIA</p>
         </div>
+        <figure className="research-hero-visual">
+          <a href="/research/product/dataset.png" target="_blank" rel="noreferrer" aria-label="Ampliar captura real del dataset de entrenamiento del piloto sintético" data-ui>
+            <Image src="/research/product/dataset.png" alt="Ficha real del dataset de entrenamiento sintético: 600 activos, 210 eras, 50 variables y descarga de train.parquet." width={534} height={223} priority sizes="(max-width: 760px) 100vw, 480px" />
+          </a>
+          <figcaption><strong>Datos con contexto.</strong> Captura de la ronda sintética del piloto técnico.</figcaption>
+        </figure>
       </div>
-      <p className="research-origin">QuantLab · Semillero DeepFin · Universidad EIA</p>
     </section>
     <section className="research-process research-wrap" aria-labelledby="process-title">
       <div className="research-section-heading"><h2 id="process-title">De datos a evidencia.</h2><p>Cuatro etapas. Un experimento que puedes documentar.</p></div>
@@ -36,7 +44,7 @@ export default function Home() {
         <span className="research-step-number" aria-hidden="true">0{index + 1}</span>
         <div><h3>{stage.title}</h3><p>{stage.text}</p><details><summary>Qué debes tener en cuenta</summary><p>{stage.detail}</p></details></div>
         <figure className="research-product-view">
-          <a href={`/research/product/${productViews[index].file}.png`} target="_blank" rel="noreferrer" aria-label={`Ampliar captura: ${productViews[index].caption}`}>
+          <a href={`/research/product/${productViews[index].file}.png`} target="_blank" rel="noreferrer" aria-label={`Ampliar captura: ${productViews[index].caption}`} data-ui>
             <Image src={`/research/product/${productViews[index].file}.png`} alt={productViews[index].alt} width={productViews[index].width} height={productViews[index].height} sizes="(max-width: 760px) 85vw, 420px" />
           </a>
           <figcaption>{productViews[index].caption} · ampliar</figcaption>
