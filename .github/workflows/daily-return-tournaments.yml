@@ -1,0 +1,31 @@
+name: Daily return tournament referee
+on:
+  schedule:
+    # 05:30 UTC = 00:30 Colombia. Other ticks recover delays and settle data.
+    - cron: '0,30 * * * *'
+  workflow_dispatch:
+concurrency:
+  group: daily-return-tournament-referee
+  cancel-in-progress: false
+jobs:
+  referee:
+    if: vars.ML_DAILY_TOURNAMENTS_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: worker/requirements.txt
+      - run: python -m pip install -r requirements.txt
+        working-directory: worker
+      - name: Generate, settle and publish due rounds
+        working-directory: worker
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATASET_SALT: ${{ secrets.DATASET_SALT }}
+          ML_DAILY_TOURNAMENTS_ENABLED: ${{ vars.ML_DAILY_TOURNAMENTS_ENABLED }}
+        run: python run_return_tournaments.py

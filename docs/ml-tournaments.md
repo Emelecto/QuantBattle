@@ -1,5 +1,7 @@
 # Torneos de predicción ML de QuantLab
 
+Este documento describe el protocolo anterior Spearman, incluida la práctica sintética. El nuevo torneo semanal de cuatro rondas con retornos reales tiene [su propio protocolo](daily-return-tournaments.md), calendario y puntuación; no usa el objetivo antiguo a cinco días.
+
 ## Qué recibe cada participante
 
 Cada ronda publica tres archivos Parquet con IDs de fila y variables `feature_XX`:

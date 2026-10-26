@@ -13,3 +13,4 @@ __pycache__
 supabase/.temp/
 web/test-results/
 web/playwright-report/
+worker/.return-pilot-*.json

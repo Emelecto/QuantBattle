@@ -288,3 +288,22 @@ def public_url(path: str) -> str:
     """URL pública estable del objeto (el bucket de datasets es público)."""
     url = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
     return f"{url}/storage/v1/object/public/{DATASET_BUCKET}/{path}"
+
+
+def upload_bytes(data: bytes, path: str, *, private: bool = True,
+                 content_type: str = 'application/octet-stream') -> str:
+    """Store an encrypted source or a final public evidence file."""
+    require_private_buckets()
+    bucket = TARGETS_BUCKET if private else DATASET_BUCKET
+    sb = _client()
+    _with_retry(lambda: sb.storage.from_(bucket).upload(
+        path, data, {'content-type': content_type, 'upsert': 'true'}), op=f'upload evidence {bucket}')
+    return path
+
+
+def download_bytes(path: str, *, private: bool = True, expected_sha256: str | None = None) -> bytes:
+    require_private_buckets()
+    bucket = TARGETS_BUCKET if private else DATASET_BUCKET
+    data = _with_retry(lambda: _client().storage.from_(bucket).download(path),
+                       op=f'download evidence {bucket}', fatal=_is_not_found)
+    return verify_bytes(data, expected_sha256)
