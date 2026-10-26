@@ -352,7 +352,7 @@ export default function TournamentsGuidePage() {
             </div>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Ejemplos de uso</h3>
-            <pre className="rounded-md border border-line bg-black/40 p-3 font-mono text-[12px] text-muted overflow-x-auto">
+            <pre className="rounded-md border border-line bg-surface-solid p-3 font-mono text-[12px] text-muted overflow-x-auto">
 {`- "¿En qué torneos puedo participar?"
 - "Muéstrame el leaderboard del torneo de BTC"
 - "¿Cuántos QP tengo?"

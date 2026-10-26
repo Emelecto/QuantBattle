@@ -14,11 +14,11 @@ function HeroEquity() {
     <svg className="academia-hero-svg" viewBox="0 0 320 120" role="img" aria-label="Equity con drawdown">
       <path
         d="M15 90 L60 70 L100 76 L150 40 L190 52 L230 30 L260 62 L290 48"
-        fill="none" stroke="#2dd4bf" strokeWidth="2.5" strokeLinecap="round" className="academia-svg-trazo"
+        fill="none" stroke="#087951" strokeWidth="2.5" strokeLinecap="round" className="academia-svg-trazo"
       />
       <path
         d="M230 30 L260 62 L290 48 L290 30 Z"
-        fill="rgba(239,68,68,0.18)" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4 3"
+        fill="rgba(239,68,68,0.18)" stroke="#af3f4f" strokeWidth="1.5" strokeDasharray="4 3"
       />
       <text x="258" y="78" textAnchor="middle" className="academia-svg-mini">underwater</text>
     </svg>
@@ -61,14 +61,14 @@ export function C1L4EquityUnderwater() {
       <Reveal retraso={200}>
         <p className="academia-viz-graf-titulo">Equity (base 100)</p>
         <AcademiaAreaChart
-          datos={ficha.equity} altura={240} color="#2dd4bf" etiqueta="Equity"
+          datos={ficha.equity} altura={240} color="#087951" etiqueta="Equity"
           formato={(v) => v.toFixed(2)}
         />
       </Reveal>
       <Reveal retraso={260}>
         <p className="academia-viz-graf-titulo">Underwater — drawdown %</p>
         <AcademiaAreaChart
-          datos={ficha.underwater} altura={150} color="#ef4444" etiqueta="DD"
+          datos={ficha.underwater} altura={150} color="#af3f4f" etiqueta="DD"
           formato={(v) => `${v.toFixed(2)} %`}
         />
       </Reveal>

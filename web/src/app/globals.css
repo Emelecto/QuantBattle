@@ -1,23 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
-/* QuantLab research system: graphite surfaces, ice-blue actions. */
+/* QuantLab research system: shared light palette for every route. */
 :root {
-  --ql-bg: #0b0e12;
-  --ql-surface: #11161c;
-  --ql-surface-solid: #181e26;
-  --ql-line: #303a46;
-  --ql-line-muted: #222b35;
-  --ql-ink: #edf2f7;
-  --ql-muted: #aab7c6;
-  --ql-highlight: #50657b;
-  --ql-accent: #b9dcf6;
-  --ql-accent-2: #85bce6;
-  --ql-tertiary: #b9dcf6;
-  --ql-long: #78d6ad;
-  --ql-short: #f29b91;
-  --ql-warning: #e9c785;
-  --ql-info: #99c8ef;
-  --ql-glow: rgba(185, 220, 246, .15);
+  --ql-bg: #f5f8fb;
+  --ql-surface: #fff;
+  --ql-surface-solid: #f0f5fa;
+  --ql-line: #dce6ef;
+  --ql-line-muted: #e9eff5;
+  --ql-ink: #172840;
+  --ql-muted: #52677d;
+  --ql-highlight: #7389a2;
+  --ql-accent: #245ce5;
+  --ql-accent-2: #3d79d7;
+  --ql-tertiary: #245ce5;
+  --ql-long: #087951;
+  --ql-short: #af3f4f;
+  --ql-warning: #8d641a;
+  --ql-info: #245ce5;
+  --ql-glow: rgba(36, 92, 229, .13);
 }
 
 @theme inline {
@@ -43,16 +44,22 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   background: var(--ql-bg);
   color: var(--ql-ink);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: "DM Sans", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
+.ql-public-header { background:#fff; border-color:#dce6ef; }
+.ql-public-header .ql-public-mark { display:grid; place-items:center; width:29px; height:29px; padding-right:3px; background:#245ce5; color:#fff; font-family:Manrope,sans-serif; font-size:17px; font-weight:800; letter-spacing:-.13em; }
+.ql-public-header .ql-public-brand { color:#172840; font-family:Manrope,sans-serif; font-size:18px; font-weight:800; letter-spacing:-.035em; }
+.ql-public-header .ql-public-nav > a:not(.ql-public-nav-cta):not(.ql-btn-primary) { color:#52677d; }
+.ql-public-header .ql-public-nav > a:not(.ql-public-nav-cta):not(.ql-btn-primary):hover { color:#245ce5; }
+.ql-public-header .ql-btn-primary { background:#245ce5; color:#fff; }
 
 /* ------------------------------------------------------------
    GLASS + ESCALA DE ELEVACIÓN
@@ -63,18 +70,16 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--ql-line);
   box-shadow:
-    inset 0 1px 0 hsla(224, 96%, 97%, 0.06),
-    0 8px 30px hsla(0, 0%, 0%, 0.4);
+    0 8px 30px rgba(31, 59, 96, .06);
   border-radius: 12px;
 }
 
 .ql-elev-1 {
-  box-shadow: 0 4px 20px hsla(0, 0%, 0%, 0.35);
+  box-shadow: 0 4px 20px rgba(31, 59, 96, .06);
 }
 .ql-elev-2 {
   box-shadow:
-    0 20px 50px hsla(0, 0%, 0%, 0.55),
-    0 4px 12px hsla(224, 90%, 50%, 0.10);
+    0 20px 50px rgba(31, 59, 96, .12);
 }
 
 /* tier destacado (Pro) — borde acento violeta + glow */
@@ -88,8 +93,7 @@ body {
 /* glow suave de acento para superficies destacadas (login/register) */
 .ql-glow-soft {
   box-shadow:
-    0 14px 44px hsla(0, 0%, 0%, 0.55),
-    0 0 26px hsla(224, 96%, 97%, 0.08);
+    0 14px 44px rgba(31, 59, 96, .12);
 }
 
 /* ------------------------------------------------------------
@@ -134,7 +138,7 @@ body {
    INPUTS GLASS
    ------------------------------------------------------------ */
 .ql-input {
-  background: hsla(224, 96%, 97%, 0.03);
+  background: #fff;
   border: 1px solid var(--ql-line);
   color: var(--ql-ink);
   transition:
@@ -158,8 +162,8 @@ body {
     box-shadow 160ms ease;
 }
 .ql-row:hover {
-  background: hsla(224, 96%, 97%, 0.04);
-  box-shadow: inset 0 0 0 1px hsla(224, 90%, 50%, 0.08);
+  background: #f1f6fc;
+  box-shadow: inset 0 0 0 1px #dce6ef;
 }
 
 /* ------------------------------------------------------------
@@ -167,24 +171,20 @@ body {
    ------------------------------------------------------------ */
 .ql-btn-primary {
   background: var(--ql-accent);
-  color: oklch(0.12 0.022 264);
-  border: 1px solid hsla(224, 96%, 97%, 0.12);
-  box-shadow: inset 0 1px 0 hsla(224, 96%, 97%, 0.25);
+  color: #fff;
+  border: 1px solid var(--ql-accent);
+  box-shadow: none;
   transition:
     transform 160ms ease,
     box-shadow 160ms ease;
 }
 .ql-btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    inset 0 1px 0 hsla(224, 96%, 97%, 0.25),
-    0 10px 30px hsla(224, 90%, 50%, 0.20);
+  background: #174cbf;
+  box-shadow: none;
 }
 
 .ql-btn-secondary {
   background: var(--ql-surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--ql-line);
   color: var(--ql-ink);
   transition:
@@ -212,19 +212,18 @@ body {
   color: var(--ql-ink);
 }
 
-/* Dropdowns nativos (select) en dark: el navegador pinta la lista emergente
-   con el color-scheme del elemento; sin esto sale blanca. */
+/* Dropdowns nativos mantienen la misma paleta clara. */
 select,
 select option,
 select optgroup {
-  background-color: oklch(0.12 0.022 264);
+  background-color: #fff;
   color: var(--ql-ink);
 }
 select {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* Scrollbar dark */
+/* Scrollbar clara */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -233,11 +232,11 @@ select {
   background: var(--ql-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.31 0.020 264);
+  background: #b4c9df;
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.37 0.022 264);
+  background: #8baaca;
 }
 
 /* ------------------------------------------------------------
@@ -285,12 +284,12 @@ select {
 .ql-skeleton-line {
   height: 12px;
   border-radius: 4px;
-  background: hsla(224, 96%, 97%, 0.05);
+  background: #e5edf5;
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 .ql-skeleton-circle {
   border-radius: 50%;
-  background: hsla(224, 96%, 97%, 0.05);
+  background: #e5edf5;
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 .ql-skeleton-card {
@@ -388,6 +387,7 @@ body::before {
 
 /* Tipografía: balance en headings, pretty en párrafos */
 h1, h2, h3 {
+  font-family: Manrope, var(--font-geist-sans), sans-serif;
   text-wrap: balance;
 }
 p {
@@ -517,9 +517,9 @@ body { caret-color: var(--ql-accent); }
 a { text-underline-offset: 4px; }
 .ql-glass { background: var(--ql-surface); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
 .ql-elev-1 { box-shadow: none; }
-.ql-glow-soft { box-shadow: 0 16px 40px rgba(0,0,0,.18); }
-.ql-btn-primary { box-shadow: none; color: var(--ql-bg); }
-.ql-btn-primary:hover { background: #d1e9fa; box-shadow: none; }
+.ql-glow-soft { box-shadow: 0 16px 40px rgba(31,59,96,.1); }
+.ql-btn-primary { box-shadow: none; color: #fff; }
+.ql-btn-primary:hover { background: #174cbf; box-shadow: none; }
 .ql-btn-secondary { backdrop-filter: none; -webkit-backdrop-filter: none; }
 .ql-gradient-text { background: none; -webkit-text-fill-color: var(--ql-accent); color: var(--ql-accent); }
 .ql-research-workspace { background: var(--ql-surface); }

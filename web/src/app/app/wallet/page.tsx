@@ -192,7 +192,7 @@ export default function WalletPage() {
 
           {/* Banner Stripe deshabilitado */}
           {stripeDisabled && (
-            <div className="mt-4 rounded-lg border border-line bg-white/[0.02] px-4 py-3 text-center text-sm text-muted">
+            <div className="mt-4 rounded-lg border border-line bg-surface-solid px-4 py-3 text-center text-sm text-muted">
               <p className="font-medium text-ink">Compras próximamente</p>
               <p className="mt-1">El método de pago estará disponible pronto.</p>
             </div>
@@ -210,7 +210,7 @@ export default function WalletPage() {
               const plan = PLAN_MAP[p.amount];
               const isSubscribing = subscribing === plan;
               return (
-                <div key={p.usd} className="flex flex-col rounded-lg border border-line bg-white/[0.02] p-4 text-center">
+                <div key={p.usd} className="flex flex-col rounded-lg border border-line bg-surface-solid p-4 text-center">
                   <p className="text-2xl font-semibold text-ink">{p.amount} QP</p>
                   <p className="mt-1 text-sm text-muted">${p.usd}/mes</p>
                   <div className="mb-4 mt-2 flex min-h-[20px] items-center justify-center gap-1">

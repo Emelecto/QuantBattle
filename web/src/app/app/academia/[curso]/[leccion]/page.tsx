@@ -29,7 +29,9 @@ export default async function AcademiaLessonPage({
   ]);
   if (html == null) notFound();
 
-  const toc = getLessonToc(html);
+  // El título de la lección ya aparece en el encabezado del lector.
+  const articleHtml = html.replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/i, "");
+  const toc = getLessonToc(articleHtml);
   const prev = getLesson(curso, lesson.leccion - 1);
   const next = getLesson(curso, lesson.leccion + 1);
   const total = LESSONS.filter((l) => l.curso === curso).length;
@@ -63,7 +65,7 @@ export default async function AcademiaLessonPage({
         )}
 
         <div className="academia-reader-grid">
-          <article className="academia-article" dangerouslySetInnerHTML={{ __html: html }} />
+          <article className="academia-article" dangerouslySetInnerHTML={{ __html: articleHtml }} />
           {toc.length > 0 && (
             <aside className="academia-toc">
               <div className="academia-toc-title">En esta lección</div>

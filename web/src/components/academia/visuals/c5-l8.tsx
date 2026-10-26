@@ -42,7 +42,7 @@ export default function C5L8Visual() {
           <div className="academia-barra-fondo" aria-label={`Progreso ${progreso}%`}>
             <div className="academia-barra-relleno" style={{ width: `${progreso}%` }} />
           </div>
-          {progreso === 100 && <p style={{ color: "#22c55e", fontSize: "0.9rem" }}>✓ Despliega con tamaño reducido y vigilancia diaria las primeras 2 semanas.</p>}
+          {progreso === 100 && <p style={{ color: "#087951", fontSize: "0.9rem" }}>✓ Despliega con tamaño reducido y vigilancia diaria las primeras 2 semanas.</p>}
         </div>
       </Reveal>
       <Reveal retraso={200}>

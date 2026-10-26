@@ -79,7 +79,7 @@ export default function C3L4Visual() {
               style={{
                 flex: 1,
                 height: `${Math.max(3, (tr / maxTr) * 100)}%`,
-                background: i >= trs.length - ventana ? "#5e6ad2" : "rgba(255,255,255,0.18)",
+                background: i >= trs.length - ventana ? "#245ce5" : "#cbd9e8",
                 borderRadius: "2px",
               }}
             />

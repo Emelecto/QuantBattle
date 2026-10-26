@@ -91,7 +91,7 @@ export function SymbolPicker({
 
       {open && (
         <div
-          className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-line bg-[#0d1017] shadow-xl shadow-black/50"
+          className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-line bg-white shadow-[0_14px_35px_rgba(31,59,96,.14)]"
           role="listbox"
         >
           <div className="border-b border-line p-2">
@@ -109,8 +109,8 @@ export function SymbolPicker({
                 <button
                   type="button"
                   onClick={() => pick(s)}
-                  className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-[13px] transition-colors hover:bg-white/[0.04] ${
-                    s.symbol === value ? "bg-white/[0.05]" : ""
+                  className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-[13px] transition-colors hover:bg-surface-solid ${
+                    s.symbol === value ? "bg-surface-solid" : ""
                   }`}
                 >
                   <span className="font-mono font-medium text-ink">{s.symbol}</span>
@@ -137,7 +137,7 @@ export function SymbolPicker({
                           asset_type: assetType,
                         })
                       }
-                      className="flex w-full items-center gap-2 border-t border-line px-3 py-2.5 text-left text-[13px] transition-colors hover:bg-white/[0.04]"
+                      className="flex w-full items-center gap-2 border-t border-line px-3 py-2.5 text-left text-[13px] transition-colors hover:bg-surface-solid"
                     >
                       <span className="text-accent">+</span>
                       <span className="font-mono text-ink">

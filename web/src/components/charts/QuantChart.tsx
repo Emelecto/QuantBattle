@@ -210,7 +210,7 @@ export function QuantChart({
               className={`rounded-md px-2 py-0.5 font-mono text-[11px] transition-colors ${
                 range === r
                   ? "bg-accent/15 text-accent"
-                  : "text-muted hover:bg-white/5 hover:text-ink"
+                  : "text-muted hover:bg-surface-solid hover:text-ink"
               }`}
             >
               {r}
@@ -224,7 +224,7 @@ export function QuantChart({
       {/* Tooltip flotante */}
       {tooltip && (
         <div
-          className="pointer-events-none absolute z-20 rounded-lg border border-line bg-[#0d1017]/95 px-3 py-2 font-mono text-[11px] leading-relaxed shadow-lg"
+          className="pointer-events-none absolute z-20 rounded-lg border border-line bg-surface-solid/95 px-3 py-2 font-mono text-[11px] leading-relaxed shadow-lg"
           style={{
             left: Math.min(tooltip.x + 12, (containerRef.current?.clientWidth ?? 400) - 170),
             top: Math.max(tooltip.y - 60, 8),

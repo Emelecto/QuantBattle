@@ -138,8 +138,8 @@ export function ActivityFeed() {
           <ul aria-busy="true" className="divide-y divide-line">
             {[0, 1, 2].map((i) => (
               <li key={i} className="flex animate-pulse items-center gap-3 px-5 py-3">
-                <span className="h-8 w-8 shrink-0 rounded-full bg-white/5" />
-                <span className="h-3 w-40 rounded-full bg-white/5" />
+                <span className="h-8 w-8 shrink-0 rounded-full bg-surface-solid" />
+                <span className="h-3 w-40 rounded-full bg-surface-solid" />
               </li>
             ))}
           </ul>

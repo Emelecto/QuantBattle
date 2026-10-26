@@ -32,7 +32,7 @@ function ModelRow({ model }: { model: ModelHistory }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-white/[0.03]"
+        className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-surface-solid"
       >
         <svg
           viewBox="0 0 24 24"
@@ -79,7 +79,7 @@ function ModelRow({ model }: { model: ModelHistory }) {
 
       {/* Detalle: historial de rounds */}
       {open && (
-        <div className="border-t border-line bg-black/20 px-5 py-3">
+        <div className="border-t border-line bg-surface-solid px-5 py-3">
           {model.history.some((r) => r.sharpe_oos != null) ? (
             <table className="w-full">
               <thead>

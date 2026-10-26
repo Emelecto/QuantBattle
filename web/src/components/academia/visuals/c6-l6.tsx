@@ -29,7 +29,7 @@ export default function C6L6Visual() {
       <Reveal retraso={200}>
         <div className="academia-control" style={{ display: "flex", gap: "0.5rem", marginBottom: "0.8rem" }}>
           {(["todas", "plan", "sin"] as const).map((m) => (
-            <button key={m} onClick={() => setFiltro(m)} style={{ padding: "0.4rem 0.9rem", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.15)", background: filtro === m ? "#5e6ad2" : "transparent", color: "inherit", cursor: "pointer" }}>
+            <button key={m} onClick={() => setFiltro(m)} style={{ padding: "0.4rem 0.9rem", borderRadius: "8px", border: "1px solid #cddaea", background: filtro === m ? "#245ce5" : "transparent", color: filtro === m ? "#fff" : "inherit", cursor: "pointer" }}>
               {m === "todas" ? "Todas" : m === "plan" ? "Con plan" : "Sin plan"}
             </button>
           ))}

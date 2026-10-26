@@ -56,8 +56,8 @@ export default function C6L8Visual() {
         </div>
       </Reveal>
       <Reveal retraso={200}>
-        <svg viewBox="0 0 100 36" style={{ width: "100%", height: "140px", background: "rgba(255,255,255,0.02)", borderRadius: "8px" }}>
-          <polyline points={pts} fill="none" stroke={disparos > 0 ? "#ef4444" : "#22c55e"} strokeWidth="1.2" />
+        <svg viewBox="0 0 100 36" style={{ width: "100%", height: "140px", background: "#f4f8fc", borderRadius: "8px" }}>
+          <polyline points={pts} fill="none" stroke={disparos > 0 ? "#af3f4f" : "#087951"} strokeWidth="1.2" />
         </svg>
         <p className="academia-viz-nota" style={{ marginTop: "0.5rem" }}>
           {disparos > 0 ? `⛔ Kill-switch activo: con límite −${limite.toFixed(1)} % el sistema se habría detenido ${disparos} días. Eso es capital salvado.` : `✓ Con límite −${limite.toFixed(1)} % y ${hasta} días no se dispara. Ojo: a 45 días el DD real llegó a −9.95 %.`}

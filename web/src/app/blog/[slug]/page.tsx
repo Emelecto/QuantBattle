@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPostBySlug, markdownToHtml, getAllPosts } from "@/lib/blog";
+import "./blog-article.css";
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -77,7 +78,7 @@ export default async function BlogPostPage({
         </header>
 
         <div
-          className="prose prose-invert prose-headings:text-ink prose-p:text-muted prose-strong:text-ink prose-a:text-accent prose-li:text-muted max-w-none"
+          className="ql-blog-article prose prose-headings:text-ink prose-p:text-muted prose-strong:text-ink prose-a:text-accent prose-li:text-muted max-w-none"
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       </article>

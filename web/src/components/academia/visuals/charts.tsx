@@ -32,7 +32,7 @@ function fechaCorta(fecha: string): string {
 export function AcademiaAreaChart({
   datos,
   altura = 260,
-  color = "#5e6ad2",
+  color = "#245ce5",
   etiqueta = "Valor",
   formato = (v: number) => v.toFixed(2),
 }: {
@@ -65,20 +65,20 @@ export function AcademiaAreaChart({
       height: altura,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#8a8f98",
+        textColor: "#52677d",
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: 11,
         attributionLogo: false,
       },
       grid: {
-        vertLines: { color: "rgba(255,255,255,0.04)" },
-        horzLines: { color: "rgba(255,255,255,0.04)" },
+        vertLines: { color: "#e3ebf4" },
+        horzLines: { color: "#e3ebf4" },
       },
       rightPriceScale: { borderVisible: false },
       timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
       crosshair: {
-        vertLine: { color: "rgba(247,248,248,0.35)", labelBackgroundColor: "#0d1017" },
-        horzLine: { color: "rgba(247,248,248,0.35)", labelBackgroundColor: "#0d1017" },
+        vertLine: { color: "#8ca9c9", labelBackgroundColor: "#245ce5" },
+        horzLine: { color: "#8ca9c9", labelBackgroundColor: "#245ce5" },
       },
       handleScale: { axisPressedMouseMove: false },
     });

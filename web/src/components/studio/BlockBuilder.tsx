@@ -80,7 +80,7 @@ export function BlockBuilder({
         {rules.map((r, i) => (
           <div
             key={i}
-            className="flex flex-wrap items-end gap-2 rounded-lg border border-line bg-white/[0.02] p-3"
+            className="flex flex-wrap items-end gap-2 rounded-lg border border-line bg-surface-solid p-3"
           >
             <label className="flex flex-col gap-1 text-[11px] text-muted">
               Indicador

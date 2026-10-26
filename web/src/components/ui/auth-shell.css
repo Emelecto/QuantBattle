@@ -1,0 +1,26 @@
+.ql-auth-page { flex:1; display:flex; align-items:center; justify-content:center; width:100%; padding:clamp(28px,6vw,82px) 24px; background:#f5f8fb; }
+.ql-auth-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.94fr); width:min(1010px,100%); border:1px solid #dce6ef; background:#fff; box-shadow:0 20px 55px rgba(31,59,96,.08); }
+.ql-auth-card { min-width:0; padding:clamp(28px,5vw,58px); background:#fff; }
+.ql-auth-kicker,.ql-auth-aside-kicker { display:block; margin-bottom:20px; color:#245ce5; font-size:11px; font-weight:700; letter-spacing:.13em; }
+.ql-auth-card h1 { margin:0; color:#172840; font-size:clamp(28px,3vw,38px); font-weight:800; letter-spacing:-.04em; }
+.ql-auth-subtitle { max-width:42ch; color:#52677d; }
+.ql-auth-form .ql-input { min-height:46px; border-color:#cddaea; border-radius:5px; background:#fff; color:#172840; }
+.ql-auth-form .ql-input::placeholder { color:#788ba1; }
+.ql-auth-form .ql-btn-primary { min-height:46px; border-radius:5px; background:#245ce5; color:#fff; }
+.ql-auth-form .ql-btn-primary:hover { background:#174cbf; }
+.ql-auth-form .ql-btn-secondary { min-height:44px; border-radius:5px; border-color:#cddaea; background:#fff; color:#2455ae; }
+.ql-auth-form .ql-btn-secondary:hover { background:#f0f6fd; }
+.ql-auth-form .text-cyan,.ql-auth-footer .text-cyan { color:#2455ae; }
+.ql-auth-footer { margin-top:25px; padding-top:20px; border-top:1px solid #dce6ef; color:#52677d; }
+.ql-auth-aside { display:flex; flex-direction:column; min-width:0; padding:clamp(30px,5vw,60px); border-left:1px solid #dce6ef; background:#eaf2f9; }
+.ql-auth-aside h2 { max-width:370px; margin:0; color:#172840; font-size:clamp(29px,3vw,41px); font-weight:800; line-height:1.12; letter-spacing:-.045em; }
+.ql-auth-aside > p { margin:19px 0 30px; max-width:40ch; color:#52677d; font-size:15px; line-height:1.6; }
+.ql-auth-aside ol { margin:0 0 28px; padding:0; list-style:none; border-top:1px solid #cbd9e8; }
+.ql-auth-aside li { display:flex; gap:16px; padding:14px 0; border-bottom:1px solid #cbd9e8; color:#28415f; font-size:13px; font-weight:700; }
+.ql-auth-aside li span { color:#245ce5; font-variant-numeric:tabular-nums; }
+.ql-auth-aside > a { width:max-content; max-width:100%; color:#2455ae; font-size:13px; font-weight:700; }
+.ql-auth-aside > a:hover { text-decoration:underline; }
+.ql-auth-aside > small { display:block; max-width:36ch; margin-top:auto; padding-top:32px; color:#657b94; font-size:11px; line-height:1.5; }
+@media (max-width:750px) { .ql-auth-layout { grid-template-columns:1fr; } .ql-auth-aside { border-left:0; border-top:1px solid #dce6ef; padding:27px; } .ql-auth-aside h2 { font-size:26px; } .ql-auth-aside ol { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 15px; } .ql-auth-aside li { align-items:flex-start; } .ql-auth-aside > small { padding-top:18px; } }
+@media (max-width:480px) { .ql-auth-page { padding:20px 16px 48px; } .ql-auth-card { padding:29px 22px; } .ql-auth-aside { padding:26px 22px; } .ql-auth-aside ol { grid-template-columns:1fr; } }
+@media (prefers-reduced-motion:no-preference) { .ql-auth-layout { animation:ql-auth-enter 420ms cubic-bezier(.23,1,.32,1) both; } @keyframes ql-auth-enter { from { opacity:.6; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } } }

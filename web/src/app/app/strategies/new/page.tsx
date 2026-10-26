@@ -437,7 +437,7 @@ function NewStrategyPageInner() {
               </p>
             )}
             {aiExplanation && (
-              <p className="mt-2 rounded-md border border-line bg-white/[0.03] px-3 py-2 text-[12px] leading-relaxed text-ink">
+              <p className="mt-2 rounded-md border border-line bg-surface-solid px-3 py-2 text-[12px] leading-relaxed text-ink">
                 {aiExplanation}
               </p>
             )}
@@ -469,7 +469,7 @@ function NewStrategyPageInner() {
                       className={
                         "rounded-md border px-2 py-2 text-[13px] font-medium transition-colors " +
                         (config.asset_type === a.k
-                          ? "border-accent bg-white/[0.06] text-ink"
+                          ? "border-accent bg-surface-solid text-ink"
                           : "border-line text-muted hover:text-ink")
                       }
                     >
@@ -590,7 +590,7 @@ function NewStrategyPageInner() {
               </div>
 
               {/* Compartir */}
-              <label className="flex items-center justify-between gap-3 rounded-md border border-line bg-white/[0.02] px-3 py-2.5">
+              <label className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface-solid px-3 py-2.5">
                 <span className="text-[13px] text-ink">Compartir en la comunidad</span>
                 <input
                   type="checkbox"

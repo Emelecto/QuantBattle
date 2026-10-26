@@ -6,7 +6,7 @@
 
 .btn-primary {
   background: var(--ql-accent);
-  color: #04110d; border: none; padding: 9px 18px; border-radius: 6px;
+  color: #fff; border: none; padding: 9px 18px; border-radius: 6px;
   font-weight: 600; cursor: pointer; font-size: 14px; transition: transform 0.1s, filter 0.15s;
 }
 .btn-primary:hover { filter: brightness(1.08); }

@@ -8,7 +8,7 @@ import { ResearchEvidence } from "@/components/research/ResearchEvidence";
 
 function Code({ children }: { children: ReactNode }) {
   return (
-    <code className="metric rounded border border-line bg-[#141926] px-1.5 py-0.5 text-[12px] text-ink">
+    <code className="metric rounded border border-line bg-surface-solid px-1.5 py-0.5 text-[12px] text-ink">
       {children}
     </code>
   );
@@ -16,7 +16,7 @@ function Code({ children }: { children: ReactNode }) {
 
 function Pre({ children }: { children: string }) {
   return (
-    <pre className="metric overflow-x-auto rounded-lg border border-line bg-[#0d1017] p-4 text-[12px] leading-relaxed text-ink/90">
+    <pre className="metric overflow-x-auto rounded-lg border border-line bg-surface-solid p-4 text-[12px] leading-relaxed text-ink/90">
       {children}
     </pre>
   );
@@ -100,7 +100,7 @@ export default function DocsPage() {
                   <span className="metric w-10 shrink-0 text-muted">
                     Fold {i + 1}
                   </span>
-                  <span className="rounded bg-white/[0.06] px-2 py-1 text-muted">
+                  <span className="rounded bg-surface-solid px-2 py-1 text-muted">
                     IS {f.is}
                   </span>
                   <span aria-hidden className="text-line">→</span>

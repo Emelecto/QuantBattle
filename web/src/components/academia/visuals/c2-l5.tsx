@@ -33,23 +33,23 @@ export default function C2L5Visual() {
       height: 300,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#8a8f98",
+        textColor: "#52677d",
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: 11,
         attributionLogo: false,
       },
       grid: {
-        vertLines: { color: "rgba(255,255,255,0.04)" },
-        horzLines: { color: "rgba(255,255,255,0.04)" },
+        vertLines: { color: "#e9f0f7" },
+        horzLines: { color: "#e9f0f7" },
       },
       rightPriceScale: { borderVisible: false },
       timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
     });
     const serie = chart.addSeries(CandlestickSeries, {
-      upColor: "#22c55e",
-      downColor: "#ef4444",
-      wickUpColor: "#22c55e",
-      wickDownColor: "#ef4444",
+      upColor: "#087951",
+      downColor: "#af3f4f",
+      wickUpColor: "#087951",
+      wickDownColor: "#af3f4f",
       borderVisible: false,
     });
     serie.setData(visibles);

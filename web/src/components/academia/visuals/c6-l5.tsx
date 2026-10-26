@@ -44,8 +44,8 @@ export default function C6L5Visual() {
           <label htmlFor="ac-c6l5-h">Días demo visibles: {hasta}</label>
           <input id="ac-c6l5-h" type="range" min={5} max={60} step={1} value={hasta} onChange={(e) => setHasta(Number(e.target.value))} className="academia-deslizador" />
         </div>
-        <svg viewBox="0 0 100 36" style={{ width: "100%", height: "140px", background: "rgba(255,255,255,0.02)", borderRadius: "8px" }}>
-          <polyline points={pts} fill="none" stroke="#22c55e" strokeWidth="1.2" />
+        <svg viewBox="0 0 100 36" style={{ width: "100%", height: "140px", background: "#f4f8fc", borderRadius: "8px" }}>
+          <polyline points={pts} fill="none" stroke="#087951" strokeWidth="1.2" />
         </svg>
         {CHECKS.map((c, i) => (
           <label key={c} style={{ display: "flex", gap: "0.6rem", alignItems: "center", padding: "0.35rem 0", cursor: "pointer" }}>

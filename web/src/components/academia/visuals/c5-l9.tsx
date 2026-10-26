@@ -7,7 +7,7 @@ import { CountUp, Reveal } from "./charts";
 import { C5_L9_MONITOREO } from "./lesson-data";
 
 function Semaforo({ estado, titulo, detalle }: { estado: "verde" | "amarillo" | "rojo"; titulo: string; detalle: string }) {
-  const color = estado === "verde" ? "#22c55e" : estado === "amarillo" ? "#eab308" : "#ef4444";
+  const color = estado === "verde" ? "#087951" : estado === "amarillo" ? "#a96b16" : "#af3f4f";
   return (
     <div className="academia-stat" style={{ borderLeft: `4px solid ${color}` }}>
       <span className="academia-stat-etiqueta">{titulo}</span>

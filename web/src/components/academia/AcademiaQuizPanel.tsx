@@ -5,6 +5,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { earnQP } from "@/lib/tokens";
 import type { AcademiaQuizQuestion } from "@/lib/academia/registry";
 import { loadAcademiaProgress, markLessonComplete } from "./progress-store";
+import "./academia-quiz.css";
 
 // Panel del quiz de la lección. Renderiza N preguntas (N varía por
 // lección) y otorga lesson.qp QP con N/N en lecciones (1 en C1, 2 en C2–C6)
@@ -34,15 +35,18 @@ export function AcademiaQuizPanel({
   const [revealed, setRevealed] = useState(false);
   const [awarded, setAwarded] = useState(false);
   const [awarding, setAwarding] = useState(false);
+  const [awardSynced, setAwardSynced] = useState(false);
   const awardTried = useRef(false);
 
   useEffect(() => {
-    setAnswers({});
-    setRevealed(false);
-    setAwarded(false);
-    awardTried.current = false;
-    const saved = loadAcademiaProgress();
-    if (saved.perfect.includes(lessonId)) setAwarded(true);
+    const frame = requestAnimationFrame(() => {
+      setAnswers({});
+      setRevealed(false);
+      setAwarded(loadAcademiaProgress().perfect.includes(lessonId));
+      setAwardSynced(false);
+      awardTried.current = false;
+    });
+    return () => cancelAnimationFrame(frame);
   }, [lessonId]);
 
   const answeredCount = questions.filter((_, i) => answers[i] != null).length;
@@ -64,6 +68,7 @@ export function AcademiaQuizPanel({
       } = await supabase.auth.getUser();
       if (user) {
         await earnQP(qp, isExam ? "examen_aprobado" : "quiz_perfect", lessonId, isExam ? `Examen ${lessonId} aprobado (${score}/${total})` : `Quiz ${lessonId} perfecto (${total}/${total})`);
+        setAwardSynced(true);
         try {
           const { data } = await supabase
             .from("course_progress")
@@ -88,10 +93,6 @@ export function AcademiaQuizPanel({
     }
   }, [lessonId, total, qp, isExam, score]);
 
-  useEffect(() => {
-    if (passed && !awarded) void awardQP();
-  }, [passed, awarded, awardQP]);
-
   function retry() {
     setAnswers({});
     setRevealed(false);
@@ -99,46 +100,6 @@ export function AcademiaQuizPanel({
 
   return (
     <div className="academia-quiz">
-      <style>{`
-        .academia-quiz { color: #f7f8f8; }
-        .academia-quiz-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
-        .academia-quiz-kicker { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8a8f98; margin-bottom: 4px; }
-        .academia-quiz-title { margin: 0; font-size: 18px; font-weight: 700; }
-        .academia-quiz-counter { flex: 0 0 auto; font-size: 13px; color: #8a8f98; font-variant-numeric: tabular-nums; padding-top: 20px; }
-        .academia-quiz-dots { display: flex; gap: 6px; margin: 12px 0 16px; }
-        .academia-quiz-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.12); }
-        .academia-quiz-dot[data-on="true"] { background: #f7f8f8; }
-        .academia-quiz-q { background: #0c0d0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; margin: 0 0 12px; }
-        .academia-quiz-prompt { margin: 0 0 4px; font-size: 12px; color: #8a8f98; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-        .academia-quiz-question { margin: 0 0 12px; font-size: 15px; font-weight: 600; line-height: 1.5; }
-        .academia-quiz-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-        .academia-quiz-opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px; color: #f7f8f8; font-size: 14px; line-height: 1.45; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
-        button.academia-quiz-opt:hover:not(:disabled) { border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.03); }
-        button.academia-quiz-opt:focus-visible { outline: 2px solid #5e6ad2; outline-offset: 2px; }
-        button.academia-quiz-opt:disabled { cursor: default; }
-        .academia-quiz-letter { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.06); color: #8a8f98; }
-        .academia-quiz-opt[data-state="elegida"] { border-color: #f7f8f8; background: rgba(255,255,255,0.05); }
-        .academia-quiz-opt[data-state="elegida"] .academia-quiz-letter { background: #f7f8f8; color: #08090a; }
-        .academia-quiz-opt[data-state="correcta"] { border-color: rgba(70,192,138,0.6); background: rgba(70,192,138,0.1); }
-        .academia-quiz-opt[data-state="correcta"] .academia-quiz-letter { background: #46c08a; color: #08090a; }
-        .academia-quiz-opt[data-state="incorrecta"] { border-color: rgba(229,72,77,0.6); background: rgba(229,72,77,0.08); }
-        .academia-quiz-opt[data-state="incorrecta"] .academia-quiz-letter { background: #e5484d; color: #fff; }
-        .academia-quiz-opt[data-state="atenuada"] { opacity: 0.5; }
-        .academia-quiz-explain { margin: 12px 0 0; padding: 10px 12px; font-size: 13px; line-height: 1.55; color: #8a8f98; border-left: 2px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.02); border-radius: 0 8px 8px 0; }
-        .academia-quiz-explain strong { color: #f7f8f8; font-weight: 600; }
-        .academia-quiz-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
-        .academia-quiz-cta { background: #5e6ad2; color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; transition: filter 0.15s ease; }
-        .academia-quiz-cta:hover:not(:disabled) { filter: brightness(1.1); }
-        .academia-quiz-cta:disabled { opacity: 0.4; cursor: not-allowed; }
-        .academia-quiz-cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-        .academia-quiz-secondary { background: transparent; color: #f7f8f8; border: 1px solid rgba(255,255,255,0.16); border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
-        .academia-quiz-secondary:hover { border-color: rgba(255,255,255,0.32); }
-        .academia-quiz-score { font-size: 13px; color: #8a8f98; font-variant-numeric: tabular-nums; }
-        .academia-quiz-perfect { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: rgba(70,192,138,0.1); border: 1px solid rgba(70,192,138,0.4); font-size: 14px; font-weight: 600; color: #f7f8f8; }
-        .academia-quiz-qpbadge { flex: 0 0 auto; background: #46c08a; color: #08090a; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
-        .academia-quiz-retry-note { margin: 12px 0 0; font-size: 13px; color: #8a8f98; }
-      `}</style>
-
       <div className="academia-quiz-head">
         <div>
           <span className="academia-quiz-kicker">
@@ -206,7 +167,10 @@ export function AcademiaQuizPanel({
           <button
             type="button"
             className="academia-quiz-cta"
-            onClick={() => setRevealed(true)}
+            onClick={() => {
+              setRevealed(true);
+              if (score >= required && !awarded) void awardQP();
+            }}
             disabled={!allAnswered}
           >
             Revisar respuestas
@@ -226,14 +190,16 @@ export function AcademiaQuizPanel({
 
       {passed && (
         <div className="academia-quiz-perfect" role="status">
-          <span className="academia-quiz-qpbadge">+{qp} QP</span>
+          <span className="academia-quiz-qpbadge">{awardSynced ? `+${qp} QP` : "✓"}</span>
           <span>
             {awarding
               ? `Acreditando ${qp} QP…`
               : awarded
-                ? isPerfect
-                  ? `Quiz perfecto. Sumaste ${qp} QP a tu progreso.`
-                  : `Examen aprobado (${score}/${total}). Sumaste ${qp} QP a tu progreso.`
+                ? awardSynced
+                  ? isPerfect
+                    ? `Quiz perfecto. Se acreditaron ${qp} QP.`
+                    : `Examen aprobado (${score}/${total}). Se acreditaron ${qp} QP.`
+                  : "Progreso guardado en este navegador. No se pudo confirmar la acreditación de QP."
                 : null}
           </span>
         </div>

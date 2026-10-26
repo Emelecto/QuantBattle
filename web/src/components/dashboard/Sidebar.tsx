@@ -8,13 +8,15 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/ui/Avatar";
 import { NotificationPopover } from "@/components/dashboard/NotificationPopover";
 import "./dashboard.css";
+import "./dashboard-light.css";
 
 const ADMIN_USER_IDS = ["2ca7b197-86f5-4605-9789-266bf8a0df01"];
 
 export const DASHBOARD_NAV = [
   { href: "/app", label: "Inicio", icon: "home" },
-  { href: "/app/tournaments", label: "Competencias", icon: "trophy" },
+  { href: "/app/tournaments", label: "Torneos ML", icon: "trophy" },
   { href: "/app/library", label: "Datasets", icon: "database" },
+  { href: "/app#historial-ml", label: "Mis envíos", icon: "strategies" },
   { href: "/app/academia", label: "Academia", icon: "book" },
   { href: "/app/strategies", label: "Estrategias", icon: "strategies" },
   { href: "/app/marketplace", label: "Marketplace", icon: "store" },
@@ -175,6 +177,7 @@ export function Sidebar() {
   const [dragging, setDragging] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [activeHash, setActiveHash] = useState("");
   const [user, setUser] = useState<{
     id: string;
     email?: string;
@@ -187,6 +190,13 @@ export function Sidebar() {
   } | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const widthRef = useRef(width);
+
+  useEffect(() => {
+    const syncHash = () => setActiveHash(window.location.hash);
+    const frame = window.requestAnimationFrame(syncHash);
+    window.addEventListener("hashchange", syncHash);
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener("hashchange", syncHash); };
+  }, [pathname]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -314,7 +324,9 @@ export function Sidebar() {
   );
 
   const isActive = (href: string) =>
-    href === "/app" ? pathname === "/app" : pathname.startsWith(href);
+    href === "/app#historial-ml" ? pathname === "/app" && activeHash === "#historial-ml"
+      : href === "/app" ? pathname === "/app" && activeHash !== "#historial-ml"
+        : pathname.startsWith(href);
 
   const displayName =
     profile?.display_name ||
@@ -336,6 +348,10 @@ export function Sidebar() {
     >
       {/* Glow vertical sutil en borde izquierdo */}
       <div className="ql-sidebar-glow" />
+
+      <Link href="/app" className="ql-side-brand" title="QuantLab · Inicio">
+        <span aria-hidden="true">Q</span>{!collapsed && <strong>QuantLab</strong>}
+      </Link>
 
       {/* Top row: Avatar + Usuario (izquierda) | QP (derecha) */}
       <div className="ql-sidebar-top">
@@ -377,7 +393,9 @@ export function Sidebar() {
 
       {/* Nav items */}
       <nav className="ql-nav" aria-label="Navegación principal">
-        {DASHBOARD_NAV.map((item) => (
+        {DASHBOARD_NAV.map((item, index) => (
+          <div key={item.href} className="ql-nav-wrap">
+          {!collapsed && (index === 0 || index === 5) && <span className="ql-nav-section">{index === 0 ? "Mi espacio" : "Explorar"}</span>}
           <Link
             key={item.href}
             href={item.href}
@@ -398,6 +416,7 @@ export function Sidebar() {
             </span>
             {!collapsed && <span className="ql-nav-label">{item.label}</span>}
           </Link>
+          </div>
         ))}
 
         {/* Admin nav */}

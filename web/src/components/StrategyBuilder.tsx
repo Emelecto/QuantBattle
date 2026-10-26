@@ -98,7 +98,7 @@ export function StrategyBuilder({
           <span className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1.5 text-[13px] text-accent">
             Cruce de medias (SMA)
           </span>
-          <span className="rounded-md border border-line bg-white/[0.02] px-3 py-1.5 text-[12px] text-muted opacity-60">
+          <span className="rounded-md border border-line bg-surface-solid px-3 py-1.5 text-[12px] text-muted opacity-60">
             RSI · Momentum · Volumen (próximamente)
           </span>
         </div>

@@ -132,7 +132,7 @@ export default function LeaderboardPage() {
                         @{row.author ?? "anónimo"}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="metric rounded border border-line bg-[#1a2131] px-1.5 py-0.5 text-[11px] text-muted">
+                        <span className="metric rounded border border-line bg-surface-solid px-1.5 py-0.5 text-[11px] text-muted">
                           {assetLabel(row.asset)}
                         </span>
                       </td>
@@ -156,7 +156,7 @@ export default function LeaderboardPage() {
                         <Link
                           href={`/app/strategies/${row.strategy_id}/results`}
                           aria-label={`Abrir ${row.name}`}
-                          className="metric inline-flex h-6 w-6 items-center justify-center rounded border border-line text-muted transition-colors hover:border-[#2f3b4f] hover:text-ink"
+                          className="metric inline-flex h-6 w-6 items-center justify-center rounded border border-line text-muted transition-colors hover:border-accent hover:text-ink"
                         >
                           ↗
                         </Link>

@@ -12,5 +12,5 @@ export function TopBarGate() {
 
 export function FooterGate() {
   const pathname = usePathname();
-  return pathname.startsWith("/app") ? null : <Footer />;
+  return pathname.startsWith("/app") ? null : <Footer landing={pathname === "/"} />;
 }

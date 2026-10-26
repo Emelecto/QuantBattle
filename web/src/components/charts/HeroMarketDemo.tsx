@@ -261,9 +261,9 @@ function LoadingChart() {
         <div className="ql-skeleton h-3 w-16" />
       </div>
       <div className="relative mt-5 h-[210px] overflow-hidden">
-        <div className="absolute inset-x-0 top-[25%] h-px bg-white/[0.05]" />
-        <div className="absolute inset-x-0 top-1/2 h-px bg-white/[0.05]" />
-        <div className="absolute inset-x-0 top-[75%] h-px bg-white/[0.05]" />
+        <div className="absolute inset-x-0 top-[25%] h-px bg-surface-solid" />
+        <div className="absolute inset-x-0 top-1/2 h-px bg-surface-solid" />
+        <div className="absolute inset-x-0 top-[75%] h-px bg-surface-solid" />
         <div className="ql-skeleton absolute bottom-7 left-0 h-24 w-full rounded-[40%] opacity-70" />
       </div>
       <p className="mt-2 text-[11px] text-muted">Cargando velas diarias desde Binance…</p>
@@ -583,7 +583,7 @@ export function HeroMarketDemo() {
                 state === "fallback"
                   ? "bg-short/10 text-short"
                   : state === "loading"
-                    ? "bg-white/[0.06] text-muted"
+                    ? "bg-surface-solid text-muted"
                     : "bg-long/10 text-long"
               }`}
             >
@@ -611,8 +611,8 @@ export function HeroMarketDemo() {
                     onClick={() => chooseRange(option.id)}
                     className={`metric min-h-8 rounded-md px-3 text-[11px] font-medium transition-[background-color,color,box-shadow] ${
                       isSelected
-                        ? "bg-white/[0.12] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
-                        : "text-muted hover:bg-white/[0.05] hover:text-ink"
+                        ? "bg-surface-solid text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+                        : "text-muted hover:bg-surface-solid hover:text-ink"
                     } disabled:cursor-wait disabled:opacity-60`}
                   >
                     {option.label}
@@ -636,7 +636,7 @@ export function HeroMarketDemo() {
                 <button
                   type="button"
                   onClick={retryBinance}
-                  className="min-h-8 rounded-md bg-white/[0.07] px-3 text-[11px] font-medium text-ink hover:bg-white/[0.12]"
+                  className="min-h-8 rounded-md bg-surface-solid px-3 text-[11px] font-medium text-ink hover:bg-surface-solid"
                 >
                   Reintentar Binance
                 </button>

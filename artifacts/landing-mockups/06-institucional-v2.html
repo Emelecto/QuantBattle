@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuantLab — Mockup institucional v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --paper:#f5f7f7; --ink:#112139; --muted:#627087; --blue:#245ce5; --line:#dbe2e8; --night:#101d31; --night2:#172840; --ice:#d5ebff; --mint:#b8edcd; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:"DM Sans",Arial,sans-serif; }
+    a { color:inherit; text-decoration:none; }
+    button { font:inherit; }
+    .shell { width:min(1380px,calc(100% - 96px)); margin:auto; }
+    .topbar { height:84px; display:flex; align-items:center; justify-content:space-between; gap:24px; border-bottom:1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap:14px; flex:none; }
+    .brand-mark { width:32px; height:32px; background:var(--blue); display:grid; place-items:center; color:white; font:800 19px Manrope,sans-serif; letter-spacing:-.13em; padding-right:4px; }
+    .brand-name { font:800 23px Manrope,sans-serif; letter-spacing:-.055em; }
+    .brand-origin { border-left:1px solid #c9d2df; padding-left:15px; color:#627087; font-size:13px; line-height:1.2; }
+    .nav { display:flex; align-items:center; gap:34px; font-size:14px; font-weight:600; }
+    .nav a:not(.nav-cta):hover { color:var(--blue); }
+    .nav-cta { padding:12px 17px; background:var(--ink); color:#fff; }
+    .hero { padding:78px 0 51px; display:grid; grid-template-columns:minmax(0,1.72fr) minmax(260px,.58fr); column-gap:50px; align-items:end; }
+    .hero h1 { font:800 clamp(60px,6.1vw,98px)/1.04 Manrope,sans-serif; letter-spacing:-.073em; margin:0; max-width:1050px; }
+    .hero h1 em { color:var(--blue); font-style:normal; }
+    .hero-lead { margin:27px 0 0; max-width:760px; font-size:21px; line-height:1.47; letter-spacing:-.01em; color:#4d5f75; }
+    .hero-actions { display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-top:33px; }
+    .button { display:inline-flex; align-items:center; justify-content:center; gap:22px; min-height:51px; padding:0 20px; font-size:15px; font-weight:700; }
+    .button-primary { background:var(--blue); color:white; }
+    .button-primary:hover { background:#174ac3; }
+    .button-link { border-bottom:1px solid var(--ink); padding:0 2px; min-height:43px; }
+    .button-link:hover { color:var(--blue); border-color:var(--blue); }
+    .hero-aside { border-top:1px solid #bac8d8; padding-top:17px; margin-bottom:4px; }
+    .hero-aside strong { display:block; font-size:13px; text-transform:uppercase; letter-spacing:.13em; color:var(--blue); margin-bottom:14px; }
+    .hero-aside p { margin:0; line-height:1.55; font-size:15px; color:#56677c; }
+    .exhibit { margin-top:4px; }
+    .exhibit-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 0 13px; color:#637287; font-size:12px; letter-spacing:.025em; }
+    .exhibit-bar b { color:var(--ink); font-size:12px; }
+    .exhibit-bar a { text-decoration:underline; text-underline-offset:3px; }
+    .product { display:grid; grid-template-columns:220px minmax(0,1fr); background:#fbfcfe; color:#182942; border:1px solid #d3deea; min-height:634px; overflow:hidden; box-shadow:0 24px 70px rgba(26,43,68,.12); }
+    .product-side { background:#ecf2f8; border-right:1px solid #d6e0ea; display:flex; flex-direction:column; min-width:0; }
+    .product-logo { padding:26px 23px 30px; font:800 22px Manrope,sans-serif; letter-spacing:-.06em; }
+    .product-logo span { color:var(--blue); }
+    .side-kicker { padding:0 23px; color:#72849b; text-transform:uppercase; font-size:10px; letter-spacing:.16em; margin-bottom:12px; }
+    .side-link { display:flex; gap:13px; align-items:center; padding:13px 23px; color:#61748b; font-size:13px; font-weight:600; }
+    .side-link.selected { color:#1752c7; background:#dceafb; box-shadow:inset 3px 0 0 var(--blue); }
+    .side-icon { font-size:16px; width:19px; text-align:center; font-weight:400; opacity:.9; }
+    .side-bottom { margin-top:auto; padding:20px 23px 22px; border-top:1px solid #d4e0ea; }
+    .side-bottom small { color:#75869b; font-size:11px; }
+    .side-bottom b { display:block; font-size:12px; margin-top:5px; font-weight:600; }
+    .product-main { min-width:0; padding:0 29px 30px; }
+    .product-top { height:65px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e0e7ef; color:#74859b; font-size:12px; }
+    .product-top .crumb strong { color:#20344e; font-weight:600; }
+    .product-top .avatar { width:27px; height:27px; border-radius:50%; background:#e0ecfa; color:#2054bc; display:inline-grid; place-items:center; font-weight:700; }
+    .product-heading { display:flex; align-items:start; justify-content:space-between; gap:18px; margin:29px 0 22px; }
+    .product-heading .eyebrow { color:#2861cb; font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; }
+    .product-heading h2 { font:700 27px/1.18 Manrope,sans-serif; letter-spacing:-.04em; margin:9px 0 7px; }
+    .product-heading p { margin:0; font-size:12px; color:#718198; }
+    .status { flex:none; display:inline-flex; align-items:center; gap:7px; color:#146b4b; background:#def4e9; padding:9px 11px; font-size:11px; font-weight:700; margin-top:8px; }
+    .status i { width:6px; height:6px; border-radius:50%; background:#189464; }
+    .process { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-bottom:18px; }
+    .process div { border-top:2px solid #76a2ed; padding:10px 0 6px; color:#627995; font-size:11px; white-space:nowrap; }
+    .process b { color:#2660cb; margin-right:6px; }
+    .product-grid { display:grid; grid-template-columns:1.18fr .82fr; gap:14px; }
+    .panel { background:#fff; border:1px solid #dce5ee; padding:20px; min-width:0; box-shadow:0 3px 12px rgba(37,62,99,.035); }
+    .panel-tag { display:flex; align-items:center; justify-content:space-between; gap:10px; color:#6380a2; text-transform:uppercase; font-size:10px; font-weight:700; letter-spacing:.11em; }
+    .panel-tag span:last-child { color:#167851; letter-spacing:0; text-transform:none; font-size:11px; }
+    .panel h3 { font:700 18px Manrope,sans-serif; letter-spacing:-.025em; margin:13px 0 7px; }
+    .panel p { color:#71839a; font-size:12px; line-height:1.5; margin:0; }
+    .dataset-meta { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:23px 0 18px; }
+    .dataset-meta div { border-top:1px solid #dbe5ef; padding-top:11px; }
+    .dataset-meta strong { display:block; font:700 24px Manrope,sans-serif; letter-spacing:-.06em; }
+    .dataset-meta span { display:block; margin-top:3px; font-size:11px; color:#71849b; }
+    .file-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 0; border-top:1px solid #e2e9f1; font-size:12px; }
+    .file-row span { color:#74859b; }
+    .file-row b { color:#2455ae; font-weight:600; }
+    .file-row:last-child { padding-bottom:0; }
+    .receipt-number { font:700 42px/1 Manrope,sans-serif; letter-spacing:-.07em; color:#15815a; margin:24px 0 6px; }
+    .receipt-number span { font-size:13px; color:#638a79; font-weight:500; letter-spacing:0; }
+    .hash { margin-top:18px; padding:13px 12px; background:#f0f6fd; border:1px solid #d8e5f3; }
+    .hash label { display:block; color:#67809e; font-size:10px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:7px; }
+    .hash code { color:#2656a6; font:12px Consolas,monospace; word-break:break-all; }
+    .receipt-bottom { margin-top:17px; color:#71849b; font-size:11px; line-height:1.4; }
+    .product-foot { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:14px; padding:15px 17px; background:#eaf3ff; border-left:3px solid #3675da; color:#526e91; font-size:11px; }
+    .product-foot strong { color:#1b478c; }
+    .evidence { display:grid; grid-template-columns:1.15fr .85fr; gap:8vw; padding:116px 0 100px; }
+    .section-kicker { color:var(--blue); text-transform:uppercase; letter-spacing:.15em; font-size:12px; font-weight:700; }
+    .evidence h2 { font:800 clamp(42px,4.3vw,66px)/1.08 Manrope,sans-serif; letter-spacing:-.06em; max-width:680px; margin:18px 0 20px; }
+    .evidence p { max-width:540px; color:#5b6b7e; font-size:18px; line-height:1.55; margin:0 0 26px; }
+    .evidence-list { padding-top:10px; }
+    .evidence-row { display:grid; grid-template-columns:130px 1fr; gap:14px; border-top:1px solid #cdd8e3; padding:19px 0; font-size:14px; line-height:1.45; }
+    .evidence-row b { font-weight:700; }
+    .evidence-row span { color:#5d6e82; }
+    .note { background:#eaf0f4; padding:22px 26px; font-size:13px; line-height:1.6; color:#53667a; }
+    .note b { color:var(--ink); }
+    .footer { border-top:1px solid var(--line); padding:30px 0 46px; display:flex; align-items:start; justify-content:space-between; gap:20px; color:#68798c; font-size:12px; }
+    a:focus-visible { outline:3px solid #81a8ff; outline-offset:3px; }
+    @media (max-width:950px) { .hero { grid-template-columns:1fr; } .hero-aside { margin-top:42px; max-width:440px; } .nav { gap:18px; } .nav .nav-hide { display:none; } .product { grid-template-columns:170px 1fr; } .product-side .side-link { padding-left:17px; } .product-logo { padding-left:17px; } .product-grid { grid-template-columns:1fr; } .product { min-height:0; } }
+    @media (max-width:620px) { .shell { width:calc(100% - 40px); } .topbar { height:68px; } .brand-origin, .nav-hide, .nav a:not(.nav-cta) { display:none; } .brand-name { font-size:21px; } .nav-cta { padding:10px 12px; font-size:12px; } .hero { padding:58px 0 37px; } .hero h1 { font-size:clamp(45px,11.8vw,65px); line-height:1.06; letter-spacing:-.072em; } .hero-lead { font-size:17px; margin-top:23px; } .hero-actions { gap:12px 20px; margin-top:26px; } .button { font-size:13px; min-height:45px; padding:0 14px; } .hero-aside { margin-top:45px; } .exhibit-bar { align-items:start; line-height:1.4; } .exhibit-bar span:last-child { text-align:right; max-width:145px; } .product { display:block; } .product-side { display:none; } .product-main { padding:0 16px 20px; } .product-top { height:49px; font-size:10px; } .product-heading { margin:23px 0 18px; } .product-heading h2 { font-size:23px; } .product-heading p { font-size:11px; } .status { font-size:10px; padding:7px; } .process { gap:4px; } .process div { font-size:9px; white-space:normal; } .process b { display:none; } .panel { padding:15px; } .panel h3 { font-size:17px; } .dataset-meta strong { font-size:22px; } .dataset-meta span { font-size:10px; } .product-foot { font-size:10px; } .evidence { display:block; padding:75px 0 65px; } .evidence h2 { font-size:44px; } .evidence p { font-size:16px; } .evidence-list { margin-top:45px; } .evidence-row { grid-template-columns:100px 1fr; font-size:12px; } .footer { flex-direction:column; } }
+    @media (prefers-reduced-motion:no-preference) { .hero h1 { animation:enter .65s ease-out both; } .hero-lead,.hero-actions { animation:enter .7s .1s ease-out both; } @keyframes enter { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } } }
+  </style>
+</head>
+<body>
+  <header class="topbar shell">
+    <a class="brand" href="https://quant-lab-nine.vercel.app/" aria-label="QuantLab, ir a la plataforma"><span class="brand-mark">Q</span><span class="brand-name">QuantLab</span><span class="brand-origin">Semillero DeepFin<br>Universidad EIA</span></a>
+    <nav class="nav" aria-label="Navegación principal"><a class="nav-hide" href="https://quant-lab-nine.vercel.app/app/tournaments">Torneos</a><a class="nav-hide" href="https://quant-lab-nine.vercel.app/docs#evaluacion">Metodología</a><a class="nav-hide" href="https://quant-lab-nine.vercel.app/research/judge-pilot.json">Evidencia</a><a class="nav-cta" href="https://quant-lab-nine.vercel.app/app/tournaments">Entrar a la plataforma ↗</a></nav>
+  </header>
+  <main>
+    <section class="hero shell">
+      <div>
+        <h1>Del dataset a una<br><em>predicción verificable.</em></h1>
+        <p class="hero-lead">Un laboratorio en español para construir modelos de machine learning financiero, enviar predicciones y evaluar sus resultados con un proceso documentado.</p>
+        <div class="hero-actions"><a class="button button-primary" href="https://quant-lab-nine.vercel.app/app/tournaments">Explorar torneos <span aria-hidden="true">↗</span></a><a class="button button-link" href="https://quant-lab-nine.vercel.app/research/judge-pilot.json">Revisar el piloto técnico <span aria-hidden="true">↗</span></a></div>
+      </div>
+      <aside class="hero-aside"><strong>Plataforma experimental</strong><p>Una iniciativa de Emilio Cardona López desarrollada en el semillero DeepFin de la Universidad EIA. Los resultados mostrados corresponden a una ronda sintética de prueba.</p></aside>
+    </section>
+    <section class="exhibit shell" aria-label="Propuesta de nueva interfaz del producto">
+      <div class="exhibit-bar"><span><b>VISTA DEL PRODUCTO</b> · nueva dashboard conceptual con datos reales</span><span><a href="https://quant-lab-nine.vercel.app/research/product/dataset.png">Ver interfaz actual ↗</a> &nbsp;·&nbsp; <a href="https://quant-lab-nine.vercel.app/research/judge-pilot.json">Evidencia del piloto ↗</a></span></div>
+      <div class="product" data-ui>
+        <aside class="product-side">
+          <div class="product-logo">Quant<span>Lab</span></div>
+          <div class="side-kicker">Investigación</div>
+          <div class="side-link selected"><span class="side-icon">◫</span>Torneos ML</div>
+          <div class="side-link"><span class="side-icon">▤</span>Datasets</div>
+          <div class="side-link"><span class="side-icon">◇</span>Mis envíos</div>
+          <div class="side-link"><span class="side-icon">▥</span>Resultados</div>
+          <div class="side-bottom"><small>Proyecto de investigación</small><b>DeepFin · Universidad EIA</b></div>
+        </aside>
+        <div class="product-main">
+          <div class="product-top"><span class="crumb">Torneos ML &nbsp; / &nbsp; <strong>Ronda de práctica</strong></span><span class="avatar" aria-label="Cuenta técnica">E</span></div>
+          <div class="product-heading"><div><span class="eyebrow">Piloto técnico · datos sintéticos</span><h2>Ronda de práctica</h2><p>Versión v1-e4bbe9a1f40c · Ronda 1 · experimento documentado</p></div><div class="status"><i></i>Finalizada</div></div>
+          <div class="process" aria-label="Etapas del torneo"><div><b>01</b>Dataset</div><div><b>02</b>Modelo</div><div><b>03</b>Envío validado</div><div><b>04</b>Evaluación</div></div>
+          <div class="product-grid">
+            <div class="panel">
+              <div class="panel-tag"><span>Dataset versionado</span><span>● Sintético</span></div>
+              <h3>Archivos para entrenar y predecir</h3>
+              <p>Train y validation para desarrollar el modelo. Live se evalúa después del cierre.</p>
+              <div class="dataset-meta"><div><strong>20</strong><span>variables</span></div><div><strong>160</strong><span>activos simulados</span></div><div><strong>100</strong><span>eras generadas</span></div></div>
+              <div class="file-row"><b>train</b><span>9.600 filas</span></div>
+              <div class="file-row"><b>validation</b><span>3.200 filas</span></div>
+              <div class="file-row"><b>live</b><span>3.200 filas · objetivo oculto</span></div>
+            </div>
+            <div class="panel">
+              <div class="panel-tag"><span>Comprobante de envío</span><span>● Validado</span></div>
+              <h3>Predicciones registradas</h3>
+              <p>Un archivo válido queda asociado a su versión del dataset y a su huella.</p>
+              <div class="receipt-number">3.200 <span>filas live</span></div>
+              <div class="hash"><label>Dataset asociado al envío</label><code>v1-e4bbe9a1f40c</code></div>
+              <div class="receipt-bottom">La puntuación del piloto se publicó tras el cierre de la ronda.</div>
+            </div>
+          </div>
+          <div class="product-foot"><span><strong>Evaluación reproducida.</strong> La comprobación técnica reprodujo exactamente el score publicado.</span><span>Spearman por era · v1</span></div>
+        </div>
+      </div>
+    </section>
+    <section class="evidence shell">
+      <div><span class="section-kicker">Evidencia antes que promesas</span><h2>Un torneo que deja rastro de cada paso.</h2><p>El piloto sintético comprobó el recorrido completo: descarga pública, envío validado, cierre de la ronda, evaluación y clasificación pública.</p><a class="button button-link" href="https://quant-lab-nine.vercel.app/docs#evaluacion">Leer metodología y resultados ↗</a></div>
+      <div class="evidence-list"><div class="evidence-row"><b>01 / Datos</b><span>Dataset versionado; el objetivo live permanece oculto durante la ronda.</span></div><div class="evidence-row"><b>02 / Envío</b><span>Los CSV inválidos se rechazan y cada envío válido deja un comprobante.</span></div><div class="evidence-row"><b>03 / Cierre</b><span>La puntuación se libera después del plazo; los envíos tardíos se rechazan.</span></div><div class="evidence-row"><b>04 / Resultado</b><span>El score del piloto se reprodujo exactamente desde los datos registrados.</span></div><div class="note"><b>Alcance del piloto:</b> mercado totalmente artificial, una ronda y una cuenta técnica. No demuestra capacidad de pronosticar mercados reales ni adopción por usuarios externos.</div></div>
+    </section>
+  </main>
+  <footer class="footer shell"><span>QuantLab · Emilio Cardona López · DeepFin, Universidad EIA</span><span>Prototipo de investigación · No es asesoría financiera</span></footer>
+</body>
+</html>

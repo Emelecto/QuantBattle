@@ -37,9 +37,9 @@ export default function C6L7Visual() {
         </div>
       </Reveal>
       <Reveal retraso={200}>
-        <Fila nombre="Señal" v={atrib.senal} max={maxAbs} color="#5e6ad2" />
-        <Fila nombre="Costo" v={atrib.costo} max={maxAbs} color="#eab308" />
-        <Fila nombre="Timing" v={atrib.timing} max={maxAbs} color="#22c55e" />
+        <Fila nombre="Señal" v={atrib.senal} max={maxAbs} color="#245ce5" />
+        <Fila nombre="Costo" v={atrib.costo} max={maxAbs} color="#a96b16" />
+        <Fila nombre="Timing" v={atrib.timing} max={maxAbs} color="#087951" />
         <p className="academia-viz-nota">La señal paga, el costo siempre resta (−2 bps) y el timing premia o castiga según entres con la ronda o contra ella. Si el costo supera a la señal, no envíes.</p>
       </Reveal>
     </div>
@@ -51,7 +51,7 @@ function Fila({ nombre, v, max, color }: { nombre: string; v: number; max: numbe
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", margin: "0.35rem 0" }}>
       <span style={{ width: "70px", fontSize: "0.85rem" }}>{nombre}</span>
-      <div style={{ flex: 1, height: "14px", background: "rgba(255,255,255,0.06)", borderRadius: "7px", overflow: "hidden" }}>
+      <div style={{ flex: 1, height: "14px", background: "#e5edf5", borderRadius: "7px", overflow: "hidden" }}>
         <div style={{ width: `${w}%`, height: "100%", background: color }} />
       </div>
       <span style={{ width: "90px", textAlign: "right", fontFamily: "monospace", fontSize: "0.85rem" }}>{v >= 0 ? "+" : ""}{v.toFixed(1)} bps</span>

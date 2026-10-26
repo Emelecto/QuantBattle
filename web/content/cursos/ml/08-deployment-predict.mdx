@@ -62,25 +62,25 @@ python predict_demo.py --input ../data/c5_l8.csv
 El deployment es una tubería con guardias: si los datos no pasan la validación, la tubería se cierra antes de llegar al modelo.
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 170" role="img" aria-label="Tuberia de deployment: CSV, validacion, features, modelo, JSON">
-  <rect x="8" y="55" width="90" height="55" rx="8" fill="#1b2a4a"/>
+  <rect x="8" y="55" width="90" height="55" rx="8" fill="#dceafb"/>
   <text x="53" y="79" text-anchor="middle" fill="#fff" font-size="12">CSV</text>
-  <text x="53" y="96" text-anchor="middle" fill="#9fb3d9" font-size="10">OHLCV</text>
+  <text x="53" y="96" text-anchor="middle" fill="#52677d" font-size="10">OHLCV</text>
   <rect x="115" y="55" width="110" height="55" rx="8" fill="#8a6d1f"/>
   <text x="170" y="79" text-anchor="middle" fill="#fff" font-size="12">Validación</text>
   <text x="170" y="96" text-anchor="middle" fill="#f5e8c4" font-size="10">o falla cerrada</text>
-  <rect x="242" y="55" width="100" height="55" rx="8" fill="#243b63"/>
+  <rect x="242" y="55" width="100" height="55" rx="8" fill="#c7dcf3"/>
   <text x="292" y="79" text-anchor="middle" fill="#fff" font-size="12">Features</text>
-  <text x="292" y="96" text-anchor="middle" fill="#9fb3d9" font-size="10">mismo código</text>
+  <text x="292" y="96" text-anchor="middle" fill="#52677d" font-size="10">mismo código</text>
   <rect x="359" y="55" width="90" height="55" rx="8" fill="#0e7c5b"/>
   <text x="404" y="79" text-anchor="middle" fill="#fff" font-size="12">Modelo</text>
   <text x="404" y="96" text-anchor="middle" fill="#d7f0e6" font-size="10">Ridge</text>
-  <rect x="466" y="55" width="86" height="55" rx="8" fill="#1b2a4a"/>
+  <rect x="466" y="55" width="86" height="55" rx="8" fill="#dceafb"/>
   <text x="509" y="79" text-anchor="middle" fill="#fff" font-size="12">JSON</text>
-  <text x="509" y="96" text-anchor="middle" fill="#9fb3d9" font-size="10">ok/pred</text>
-  <line x1="98" y1="82" x2="115" y2="82" stroke="#7d8fb0" stroke-width="2"/>
-  <line x1="225" y1="82" x2="242" y2="82" stroke="#7d8fb0" stroke-width="2"/>
-  <line x1="342" y1="82" x2="359" y2="82" stroke="#7d8fb0" stroke-width="2"/>
-  <line x1="449" y1="82" x2="466" y2="82" stroke="#7d8fb0" stroke-width="2"/>
+  <text x="509" y="96" text-anchor="middle" fill="#52677d" font-size="10">ok/pred</text>
+  <line x1="98" y1="82" x2="115" y2="82" stroke="#52677d" stroke-width="2"/>
+  <line x1="225" y1="82" x2="242" y2="82" stroke="#52677d" stroke-width="2"/>
+  <line x1="342" y1="82" x2="359" y2="82" stroke="#52677d" stroke-width="2"/>
+  <line x1="449" y1="82" x2="466" y2="82" stroke="#52677d" stroke-width="2"/>
 </svg>
 
 ## Error típico

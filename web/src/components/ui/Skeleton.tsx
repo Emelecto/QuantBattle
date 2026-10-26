@@ -15,5 +15,5 @@ export function Skeleton({
   variant?: SkeletonVariant;
   className?: string;
 }) {
-  return <div aria-hidden className={cn("animate-pulse bg-white/5", VARIANT_CLASSES[variant], className)} />;
+  return <div aria-hidden className={cn("animate-pulse bg-surface-solid", VARIANT_CLASSES[variant], className)} />;
 }

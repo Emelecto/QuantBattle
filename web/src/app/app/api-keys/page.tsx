@@ -166,7 +166,7 @@ export default function ApiKeysPage() {
               Copia tu clave ahora — no se volverá a mostrar
             </div>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <code className="flex-1 overflow-x-auto rounded-md border border-line bg-black/40 px-3 py-2 font-mono text-sm text-ink">
+              <code className="flex-1 overflow-x-auto rounded-md border border-line bg-surface-solid px-3 py-2 font-mono text-sm text-ink">
                 {newKey}
               </code>
               <button
@@ -190,7 +190,7 @@ export default function ApiKeysPage() {
                 </p>
               </div>
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                <code className="flex-1 overflow-x-auto rounded-md border border-line bg-black/40 px-3 py-2 font-mono text-sm text-muted">
+                <code className="flex-1 overflow-x-auto rounded-md border border-line bg-surface-solid px-3 py-2 font-mono text-sm text-muted">
                   claude mcp add quantlab -e QUANTLAB_TOKEN={newKey} -- python mcp_server.py
                 </code>
                 <button
@@ -315,7 +315,7 @@ export default function ApiKeysPage() {
           <p className="mt-2 text-[13px] leading-relaxed text-muted">
             Con tu clave copiada, registra el servidor MCP de QuantLab:
           </p>
-          <pre className="mt-3 overflow-x-auto rounded-md border border-line bg-black/40 p-3 font-mono text-sm text-muted">
+          <pre className="mt-3 overflow-x-auto rounded-md border border-line bg-surface-solid p-3 font-mono text-sm text-muted">
 {`claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python mcp_server.py`}
           </pre>
           <p className="mt-2 text-sm text-muted">

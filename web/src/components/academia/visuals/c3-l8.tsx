@@ -99,10 +99,10 @@ export default function C3L8Visual() {
             </span>
           </div>
         </div>
-        <div style={{ position: 'relative', height: '56px', borderRadius: '8px', background: 'rgba(255,255,255,0.06)' }} aria-label={`Intervalo ${stats.li.toFixed(1)} a ${stats.ls.toFixed(1)} por ciento`}>
+        <div style={{ position: 'relative', height: '56px', borderRadius: '8px', background: '#e5edf5' }} aria-label={`Intervalo ${stats.li.toFixed(1)} a ${stats.ls.toFixed(1)} por ciento`}>
           <div
             title="Azar (50 %)"
-            style={{ position: 'absolute', left: `${pos(50)}%`, top: 0, bottom: 0, width: '2px', background: '#ef4444' }}
+            style={{ position: 'absolute', left: `${pos(50)}%`, top: 0, bottom: 0, width: '2px', background: '#af3f4f' }}
           />
           <div
             title={`IC: ${stats.li.toFixed(1)}–${stats.ls.toFixed(1)} %`}
@@ -113,7 +113,7 @@ export default function C3L8Visual() {
               top: '18px',
               height: '20px',
               borderRadius: '6px',
-              background: significativo ? '#22c55e' : '#f59e0b',
+              background: significativo ? '#087951' : '#a96b16',
             }}
           />
           <div
@@ -125,13 +125,13 @@ export default function C3L8Visual() {
               width: '12px',
               height: '32px',
               borderRadius: '4px',
-              background: '#f7f8f8',
+              background: '#172840',
             }}
           />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', opacity: 0.7 }}>
           <span>{MIN} %</span>
-          <span style={{ color: '#ef4444' }}>azar 50 %</span>
+          <span style={{ color: '#af3f4f' }}>azar 50 %</span>
           <span>{MAX} %</span>
         </div>
         <p style={{ fontSize: '0.85rem', opacity: 0.75 }}>

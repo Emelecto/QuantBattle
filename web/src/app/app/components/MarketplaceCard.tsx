@@ -74,7 +74,7 @@ export function MarketplaceCard({ strategy }: { strategy: MarketplaceStrategy })
         <div className="flex items-center gap-2.5 px-5 pt-5">
           <span
             aria-hidden
-            className="metric flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-[#1a2131] text-[12px] text-muted"
+            className="metric flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface-solid text-[12px] text-muted"
           >
             {(strategy.author ?? "??").slice(0, 2).toUpperCase()}
           </span>

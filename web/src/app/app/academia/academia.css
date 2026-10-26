@@ -1,24 +1,21 @@
-/* Academia QuantLab — sistema visual propio, scoped .academia-*.
-   Chrome estilo Linear dark + lectura estilo Mintlify.
-   NO toca learn.css ni globals.css. Importado por las páginas de academia. */
+/* Academia QuantLab: superficies claras y lectura prolongada. */
 
 .academia-scope {
-  /* Mapa a tokens QuantLab (--ql-*); fallback hex = aspecto anterior. */
-  --ac-bg: var(--ql-bg, #08090a);
-  --ac-ink: var(--ql-ink, #f7f8f8);
-  --ac-body: var(--ql-muted, #d0d6e0);
-  --ac-muted: var(--ql-muted, #8a8f98);
-  --ac-accent: var(--ql-accent, #5e6ad2);
-  --ac-long: var(--ql-long, #2dd4bf);
-  --ac-short: var(--ql-short, #ef4444);
-  --ac-warning: var(--ql-warning, #f59e0b);
-  --ac-line: var(--ql-line, rgba(255, 255, 255, 0.08));
-  --ac-card: var(--ql-surface, rgba(255, 255, 255, 0.03));
-  --ac-surface-solid: var(--ql-surface-solid, #0b0c0e);
+  --ac-bg: var(--ql-bg, #f5f8fb);
+  --ac-ink: var(--ql-ink, #172840);
+  --ac-body: var(--ql-muted, #52677d);
+  --ac-muted: var(--ql-muted, #52677d);
+  --ac-accent: var(--ql-accent, #245ce5);
+  --ac-long: var(--ql-long, #087951);
+  --ac-short: var(--ql-short, #af3f4f);
+  --ac-warning: var(--ql-warning, #8d641a);
+  --ac-line: var(--ql-line, #dce6ef);
+  --ac-card: var(--ql-surface, #fff);
+  --ac-surface-solid: var(--ql-surface-solid, #f0f5fa);
   --ac-radius: 10px;
   background: var(--ac-bg);
   color: var(--ac-body);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: "DM Sans", var(--font-geist-sans), system-ui, sans-serif;
   border: 1px solid var(--ac-line);
   border-radius: 12px;
   padding: clamp(20px, 4vw, 44px);
@@ -72,7 +69,7 @@
 .academia-progress { max-width: 460px; margin: 6px 0 4px; }
 .academia-progress-track {
   height: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: #e1eaf4;
   border: 1px solid var(--ac-line);
   border-radius: 999px;
   overflow: hidden;
@@ -120,7 +117,7 @@
   text-decoration: none;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
-.academia-lesson-row:hover { border-color: rgba(255, 255, 255, 0.22); transform: translateY(-1px); }
+.academia-lesson-row:hover { border-color: #9cbce5; transform: translateY(-1px); }
 .academia-lesson-num {
   flex: 0 0 auto;
   width: 44px;
@@ -131,7 +128,7 @@
   font-weight: 700;
   font-size: 15px;
   color: var(--ac-ink);
-  background: rgba(255, 255, 255, 0.05);
+  background: #f0f5fa;
   border: 1px solid var(--ac-line);
 }
 .academia-lesson-body { flex: 1 1 auto; min-width: 0; }
@@ -161,20 +158,18 @@
   border: 1px solid transparent;
   transition: filter 0.15s ease, border-color 0.15s ease;
 }
-/* Shared ice-blue actions with dark text. Legacy note: the token
-   --ql-accent en tema claro (oklch L≈0.93) no contrasta con texto claro. */
-.academia-btn-primary { background: var(--ql-accent); border-color: var(--ql-accent); color: var(--ql-bg); }
-.academia-btn-primary:hover { background: #d1e9fa; border-color: #d1e9fa; color: var(--ql-bg); }
+.academia-btn-primary { background: var(--ql-accent); border-color: var(--ql-accent); color: #fff; }
+.academia-btn-primary:hover { background: #174cbf; border-color: #174cbf; color: #fff; }
 .academia-btn-primary:focus-visible,
-.academia-btn-secondary:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.academia-btn-secondary:focus-visible { outline: 3px solid #79a3ff; outline-offset: 2px; }
 .academia-btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--ac-ink);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: #fff;
+  color: #2455ae;
+  border-color: #cddaea;
 }
 .academia-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.38);
+  background: #f2f7fd;
+  border-color: #7ea8e9;
 }
 
 /* ---------- Lector: layout artículo + TOC ---------- */
@@ -255,7 +250,7 @@
 .academia-article > blockquote {
   margin: 0 0 22px;
   padding: 14px 18px;
-  border-left: 2px solid rgba(255, 255, 255, 0.25);
+  border-left: 3px solid #90addb;
   background: var(--ac-card);
   border-radius: 0 var(--ac-radius) var(--ac-radius) 0;
   color: var(--ac-ink);
@@ -285,7 +280,7 @@
 .academia-callout ol:last-child { margin-bottom: 0; }
 .academia-callout--objetivo { border-left-color: var(--ac-ink); }
 .academia-callout--objetivo h2::before { content: "◎ "; color: var(--ac-muted); }
-.academia-callout--tldr { border-left-color: rgba(255, 255, 255, 0.45); }
+.academia-callout--tldr { border-left-color: #6d99d6; }
 .academia-callout--tldr h2::before { content: "▸ "; color: var(--ac-muted); }
 .academia-callout--error {
   border-color: color-mix(in srgb, var(--ac-warning) 30%, transparent);
@@ -293,11 +288,11 @@
   background: color-mix(in srgb, var(--ac-warning) 6%, transparent);
 }
 .academia-callout--error h2::before { content: "⚠ "; }
-.academia-callout--practica { border-left-color: rgba(255, 255, 255, 0.3); }
+.academia-callout--practica { border-left-color: #90addb; }
 .academia-callout--practica h2::before { content: "✎ "; color: var(--ac-muted); }
 
 /* Checklist: callout con checkboxes reales */
-.academia-callout--checklist { border-left-color: rgba(255, 255, 255, 0.35); }
+.academia-callout--checklist { border-left-color: #90addb; }
 .academia-callout--checklist h2::before { content: "☑ "; color: var(--ac-muted); }
 .academia-callout--checklist ul { list-style: none; padding-left: 0; margin: 0; }
 .academia-check-item {
@@ -371,6 +366,14 @@
   border-radius: 6px;
 }
 
+/* Los comandos de las prácticas deben caber en pantallas estrechas. */
+.academia-viz { min-width: 0; }
+.academia-paso { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--ac-line); border-radius: 6px; background: var(--ac-card); }
+.academia-paso label { min-width: 0; flex: 1 1 240px; }
+.academia-paso label > span { min-width: 0; overflow-wrap: anywhere; }
+.academia-cmd { display: block; max-width: 100%; margin-top: 5px; white-space: normal; overflow-wrap: anywhere; }
+.academia-paso .academia-btn-mini { margin-left: auto; }
+
 /* ---------- Quiz + nav lector ---------- */
 .academia-quiz { margin-top: 30px; }
 .academia-reader-nav {
@@ -386,7 +389,7 @@
   margin-top: 12px;
   padding: 10px 14px;
   border-radius: var(--ac-radius);
-  background: rgba(255, 255, 255, 0.04);
+  background: #f0f5fa;
   border: 1px solid var(--ac-line);
   color: var(--ac-muted);
   font-size: 14px;
@@ -458,8 +461,8 @@
 }
 .academia-svg-moneda { fill: var(--ac-accent); }
 .academia-svg-moneda-alt { fill: var(--ac-long); }
-.academia-svg-texto { fill: var(--ac-bg); font-size: 28px; font-weight: 700; }
-.academia-svg-eje { stroke: rgba(255, 255, 255, 0.2); stroke-width: 1.5; }
+.academia-svg-texto { fill: #fff; font-size: 28px; font-weight: 700; }
+.academia-svg-eje { stroke: #9fb5cc; stroke-width: 1.5; }
 .academia-svg-arco { opacity: 0.7; }
 .academia-svg-trazo { stroke-dasharray: 600; animation: academia-trazo 1.6s ease forwards; }
 .academia-svg-punto { fill: var(--ac-long); transform-origin: center; transform-box: fill-box; animation: academia-punto 2.4s ease-in-out infinite; }
@@ -479,7 +482,7 @@
   font-weight: 600;
   cursor: pointer;
 }
-.academia-pill-activa { background: var(--ql-accent); border-color: var(--ql-accent); color: var(--ql-bg); }
+.academia-pill-activa { background: var(--ql-accent); border-color: var(--ql-accent); color: #fff; }
 .academia-simulador-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
 .academia-control label { display: block; color: var(--ac-body); font-size: 13px; margin-bottom: 6px; }
 .academia-deslizador { width: 100%; accent-color: var(--ac-accent); cursor: pointer; }
@@ -581,7 +584,7 @@
   text-decoration: none;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
-.academia-course-card:hover { border-color: rgba(255, 255, 255, 0.22); transform: translateY(-2px); }
+.academia-course-card:hover { border-color: #9cbce5; transform: translateY(-2px); }
 .academia-course-top { display: flex; align-items: center; gap: 14px; }
 .academia-course-top .academia-kicker { margin-bottom: 0; }
 .academia-course-card h3 { margin: 0; font-size: 19px; font-weight: 650; }

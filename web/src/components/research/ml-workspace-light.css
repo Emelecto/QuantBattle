@@ -1,0 +1,67 @@
+.ql-app-shell .ql-research-workspace { display:grid; gap:23px; margin:0; background:transparent; }
+.ql-app-shell .ql-ml-hero { min-height:0; grid-template-columns:minmax(0,1.28fr) minmax(280px,.72fr); border:1px solid #d7e2ec; border-radius:0; background:#fff; box-shadow:0 10px 32px rgba(33,62,99,.06); }
+.ql-app-shell .ql-ml-hero-main { padding:34px 38px; background:#fff; background-image:none; }
+.ql-app-shell .ql-ml-hero-main::before { display:none; }
+.ql-app-shell .ql-ml-eyebrow,.ql-app-shell .ql-ml-field-label { color:#3368bf; font-family:"DM Sans",var(--font-geist-sans),sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; }
+.ql-app-shell .ql-ml-live { color:#17684a; background:#e0f5e9; padding:6px 9px; font-weight:700; }
+.ql-app-shell .ql-ml-live span { background:#119265; box-shadow:none; }
+.ql-app-shell .ql-ml-live.is-error { color:#8d4319; background:#fff0dc; }
+.ql-app-shell .ql-ml-live.is-error span { background:#c57834; }
+.ql-app-shell .ql-ml-hero h2 { max-width:640px; margin:25px 0 12px; font-family:Manrope,var(--font-geist-sans),sans-serif; font-size:29px; font-weight:800; letter-spacing:-.035em; line-height:1.2; }
+.ql-app-shell .ql-ml-hero-intro { max-width:600px; color:#52677d; font-size:14px; line-height:1.55; }
+.ql-app-shell .ql-ml-round { margin-top:0; padding-top:14px; }
+.ql-app-shell .ql-ml-round-name { color:#2454aa; font-size:18px; }
+.ql-app-shell .ql-ml-round-name:hover { color:#174cbf; }
+.ql-app-shell .ql-ml-round-name span { color:#245ce5; }
+.ql-app-shell .ql-ml-round-meta { color:#52677d; font-size:11px; }
+.ql-app-shell .ql-ml-hero-actions { margin-top:23px; gap:15px; }
+.ql-app-shell .ql-ml-main-action { min-height:43px; border-radius:5px; padding:10px 16px; font-size:13px; box-shadow:none; }
+.ql-app-shell .ql-ml-guide-link { color:#2455ae; font-weight:700; }
+.ql-app-shell .ql-ml-hero-status { padding:33px 31px; border-color:#dce6ef; background:#f0f5fa; }
+.ql-app-shell .ql-ml-status-mark { color:#245ce5; border-color:#cddbea; border-radius:5px; }
+.ql-app-shell .ql-ml-status-title { margin:20px 0 9px; font-family:Manrope,var(--font-geist-sans),sans-serif; font-size:22px; font-weight:800; letter-spacing:-.025em; }
+.ql-app-shell .ql-ml-status-copy { min-height:0; color:#52677d; font-size:13px; }
+.ql-app-shell .ql-ml-status-score { color:#2455ae; font-size:13px; font-weight:700; }
+.ql-app-shell .ql-ml-process { padding-top:23px; }
+.ql-app-shell .ql-ml-process > div { border-color:#cbd9e8; }
+.ql-app-shell .ql-ml-process > div.is-current { border-color:#6093df; }
+.ql-app-shell .ql-ml-process span { color:#2455ae; }
+.ql-app-shell .ql-ml-process small { color:#52677d; }
+.ql-app-shell .ql-ml-history { padding:24px 27px; border:1px solid #dce6ef; border-radius:0; background:#fff; box-shadow:none; }
+.ql-app-shell .ql-ml-history-heading h3 { margin:8px 0 0; font-family:Manrope,var(--font-geist-sans),sans-serif; font-size:19px; font-weight:800; }
+.ql-app-shell .ql-ml-history-heading p { color:#52677d; font-size:12px; }
+.ql-app-shell .ql-ml-history summary { min-height:44px; }
+.ql-app-shell .ql-ml-history button,.ql-app-shell .ql-ml-history a { color:#2455ae; }
+.ql-pilot-grid { display:grid; grid-template-columns:minmax(0,1.42fr) minmax(280px,.74fr); gap:20px; }
+.ql-pilot-result,.ql-pilot-verification { min-width:0; border:1px solid #dce6ef; background:#fff; }
+.ql-pilot-panel-head { display:flex; align-items:start; justify-content:space-between; gap:15px; padding:22px 25px 12px; }
+.ql-pilot-panel-head h3 { margin:0 0 6px; color:#172840; font-family:Manrope,var(--font-geist-sans),sans-serif; font-size:19px; font-weight:800; }
+.ql-pilot-panel-head p { margin:0; color:#52677d; font-size:12px; }
+.ql-pilot-panel-head a,.ql-pilot-result-note a,.ql-pilot-verification > a { color:#2455ae; font-size:12px; font-weight:700; white-space:nowrap; }
+.ql-pilot-panel-head a:hover,.ql-pilot-result-note a:hover,.ql-pilot-verification > a:hover { text-decoration:underline; }
+.ql-pilot-result-body { display:grid; grid-template-columns:195px minmax(0,1fr); gap:16px; align-items:center; padding:9px 25px 18px; }
+.ql-pilot-score span { color:#4b6790; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.ql-pilot-score strong { display:block; margin:10px 0 7px; color:#2455ae; font-family:Manrope,var(--font-geist-sans),sans-serif; font-size:37px; line-height:1.1; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+.ql-pilot-score p { max-width:210px; margin:0; color:#52677d; font-size:11px; line-height:1.45; }
+.ql-pilot-chart-wrap { min-width:0; }
+.ql-pilot-chart-wrap svg { display:block; width:100%; height:auto; }
+.ql-pilot-baselines { display:flex; flex-wrap:wrap; gap:8px 22px; margin:0 25px; padding:13px 0; border-top:1px solid #dce6ef; color:#52677d; font-size:11px; font-variant-numeric:tabular-nums; }
+.ql-pilot-baselines b { color:#172840; }
+.ql-pilot-result-note { margin:0; padding:13px 25px 16px; border-top:1px solid #dce6ef; color:#52677d; font-size:11px; line-height:1.5; }
+.ql-pilot-verification { display:flex; flex-direction:column; }
+.ql-pilot-verification ul { list-style:none; padding:0 25px; margin:3px 0 0; }
+.ql-pilot-verification li { display:grid; grid-template-columns:22px minmax(0,1fr); gap:12px; padding:14px 0; border-bottom:1px solid #e3ebf3; }
+.ql-pilot-verification li > span { display:grid; place-items:center; width:20px; height:20px; border-radius:50%; color:#087951; background:#e0f5e9; font-weight:800; font-size:11px; }
+.ql-pilot-verification strong { display:block; color:#172840; font-size:12px; }
+.ql-pilot-verification li p { margin:5px 0 0; color:#52677d; font-size:11px; line-height:1.5; }
+.ql-pilot-verification > a { display:block; margin:auto 25px 0; padding:15px 0 20px; }
+@media (prefers-reduced-motion:no-preference) {
+  .ql-app-shell .ql-ml-hero { animation:ql-hero-enter 420ms cubic-bezier(.23,1,.32,1) both; }
+  .ql-app-shell .ql-pilot-grid { animation:ql-evidence-enter 440ms 70ms ease-out both; }
+  .ql-pilot-chart-wrap rect { animation:ql-bar-enter 450ms ease-out both; }
+  @keyframes ql-hero-enter { from { opacity:.55; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes ql-evidence-enter { from { opacity:.6; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes ql-bar-enter { from { opacity:0; } to { opacity:1; } }
+}
+@media (max-width:1100px) { .ql-app-shell .ql-ml-hero,.ql-pilot-grid { grid-template-columns:1fr; } .ql-app-shell .ql-ml-hero-status { border-left:0; border-top:1px solid #dce6ef; } }
+@media (max-width:640px) { .ql-app-shell .ql-ml-hero-main,.ql-app-shell .ql-ml-hero-status { padding:23px 21px; } .ql-app-shell .ql-ml-hero h2 { margin-top:18px; font-size:23px; } .ql-app-shell .ql-ml-live { white-space:normal; } .ql-app-shell .ql-ml-history { padding:20px; } .ql-pilot-grid { gap:16px; } .ql-pilot-panel-head { padding:20px; } .ql-pilot-result-body { display:block; padding:0 20px 20px; } .ql-pilot-chart-wrap { margin-top:13px; } .ql-pilot-baselines { margin-inline:20px; } .ql-pilot-result-note { padding-inline:20px; } .ql-pilot-verification ul { padding-inline:20px; } .ql-pilot-verification > a { margin-inline:20px; } }

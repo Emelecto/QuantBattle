@@ -64,7 +64,7 @@ export default function C4L6Visual() {
           <div className="academia-barra-fondo" aria-label={`Progreso ${progreso}%`}>
             <div className="academia-barra-relleno" style={{ width: `${progreso}%` }} />
           </div>
-          {progreso === 100 && <p style={{ color: "#22c55e", fontSize: "0.9rem" }}>✓ Protocolo completo: solo vuelve si el trade está en tu plan.</p>}
+          {progreso === 100 && <p style={{ color: "#087951", fontSize: "0.9rem" }}>✓ Protocolo completo: solo vuelve si el trade está en tu plan.</p>}
         </div>
         <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.6rem" }}>
           {PAUSA.map((p, i) => {

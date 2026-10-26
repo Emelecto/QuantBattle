@@ -53,7 +53,7 @@ export default function C2L7Visual() {
           </div>
           <div className="academia-stat"><span className="academia-stat-etiqueta">Gap IS−OOS</span><span className={`academia-stat-valor ${sel.gap > 2 ? "academia-negativo" : "academia-positivo"}`}><CountUp valor={sel.gap} decimales={2} /></span></div>
         </div>
-        {sel.gap > 2 && <p style={{ color: "#ef4444", fontSize: "0.9rem" }}>⚠ Gap &gt; 2: lo que brilló in-sample se apagó out-of-sample — sobreajuste.</p>}
+        {sel.gap > 2 && <p style={{ color: "#af3f4f", fontSize: "0.9rem" }}>⚠ Gap &gt; 2: lo que brilló in-sample se apagó out-of-sample — sobreajuste.</p>}
       </Reveal>
       <Reveal retraso={240}>
         <p className="academia-viz-graf-titulo">IS vs OOS por fold · {sobreajustados} de 6 con gap &gt; 2</p>

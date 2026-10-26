@@ -65,7 +65,7 @@ export default function C2L9Visual() {
       </Reveal>
       <Reveal retraso={120}>
         <p className="academia-viz-graf-titulo">Equity neto del pipeline</p>
-        <AcademiaAreaChart datos={serie} altura={220} color="#2dd4bf" etiqueta="Equity" formato={(v) => `$${v.toFixed(0)}`} />
+        <AcademiaAreaChart datos={serie} altura={220} color="#087951" etiqueta="Equity" formato={(v) => `$${v.toFixed(0)}`} />
       </Reveal>
       <Reveal retraso={200}>
         <div className="academia-stat-grid academia-stat-grid-3">
@@ -100,7 +100,7 @@ export default function C2L9Visual() {
             );
           })}
         </ol>
-        {progreso === 100 && <p style={{ color: "#22c55e" }}>✓ Pipeline completo: estrategia lista para paper trading, no para el Lambo.</p>}
+        {progreso === 100 && <p style={{ color: "#087951" }}>✓ Pipeline completo: estrategia lista para paper trading, no para el Lambo.</p>}
       </Reveal>
     </div>
   );

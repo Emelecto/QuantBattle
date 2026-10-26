@@ -90,7 +90,7 @@ export function NextAction({
               <span
                 aria-hidden="true"
                 className={`flex items-center justify-center rounded-full text-[10px] font-bold ${
-                  s.id === next.id ? "bg-accent text-bg" : "bg-white/10 text-muted"
+                  s.id === next.id ? "bg-accent text-bg" : "bg-surface-solid text-muted"
                 }`}
                 style={{ height: 18, width: 18 }}
               >

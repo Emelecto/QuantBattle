@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("un evaluador encuentra el protocolo y la evidencia desde la portada", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Ver evaluación técnica" }).click();
+  await page.getByRole("link", { name: "Leer metodología y resultados" }).click();
   await expect(page).toHaveURL(/\/docs#evaluacion$/);
   await expect(page.getByRole("heading", { name: "Evaluación técnica con datos sintéticos" })).toBeVisible();
   await expect(page.getByRole("table", { name: "Spearman medio por era sobre el holdout sintético" })).toBeVisible();

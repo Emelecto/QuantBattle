@@ -36,7 +36,7 @@ export default function C6L4Visual() {
         <div className="academia-control" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.8rem" }}>
           {(["full", "half", "fijo"] as const).map((m) => (
             <button key={m} onClick={() => setModo(m)} className="academia-btn" data-activo={modo === m}
-              style={{ padding: "0.4rem 0.9rem", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.15)", background: modo === m ? "#5e6ad2" : "transparent", color: "inherit", cursor: "pointer" }}>
+              style={{ padding: "0.4rem 0.9rem", borderRadius: "8px", border: "1px solid #cddaea", background: modo === m ? "#245ce5" : "transparent", color: modo === m ? "#fff" : "inherit", cursor: "pointer" }}>
               {m === "full" ? "Full Kelly" : m === "half" ? "Half Kelly" : "Fijo"}
             </button>
           ))}
@@ -50,8 +50,8 @@ export default function C6L4Visual() {
       </Reveal>
       <Reveal retraso={200}>
         <p className="academia-viz-graf-titulo">Equity simulado · {modo === "fijo" ? `fijo ${fijo}%` : modo}</p>
-        <svg viewBox="0 0 100 36" style={{ width: "100%", height: "140px", background: "rgba(255,255,255,0.02)", borderRadius: "8px" }}>
-          <polyline points={pts} fill="none" stroke="#5e6ad2" strokeWidth="1.2" />
+        <svg viewBox="0 0 100 36" style={{ width: "100%", height: "140px", background: "#f4f8fc", borderRadius: "8px" }}>
+          <polyline points={pts} fill="none" stroke="#245ce5" strokeWidth="1.2" />
         </svg>
         <p className="academia-viz-nota">Con edge medio de 0.029, Full Kelly apuesta fuerte y se sacude; Half Kelly suaviza la curva. El stake fijo ignora el edge: igual tamaño con y sin ventaja.</p>
       </Reveal>

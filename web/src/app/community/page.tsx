@@ -186,7 +186,7 @@ export default function CommunityPage() {
                   <div className="flex items-center gap-2.5 px-5 pt-5">
                     <span
                       aria-hidden
-                      className="metric flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-[#1a2131] text-[11px] text-muted"
+                      className="metric flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface-solid text-[11px] text-muted"
                     >
                       {(s.username ?? "??").slice(0, 2).toUpperCase()}
                     </span>

@@ -30,7 +30,7 @@ export default function C5L5Visual() {
         </p>
       </Reveal>
       <Reveal retraso={120}>
-        <AcademiaAreaChart datos={datos} color="#22c55e" etiqueta="Cierre" />
+        <AcademiaAreaChart datos={datos} color="#087951" etiqueta="Cierre" />
       </Reveal>
       <Reveal retraso={180}>
         <div className="academia-filtros" role="group" aria-label="Selector de modelo">

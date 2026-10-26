@@ -59,7 +59,7 @@ export default function C2L1Visual() {
           <div className="academia-barra-fondo" aria-label={`Progreso ${progreso}%`}>
             <div className="academia-barra-relleno" style={{ width: `${progreso}%` }} />
           </div>
-          {progreso === 100 && <p style={{ color: "#22c55e", fontSize: "0.9rem" }}>✓ Entorno listo: ya puedes reproducir cualquier lección del curso.</p>}
+          {progreso === 100 && <p style={{ color: "#087951", fontSize: "0.9rem" }}>✓ Entorno listo: ya puedes reproducir cualquier lección del curso.</p>}
         </div>
       </Reveal>
       <Reveal retraso={200}>

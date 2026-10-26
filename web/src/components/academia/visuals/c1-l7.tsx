@@ -111,7 +111,7 @@ export default function C1L7Visual() {
         <polyline
           points={puntos}
           fill="none"
-          stroke="#f59e0b"
+          stroke="#a96b16"
           strokeWidth="2"
           strokeLinejoin="round"
           strokeLinecap="round"

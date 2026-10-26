@@ -22,7 +22,7 @@ def signal(fast, slow):
 `;
 
 /**
- * Editor Monaco con tema oscuro QuantLab ('quantlab-dark').
+ * Editor Monaco con la paleta clara QuantLab.
  * Se carga solo en el cliente (loader CDN de @monaco-editor/react).
  */
 export function StrategyEditor({
@@ -33,20 +33,20 @@ export function StrategyEditor({
   onChange: (value: string) => void;
 }) {
   const beforeMount: BeforeMount = (monaco) => {
-    monaco.editor.defineTheme("quantlab-dark", {
-      base: "vs-dark",
+    monaco.editor.defineTheme("quantlab-light", {
+      base: "vs",
       inherit: true,
       rules: [],
       colors: {
-        "editor.background": "#0a0c10",
-        "editor.foreground": "#eef2f7",
-        "editorCursor.foreground": "#f8fafc",
-        "editor.lineHighlightBackground": "#11151c",
-        "editorLineNumber.foreground": "#8b93a7",
-        "editorLineNumber.activeForeground": "#f8fafc",
-        "editor.selectionBackground": "#1f6f68",
-        "editorGutter.background": "#0a0c10",
-        "editorIndentGuide.background1": "#1b2230",
+        "editor.background": "#ffffff",
+        "editor.foreground": "#172840",
+        "editorCursor.foreground": "#245ce5",
+        "editor.lineHighlightBackground": "#f0f5fa",
+        "editorLineNumber.foreground": "#7890aa",
+        "editorLineNumber.activeForeground": "#28415f",
+        "editor.selectionBackground": "#dceafb",
+        "editorGutter.background": "#ffffff",
+        "editorIndentGuide.background1": "#dce6ef",
       },
     });
   };
@@ -57,7 +57,7 @@ export function StrategyEditor({
     <Editor
       height="480px"
       language="python"
-      theme="quantlab-dark"
+      theme="quantlab-light"
       value={value}
       beforeMount={beforeMount}
       onChange={handleChange}

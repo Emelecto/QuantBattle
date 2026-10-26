@@ -20,7 +20,7 @@ export function HeroChart() {
           <span className="ql-glass rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] font-medium text-accent shadow-lg">
             Sharpe 1.42
           </span>
-          <span className="ql-glass rounded-full border border-line bg-[#0d1017]/80 px-3 py-1 font-mono text-[11px] text-muted shadow-lg">
+          <span className="ql-glass rounded-full border border-line bg-surface-solid/80 px-3 py-1 font-mono text-[11px] text-muted shadow-lg">
             MaxDD −18%
           </span>
           <span className="ql-glass rounded-full border border-long/30 bg-long/10 px-3 py-1 font-mono text-[11px] font-medium text-long shadow-lg">

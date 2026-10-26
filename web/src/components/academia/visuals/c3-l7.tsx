@@ -25,8 +25,8 @@ export default function C3L7Visual() {
 
   const maxAbs = Math.max(Math.abs(is.sharpeA), Math.abs(oos.sharpeA), 0.5);
   const filas = [
-    { nombre: `In-sample (n=${is.n})`, media: is.media, sharpe: is.sharpeA, color: '#5e6ad2' },
-    { nombre: `Out-of-sample (n=${oos.n})`, media: oos.media, sharpe: oos.sharpeA, color: '#f59e0b' },
+    { nombre: `In-sample (n=${is.n})`, media: is.media, sharpe: is.sharpeA, color: '#245ce5' },
+    { nombre: `Out-of-sample (n=${oos.n})`, media: oos.media, sharpe: oos.sharpeA, color: '#a96b16' },
   ];
 
   return (
@@ -69,13 +69,13 @@ export default function C3L7Visual() {
                 media <CountUp valor={f.media} decimales={3} /> % · Sharpe <CountUp valor={f.sharpe} decimales={2} />
               </span>
             </div>
-            <div style={{ height: '12px', borderRadius: '6px', background: 'rgba(255,255,255,0.12)', overflow: 'hidden' }}>
+            <div style={{ height: '12px', borderRadius: '6px', background: '#dce6ef', overflow: 'hidden' }}>
               <div
                 style={{
                   height: '100%',
                   width: `${(Math.abs(f.sharpe) / maxAbs) * 100}%`,
                   borderRadius: '6px',
-                  background: f.sharpe >= 0 ? f.color : '#ef4444',
+                  background: f.sharpe >= 0 ? f.color : '#af3f4f',
                 }}
               />
             </div>

@@ -19,8 +19,8 @@ function HeroMoneda() {
       <circle cx="230" cy="60" r="40" className="academia-svg-moneda-alt" />
       <circle cx="230" cy="60" r="32" fill="none" stroke="#08090a" strokeWidth="1.5" strokeDasharray="4 4" />
       <text x="230" y="70" textAnchor="middle" className="academia-svg-texto">½</text>
-      <path d="M140 40 Q160 60 140 80" fill="none" stroke="#5e6ad2" strokeWidth="2" strokeDasharray="5 4" className="academia-svg-arco" />
-      <path d="M180 40 Q160 60 180 80" fill="none" stroke="#5e6ad2" strokeWidth="2" strokeDasharray="5 4" className="academia-svg-arco" />
+      <path d="M140 40 Q160 60 140 80" fill="none" stroke="#245ce5" strokeWidth="2" strokeDasharray="5 4" className="academia-svg-arco" />
+      <path d="M180 40 Q160 60 180 80" fill="none" stroke="#245ce5" strokeWidth="2" strokeDasharray="5 4" className="academia-svg-arco" />
     </svg>
   );
 }

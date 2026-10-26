@@ -49,16 +49,16 @@ export default function C3L6Visual() {
   const barra = (valor: number, color: string) => (
     <div style={{ marginBottom: '0.7rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-        <span style={{ fontWeight: 600 }}>{color === '#5e6ad2' ? 'Sharpe' : 'Sortino'}</span>
+        <span style={{ fontWeight: 600 }}>{color === '#245ce5' ? 'Sharpe' : 'Sortino'}</span>
         <span><CountUp valor={valor} decimales={2} /></span>
       </div>
-      <div style={{ height: '12px', borderRadius: '6px', background: 'rgba(255,255,255,0.12)', overflow: 'hidden' }}>
+      <div style={{ height: '12px', borderRadius: '6px', background: '#dce6ef', overflow: 'hidden' }}>
         <div
           style={{
             height: '100%',
             width: `${(Math.abs(valor) / maxAbs) * 100}%`,
             borderRadius: '6px',
-            background: valor >= 0 ? color : '#ef4444',
+            background: valor >= 0 ? color : '#af3f4f',
           }}
         />
       </div>
@@ -109,8 +109,8 @@ export default function C3L6Visual() {
             <span className="academia-stat-valor">×<CountUp valor={sortino / sharpe} decimales={2} /></span>
           </div>
         </div>
-        {barra(sharpe, '#5e6ad2')}
-        {barra(sortino, '#f59e0b')}
+        {barra(sharpe, '#245ce5')}
+        {barra(sortino, '#a96b16')}
         <p style={{ fontSize: '0.85rem', opacity: 0.75 }}>
           Lección: el Sortino (≈ {sortino.toFixed(2)}) supera al Sharpe (≈ {sharpe.toFixed(2)}) porque
           la dispersión alcista no se castiga. Para estrategias asimétricas, el Sharpe subestima la calidad.

@@ -78,7 +78,7 @@ function CommentRow({
       {/* Avatar con inicial */}
       <span
         aria-hidden="true"
-        className="metric flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full border border-line bg-[#1a2131] text-[12px] font-semibold text-muted"
+        className="metric flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full border border-line bg-surface-solid text-[12px] font-semibold text-muted"
       >
         {(comment.username ?? "?").slice(0, 1).toUpperCase()}
       </span>

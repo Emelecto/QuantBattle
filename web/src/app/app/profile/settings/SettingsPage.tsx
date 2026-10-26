@@ -199,7 +199,7 @@ export function SettingsPage() {
                       <p className="text-sm font-medium text-accent mb-2">
                         Clave recien generada — copiala ahora
                       </p>
-                      <code className="block overflow-x-auto rounded-md border border-line bg-black/40 px-3 py-2 font-mono text-sm text-ink">
+                      <code className="block overflow-x-auto rounded-md border border-line bg-surface-solid px-3 py-2 font-mono text-sm text-ink">
                         {apiKey}
                       </code>
                     </div>
@@ -249,7 +249,7 @@ export function SettingsPage() {
                     Conecta tu agente de IA directamente con el motor de
                     backtest de QuantLab.
                   </p>
-                  <pre className="overflow-x-auto rounded-md border border-line bg-black/40 p-3 font-mono text-sm text-muted">
+                  <pre className="overflow-x-auto rounded-md border border-line bg-surface-solid p-3 font-mono text-sm text-muted">
 {`claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python mcp_server.py`}
                   </pre>
                   <p className="mt-2 text-[13px] text-muted">

@@ -102,7 +102,7 @@ export default function TermsPage() {
             Para usar el servicio se requiere una cuenta registrada con un
             correo electrónico válido. Eres responsable de mantener la
             confidencialidad de tu contraseña y de tus claves API de QuantLab
-            (las credenciales con prefijo <code className="metric rounded border border-line bg-[#141926] px-1 py-0.5 text-[12px] text-ink">qlk_</code>).
+            (las credenciales con prefijo <code className="metric rounded border border-line bg-surface-solid px-1 py-0.5 text-[12px] text-ink">qlk_</code>).
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>

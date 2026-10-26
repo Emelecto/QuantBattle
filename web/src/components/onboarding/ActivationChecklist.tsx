@@ -47,7 +47,7 @@ export function ActivationChecklist() {
         </span>
       </div>
       <div
-        className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"
+        className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-solid"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
@@ -71,13 +71,13 @@ export function ActivationChecklist() {
                   ? "border-long/25 bg-long/[0.06]"
                   : isNext
                     ? "border-accent/35 bg-accent/[0.07]"
-                    : "border-line bg-white/[0.02]"
+                    : "border-line bg-surface-solid"
               }`}
             >
               <span
                 aria-hidden="true"
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                  ok ? "bg-long text-bg" : isNext ? "bg-accent text-bg" : "bg-white/10 text-muted"
+                  ok ? "bg-long text-bg" : isNext ? "bg-accent text-bg" : "bg-surface-solid text-muted"
                 }`}
               >
                 {ok ? "✓" : s.n}

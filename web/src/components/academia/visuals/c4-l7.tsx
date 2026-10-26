@@ -42,7 +42,7 @@ export default function C4L7Visual() {
           <div className="academia-barra-fondo" aria-label={`Progreso ${progreso}%`}>
             <div className="academia-barra-relleno" style={{ width: `${progreso}%` }} />
           </div>
-          <p style={{ fontSize: "0.9rem", color: listo ? "#22c55e" : "#f59e0b" }}>
+          <p style={{ fontSize: "0.9rem", color: listo ? "#087951" : "#a96b16" }}>
             {listo ? "✓ Luz verde: trade autorizado por tu plan." : "⏳ Trade bloqueado hasta completar los 6 filtros."}
           </p>
         </div>

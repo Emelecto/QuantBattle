@@ -278,7 +278,7 @@ export default function StrategyDetailPage() {
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2.5 mb-2">
-              <span className="metric flex h-10 w-10 items-center justify-center rounded-full border border-line bg-[#1a2131] text-[14px] text-muted">
+              <span className="metric flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface-solid text-[14px] text-muted">
                 {(strategy.author ?? "??").slice(0, 2).toUpperCase()}
               </span>
               <div>
@@ -439,7 +439,7 @@ export default function StrategyDetailPage() {
             Autor
           </h2>
           <div className="flex items-center gap-3">
-            <span className="metric flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-[#1a2131] text-[14px] text-muted">
+            <span className="metric flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-surface-solid text-[14px] text-muted">
               {(prof?.display_name ?? strategy.author ?? "??").slice(0, 2).toUpperCase()}
             </span>
             <div className="min-w-0">

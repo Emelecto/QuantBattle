@@ -13,4 +13,4 @@ Spanish-speaking students and researchers, including academic judges, need to un
 - Preserve existing routes and secondary product functions.
 
 ## Visual mandate
-The user authorizes the complete visual redesign using installed design skills and references from established products. Maintain the recognizable dark QuantLab identity and Geist typography; improve hierarchy, readability and consistency. Build directly in the existing Next.js application. References: Linear's product demonstrations and Vercel's technical information structure. A typographic landing leads into an evidence-oriented tournament workflow; the dashboard prioritizes the user's next action.
+The approved landing and dashboard mockups define a light institutional identity: paper and pale blue surfaces, navy typography, blue actions, and restrained green status. Build in the existing Next.js application. The public landing leads with the tournament workflow and verifiable synthetic pilot; the authenticated dashboard prioritizes the next ML action, evidence, private history and honest loading/error states. Secondary product routes must remain usable under the shared light shell.

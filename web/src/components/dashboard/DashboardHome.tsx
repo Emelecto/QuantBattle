@@ -45,9 +45,8 @@ function formatDateTime(value: string | null): string | null {
 
 /** Card de competencia con countdown en vivo (re-render cada minuto). */
 function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
-  const countdown = useCountdown(tournament.deadline);
+  const { countdown, closed } = useCountdown(tournament.deadline);
   const deadline = formatDateTime(tournament.deadline);
-  const closed = !!tournament.deadline && Date.parse(tournament.deadline) <= Date.now();
 
   return (
     <Link
@@ -90,7 +89,7 @@ function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
 
 /** Devuelve el tiempo restante legible ("3d 04h") hasta una fecha ISO,
  *  o null si ya pasó / no hay deadline. Re-renderiza cada minuto. */
-function useCountdown(deadline: string | null): string | null {
+function useCountdown(deadline: string | null): { countdown: string | null; closed: boolean } {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -99,20 +98,20 @@ function useCountdown(deadline: string | null): string | null {
     return () => window.clearInterval(timer);
   }, [deadline]);
 
-  if (!deadline) return null;
+  if (!deadline) return { countdown: null, closed: false };
   const end = new Date(deadline).getTime();
-  if (Number.isNaN(end)) return null;
+  if (Number.isNaN(end)) return { countdown: null, closed: false };
   const diffMs = end - now;
-  if (diffMs <= 0) return null;
+  if (diffMs <= 0) return { countdown: null, closed: true };
 
   const diffMin = Math.floor(diffMs / 60_000);
   const days = Math.floor(diffMin / 1440);
   const hours = Math.floor((diffMin % 1440) / 60);
   const minutes = diffMin % 60;
 
-  if (days > 0) return `${days}d ${String(hours).padStart(2, "0")}h`;
-  if (hours > 0) return `${hours}h ${String(minutes).padStart(2, "0")}m`;
-  return `${minutes}m`;
+  if (days > 0) return { countdown: `${days}d ${String(hours).padStart(2, "0")}h`, closed: false };
+  if (hours > 0) return { countdown: `${hours}h ${String(minutes).padStart(2, "0")}m`, closed: false };
+  return { countdown: `${minutes}m`, closed: false };
 }
 
 function Card({
@@ -242,7 +241,8 @@ function DashboardHome() {
   // lección en el store local y la sincroniza a Supabase (completed_lessons).
   const [academiaDone, setAcademiaDone] = useState<string[]>([]);
   useEffect(() => {
-    setAcademiaDone(loadAcademiaProgress().completed);
+    const frame = window.requestAnimationFrame(() => setAcademiaDone(loadAcademiaProgress().completed));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
   const totalModules = LESSONS.filter((l) => !l.draft).length;
     const completedCount = new Set(academiaDone.filter((id) =>
@@ -252,10 +252,14 @@ function DashboardHome() {
       totalModules > 0 ? Math.round((completedCount / totalModules) * 100) : 0;
 
   const handleTabChange = (tab: RankingTab) => {
+    setRankingLoading(true);
+    setRankingError(false);
     setRankingTab(tab);
   };
 
   const handlePeriodChange = (p: RankingPeriod) => {
+    setRankingLoading(true);
+    setRankingError(false);
     setPeriod(p);
   };
 
@@ -276,8 +280,6 @@ function DashboardHome() {
 
   useEffect(() => {
     let active = true;
-    setRankingLoading(true);
-    setRankingError(false);
     const request = rankingTab === "qp" ? getQPRanking(period) : getTournamentRanking(period);
     request.then(({ entries }) => {
       if (!active) return;
@@ -289,7 +291,7 @@ function DashboardHome() {
   }, [rankingTab, period, rankingRetry]);
 
   return (
-    <main className="ql-dash-content" aria-busy={loading}>
+    <div className="ql-dash-content" aria-busy={loading}>
       {error && (
         <div className="ql-dashboard-notice ql-dashboard-notice--error" role="alert">
           <span>{error}</span>
@@ -309,13 +311,13 @@ function DashboardHome() {
       <header className="ql-home-intro">
         <span className="ql-home-intro-kicker">QUANTLAB / INICIO</span>
         <h1 className="text-2xl font-semibold text-ink">Tu espacio de investigación</h1>
-        <p className="mt-2 max-w-2xl text-base text-muted">Participa en torneos de machine learning, consulta tus envíos y continúa aprendiendo.</p>
+        <p className="mt-2 max-w-2xl text-base text-muted">Continúa desde tus datos, envíos y resultados de torneos ML.</p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
-          <Link href="/docs#evaluacion" className="text-accent underline underline-offset-4">Resultados del piloto técnico</Link>
+          <Link href="#historial-ml" className="text-accent underline underline-offset-4">Ir a mi historial ↗</Link>
         </div>
       </header>
 
-      <MlWorkspace nextRound={tournaments[0]} roundsLoading={sources.tournaments === "loading"} />
+      <MlWorkspace nextRound={tournaments.find((t) => t.type === "ml")} roundsLoading={sources.tournaments === "loading"} roundsError={sources.tournaments === "error"} />
       <div className="ql-bento-grid">
         {/* Competencias — fila 1 izquierda */}
         <Card className="ql-bento-competencias">
@@ -326,7 +328,7 @@ function DashboardHome() {
                 <path d="M17 4h3v2a3 3 0 01-3 3M7 4H4v2a3 3 0 003 3" />
               </svg>
             }
-            title="Competencias"
+            title="Torneos ML"
             subtitle="Rondas ML abiertas para enviar predicciones"
             badge={myTournaments.length > 0 ? `${myTournaments.length} activas` : undefined}
             action={<SectionLink href="/app/tournaments" label="Ver todas" />}
@@ -410,7 +412,7 @@ function DashboardHome() {
             ) : rankingError ? (
               <div className="ql-bento-empty" role="alert">
                 <p>No se pudo cargar el ranking.</p>
-                <button type="button" className="ql-btn-secondary" onClick={() => setRankingRetry((n) => n + 1)}>Reintentar ranking</button>
+                <button type="button" className="ql-btn-secondary" onClick={() => { setRankingLoading(true); setRankingError(false); setRankingRetry((n) => n + 1); }}>Reintentar ranking</button>
               </div>
             ) : rankingEntries.length === 0 ? (
               <div className="ql-bento-empty">
@@ -578,7 +580,7 @@ function DashboardHome() {
           </Card>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

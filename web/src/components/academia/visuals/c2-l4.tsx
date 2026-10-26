@@ -40,11 +40,11 @@ export default function C2L4Visual() {
       </Reveal>
       <Reveal retraso={160}>
         <p className="academia-viz-graf-titulo">Equity (base 10 000)</p>
-        <AcademiaAreaChart datos={ficha.equity} altura={240} color="#2dd4bf" etiqueta="Equity" formato={(v) => `$${v.toFixed(0)}`} />
+        <AcademiaAreaChart datos={ficha.equity} altura={240} color="#087951" etiqueta="Equity" formato={(v) => `$${v.toFixed(0)}`} />
       </Reveal>
       <Reveal retraso={240}>
         <p className="academia-viz-graf-titulo">Underwater — drawdown %</p>
-        <AcademiaAreaChart datos={ficha.underwater} altura={150} color="#ef4444" etiqueta="DD" formato={(v) => `${v.toFixed(2)} %`} />
+        <AcademiaAreaChart datos={ficha.underwater} altura={150} color="#af3f4f" etiqueta="DD" formato={(v) => `${v.toFixed(2)} %`} />
       </Reveal>
       <Reveal retraso={320}>
         <div className="academia-stat-grid academia-stat-grid-4">

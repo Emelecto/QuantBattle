@@ -108,8 +108,8 @@ export default function C3L5Visual() {
                   <span style={{ fontWeight: 600 }}>{v.activo}</span>
                   <span>{v.std.toFixed(2)} %</span>
                 </div>
-                <div style={{ height: '10px', borderRadius: '6px', background: 'rgba(255,255,255,0.12)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${(v.std / maxVol) * 100}%`, borderRadius: '6px', background: '#5e6ad2' }} />
+                <div style={{ height: '10px', borderRadius: '6px', background: '#dce6ef', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${(v.std / maxVol) * 100}%`, borderRadius: '6px', background: '#245ce5' }} />
                 </div>
               </div>
             ))}

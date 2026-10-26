@@ -49,8 +49,8 @@ const FILTROS: { id: Filtro; etiqueta: string }[] = [
 ];
 
 const COLOR: Record<Veredicto, string> = {
-  robusta: '#22c55e',
-  sobreajustada: '#ef4444',
+  robusta: '#087951',
+  sobreajustada: '#af3f4f',
   débil: '#a3a3a3',
 };
 
@@ -74,7 +74,7 @@ export default function C1L6Visual() {
             aria-pressed={filtro === f.id}
             className="academia-btn academia-btn-secondary"
             style={{
-              outline: filtro === f.id ? '2px solid #f59e0b' : 'none',
+              outline: filtro === f.id ? '2px solid #a96b16' : 'none',
               fontWeight: filtro === f.id ? 700 : 400,
             }}
           >

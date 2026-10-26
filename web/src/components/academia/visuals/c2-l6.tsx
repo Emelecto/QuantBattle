@@ -74,11 +74,11 @@ export default function C2L6Visual() {
       </Reveal>
       <Reveal retraso={200}>
         <p className="academia-viz-graf-titulo">Equity bruto (sin costes)</p>
-        <AcademiaAreaChart datos={bt.bruto} altura={200} color="#5e6ad2" etiqueta="Bruto" formato={(v) => `$${v.toFixed(0)}`} />
+        <AcademiaAreaChart datos={bt.bruto} altura={200} color="#245ce5" etiqueta="Bruto" formato={(v) => `$${v.toFixed(0)}`} />
       </Reveal>
       <Reveal retraso={260}>
         <p className="academia-viz-graf-titulo">Equity neto (con {bps} bps por lado)</p>
-        <AcademiaAreaChart datos={bt.neto} altura={200} color="#f59e0b" etiqueta="Neto" formato={(v) => `$${v.toFixed(0)}`} />
+        <AcademiaAreaChart datos={bt.neto} altura={200} color="#a96b16" etiqueta="Neto" formato={(v) => `$${v.toFixed(0)}`} />
       </Reveal>
       <Reveal retraso={320}>
         <div className="academia-stat-grid academia-stat-grid-4">

@@ -95,7 +95,7 @@ export default function C1L5Visual() {
                 style={{
                   height: '10px',
                   borderRadius: '6px',
-                  background: 'rgba(255,255,255,0.12)',
+                  background: '#dce6ef',
                   overflow: 'hidden',
                 }}
               >
@@ -104,7 +104,7 @@ export default function C1L5Visual() {
                     width: `${((v.std / maxVol) * 100).toFixed(1)}%`,
                     height: '100%',
                     borderRadius: '6px',
-                    background: 'linear-gradient(90deg, #f59e0b, #ef4444)',
+                    background: 'linear-gradient(90deg, #a96b16, #af3f4f)',
                   }}
                 />
               </div>

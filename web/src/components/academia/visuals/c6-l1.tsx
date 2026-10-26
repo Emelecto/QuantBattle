@@ -49,7 +49,7 @@ export default function C6L1Visual() {
       <Reveal retraso={280}>
         <p className="academia-viz-graf-titulo">Validador de submission</p>
         <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={5} spellCheck={false}
-          style={{ width: "100%", fontFamily: "monospace", fontSize: "0.85rem", background: "rgba(255,255,255,0.04)", color: "inherit", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", padding: "0.6rem" }} />
+          style={{ width: "100%", fontFamily: "monospace", fontSize: "0.85rem", background: "#e9f0f7", color: "inherit", border: "1px solid #dce6ef", borderRadius: "8px", padding: "0.6rem" }} />
         <p className={veredicto.ok ? "academia-positivo" : "academia-negativo"} style={{ marginTop: "0.5rem" }}>{veredicto.ok ? "✓ " : "✗ "}{veredicto.msg}</p>
         <p className="academia-viz-nota">Regla de oro: una predicción por activo de la era, cabecera exacta, sin NaN. Si falla el formato, el torneo rechaza todo el envío.</p>
       </Reveal>

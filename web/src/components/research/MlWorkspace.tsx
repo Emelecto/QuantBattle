@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { experimentHistory, type ExperimentPage, type MlExperiment } from "@/lib/mlTournaments";
 import type { DashboardTournament } from "@/components/dashboard/useDashboardData";
+import { PilotEvidencePanel } from "./PilotEvidencePanel";
 import "./ml-workspace.css";
+import "./ml-workspace-light.css";
 
 const date = (value: string) => new Intl.DateTimeFormat("es-CO", {dateStyle:"medium",timeStyle:"short",timeZone:"America/Bogota"}).format(new Date(value));
 const score = (value: number | null) => value == null ? "Pendiente de cierre y evaluación" : value.toFixed(6);
 
-export function MlWorkspace({nextRound, roundsLoading}: {nextRound?: DashboardTournament; roundsLoading: boolean}) {
+export function MlWorkspace({nextRound, roundsLoading, roundsError}: {nextRound?: DashboardTournament; roundsLoading: boolean; roundsError: boolean}) {
   const {user} = useAuth();
   const [page, setPage] = useState<ExperimentPage | null>(null);
   const [error, setError] = useState(false);
@@ -27,7 +29,7 @@ export function MlWorkspace({nextRound, roundsLoading}: {nextRound?: DashboardTo
   useEffect(() => {
     if (!user) return;
     let active = true;
-    setLoading(true); setError(false);
+    queueMicrotask(() => { if (active) { setLoading(true); setError(false); } });
     experimentHistory(offset, snapshot).then(value=>{if(active)setPage(value);})
       .catch(()=>{if(active)setError(true);})
       .finally(()=>{if(active)setLoading(false);});
@@ -49,16 +51,16 @@ export function MlWorkspace({nextRound, roundsLoading}: {nextRound?: DashboardTo
       <div className="ql-ml-hero-main">
         <div className="ql-ml-hero-topline">
           <span className="ql-ml-eyebrow">ESTACIÓN DE INVESTIGACIÓN / ML</span>
-          <span className="ql-ml-live"><span aria-hidden="true" />{roundsLoading ? "Consultando ronda" : nextRound ? "Ronda disponible" : "Sin ronda abierta"}</span>
+          <span className={`ql-ml-live${roundsError ? " is-error" : ""}`}><span aria-hidden="true" />{roundsLoading ? "Consultando ronda" : roundsError ? "Consulta no disponible" : nextRound ? "Ronda disponible" : "Sin ronda abierta"}</span>
         </div>
-        <h2 id="workspace-heading">Tu próxima decisión empieza con los datos.</h2>
-        <p className="ql-ml-hero-intro">{roundsLoading ? "Consultando las rondas disponibles…" : nextRound ? "Descarga el dataset, prepara tus predicciones y comprueba el estado de tu envío." : "Consulta las competencias para encontrar la próxima ronda disponible."}</p>
+        <h2 id="workspace-heading">{nextRound ? "Tu próxima ronda empieza con los datos." : "Explora tu próxima ronda de investigación."}</h2>
+        <p className="ql-ml-hero-intro">{roundsLoading ? "Consultando las rondas disponibles…" : roundsError ? "No se pudieron consultar las rondas ahora. Puedes intentar abrir la lista de torneos." : nextRound ? "Descarga el dataset, prepara tus predicciones y comprueba el estado de tu envío." : "Consulta las competencias para encontrar la próxima ronda disponible."}</p>
         <div className="ql-ml-round">
-          <span className="ql-ml-field-label">RONDA ACTIVA</span>
+          <span className="ql-ml-field-label">{nextRound ? "RONDA DISPONIBLE" : "TORNEOS ML"}</span>
           {nextRound ? <>
             <Link href={`/app/tournaments/${nextRound.id}`} className="ql-ml-round-name">{nextRound.name}<span aria-hidden="true">↗</span></Link>
             <div className="ql-ml-round-meta"><span>Cierre · {nextRound.deadline ? date(nextRound.deadline) : "Por anunciar"}</span><span>Dataset · {nextRound.datasetVersion}</span></div>
-          </> : <p className="ql-ml-round-none">{roundsLoading ? "Cargando…" : "No se encontró una ronda abierta."}</p>}
+          </> : <p className="ql-ml-round-none">{roundsLoading ? "Cargando…" : roundsError ? "Estado de las rondas no disponible." : "No se encontró una ronda abierta."}</p>}
         </div>
         <div className="ql-ml-hero-actions">
           <Link href={nextRound ? `/app/tournaments/${nextRound.id}` : "/app/tournaments"} className="ql-btn-primary ql-ml-main-action">{nextRound ? nextRound.submission ? "Revisar mi envío" : "Preparar mis predicciones" : "Explorar torneos"}<span aria-hidden="true">↗</span></Link>
@@ -67,9 +69,9 @@ export function MlWorkspace({nextRound, roundsLoading}: {nextRound?: DashboardTo
       </div>
       <aside className="ql-ml-hero-status" aria-label="Estado de tu investigación">
         <div className="ql-ml-status-heading"><span className="ql-ml-field-label">ESTADO DEL ENVÍO</span><span className="ql-ml-status-mark" aria-hidden="true">↗</span></div>
-        <p className="ql-ml-status-title">{loading ? "Consultando…" : error ? "Estado no disponible" : evaluated ? "Resultado disponible" : validated ? "Predicción validada" : nextRound?.submission ? "Predicción registrada" : "Lista para empezar"}</p>
-        <p className="ql-ml-status-copy">{loading ? "Consultando tus envíos…" : error ? "No se pudo consultar el estado." : selected ? `${selected.row_count.toLocaleString("es-CO")} filas · ${selected.experiment?.model_name ?? "Envío sin ficha de modelo"}` : nextRound?.submission ? "Hay un envío seleccionado. Abre la ronda para consultar su comprobante." : "Descarga el dataset de la ronda y envía tus predicciones para iniciar tu registro."}</p>
-        {selected && <p className="ql-ml-status-score">{score(selected.score)}</p>}
+        <p className="ql-ml-status-title">{loading ? "Consultando…" : error ? "Estado no disponible" : roundsError ? "Rondas no disponibles" : !nextRound ? "Sin ronda abierta" : evaluated ? "Resultado disponible" : validated ? "Predicción validada" : nextRound.submission ? "Predicción registrada" : "Lista para empezar"}</p>
+        <p className="ql-ml-status-copy">{loading ? "Consultando tus envíos…" : error ? "No se pudo consultar el estado." : roundsError ? "No podemos confirmar si hay una ronda abierta. Intenta actualizar el dashboard." : !nextRound ? "Consulta los torneos y tu historial mientras se prepara la próxima ronda." : selected ? `${selected.row_count.toLocaleString("es-CO")} filas · ${selected.experiment?.model_name ?? "Envío sin ficha de modelo"}` : nextRound.submission ? "Hay un envío seleccionado. Abre la ronda para consultar su comprobante." : "Descarga el dataset de la ronda y envía tus predicciones para iniciar tu registro."}</p>
+        {selected && <p className="ql-ml-status-score">Spearman: {score(selected.score)}</p>}
         <div className="ql-ml-process" aria-label="Etapas del torneo">
           <div className={nextRound ? "is-current" : ""}><span>01</span><strong>Datos</strong><small>{nextRound ? "Disponibles" : "Pendientes"}</small></div>
           <div className={nextRound?.submission ? "is-current" : ""}><span>02</span><strong>Predicción</strong><small>{validated ? "Validada" : nextRound?.submission ? "Enviada" : "Por enviar"}</small></div>
@@ -77,6 +79,7 @@ export function MlWorkspace({nextRound, roundsLoading}: {nextRound?: DashboardTo
         </div>
       </aside>
     </div>
+    <PilotEvidencePanel />
     <div className="ql-ml-history">
     <div className="ql-ml-history-heading">
       <div><span className="ql-ml-field-label">BITÁCORA / EXPERIMENTOS</span><h3>Historial de experimentos</h3></div>

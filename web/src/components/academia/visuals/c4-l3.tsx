@@ -78,7 +78,7 @@ export default function C4L3Visual() {
         <svg viewBox={`0 0 ${W} ${H}`} className="academia-graf" role="img" aria-label="20 trayectorias Montecarlo">
           {paths.map((p, i) => (
             <polyline key={i} points={p.puntos.map((v, j) => aXY(j, v)).join(" ")}
-              fill="none" stroke={p.final >= 10000 ? "#22c55e" : "#ef4444"} strokeOpacity={0.55} strokeWidth={1.4} />
+              fill="none" stroke={p.final >= 10000 ? "#087951" : "#af3f4f"} strokeOpacity={0.55} strokeWidth={1.4} />
           ))}
         </svg>
       </Reveal>

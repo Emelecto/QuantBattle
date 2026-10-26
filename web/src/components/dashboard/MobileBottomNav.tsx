@@ -1,21 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { DASHBOARD_NAV, Icon } from "./Sidebar";
 
 const ITEMS = [
   { href: "/app", label: "Inicio", icon: "home" },
-  { href: "/app/tournaments", label: "Competencias", icon: "trophy" },
+  { href: "/app/tournaments", label: "Torneos", icon: "trophy" },
+  { href: "/app#historial-ml", label: "Envíos", icon: "strategies" },
   { href: "/app/academia", label: "Academia", icon: "book" },
-  { href: "/app/profile", label: "Perfil", icon: "user" },
 ] as const;
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const active = (href: string) => href === "/app" ? pathname === "/app" : pathname.startsWith(href);
+  const [hash, setHash] = useState("");
+  useEffect(() => {
+    const update = () => setHash(window.location.hash);
+    update();
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, [pathname]);
+  const active = (href: string) => href.includes("#") ? pathname === "/app" && hash === "#historial-ml" : href === "/app" ? pathname === "/app" && hash !== "#historial-ml" : pathname.startsWith(href);
 
   const showBackArrow = pathname !== "/app";
 
@@ -23,9 +31,9 @@ export function MobileBottomNav() {
     if (typeof window !== "undefined" && window.history.length > 1) {
       window.history.back();
     } else {
-      window.location.assign("/app");
+      router.push("/app");
     }
-  }, []);
+  }, [router]);
 
   return (
     <nav className="ql-dash-bottomnav" aria-label="Navegación móvil" onKeyDown={(e) => { if (e.key === "Escape") setMenuOpen(false); }}>
@@ -58,7 +66,7 @@ export function MobileBottomNav() {
           aria-current={active(item.href) ? "page" : undefined}
           onClick={() => setMenuOpen(false)}
         >
-          <Icon name={item.icon} size={18} /><span className="ql-mobile-nav-label">{item.label === "Competencias" ? "Torneos" : item.label}</span>
+              <Icon name={item.icon} size={18} /><span className="ql-mobile-nav-label">{item.label}</span>
         </Link>
       ))}
       <button type="button" className="ql-back-nav-button" aria-label={menuOpen ? "Cerrar menú" : "Más secciones"} aria-expanded={menuOpen} aria-controls="mobile-more" onClick={() => setMenuOpen((open) => !open)}><Icon name="menu" /><span className="ql-mobile-nav-label">Más</span></button>

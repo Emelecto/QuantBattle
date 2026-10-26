@@ -53,7 +53,7 @@ export default function C2L8Visual() {
                         style={{
                           padding: "0.7rem 1rem", borderRadius: "0.5rem", fontWeight: 700, width: "100%",
                           background: colorSharpe(c.sharpe, maxSharpe), color: "#111",
-                          border: activa ? "2px solid #f7f8f8" : "2px solid transparent", cursor: "pointer",
+                          border: activa ? "2px solid #245ce5" : "2px solid transparent", cursor: "pointer",
                         }}>
                         {c.sharpe.toFixed(2)}
                       </button>

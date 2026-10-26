@@ -17,7 +17,7 @@ function HeroPrecio() {
       <line x1="20" y1="105" x2="305" y2="105" className="academia-svg-eje" />
       <path
         d="M20 95 L50 88 L80 90 L110 74 L140 80 L170 66 L200 70 L230 52 L260 58 L290 34"
-        fill="none" stroke="#5e6ad2" strokeWidth="2.5" strokeLinecap="round" className="academia-svg-trazo"
+        fill="none" stroke="#245ce5" strokeWidth="2.5" strokeLinecap="round" className="academia-svg-trazo"
       />
       <circle cx="290" cy="34" r="5" className="academia-svg-punto" />
       <text x="292" y="22" className="academia-svg-mini">+6,4 %</text>
@@ -70,7 +70,7 @@ export function C1L2PrecioRetornos() {
           datos={datos}
           etiqueta={modo === "simple" ? "Acum. simple" : "Acum. log"}
           formato={(v) => `${v >= 0 ? "+" : ""}${v.toFixed(2)} %`}
-          color={modo === "simple" ? "#5e6ad2" : "#2dd4bf"}
+          color={modo === "simple" ? "#245ce5" : "#087951"}
         />
       </Reveal>
       <Reveal retraso={320}>

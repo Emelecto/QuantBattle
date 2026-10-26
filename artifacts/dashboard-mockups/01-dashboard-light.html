@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuantLab — Dashboard claro, propuesta visual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#172840; --muted:#64768d; --blue:#245ce5; --blue-dark:#174cbf; --paper:#f5f8fb; --sidebar:#edf3f8; --surface:#fff; --line:#dce6ef; --line-strong:#c8d7e6; --green:#087951; --green-bg:#e0f5e9; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:"DM Sans",Arial,sans-serif; font-size:14px; }
+    a { color:inherit; text-decoration:none; }
+    button { font:inherit; cursor:pointer; }
+    svg { display:block; }
+    ::selection { background:#bcd3ff; color:#12366b; }
+    a:focus-visible,button:focus-visible { outline:3px solid #6b9bff; outline-offset:3px; }
+    .app { min-height:100vh; display:grid; grid-template-columns:242px minmax(0,1fr); }
+    .sidebar { background:var(--sidebar); border-right:1px solid var(--line-strong); display:flex; flex-direction:column; min-width:0; position:sticky; top:0; height:100vh; }
+    .sidebar-brand { height:78px; display:flex; align-items:center; gap:12px; padding:0 23px; border-bottom:1px solid var(--line); }
+    .mark { display:grid; place-items:center; width:29px; height:29px; flex:none; background:var(--blue); color:white; font:800 18px Manrope,sans-serif; letter-spacing:-.14em; padding-right:4px; }
+    .wordmark { font:800 21px Manrope,sans-serif; letter-spacing:-.045em; }
+    .side-section { padding:28px 12px 0; }
+    .side-label { margin:0 13px 11px; color:#7c8da1; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+    .side-link { display:flex; align-items:center; gap:13px; width:100%; min-height:41px; padding:0 13px; color:#536a84; font-weight:600; border-radius:6px; margin:2px 0; }
+    .side-link:hover { color:var(--blue-dark); background:#e4eef9; }
+    .side-link.active { color:#164bbd; background:#dceafb; }
+    .side-link .ico { width:18px; height:18px; stroke:currentColor; stroke-width:1.8; fill:none; flex:none; }
+    .side-link .chevron { margin-left:auto; color:#8ba0b7; font-size:14px; }
+    .sidebar-bottom { margin-top:auto; padding:19px 12px 18px; border-top:1px solid var(--line-strong); }
+    .sidebar-bottom .side-link { margin:0 0 13px; }
+    .account { display:flex; align-items:center; gap:10px; padding:9px 11px; color:#61748b; }
+    .account-avatar { width:31px; height:31px; display:grid; place-items:center; background:#d6e6f7; border-radius:50%; color:#2358b5; font-size:11px; font-weight:800; }
+    .account strong { display:block; color:var(--ink); font-size:12px; }
+    .account span { font-size:11px; }
+    .workspace { min-width:0; }
+    .topbar { height:78px; display:flex; align-items:center; justify-content:space-between; gap:20px; padding:0 clamp(30px,4vw,65px); border-bottom:1px solid var(--line); background:#fff; }
+    .breadcrumb { display:flex; align-items:center; gap:9px; color:#8393a5; font-size:12px; }
+    .breadcrumb strong { color:#28415f; font-weight:700; }
+    .top-actions { display:flex; align-items:center; gap:22px; color:#60738b; font-size:12px; font-weight:600; }
+    .top-actions a:hover { color:var(--blue); }
+    .top-actions .help { display:flex; align-items:center; gap:6px; }
+    .top-actions .help svg { width:15px; height:15px; stroke:currentColor; stroke-width:1.8; fill:none; }
+    .top-account { width:30px; height:30px; background:#e7f0fb; color:#2a61bf; display:grid; place-items:center; border-radius:50%; font-weight:800; }
+    .content { width:min(1270px,100%); margin:auto; padding:38px clamp(30px,4vw,65px) 74px; }
+    .context-note { color:#68809a; font-size:12px; font-weight:700; letter-spacing:.105em; text-transform:uppercase; }
+    .page-head { display:flex; justify-content:space-between; align-items:end; gap:24px; margin:12px 0 30px; }
+    h1,h2,h3,p { margin-top:0; }
+    h1 { font:800 37px/1.13 Manrope,sans-serif; letter-spacing:-.042em; margin-bottom:10px; }
+    .page-head p { color:var(--muted); line-height:1.45; font-size:15px; margin:0; }
+    .head-link { color:#2258bc; border-bottom:1px solid #96b4e8; padding-bottom:5px; font-weight:700; font-size:12px; white-space:nowrap; }
+    .head-link:hover { border-color:var(--blue); }
+    .hero { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr); background:var(--surface); border:1px solid #d7e2ec; box-shadow:0 10px 32px rgba(33,62,99,.06); }
+    .hero-copy { padding:37px 39px 35px; min-width:0; }
+    .hero-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:23px; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:6px 9px; background:#e8f1fc; color:#2358b4; font-weight:700; font-size:11px; }
+    .badge.success { background:var(--green-bg); color:var(--green); }
+    .badge::before { content:""; width:6px; height:6px; background:currentColor; border-radius:50%; }
+    .hero-copy h2 { font:800 29px/1.19 Manrope,sans-serif; letter-spacing:-.035em; max-width:540px; margin-bottom:12px; }
+    .hero-copy p { max-width:540px; color:#61758b; line-height:1.54; font-size:14px; margin-bottom:25px; }
+    .hero-ctas { display:flex; gap:15px; flex-wrap:wrap; align-items:center; }
+    .btn { min-height:40px; display:inline-flex; justify-content:center; align-items:center; gap:12px; padding:0 15px; border:1px solid transparent; font-size:12px; font-weight:700; border-radius:5px; }
+    .btn.primary { background:var(--blue); color:white; }
+    .btn.primary:hover { background:var(--blue-dark); }
+    .btn.secondary { border-color:#cddced; background:#fff; color:#2b5eac; }
+    .btn.secondary:hover { border-color:#7ea8e9; background:#f4f8ff; }
+    .hero-rail { background:#f1f6fb; border-left:1px solid var(--line); padding:35px 31px; display:flex; flex-direction:column; justify-content:space-between; }
+    .rail-label { color:#617da0; font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; margin-bottom:17px; }
+    .rail-list { display:grid; gap:0; }
+    .rail-item { display:flex; align-items:center; gap:11px; padding:12px 0; border-bottom:1px solid #d6e3f0; color:#294260; font-size:12px; }
+    .rail-item:first-child { border-top:1px solid #d6e3f0; }
+    .rail-check { width:19px; height:19px; border-radius:50%; display:grid; place-items:center; background:#d9f3e6; color:#117b55; font-weight:800; font-size:11px; flex:none; }
+    .rail-item span:last-child { margin-left:auto; color:#69809a; }
+    .rail-footer { padding-top:21px; color:#687e95; font-size:11px; line-height:1.5; }
+    .grid { display:grid; grid-template-columns:minmax(0,1.42fr) minmax(290px,.74fr); gap:21px; margin-top:24px; align-items:start; }
+    .module { background:var(--surface); border:1px solid #dce5ef; min-width:0; }
+    .module-head { padding:22px 25px 19px; display:flex; justify-content:space-between; align-items:start; gap:20px; }
+    .module h2 { font:800 19px/1.25 Manrope,sans-serif; letter-spacing:-.025em; margin:0 0 6px; }
+    .module .sub { margin:0; color:#718399; font-size:12px; line-height:1.5; }
+    .module-link { font-weight:700; font-size:11px; color:#265fc2; white-space:nowrap; padding-top:3px; }
+    .module-link:hover { text-decoration:underline; text-underline-offset:3px; }
+    .score-area { display:grid; grid-template-columns:205px minmax(0,1fr); gap:14px; padding:4px 25px 24px; }
+    .score-stat { display:flex; flex-direction:column; justify-content:center; padding-bottom:10px; }
+    .score-label { color:#587399; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; }
+    .score-value { font:800 38px/1.08 Manrope,sans-serif; letter-spacing:-.055em; color:#1c4ca2; margin:11px 0 8px; font-variant-numeric:tabular-nums; }
+    .score-stat p { color:#6a7e95; font-size:11px; line-height:1.45; margin:0; }
+    .chart-wrap { height:165px; min-width:0; padding:4px 0 0; }
+    #era-chart { width:100%; height:100%; overflow:visible; }
+    .chart-note { border-top:1px solid #e3ebf3; padding:13px 25px 16px; color:#6a7d94; font-size:11px; line-height:1.5; }
+    .activity { grid-row:span 2; }
+    .activity .module-head { padding-bottom:6px; }
+    .activity-list { padding:0 25px 12px; }
+    .activity-row { display:grid; grid-template-columns:25px minmax(0,1fr); gap:11px; padding:16px 0; border-bottom:1px solid #e6edf4; }
+    .activity-row:last-child { border-bottom:0; }
+    .activity-icon { width:21px; height:21px; display:grid; place-items:center; background:#e6f0fc; color:#2d66c8; border-radius:50%; font-size:11px; font-weight:800; margin-top:1px; }
+    .activity-row strong { display:block; font-size:12px; margin-bottom:4px; }
+    .activity-row p { color:#74869b; font-size:11px; line-height:1.45; margin:0; }
+    .activity-footer { border-top:1px solid #e6edf4; margin:0 25px; padding:16px 0 20px; }
+    .activity-footer a { color:#245bbd; font-weight:700; font-size:11px; }
+    .experiments { margin-top:24px; }
+    .experiments .module-head { align-items:center; }
+    .experiment-row { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(110px,.6fr) minmax(90px,.5fr) auto; gap:20px; align-items:center; border-top:1px solid #e3ebf3; padding:18px 25px; }
+    .experiment-name { font-weight:700; font-size:12px; margin-bottom:5px; }
+    .experiment-meta { color:#71849a; font-size:11px; line-height:1.4; }
+    .experiment-cell span { display:block; color:#788aa0; font-size:10px; margin-bottom:5px; }
+    .experiment-cell strong { font-size:12px; color:#284362; font-variant-numeric:tabular-nums; }
+    .experiment-link { color:#245bbd; font-size:11px; font-weight:700; white-space:nowrap; }
+    .lower { display:grid; grid-template-columns:1fr 1fr; gap:21px; margin-top:24px; }
+    .resource { min-height:146px; padding:23px 25px; display:flex; flex-direction:column; align-items:flex-start; }
+    .resource h2 { margin-bottom:8px; }
+    .resource p { color:#708299; font-size:12px; line-height:1.5; max-width:360px; margin:0 0 17px; }
+    .resource a { margin-top:auto; color:#245bbd; font-size:11px; font-weight:700; }
+    .footnote { margin:28px 0 0; color:#77889a; font-size:11px; line-height:1.6; }
+    .mobile-top,.bottom-nav { display:none; }
+    @media (max-width:1120px) { .app { grid-template-columns:210px minmax(0,1fr); } .sidebar-brand { padding-inline:16px; } .side-section { padding-inline:8px; } .hero { grid-template-columns:minmax(0,1fr); } .hero-rail { border-left:0; border-top:1px solid var(--line); } .rail-list { display:block; } .rail-item { border-top:1px solid #d6e3f0; } .grid { grid-template-columns:1fr; } .activity { grid-row:auto; } .activity-list { display:block; } .activity-row { border-bottom:1px solid #e6edf4; } .experiment-row { grid-template-columns:1fr 1fr; } .experiment-row > div:first-child,.experiment-link { grid-column:1/-1; } }
+    @media (max-width:700px) { .app { display:block; } .sidebar,.topbar { display:none; } .mobile-top { height:60px; display:flex; justify-content:space-between; align-items:center; padding:0 20px; border-bottom:1px solid var(--line); background:#fff; } .mobile-top .brand { display:flex; align-items:center; gap:9px; } .mobile-top .wordmark { font-size:19px; } .content { padding:28px 20px 100px; } .context-note { font-size:10px; } .page-head { display:block; margin-bottom:23px; } h1 { font-size:29px; letter-spacing:-.035em; } .page-head p { font-size:13px; } .head-link { display:inline-block; margin-top:15px; } .hero-copy { padding:25px 21px 26px; } .hero-copy h2 { font-size:23px; } .hero-rail { padding:22px 21px; } .rail-list { display:block; } .rail-item:not(:first-child) { border-top:0; } .grid,.lower { display:block; } .grid .module + .module,.lower .module + .module { margin-top:16px; } .lower { margin-top:16px; } .score-area { grid-template-columns:1fr; gap:12px; padding:0 20px 20px; } .score-stat { padding:0; } .score-value { font-size:34px; margin:8px 0 5px; } .chart-wrap { height:145px; } .module-head { padding:20px; } .chart-note { padding:13px 20px 16px; } .activity-list { display:block; padding:0 20px 8px; } .activity-row { border-bottom:1px solid #e6edf4; } .activity-footer { margin:0 20px; } .experiments { margin-top:16px; } .experiment-row { grid-template-columns:1fr 1fr; gap:15px; padding:18px 20px; } .experiment-row > div:first-child { grid-column:1/-1; } .experiment-link { grid-column:1/-1; } .resource { min-height:0; padding:20px; } .bottom-nav { display:grid; grid-template-columns:repeat(4,1fr); position:fixed; z-index:5; left:0; bottom:0; width:100%; height:64px; background:#fff; border-top:1px solid #d8e3ed; box-shadow:0 -8px 25px rgba(28,57,96,.06); } .bottom-nav a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:10px; font-weight:700; color:#73869b; } .bottom-nav a.active { color:var(--blue); } .bottom-nav svg { width:18px; height:18px; stroke:currentColor; stroke-width:1.8; fill:none; } }
+  </style>
+</head>
+<body>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></symbol><symbol id="i-cup" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM12 14v6m-4 0h8M7 6H4v2a3 3 0 0 0 3 3m10-5h3v2a3 3 0 0 1-3 3"/></symbol><symbol id="i-data" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v13c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6zM14 2v5h5M9 12h7M9 16h7"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5C9 3 6 3 3 4v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1zM12 5v15"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19h16M6 16l4-5 4 3 4-8"/></symbol><symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2zM17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5v1"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 3c-1 .5-1 1-1 2m0 3h.01"/></symbol><symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9 7 7m10 10 2.1 2.1m0-14.2L17 7M7 17l-2.1 2.1"/></symbol></svg>
+<div class="app">
+  <aside class="sidebar" aria-label="Navegación de QuantLab">
+    <a class="sidebar-brand" href="https://quant-lab-nine.vercel.app/app"><span class="mark">Q</span><span class="wordmark">QuantLab</span></a>
+    <div class="side-section"><div class="side-label">Mi espacio</div><a class="side-link active" href="https://quant-lab-nine.vercel.app/app"><svg class="ico"><use href="#i-home"/></svg>Inicio</a><a class="side-link" href="https://quant-lab-nine.vercel.app/app/tournaments"><svg class="ico"><use href="#i-cup"/></svg>Torneos ML</a><a class="side-link" href="https://quant-lab-nine.vercel.app/app/tournaments"><svg class="ico"><use href="#i-data"/></svg>Datasets</a><a class="side-link" href="https://quant-lab-nine.vercel.app/app#historial-ml"><svg class="ico"><use href="#i-file"/></svg>Mis envíos</a><a class="side-link" href="https://quant-lab-nine.vercel.app/app/academia"><svg class="ico"><use href="#i-book"/></svg>Academia</a></div>
+    <div class="side-section"><div class="side-label">Explorar</div><a class="side-link" href="https://quant-lab-nine.vercel.app/app/strategies"><svg class="ico"><use href="#i-chart"/></svg>Estrategias</a><a class="side-link" href="https://quant-lab-nine.vercel.app/app/rankings"><svg class="ico"><use href="#i-people"/></svg>Comunidad</a><a class="side-link" href="https://quant-lab-nine.vercel.app/app/marketplace"><svg class="ico"><use href="#i-data"/></svg>Marketplace</a><a class="side-link" href="https://quant-lab-nine.vercel.app/app/api-keys"><svg class="ico"><use href="#i-file"/></svg>API Keys</a></div>
+    <div class="sidebar-bottom"><a class="side-link" href="https://quant-lab-nine.vercel.app/app/profile/settings"><svg class="ico"><use href="#i-settings"/></svg>Configuración</a><div class="account"><div class="account-avatar">CT</div><div><strong>Cuenta técnica</strong><span>Piloto sintético</span></div></div></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><div class="breadcrumb"><span>Espacio de investigación</span><span>/</span><strong>Inicio</strong></div><div class="top-actions"><a href="https://quant-lab-nine.vercel.app/docs" class="help"><svg><use href="#i-help"/></svg>Ayuda y método</a><span class="top-account">CT</span></div></header>
+    <header class="mobile-top"><div class="brand"><span class="mark">Q</span><span class="wordmark">QuantLab</span></div><span class="top-account">CT</span></header>
+    <main class="content">
+      <div class="context-note">Vista conceptual · cuenta técnica del piloto</div>
+      <div class="page-head"><div><h1>Tu espacio de investigación</h1><p>Continúa desde tus datos, envíos y resultados de torneos ML.</p></div><a class="head-link" href="https://quant-lab-nine.vercel.app/research/judge-pilot.json">Ver evidencia pública ↗</a></div>
+      <section class="hero" aria-labelledby="pilot-title">
+        <div class="hero-copy"><div class="hero-top"><span class="badge success">Ronda finalizada</span><span class="badge">Datos sintéticos</span></div><h2 id="pilot-title">El piloto completó el recorrido de un torneo ML.</h2><p>Descarga versionada, predicciones validadas y evaluación después del cierre. Consulta cada paso o explora las rondas disponibles.</p><div class="hero-ctas"><a class="btn primary" href="https://quant-lab-nine.vercel.app/app/tournaments">Explorar torneos <span aria-hidden="true">↗</span></a><a class="btn secondary" href="https://quant-lab-nine.vercel.app/docs#evaluacion">Revisar el piloto</a></div></div>
+        <div class="hero-rail"><div><div class="rail-label">Ronda 1 · versión v1-e4bbe9a1f40c</div><div class="rail-list"><div class="rail-item"><span class="rail-check">✓</span>Datos disponibles<span>Validado</span></div><div class="rail-item"><span class="rail-check">✓</span>Envío aceptado<span>Validado</span></div><div class="rail-item"><span class="rail-check">✓</span>Resultado publicado<span>Finalizado</span></div></div></div><div class="rail-footer">Una ronda y una cuenta técnica. No representa actividad de participantes externos.</div></div>
+      </section>
+      <div class="grid">
+        <section class="module" aria-labelledby="results-title"><div class="module-head"><div><h2 id="results-title">Resultado del piloto</h2><p class="sub">Correlación de Spearman por era · 20 eras live</p></div><a class="module-link" href="https://quant-lab-nine.vercel.app/docs#evaluacion">Metodología ↗</a></div><div class="score-area"><div class="score-stat"><span class="score-label">Media de correlación</span><strong class="score-value">0,00646</strong><p>Valor de la ronda sintética. No representa rentabilidad ni capacidad de pronosticar mercados reales.</p></div><div class="chart-wrap"><svg id="era-chart" role="img" aria-label="Correlación por cada una de las 20 eras live del piloto; valores positivos y negativos alrededor de cero"></svg></div></div><div class="chart-note">El score publicado se reprodujo exactamente en la comprobación técnica. <a class="module-link" href="https://quant-lab-nine.vercel.app/research/judge-pilot.json">Abrir registro completo ↗</a></div></section>
+        <section class="module activity" aria-labelledby="activity-title"><div class="module-head"><div><h2 id="activity-title">Registro del experimento</h2><p class="sub">Trazabilidad de la ronda sintética</p></div></div><div class="activity-list"><div class="activity-row"><span class="activity-icon">✓</span><div><strong>Dataset versionado</strong><p>20 variables, 160 activos simulados y objetivo live oculto durante la ronda.</p></div></div><div class="activity-row"><span class="activity-icon">✓</span><div><strong>Predicciones validadas</strong><p>3.200 filas live. El archivo inválido fue rechazado en la prueba técnica.</p></div></div><div class="activity-row"><span class="activity-icon">✓</span><div><strong>Evaluación reproducida</strong><p>El resultado se publicó después del cierre y coincidió con el recálculo.</p></div></div></div><div class="activity-footer"><a href="https://quant-lab-nine.vercel.app/research/judge-pilot.json">Consultar el registro técnico ↗</a></div></section>
+      </div>
+      <section class="module experiments" aria-labelledby="experiments-title"><div class="module-head"><div><h2 id="experiments-title">Historial de experimentos</h2><p class="sub">Resultados comparables dentro de una misma ronda y versión de datos.</p></div><a class="module-link" href="https://quant-lab-nine.vercel.app/app#historial-ml">Abrir historial ↗</a></div><div class="experiment-row"><div><div class="experiment-name">HistGradientBoostingRegressor · referencia técnica</div><div class="experiment-meta">Piloto sintético · ronda 1 · envío válido seleccionado</div></div><div class="experiment-cell"><span>Predicciones live</span><strong>3.200 filas</strong></div><div class="experiment-cell"><span>Spearman medio</span><strong>0,006457</strong></div><a class="experiment-link" href="https://quant-lab-nine.vercel.app/app#historial-ml">Ver comprobante ↗</a></div></section>
+      <div class="lower"><section class="module resource"><h2>Aprende el método</h2><p>La guía explica el formato del envío, la validación y el criterio de evaluación.</p><a href="https://quant-lab-nine.vercel.app/app/tournaments/guide">Abrir guía de torneos ↗</a></section><section class="module resource"><h2>Explora otras áreas</h2><p>QuantLab también conserva el espacio de estrategias y aprendizaje como funciones complementarias.</p><a href="https://quant-lab-nine.vercel.app/app/strategies">Ver estrategias ↗</a></section></div>
+      <p class="footnote">Mockup visual de la cuenta técnica basado en <a href="https://quant-lab-nine.vercel.app/research/judge-pilot.json">judge-pilot.json</a>. La interfaz propuesta aún no es la interfaz funcional de QuantLab.</p>
+    </main>
+  </div>
+</div>
+<nav class="bottom-nav" aria-label="Navegación móvil"><a class="active" href="https://quant-lab-nine.vercel.app/app"><svg><use href="#i-home"/></svg>Inicio</a><a href="https://quant-lab-nine.vercel.app/app/tournaments"><svg><use href="#i-cup"/></svg>Torneos</a><a href="https://quant-lab-nine.vercel.app/app#historial-ml"><svg><use href="#i-file"/></svg>Envíos</a><a href="https://quant-lab-nine.vercel.app/app/academia"><svg><use href="#i-book"/></svg>Academia</a></nav>
+<script>
+  const eras=[-0.11343142997476069,0.021220175642323223,0.051112021736663266,0.0051192757978802735,0.06577611549414274,-0.033725322480369545,0.049519723627801555,0.09473650457268856,0.10795930689641903,0.016654092614657817,0.12285813380234104,-0.05348626530180166,-0.10794734597165764,0.08614856059400156,-0.0337283127115599,-0.05906304647180558,-0.10682152392849063,-0.08999100767360212,0.05987638935558095,0.04636282100707212];
+  const svg=document.querySelector('#era-chart');
+  if(svg){const ns='http://www.w3.org/2000/svg',W=560,H=160,mid=79,scale=500;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const line=document.createElementNS(ns,'line');line.setAttribute('x1','0');line.setAttribute('x2',W);line.setAttribute('y1',mid);line.setAttribute('y2',mid);line.setAttribute('stroke','#bfd1e3');line.setAttribute('stroke-width','1');svg.append(line);eras.forEach((value,i)=>{const bar=document.createElementNS(ns,'rect');const height=Math.max(2,Math.abs(value)*scale);bar.setAttribute('x',String(8+i*27));bar.setAttribute('y',String(value>=0?mid-height:mid));bar.setAttribute('width','16');bar.setAttribute('height',String(height));bar.setAttribute('rx','2');bar.setAttribute('fill',value>=0?'#3e7ce1':'#9fb2c8');const tip=document.createElementNS(ns,'title');tip.textContent=`Era ${i+1}: ${value.toFixed(5)}`;bar.append(tip);svg.append(bar)});const label=document.createElementNS(ns,'text');label.setAttribute('x','0');label.setAttribute('y','155');label.setAttribute('fill','#70849a');label.setAttribute('font-size','10');label.textContent='era 01';svg.append(label);const last=document.createElementNS(ns,'text');last.setAttribute('x','522');last.setAttribute('y','155');last.setAttribute('fill','#70849a');last.setAttribute('font-size','10');last.textContent='era 20';svg.append(last)}
+</script>
+</body>
+</html>

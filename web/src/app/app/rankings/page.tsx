@@ -129,7 +129,7 @@ function RankingCard({ entry, tab, highlight }: { entry: PublicLeaderboardEntry;
             className="h-9 w-9 rounded-full border border-line object-cover"
           />
         ) : (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-[#1a2131] metric text-[13px] text-muted">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface-solid metric text-[13px] text-muted">
             {(entry.username ?? "??").slice(0, 2).toUpperCase()}
           </span>
         )}
@@ -367,7 +367,7 @@ export default function RankingsPage() {
                             className="h-14 w-14 rounded-full border border-line object-cover mt-3"
                           />
                         ) : (
-                          <span className="flex h-14 w-14 items-center justify-center rounded-full border border-line bg-[#1a2131] metric text-[18px] text-muted mt-3">
+                          <span className="flex h-14 w-14 items-center justify-center rounded-full border border-line bg-surface-solid metric text-[18px] text-muted mt-3">
                             {(entry.username ?? "??").slice(0, 2).toUpperCase()}
                           </span>
                         )}

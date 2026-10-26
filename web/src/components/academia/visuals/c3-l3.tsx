@@ -36,14 +36,14 @@ export default function C3L3Visual() {
           <button
             type="button" className="academia-btn-mini"
             onClick={() => setModo("simple")} aria-pressed={modo === "simple"}
-            style={modo === "simple" ? { borderColor: "#5e6ad2" } : undefined}
+            style={modo === "simple" ? { borderColor: "#245ce5" } : undefined}
           >
             Retorno simple
           </button>
           <button
             type="button" className="academia-btn-mini"
             onClick={() => setModo("log")} aria-pressed={modo === "log"}
-            style={modo === "log" ? { borderColor: "#5e6ad2" } : undefined}
+            style={modo === "log" ? { borderColor: "#245ce5" } : undefined}
           >
             Retorno log
           </button>
@@ -88,7 +88,7 @@ export default function C3L3Visual() {
                 flex: 1,
                 height: `${Math.max(3, (Math.abs(r) / maxAbs) * 100)}%`,
                 alignSelf: r >= 0 ? "flex-start" : "flex-end",
-                background: r >= 0 ? "#22c55e" : "#ef4444",
+                background: r >= 0 ? "#087951" : "#af3f4f",
                 opacity: 0.85,
                 borderRadius: "2px",
                 marginTop: r >= 0 ? 0 : "auto",

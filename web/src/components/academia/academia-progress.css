@@ -1,0 +1,26 @@
+.academia-progress { color:var(--ql-ink); }
+.academia-progress-top { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.academia-progress-label { color:#3368bf; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.academia-progress-text { color:var(--ql-muted); font-size:13px; font-variant-numeric:tabular-nums; }
+.academia-progress-track { height:8px; border:1px solid #dce6ef; border-radius:999px; background:#e1eaf4; overflow:hidden; }
+.academia-progress-fill { height:100%; border-radius:999px; background:#245ce5; transition:width 400ms ease; }
+.academia-journey { display:flex; flex-direction:column; margin:20px 0 0; padding:0; list-style:none; }
+.academia-journey-node { display:grid; grid-template-columns:30px minmax(0,1fr); gap:12px; position:relative; padding-bottom:12px; }
+.academia-journey-node:last-child { padding-bottom:0; }
+.academia-journey-node::before { content:""; position:absolute; left:14px; top:32px; bottom:0; width:1px; background:#cbd9e8; }
+.academia-journey-node:last-child::before { display:none; }
+.academia-journey-dot { display:grid; place-items:center; z-index:1; width:30px; height:30px; border:1px solid #cbd9e8; border-radius:50%; background:#f0f5fa; color:#52677d; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; }
+.academia-journey-node[data-state="hecha"] .academia-journey-dot { border-color:#90d2b3; background:#e5f7ee; color:#087951; }
+.academia-journey-node[data-state="encurso"] .academia-journey-dot { border-color:#245ce5; background:#eaf2ff; color:#245ce5; box-shadow:0 0 0 3px #eaf2ff; }
+.academia-journey-card { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid #dce6ef; border-radius:6px; background:#fff; color:#172840; text-decoration:none; transition:border-color 150ms ease,background 150ms ease; }
+a.academia-journey-card:hover { border-color:#90addb; background:#f8fbff; }
+.academia-journey-node[data-state="encurso"] .academia-journey-card { border-color:#90addb; }
+.academia-journey-node[data-state="hecha"] .academia-journey-card { background:#fbfdfb; }
+.academia-journey-body { flex:1; min-width:0; }
+.academia-journey-kicker { display:block; margin-bottom:2px; color:#657b94; font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+.academia-journey-title { margin:0; color:#172840; font-size:14px; font-weight:700; line-height:1.4; }
+.academia-journey-pill { flex:none; padding:4px 10px; border:1px solid #dce6ef; border-radius:4px; color:#52677d; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.academia-journey-node[data-state="hecha"] .academia-journey-pill { border-color:#90d2b3; background:#e5f7ee; color:#087951; }
+.academia-journey-node[data-state="encurso"] .academia-journey-pill { border-color:#a9c6ed; background:#eaf2ff; color:#2455ae; }
+@media (max-width:570px) { .academia-journey-card { align-items:flex-start; flex-direction:column; } .academia-progress-top { align-items:flex-start; flex-direction:column; } }
+@media (prefers-reduced-motion:reduce) { .academia-progress-fill,.academia-journey-card { transition:none; } }

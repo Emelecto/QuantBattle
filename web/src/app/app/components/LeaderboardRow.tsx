@@ -75,7 +75,7 @@ export function LeaderboardRow({
                 className="h-8 w-8 rounded-full border border-line object-cover"
               />
             ) : (
-              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-[#1a2131] metric text-[12px] text-muted">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface-solid metric text-[12px] text-muted">
                 {(entry.username ?? "??").slice(0, 2).toUpperCase()}
               </span>
             )}

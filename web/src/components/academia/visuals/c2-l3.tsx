@@ -77,7 +77,7 @@ export default function C2L3Visual() {
       </Reveal>
       <Reveal retraso={120}>
         <p className="academia-viz-graf-titulo">Serie de trabajo · cierres</p>
-        <AcademiaAreaChart datos={datos} altura={200} color="#5e6ad2" etiqueta="Cierre" formato={(v) => `$${v.toFixed(2)}`} />
+        <AcademiaAreaChart datos={datos} altura={200} color="#245ce5" etiqueta="Cierre" formato={(v) => `$${v.toFixed(2)}`} />
       </Reveal>
       <Reveal retraso={200}>
         <div className="academia-control">

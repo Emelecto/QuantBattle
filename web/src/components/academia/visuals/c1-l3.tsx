@@ -32,9 +32,9 @@ function HeroCampana() {
         d="M25 103 C80 102 110 100 135 62 C148 40 172 40 185 62 C210 100 240 102 295 103 Z"
         className="academia-svg-campana"
       />
-      <line x1="160" y1="50" x2="160" y2="105" stroke="#f7f8f8" strokeWidth="1.5" strokeDasharray="4 3" />
-      <line x1="120" y1="78" x2="120" y2="105" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="4 3" />
-      <line x1="200" y1="78" x2="200" y2="105" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="4 3" />
+      <line x1="160" y1="50" x2="160" y2="105" stroke="#9fb5cc" strokeWidth="1.5" strokeDasharray="4 3" />
+      <line x1="120" y1="78" x2="120" y2="105" stroke="#a96b16" strokeWidth="1.5" strokeDasharray="4 3" />
+      <line x1="200" y1="78" x2="200" y2="105" stroke="#a96b16" strokeWidth="1.5" strokeDasharray="4 3" />
       <text x="160" y="118" textAnchor="middle" className="academia-svg-mini">μ</text>
       <text x="120" y="118" textAnchor="middle" className="academia-svg-mini">−σ</text>
       <text x="200" y="118" textAnchor="middle" className="academia-svg-mini">+σ</text>

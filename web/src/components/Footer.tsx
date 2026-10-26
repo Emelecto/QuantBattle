@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-export function Footer() {
+export function Footer({ landing = false }: { landing?: boolean }) {
   return (
-    <footer className="mt-auto bg-surface">
+    <footer className={`mt-auto bg-surface${landing ? " ql-public-footer--landing" : ""}`}>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
           <Link href="/docs" className="transition-colors hover:text-ink">
