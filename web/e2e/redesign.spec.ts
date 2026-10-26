@@ -14,6 +14,26 @@ test("la portada clara conserva navegación y no desborda", async ({ page }) => 
   expect(errors).toEqual([]);
 });
 
+test("la vista del producto recorre el piloto con mouse, teclado y sin desbordar", async ({ page }) => {
+  await page.goto("/");
+  const preview = page.locator(".research-product-preview");
+  await expect(preview).toHaveAttribute("data-preview-step", "0");
+  await preview.getByRole("button", { name: "02 Modelo" }).click();
+  await expect(preview).toHaveAttribute("data-preview-step", "1");
+  await expect(preview.getByText("HistGradientBoostingRegressor")).toBeVisible();
+  const send = preview.getByRole("button", { name: "03 Envío" });
+  await send.focus();
+  await page.keyboard.press("Enter");
+  await expect(preview).toHaveAttribute("data-preview-step", "2");
+  await expect(preview.getByText("Comprobante verificable")).toBeVisible();
+  await preview.getByRole("button", { name: "04 Resultado" }).click();
+  await expect(preview.locator(".research-preview-result-score")).toHaveText("0,006457");
+  await expect(preview.getByRole("img", { name: /Correlación por era/ })).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(preview.locator(".research-preview-state")).toHaveCSS("animation-name", "none");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test("el dashboard comunica un fallo de datos sin inventar una ronda vacía", async ({ page }) => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL;

@@ -8,9 +8,48 @@ on:
   workflow_dispatch:
 
 jobs:
+  evaluate-rounds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Cerrar y puntuar primero: de lo contrario, una ronda vencida que sigue
+    # marcada como ready bloquea la publicación de la siguiente semana.
+    steps:
+      - name: Trigger evaluation on worker
+        env:
+          SCHEDULER_KEY: ${{ secrets.SCHEDULER_KEY }}
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+        run: |
+          if [ -z "$WORKER_URL" ] || [ -z "$SCHEDULER_KEY" ]; then
+            echo "ERROR: WORKER_URL y SCHEDULER_KEY deben estar configurados en Secrets"
+            exit 1
+          fi
+          echo "Llamando a $WORKER_URL/scheduler/evaluate ..."
+          HTTP_CODE="000"
+          for i in 1 2 3 4 5; do
+            HTTP_CODE=$(curl -s -o /tmp/eval_response.txt -w "%{http_code}" \
+              -X POST "$WORKER_URL/scheduler/evaluate?sync=true" \
+              -H "Content-Type: application/json" \
+              -H "X-Scheduler-Key: $SCHEDULER_KEY" \
+              --max-time 600)
+            echo "Intento $i -> HTTP Status: $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              break
+            fi
+            echo "Reintentando en 15s..."
+            sleep 15
+          done
+          echo "HTTP Status final: $HTTP_CODE"
+          cat /tmp/eval_response.txt
+          echo ""
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "ERROR: la evaluacion respondio con codigo $HTTP_CODE tras reintentos"
+            exit 1
+          fi
+          echo "Evaluacion ejecutada exitosamente."
   generate-dataset:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: evaluate-rounds
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -57,44 +96,3 @@ jobs:
           fi
           echo "Procesando ronda ML: $ML_ROUND_TYPE"
           python generate_dataset_github.py
-
-  evaluate-rounds:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: generate-dataset
-    if: always()
-    # Evaluar rondas vencidas es ligero; lo dejamos en el worker de Render
-    # via su endpoint asincrono (devuelve 200 al instante).
-    steps:
-      - name: Trigger evaluation on worker
-        env:
-          SCHEDULER_KEY: ${{ secrets.SCHEDULER_KEY }}
-          WORKER_URL: ${{ secrets.WORKER_URL }}
-        run: |
-          if [ -z "$WORKER_URL" ] || [ -z "$SCHEDULER_KEY" ]; then
-            echo "ERROR: WORKER_URL y SCHEDULER_KEY deben estar configurados en Secrets"
-            exit 1
-          fi
-          echo "Llamando a $WORKER_URL/scheduler/evaluate ..."
-          HTTP_CODE="000"
-          for i in 1 2 3 4 5; do
-            HTTP_CODE=$(curl -s -o /tmp/eval_response.txt -w "%{http_code}" \
-              -X POST "$WORKER_URL/scheduler/evaluate?sync=true" \
-              -H "Content-Type: application/json" \
-              -H "X-Scheduler-Key: $SCHEDULER_KEY" \
-              --max-time 600)
-            echo "Intento $i -> HTTP Status: $HTTP_CODE"
-            if [ "$HTTP_CODE" = "200" ]; then
-              break
-            fi
-            echo "Reintentando en 15s..."
-            sleep 15
-          done
-          echo "HTTP Status final: $HTTP_CODE"
-          cat /tmp/eval_response.txt
-          echo ""
-          if [ "$HTTP_CODE" -ne 200 ]; then
-            echo "ERROR: la evaluacion respondio con codigo $HTTP_CODE tras reintentos"
-            exit 1
-          fi
-          echo "Evaluacion ejecutada exitosamente."

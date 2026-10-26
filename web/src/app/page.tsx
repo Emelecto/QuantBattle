@@ -1,5 +1,6 @@
 import Link from "next/link";
 import pilot from "../../public/research/judge-pilot.json";
+import { InteractiveProductPreview } from "@/components/research/InteractiveProductPreview";
 import "./research-landing.css";
 
 const stages = [
@@ -31,23 +32,11 @@ export default function Home() {
     </section>
 
     <section className="research-exhibit research-wrap" aria-labelledby="product-view-title">
-      <div className="research-exhibit-caption"><h2 id="product-view-title">Vista del producto <span>· basada en el piloto sintético</span></h2><div><Link href="/app">Abrir plataforma ↗</Link><a href="/research/judge-pilot.json">Evidencia del piloto ↗</a></div></div>
-      <div className="research-product-preview" data-ui>
-        <aside className="research-preview-side"><div className="research-preview-brand">Quant<span>Lab</span></div><p>Investigación</p><span className="selected">Torneos ML</span><span>Datasets</span><span>Mis envíos</span><span>Resultados</span><small>DeepFin · Universidad EIA</small></aside>
-        <div className="research-preview-content">
-          <div className="research-preview-top">Torneos ML &nbsp; / &nbsp; <strong>Ronda de práctica</strong></div>
-          <div className="research-preview-heading"><div><span>Piloto técnico · datos sintéticos</span><h3>Ronda de práctica</h3><p>Versión {pilot.version} · Ronda {pilot.round_number} · experimento documentado</p></div><b>Finalizada</b></div>
-          <ol className="research-preview-steps"><li>Dataset</li><li>Modelo</li><li>Envío validado</li><li>Evaluación</li></ol>
-          <div className="research-preview-grid">
-            <div className="research-preview-panel"><span>Dataset versionado</span><h4>Archivos para entrenar y predecir</h4><p>Train y validation para desarrollar el modelo. Live se evalúa después del cierre.</p><dl className="research-preview-metrics"><div><dt>Variables</dt><dd>{pilot.generator.n_features}</dd></div><div><dt>Activos simulados</dt><dd>{pilot.generator.n_assets}</dd></div><div><dt>Eras generadas</dt><dd>{pilot.generator.n_eras}</dd></div></dl><ul><li>train <b>{pilot.row_counts.train.toLocaleString("es-CO")} filas</b></li><li>validation <b>{pilot.row_counts.validation.toLocaleString("es-CO")} filas</b></li><li>live <b>{pilot.row_counts.live.toLocaleString("es-CO")} filas · objetivo oculto</b></li></ul></div>
-            <div className="research-preview-panel"><span>Comprobante de envío</span><h4>Predicciones registradas</h4><p>Un envío válido queda asociado a la versión del dataset y a una huella SHA-256.</p><div className="research-preview-count">{pilot.row_counts.live.toLocaleString("es-CO")} <small>filas live</small></div><div className="research-preview-version">Dataset asociado <code>{pilot.version}</code></div><p>La puntuación se publicó tras el cierre.</p></div>
-          </div>
-          <div className="research-preview-foot"><strong>Evaluación reproducida.</strong> El score del piloto se reprodujo exactamente. <span>Spearman por era · v1</span></div>
-        </div>
-      </div>
+      <div className="research-exhibit-caption"><h2 id="product-view-title">Vista del producto <span>· explora el piloto sintético</span></h2><div><Link href="/app">Abrir plataforma ↗</Link><a href="/research/judge-pilot.json">Evidencia del piloto ↗</a></div></div>
+      <InteractiveProductPreview />
     </section>
 
-    <section className="research-evidence research-wrap" aria-labelledby="evidence-title"><div><span className="research-label">Evidencia antes que promesas</span><h2 id="evidence-title">Un torneo que deja rastro de cada paso.</h2><p>El piloto sintético comprobó el recorrido completo: descarga pública, envío validado, cierre de la ronda, evaluación y clasificación pública.</p><Link href="/docs#evaluacion" className="research-text-link">Leer metodología y resultados ↗</Link></div><div className="research-evidence-list"><div><b>Datos</b><p>Dataset versionado; el objetivo live permanece oculto durante la ronda.</p></div><div><b>Envío</b><p>Los CSV inválidos se rechazan y cada envío válido deja un comprobante.</p></div><div><b>Cierre</b><p>La puntuación se libera después del plazo; los envíos tardíos se rechazan.</p></div><div><b>Resultado</b><p>El score se reprodujo exactamente desde los datos registrados.</p></div><aside><strong>Alcance del piloto:</strong> mercado totalmente artificial, una ronda y una cuenta técnica. No demuestra capacidad de pronosticar mercados reales ni adopción por usuarios externos.</aside></div></section>
+    <section className="research-evidence research-wrap" aria-labelledby="evidence-title"><div><span className="research-label">Evidencia antes que promesas</span><h2 id="evidence-title">Un torneo que deja rastro de cada paso.</h2><p>El piloto sintético comprobó el recorrido completo: descarga pública, envío validado, cierre de la ronda, evaluación y clasificación pública.</p>{/* La navegación cliente de Next elimina el fragmento en esta ruta. */}<a href="/docs#evaluacion" className="research-text-link">Leer metodología y resultados ↗</a></div><div className="research-evidence-list"><div><b>Datos</b><p>Dataset versionado; el objetivo live permanece oculto durante la ronda.</p></div><div><b>Envío</b><p>Los CSV inválidos se rechazan y cada envío válido deja un comprobante.</p></div><div><b>Cierre</b><p>La puntuación se libera después del plazo; los envíos tardíos se rechazan.</p></div><div><b>Resultado</b><p>El score se reprodujo exactamente desde los datos registrados.</p></div><aside><strong>Alcance del piloto:</strong> mercado totalmente artificial, una ronda y una cuenta técnica. No demuestra capacidad de pronosticar mercados reales ni adopción por usuarios externos.</aside></div></section>
 
     <section className="research-process research-wrap" aria-labelledby="process-title"><div className="research-process-heading"><span className="research-label">Dentro de QuantLab</span><h2 id="process-title">Del archivo al resultado, con contexto.</h2><p>Este recorrido usa los valores registrados en el piloto sintético. Cada etapa deja evidencia consultable.</p></div><ol className="research-stages">{stages.map((stage, index) => <li key={stage.title}><div className="research-stage-copy"><span>0{index + 1}</span><h3>{stage.title}</h3><p>{stage.text}</p><details><summary>Qué debes tener en cuenta</summary><p>{stage.detail}</p></details></div><figure><StageVisual index={index} /><figcaption>Vista esquemática · datos del piloto sintético</figcaption></figure></li>)}</ol><p className="research-footnote">Los valores proceden del registro público del piloto; la plataforma identifica cada ronda y versión por separado.</p></section>
 

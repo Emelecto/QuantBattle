@@ -11,7 +11,7 @@ Help Spanish-speaking researchers understand and complete a prediction tournamen
 - Solid surfaces, thin dividers and modest corners. The landing and dashboard share a consistent light identity.
 
 ## Public pages
-The landing uses a two-line typographic statement, a product preview populated with recorded synthetic pilot values, then four stages of the real workflow. The stage visuals are light schematics of the product workflow, not screenshots or claims of live user activity. Claims link to the public pilot record. No adoption or profitability claims.
+The landing uses a two-line typographic statement, an interactive four-step preview populated with recorded synthetic pilot values, then four stages of the real workflow. The preview lets visitors inspect the dataset, model, validated submission and published result without sending real data. The stage visuals are light schematics of the product workflow, not screenshots or claims of live user activity. Claims link to the public pilot record. No adoption or profitability claims.
 
 ## Product pages
 - `.ql-page` defines the research page width and responsive padding.
@@ -24,7 +24,7 @@ The landing uses a two-line typographic statement, a product preview populated w
 - Empty rankings take only the space they require.
 
 ## Interaction and motion
-Visible keyboard focus, named controls, native disclosure semantics and consistent state colors. Content panels do not move on hover. Landing and dashboard entrance motion is brief and respects reduced motion. Loading, errors and empty states must remain distinguishable; a failed round lookup must never be presented as an empty schedule.
+Visible keyboard focus, named controls, native disclosure semantics and consistent state colors. Content panels do not move on hover; interactive links and controls use brief feedback. The preview's result chart animates once when opened, using the recorded per-era values. Landing and dashboard motion respects reduced motion. Loading, errors and empty states must remain distinguishable; a failed round lookup must never be presented as an empty schedule.
 
 ## References and verification
 The approved mockups are `artifacts/landing-mockups/06-institucional-v2.html` and `artifacts/dashboard-mockups/01-dashboard-light.html`. Screenshots and verification reports belong in `artifacts/visual-redesign`.

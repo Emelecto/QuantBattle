@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { ResearchEvidence } from "@/components/research/ResearchEvidence";
 
 /**
@@ -61,6 +62,11 @@ export default function DocsPage() {
           herramientas para reproducir experimentos. QuantLab es un prototipo
           de investigación del semillero DeepFin de la Universidad EIA.
         </p>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
+          La evaluación documentada cubre los torneos ML sintéticos. Las secciones
+          de backtesting, marketplace y API describen módulos experimentales con
+          un alcance distinto al piloto del semillero.
+        </p>
 
         <nav className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-[13px]">
           <a href="#evaluacion" className="text-accent hover:underline">Evaluación del semillero</a>
@@ -76,11 +82,12 @@ export default function DocsPage() {
             <ResearchEvidence />
           </Section>
           <Section id="torneos-ml" title="Cómo funciona una ronda ML">
+            <p>Abre <Link href="/app/tournaments" className="text-accent underline underline-offset-4">Torneos</Link> para consultar el estado y la fecha de cierre de la ronda vigente. La demostración técnica es una ronda cerrada distinta de la práctica semanal; sus resultados no representan usuarios externos.</p>
             <p>Descarga train y validation con target, y live sin target. Cada envío debe incluir exactamente las columnas <Code>id,prediction</Code>, todos los IDs de live una sola vez y números finitos entre 0 y 1. Cada era debe tener predicciones con variación.</p>
             <p>El servidor valida y guarda el archivo con un recibo SHA-256. Solo el último envío válido antes del cierre queda seleccionado. La puntuación y el ranking se publican después del plazo; la métrica oficial es la media de Spearman por era, versión <Code>spearman_era_v1</Code>.</p>
             <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. La generación automática de rondas reales permanece desactivada hasta resolver la distribución de la fuente.</p>
             <div className="flex flex-wrap gap-4">
-              <a href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía del participante</a>
+              <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía del participante</Link>
               <a href="/ml/ejemplo_quantlab.ipynb" download className="text-accent underline underline-offset-4">Descargar notebook reproducible</a>
             </div>
           </Section>
@@ -138,8 +145,8 @@ export default function DocsPage() {
                 <dd>
                   Corrección del Sharpe por <em>pruebas múltiples</em>: si
                   pruebas muchas variantes, alguna saldrá bien por azar. El
-                  deflated penaliza esa suerte estadística. Es la métrica reina
-                  del ranking.
+                  deflated penaliza esa suerte estadística dentro del módulo
+                  experimental de backtesting.
                 </dd>
               </div>
               <div>

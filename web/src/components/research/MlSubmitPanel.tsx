@@ -26,12 +26,7 @@ export function MlSubmitPanel({liveDataset, canSubmit}: {liveDataset: MlDataset 
   const generation = useRef(0);
   const datasetId = liveDataset?.id;
   useEffect(() => {
-    setFile(null); setReview(null); setDigest(""); setChecking(false);
-    return () => { generation.current++; };
-  }, [datasetId]);
-  useEffect(() => {
     let active = true;
-    setMine(null); setReceiptError(false);
     if (datasetId) void call<{submission: MlSubmission | null}>(`/ml/predictions/mine?dataset_id=${encodeURIComponent(datasetId)}`)
       .then(value => { if (active) setMine(value.submission); })
       .catch(() => { if (active) setReceiptError(true); });
@@ -120,7 +115,7 @@ export function MlSubmitPanel({liveDataset, canSubmit}: {liveDataset: MlDataset 
       <button type="button" disabled={!review?.valid || checking || sending} onClick={()=>void send()} className={buttonClasses("primary","md")}>{sending ? "Verificando…" : "Validar y registrar envío"}</button>
     </>}
     {feedback && <p role={feedback.ok ? "status" : "alert"} className={`rounded-md border border-line p-4 text-sm ${feedback.ok ? "text-long" : "text-short"}`}>{feedback.message}</p>}
-    {receiptError && <p role="alert" className="text-sm text-short">No se pudo consultar tu comprobante. <button className="underline" onClick={()=>setReceiptRetry(value=>value+1)}>Reintentar consulta</button></p>}
+    {receiptError && <p role="alert" className="text-sm text-short">No se pudo consultar tu comprobante. <button className="underline" onClick={()=>{setReceiptError(false);setReceiptRetry(value=>value+1);}}>Reintentar consulta</button></p>}
     {mine && <section className="rounded-xl border border-line p-5">
       <h3 className="font-semibold text-ink">Comprobante del envío seleccionado</h3>
       <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">

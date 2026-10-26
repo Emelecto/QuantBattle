@@ -86,3 +86,18 @@
 @media (max-width:1050px) { .ql-app-shell .ql-bento-grid { grid-template-columns:1fr; } .ql-app-shell .ql-bento-ranking { grid-column:auto; grid-row:auto; } .ql-app-shell .ql-bento-bottom-left { grid-column:auto; grid-row:auto; } }
 @media (max-width:640px) { .ql-app-shell .ql-sidebar { display:none; } .ql-app-shell .ql-dash-main > :not(.ql-light-topbar):not(.ql-dash-bottomnav) { padding-inline:20px; } .ql-app-shell .ql-dash-main > :not(.ql-light-topbar):not(.ql-dash-bottomnav):not(.ql-dash-content) { padding-bottom:100px; } .ql-app-shell .ql-dash-content { padding-top:27px; padding-bottom:110px; } .ql-light-topbar { min-height:60px; padding-inline:20px; } .ql-light-topbar-brand { display:flex; align-items:center; gap:9px; } .ql-light-topbar-mark { display:grid; place-items:center; width:28px; height:28px; background:#245ce5; color:#fff; font-family:Manrope,sans-serif; font-size:17px; font-weight:800; letter-spacing:-.1em; } .ql-light-topbar-brand strong { font-family:Manrope,sans-serif; font-size:18px; letter-spacing:-.04em; } .ql-light-topbar-breadcrumb,.ql-light-topbar-actions > a:first-child { display:none; } .ql-app-shell .ql-home-intro h1 { font-size:29px; } .ql-app-shell .ql-bento-bottom-left { display:block; } .ql-app-shell .ql-bento-bottom-left > .ql-bento-card + .ql-bento-card { margin-top:16px; } .ql-app-shell .ql-dash-bottomnav { min-height:64px; } }
 @media (prefers-reduced-motion:reduce) { .ql-app-shell *, .ql-app-shell *::before,.ql-app-shell *::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+
+/* Frequent dashboard actions get fast feedback; data panels stay still. */
+.ql-app-shell .ql-nav-item .ic { transition:transform 160ms var(--ql-ease-out); }
+.ql-app-shell .ql-competencia-mini { transition:background 160ms ease,border-color 160ms ease,transform 160ms var(--ql-ease-out); }
+.ql-app-shell .ql-btn-primary,.ql-app-shell .ql-btn-secondary { transition:background 160ms ease,border-color 160ms ease,color 160ms ease,transform 160ms var(--ql-ease-out); }
+.ql-app-shell .ql-btn-primary:active,.ql-app-shell .ql-btn-secondary:active { transform:scale(.97); }
+@media (hover:hover) and (pointer:fine) {
+  .ql-app-shell .ql-nav-item:hover .ic { transform:translateX(2px); }
+  .ql-app-shell .ql-bento-grid .ql-competencia-mini:hover { background:#f7faff; border-color:#a9c7ee; transform:translateY(-2px); }
+  .ql-app-shell .ql-section-link:hover { text-decoration:underline; text-underline-offset:3px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .ql-app-shell .ql-nav-item:hover .ic,.ql-app-shell .ql-bento-grid .ql-competencia-mini:hover { transform:none; }
+  .ql-app-shell .ql-btn-primary,.ql-app-shell .ql-btn-secondary,.ql-app-shell .ql-nav-item .ic,.ql-app-shell .ql-competencia-mini { transition:background 120ms ease,border-color 120ms ease,color 120ms ease!important; }
+}

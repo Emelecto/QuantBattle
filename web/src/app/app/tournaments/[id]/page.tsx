@@ -614,7 +614,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
 /* -------------------------- Pestaña: Enviar -------------------------- */
 
 function TabEnviar({liveDataset, canSubmit}: {liveDataset: MlDataset | null; canSubmit: boolean}) {
-  return <MlSubmitPanel liveDataset={liveDataset} canSubmit={canSubmit} />;
+  return <MlSubmitPanel key={liveDataset?.id ?? "no-round"} liveDataset={liveDataset} canSubmit={canSubmit} />;
 }
 
 /* -------------------------- Pestaña: Ranking ------------------------- */

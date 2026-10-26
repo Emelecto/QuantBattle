@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuantLab · aplicación web
 
-## Getting Started
+Interfaz de investigación de QuantLab para el semillero DeepFin de la Universidad EIA. La entrega evaluada se concentra en torneos de predicción ML con datos sintéticos: descarga de `train`, `validation` y `live`, envío de `id,prediction`, validación del CSV, comprobante y puntuación posterior al cierre.
 
-First, run the development server:
+- [Plataforma publicada](https://quant-lab-nine.vercel.app/)
+- [Protocolo y evidencia del piloto](https://quant-lab-nine.vercel.app/docs#evaluacion)
+- [Guía para evaluadores](../docs/evaluation-guide.md)
+- [Protocolo técnico ML](../docs/ml-tournaments.md)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+El piloto publicado usa una cuenta técnica y datos artificiales. Su puntuación Spearman mide orden relativo dentro de cada era; no mide rentabilidad ni demuestra adopción externa. Las rondas con datos financieros reales y los pagos permanecen desactivados para esta entrega.
+
+## Ejecutar localmente
+
+Requiere Node.js 22 y el worker configurado según el [README principal](../README.md).
+
+1. Copiar `.env.local.example` a `.env.local` y configurar la URL del worker y las variables públicas de Supabase.
+2. Ejecutar `npm ci`.
+3. Ejecutar `npm run dev` y abrir la dirección indicada por Next.js.
+
+Las claves privadas de Supabase y del programador de rondas pertenecen al worker o a GitHub Actions; nunca a variables `NEXT_PUBLIC_*`.
+
+## Verificación
+
+```text
+npx tsc --noEmit
+npm run build
+npm run test:e2e
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La CI ejecuta comprobación de tipos, auditoría de dependencias de producción, compilación y pruebas de navegador. El lint completo se revisa por separado; los problemas heredados que no afecten el recorrido de torneos se registran antes de introducir cambios en esos módulos.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Alcance
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+La portada incluye una vista interactiva **guiada** del piloto registrado. Sus controles muestran dataset, modelo, envío y resultado; no realizan un envío real. Para participar, entrar en **Torneos** y consultar la fecha de cierre que muestra la ronda vigente. La guía y el notebook público explican cómo formar el CSV.
