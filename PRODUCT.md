@@ -7,7 +7,8 @@ Spanish-speaking students and researchers, including academic judges, need to un
 
 ## Invariants
 - Preserve authentication, private experiment history, downloads, uploads, CSV validation, receipts, pagination and export.
-- Scores remain hidden until the round has closed and been evaluated.
+- Practice scores remain hidden until its round has closed and been evaluated. Daily-return scores, asset names and real prices remain hidden until the entire four-round weekly tournament is finished and verified.
+- Daily real tournaments use fractional returns and normalized MAE improvement against zero, with four valid submissions required for the general ranking. They are separate from the synthetic Spearman pilot.
 - Spearman is a ranking correlation, not a return.
 - Do not invent performance, endorsements, user counts or prize promises.
 - Preserve existing routes and secondary product functions.

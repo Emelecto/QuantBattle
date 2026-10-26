@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T23:49:14Z",
+  "title": "QuantLab visual system",
+  "extensions": {
+    "motion": [
+      {
+        "name": "weekly-control-feedback",
+        "value": "160ms ease",
+        "purpose": "Background and border feedback on weekly controls; removed for reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "weekly-calendar-two-columns",
+        "value": "850px"
+      },
+      {
+        "name": "weekly-form-stack",
+        "value": "580px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Weekly primary action",
+      "kind": "button",
+      "description": "Shared large action used to validate and register a submission.",
+      "html": "<button class=\"ds-weekly-primary\">Validar y registrar predicciones</button>",
+      "css": ".ds-weekly-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:1px solid var(--ql-accent,#245ce5);border-radius:6px;background:var(--ql-accent,#245ce5);color:#fff;font:500 15px 'DM Sans',sans-serif;cursor:pointer;box-shadow:none}.ds-weekly-primary:hover{background:#174cbf}.ds-weekly-primary:focus-visible{outline:3px solid #79a3ff;outline-offset:3px}.ds-weekly-primary:disabled{opacity:.5;pointer-events:none}@media(max-width:580px){.ds-weekly-primary{width:100%;height:auto;white-space:normal}}"
+    },
+    {
+      "name": "Receipt refresh action",
+      "kind": "button",
+      "description": "Shared small secondary action for refreshing private records.",
+      "html": "<button class=\"ds-weekly-secondary\">Actualizar comprobante</button>",
+      "css": ".ds-weekly-secondary{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 12px;border:1px solid var(--ql-line,#dce6ef);border-radius:6px;background:var(--ql-surface,#fff);color:var(--ql-ink,#172840);font:500 13px 'DM Sans',sans-serif;cursor:pointer;transition:border-color 160ms ease,color 160ms ease,transform 160ms ease}.ds-weekly-secondary:hover{border-color:var(--ql-accent,#245ce5);transform:translateY(-1px)}.ds-weekly-secondary:focus-visible{outline:3px solid #79a3ff;outline-offset:3px}.ds-weekly-secondary:disabled{opacity:.5;pointer-events:none}@media(prefers-reduced-motion:reduce){.ds-weekly-secondary{transition:none}.ds-weekly-secondary:hover{transform:none}}"
+    },
+    {
+      "name": "Round selection",
+      "kind": "nav",
+      "description": "Four calendar choices; blue border, pale fill and pressed semantics identify the selected round.",
+      "html": "<nav class=\"ds-weekly-calendar\" aria-label=\"Elegir ronda\"><button aria-pressed=\"true\"><strong>Ronda 1</strong><span>Abierta</span><small>Predice martes</small></button><button aria-pressed=\"false\"><strong>Ronda 2</strong><span>Próxima</span><small>Predice miércoles</small></button><button aria-pressed=\"false\"><strong>Ronda 3</strong><span>Próxima</span><small>Predice jueves</small></button><button aria-pressed=\"false\"><strong>Ronda 4</strong><span>Próxima</span><small>Predice viernes</small></button></nav>",
+      "css": ".ds-weekly-calendar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;font-family:'DM Sans',sans-serif}.ds-weekly-calendar button{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:10px;padding:18px;border:1px solid var(--ql-line,#dce6ef);border-radius:10px;text-align:left;background:#fff;color:var(--ql-ink,#172840);cursor:pointer;transition:background 160ms ease,border-color 160ms ease}.ds-weekly-calendar button[aria-pressed=true]{border-color:var(--ql-accent,#245ce5);background:#edf3fb}.ds-weekly-calendar strong{font-size:14px;line-height:1.5}.ds-weekly-calendar span,.ds-weekly-calendar small{color:var(--ql-muted,#52677d);font-size:12px;line-height:1.5}.ds-weekly-calendar button:focus-visible{outline:3px solid #79a3ff;outline-offset:3px}@media(hover:hover) and (pointer:fine){.ds-weekly-calendar button:hover{background:#f1f6fc}}@media(max-width:850px){.ds-weekly-calendar{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:580px){.ds-weekly-calendar{gap:8px}.ds-weekly-calendar button{padding:12px;gap:6px}.ds-weekly-calendar strong{font-size:13px;line-height:1.45}}@media(prefers-reduced-motion:reduce){.ds-weekly-calendar button{transition:none}}"
+    },
+    {
+      "name": "Private model field",
+      "kind": "input",
+      "description": "Visible label and readable field used by the private model form.",
+      "html": "<label class=\"ds-weekly-field\">Nombre del modelo<input placeholder=\"Ej.: HistGradientBoosting v1\"></label>",
+      "css": ".ds-weekly-field{display:grid;gap:9px;margin:19px 0;color:var(--ql-ink,#172840);font:600 14px 'DM Sans',sans-serif}.ds-weekly-field input{min-width:0;min-height:44px;padding:11px 12px;border:1px solid #bdccdc;border-radius:7px;background:#fff;color:var(--ql-ink,#172840);font:400 16px 'DM Sans',sans-serif;caret-color:var(--ql-accent,#245ce5)}.ds-weekly-field input:focus-visible{outline:3px solid #79a3ff;outline-offset:3px}"
+    },
+    {
+      "name": "Weekly state label",
+      "kind": "chip",
+      "description": "Written tournament status uses a restrained blue tint without becoming an action.",
+      "html": "<span class=\"ds-weekly-state\">Resultados retenidos</span>",
+      "css": ".ds-weekly-state{display:inline-block;padding:6px 10px;border-radius:6px;background:#edf3fb;color:#2455ae;font:700 12px 'DM Sans',sans-serif}"
+    },
+    {
+      "name": "Selected round workspace",
+      "kind": "card",
+      "description": "Flat white workspace for dataset files and private submission records.",
+      "html": "<section class=\"ds-weekly-workspace\"><h2>Ronda 1 · Recibiendo predicciones</h2><p>Descarga y entrena tu modelo.</p></section>",
+      "css": ".ds-weekly-workspace{padding:28px;border:1px solid var(--ql-line,#dce6ef);border-radius:14px;background:#fff;color:var(--ql-ink,#172840)}.ds-weekly-workspace h2{margin:0;font:700 21px/1.35 Manrope,sans-serif;letter-spacing:-.025em}.ds-weekly-workspace p{max-width:73ch;margin-top:10px;color:var(--ql-muted,#52677d);font:400 14px/1.7 'DM Sans',sans-serif}@media(max-width:580px){.ds-weekly-workspace{padding:20px}}"
+    },
+    {
+      "name": "Private selected receipt",
+      "kind": "custom",
+      "description": "A wrapping definition list separates receipt facts from the retained score; specimen values are illustrative.",
+      "html": "<section class=\"ds-weekly-receipt\"><h4>Último envío válido seleccionado</h4><dl><div><dt>Recibido</dt><dd>26 oct, 15:00 Colombia</dd></div><div><dt>Filas</dt><dd>100</dd></div><div><dt>Estado</dt><dd>Validado · resultado retenido</dd></div></dl><p>SHA-256: ejemplo-ilustrativo</p><details><summary>Historial de intentos</summary><p>Los intentos anteriores conservan su huella.</p></details></section>",
+      "css": ".ds-weekly-receipt{margin-top:28px;padding-top:22px;border-top:1px solid var(--ql-line,#dce6ef);color:var(--ql-ink,#172840);font:400 13px 'DM Sans',sans-serif}.ds-weekly-receipt h4{font-size:15px;font-weight:700}.ds-weekly-receipt dl{display:flex;flex-wrap:wrap;gap:24px;margin:18px 0}.ds-weekly-receipt dt{color:var(--ql-muted,#52677d);margin-bottom:6px}.ds-weekly-receipt dd{margin:0}.ds-weekly-receipt p{font:12px/1.7 var(--font-geist-mono,monospace);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.ds-weekly-receipt details{margin-top:18px;line-height:1.7}.ds-weekly-receipt summary{padding-block:8px;cursor:pointer;font-weight:650;color:#294b78}.ds-weekly-receipt summary:hover{color:var(--ql-accent,#245ce5)}.ds-weekly-receipt summary:focus-visible{outline:2px solid var(--ql-accent,#245ce5);outline-offset:4px}"
+    },
+    {
+      "name": "Published result table",
+      "kind": "custom",
+      "description": "Captioned results retain readable columns in a horizontal overflow container; specimen is an empty table.",
+      "html": "<div class=\"ds-weekly-table\"><table><caption>Clasificación general · se requieren cuatro rondas</caption><thead><tr><th>Puesto</th><th>Participante</th><th>Rondas</th><th>Score medio</th><th>Error medio</th></tr></thead><tbody></tbody></table></div>",
+      "css": ".ds-weekly-table{overflow:auto;margin:22px 0;scrollbar-color:#afc1d8 #edf3fb;color:var(--ql-ink,#172840)}.ds-weekly-table table{width:100%;min-width:610px;border-collapse:collapse;font:400 13px 'DM Sans',sans-serif;font-variant-numeric:tabular-nums}.ds-weekly-table th,.ds-weekly-table td{padding:13px 16px 13px 0;border-bottom:1px solid var(--ql-line,#dce6ef);text-align:left}.ds-weekly-table th{color:var(--ql-muted,#52677d);font-weight:600}.ds-weekly-table caption{text-align:left;margin-bottom:14px;color:var(--ql-muted,#52677d)}"
+    }
+  ],
+  "narrative": {
+    "overview": "Help Spanish-speaking researchers understand and complete a prediction tournament. Public pages introduce the research workflow; authenticated screens prioritize the next action, readable records and explicit states. Functionality and scientific accuracy govern visual decisions.",
+    "keyCharacteristics": [],
+    "rules": [],
+    "dos": [],
+    "donts": []
+  }
+}

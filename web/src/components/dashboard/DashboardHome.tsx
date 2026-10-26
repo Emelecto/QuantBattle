@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { MlWorkspace } from "@/components/research/MlWorkspace";
+import { ReturnTournamentList, ReturnSubmissionHistory } from "@/components/research/ReturnTournament";
 import { useEffect, useState } from "react";
 import { useDashboardData, type DashboardTournament } from "./useDashboardData";
 import { LESSONS } from "@/lib/academia/catalog";
@@ -317,6 +318,8 @@ function DashboardHome() {
         </div>
       </header>
 
+      <ReturnTournamentList compact />
+      <ReturnSubmissionHistory />
       <MlWorkspace nextRound={tournaments.find((t) => t.type === "ml")} roundsLoading={sources.tournaments === "loading"} roundsError={sources.tournaments === "error"} />
       <div className="ql-bento-grid">
         {/* Competencias — fila 1 izquierda */}

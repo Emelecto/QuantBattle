@@ -1,15 +1,16 @@
 # QuantLab · DeepFin / Universidad EIA
 
-Prototipo de investigación de Emilio Cardona Lopez para una comunidad de investigación cuantitativa en español. La entrega del semillero se centra en **torneos de predicción de machine learning con datos sintéticos**, validación de archivos, etiquetas privadas y puntuación reproducible después del cierre.
+Prototipo de investigación de Emilio Cardona Lopez para una comunidad de investigación cuantitativa en español. Incluye **práctica sintética con piloto reproducible** y un **torneo semanal de cuatro rondas prospectivas de retornos reales**, con validación de CSV, fuentes privadas y publicación de resultados solo al cierre completo.
 
 - Plataforma: https://quant-lab-nine.vercel.app
 - Evaluación técnica y resultados: https://quant-lab-nine.vercel.app/docs#evaluacion
 - [Protocolo ML](docs/ml-tournaments.md)
+- [Torneo semanal de retornos reales](docs/daily-return-tournaments.md)
 - [Guía para evaluadores](docs/evaluation-guide.md)
 
 ## Alcance de la entrega
 
-Las rondas de práctica son artificiales y gratuitas, sin premios QP ni pagos. El ranking usa `spearman_era_v1`: correlación de Spearman por era, promediada entre eras. Ese número no mide rentabilidad. La infraestructura de datos reales permanece experimental y la generación automática exige aprobación explícita de la fuente y de sus condiciones de distribución.
+Las rondas de práctica son artificiales y gratuitas, sin premios QP ni pagos. Su ranking usa `spearman_era_v1`. El torneo semanal nuevo usa `daily_return_mae_v1`: predicciones de retornos decimales, score normalizado frente a cero y cuatro rondas obligatorias. No se comparan scores entre protocolos. Ninguno mide rentabilidad de una cartera. La automatización real requiere activar `ML_DAILY_TOURNAMENTS_ENABLED`; los modos reales anteriores a cinco días continúan separados.
 
 El repositorio también contiene backtesting, academia, comunidad, marketplace y API/MCP. La prueba técnica documentada se refiere al flujo ML; no constituye una validación completa de todos esos módulos ni evidencia de adopción por usuarios externos.
 

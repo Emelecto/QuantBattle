@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { loadEnvConfig } from "@next/env";
+
+// The browser mocks must use the same public hosts as the compiled application.
+loadEnvConfig(process.cwd());
 
 export default defineConfig({
   testDir: "./e2e",

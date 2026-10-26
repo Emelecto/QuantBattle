@@ -53,6 +53,10 @@ export function Icon({ name, size = 18 }: { name: string; size?: number }) {
       return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0116 0v2" /></svg>;
     case "arrow-left":
       return <svg {...common}><path d="M19 12H5m7-7l-7 7 7 7" /></svg>;
+    case "arrow-right":
+      return <svg {...common}><path d="M5 12h14m-7-7l7 7-7 7" /></svg>;
+    case "download":
+      return <svg {...common}><path d="M12 3v12m-5-5l5 5 5-5M5 16v5h14v-5" /></svg>;
     case "menu":
       return <svg {...common}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
     case "code":

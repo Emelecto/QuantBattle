@@ -23,6 +23,18 @@ The landing uses a two-line typographic statement, an interactive four-step prev
 - Navigation places tournaments, datasets and learning before secondary strategies and marketplace.
 - Empty rankings take only the space they require.
 
+## Components
+
+### Weekly tournament patterns
+These patterns extend the existing institutional light shell. The weekly page orders the calendar, selected round's dataset, private submission and receipt, then evaluation method and the week-wide release notice.
+
+- **Calendar:** four labeled round controls form one row on wide screens and a two-by-two grid at 850px and below. Compact spacing at 580px keeps all four choices visible near the start of the mobile page. The selected round has a blue border and pale blue fill; `aria-pressed` and written status communicate selection and availability without relying on color.
+- **Forms:** persistent labels accompany white fields with fine borders and modest corners (7px). Model name and seed share a row on wide screens and stack at 580px. The mobile submit action fills the available width and wraps its label. CSV review, server registration, success and failure retain separate written feedback; validation does not imply a published score.
+- **Private receipts:** a divider introduces the selected valid submission, with received time, row count and written state in a wrapping definition list. File and dataset hashes use small wrapping monospace text; previous attempts sit in a native disclosure. A retained result is explicitly labeled rather than represented by a zero or an empty metric.
+- **Result tables:** captions, muted column headings, thin row separators and tabular numerals support comparison. Tables retain a readable minimum width (610px) inside horizontal overflow containers. Per-round scores and price evidence sit in native disclosures; empty results remain concise prose.
+- **Surfaces and feedback:** white round workspaces use fine borders and modest corners (14px); the release notice uses a pale blue inset surface. These panels stay flat. Round controls use brief background and border feedback (160ms), removed for reduced motion. Keyboard focus uses a visible blue outline (3px with 3px offset).
+- **Icons:** back, forward and download affordances reuse the shared SVG icon component beside written labels; decorative icons are hidden from assistive technology.
+
 ## Interaction and motion
 Visible keyboard focus, named controls, native disclosure semantics and consistent state colors. Content panels do not move on hover; interactive links and controls use brief feedback. The preview's result chart animates once when opened, using the recorded per-era values. Landing and dashboard motion respects reduced motion. Loading, errors and empty states must remain distinguishable; a failed round lookup must never be presented as an empty schedule.
 

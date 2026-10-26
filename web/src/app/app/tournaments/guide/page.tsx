@@ -19,6 +19,23 @@ export default function TournamentsGuidePage() {
 
       <section className="ql-page flex-1">
         <div className="prose prose-invert max-w-none">
+          <section id="retornos-diarios" className="mb-12 scroll-mt-20">
+            <h2 className="text-2xl font-semibold text-ink mb-4">Torneo semanal de retornos reales</h2>
+            <p className="text-base leading-relaxed text-muted">Esta modalidad usa criptoactivos reales de Binance Vision. Tiene cuatro rondas, de lunes a jueves. Cada día se publica a partir de las 00:30, hora de Colombia, la información completa del día anterior. Recibes train y validation con retornos históricos y live sin respuesta futura.</p>
+            <ol className="mt-5 list-decimal pl-6 space-y-3 text-sm text-muted">
+              <li>El lunes envías una predicción para el retorno del martes; el martes para el miércoles; el miércoles para el jueves y el jueves para el viernes.</li>
+              <li>El plazo de envío termina a las 23:59 de cada día de apertura. El retorno empieza a observarse a las 00:00 del día siguiente y termina 24 horas después.</li>
+              <li>El CSV usa exactamente <code>id,prediction</code> y todos los IDs del live. Los valores son retornos decimales: 0.025 = +2,5 %, −0.02 = −2 %; cero es válido. Se aceptan valores finitos entre −1 y 10.</li>
+              <li>El servidor registra huella, versión y ficha privada del modelo. Solo el último CSV válido antes del cierre compite; un intento inválido no lo reemplaza.</li>
+              <li>El ranking general exige los cuatro envíos. Se promedian cuatro scores de mejora del error absoluto frente a predecir 0 %; un valor positivo mejora esa referencia. No es rentabilidad.</li>
+              <li>Desde el sábado a las 00:30, tras verificar toda la semana, se publican juntos scores, símbolos, precios y evidencia de reproducción. Los resultados no se publican al terminar cada ronda.</li>
+            </ol>
+            <p className="mt-5 text-sm text-muted">Durante el torneo no se publican precios ni símbolos originales. Las variables se mezclan y discretizan, y las etiquetas históricas se redondean a pasos de 0,5 puntos porcentuales. Los originales permanecen cifrados y privados. Esto dificulta búsquedas por precio, pero no garantiza anonimato ni demuestra el uso de ML solo con un CSV. Se permite información pública anterior al cierre.</p>
+            <p className="mt-4 text-sm text-muted">La apertura puede retrasarse si la fuente no está completa; el plazo de cierre no se desplaza. No se inventan precios ni se eliminan activos del universo a mitad del torneo para completar un resultado.</p>
+            <div className="mt-5 flex flex-wrap gap-5 text-sm"><Link href="/app/tournaments" className="text-accent underline">Ver torneos y horarios</Link><a href="/ml/ejemplo_retornos_diarios.ipynb" download className="text-accent underline">Notebook de retornos diarios</a></div>
+          </section>
+          <h2 className="text-2xl font-semibold text-ink mb-5">Práctica sintética y protocolo Spearman anterior</h2>
+          <p className="mb-8 text-sm text-muted">Las reglas 0–1 y Spearman que siguen corresponden a la práctica y al protocolo anterior. No se aplican a los CSV de retornos diarios descritos arriba. Los modos reales antiguos a cinco días no se activan con el nuevo torneo semanal.</p>
           {/* ¿Qué son los torneos? */}
           <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">¿Qué son los torneos?</h2>

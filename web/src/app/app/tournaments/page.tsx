@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listTournaments, type Tournament } from "@/lib/tournaments";
 import { listDatasets, type MlDataset } from "@/lib/mlTournaments";
 import { TournamentCard } from "./components/TournamentCard";
+import { ReturnTournamentList } from "@/components/research/ReturnTournament";
 
 export default function TournamentsPage() {
   const [rounds, setRounds] = useState<{ tournament: Tournament; dataset: MlDataset; active: boolean }[]>([]);
@@ -45,6 +46,8 @@ export default function TournamentsPage() {
         <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Cómo participar</Link>
         <Link href="/docs#evaluacion" className="text-accent underline underline-offset-4">Evidencia técnica del semillero</Link>
       </div>
+      <ReturnTournamentList />
+      <h2 className="mt-10 text-xl font-semibold text-ink">Práctica sintética y evidencia anterior</h2>
       {error ? (
         <div role="alert" className="mt-8 rounded-xl border border-line p-6">
           <p className="text-sm text-short">{error}</p>

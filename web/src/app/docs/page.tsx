@@ -78,6 +78,12 @@ export default function DocsPage() {
         </nav>
 
         <div className="mt-10 space-y-10">
+          <Section id="retornos-diarios" title="Torneos semanales con retornos reales">
+            <p>Cuatro rondas, de lunes a jueves, publicadas a partir de las 00:30 de Colombia con datos hasta el día anterior. El plazo termina a las 23:59 y se predice el retorno completo del día siguiente. Todos los scores, símbolos y precios se retienen hasta terminar el torneo completo, desde el sábado a las 00:30 y solo tras verificar la fuente.</p>
+            <p>El CSV <Code>id,prediction</Code> contiene retornos decimales, incluidos negativos: 0.025 equivale a +2,5 %. La puntuación compara el error absoluto con predecir cero y el ranking requiere cuatro rondas válidas. Esta modalidad tiene protocolo independiente <Code>daily_return_mae_v1</Code>; su score no se compara con Spearman.</p>
+            <p>Las variables públicas están ofuscadas, los retornos históricos redondeados y los originales cifrados. No se garantiza anonimato criptográfico de los datos derivados. Los precios reales y la fuente verificable se revelan al cierre general. Una semana real solo puede acreditarse después de observar los días objetivo; el piloto sintético de abajo conserva su alcance original.</p>
+            <Link href="/app/tournaments/guide#retornos-diarios" className="text-accent underline underline-offset-4">Reglas y notebook de retornos diarios</Link>
+          </Section>
           <Section id="evaluacion" title="Evaluación técnica con datos sintéticos">
             <ResearchEvidence />
           </Section>
@@ -85,7 +91,7 @@ export default function DocsPage() {
             <p>Abre <Link href="/app/tournaments" className="text-accent underline underline-offset-4">Torneos</Link> para consultar el estado y la fecha de cierre de la ronda vigente. La demostración técnica es una ronda cerrada distinta de la práctica semanal; sus resultados no representan usuarios externos.</p>
             <p>Descarga train y validation con target, y live sin target. Cada envío debe incluir exactamente las columnas <Code>id,prediction</Code>, todos los IDs de live una sola vez y números finitos entre 0 y 1. Cada era debe tener predicciones con variación.</p>
             <p>El servidor valida y guarda el archivo con un recibo SHA-256. Solo el último envío válido antes del cierre queda seleccionado. La puntuación y el ranking se publican después del plazo; la métrica oficial es la media de Spearman por era, versión <Code>spearman_era_v1</Code>.</p>
-            <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. La generación automática de rondas reales permanece desactivada hasta resolver la distribución de la fuente.</p>
+            <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. Este protocolo de práctica se conserva separado del torneo semanal de retornos reales.</p>
             <div className="flex flex-wrap gap-4">
               <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía del participante</Link>
               <a href="/ml/ejemplo_quantlab.ipynb" download className="text-accent underline underline-offset-4">Descargar notebook reproducible</a>

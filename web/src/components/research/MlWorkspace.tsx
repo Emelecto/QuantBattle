@@ -46,7 +46,7 @@ export function MlWorkspace({nextRound, roundsLoading, roundsError}: {nextRound?
   const submissionStatus = nextRound?.submission?.status;
   const evaluated = submissionStatus === "scored" || submissionStatus === "done";
   const validated = submissionStatus === "validated" || evaluated;
-  return <section id="historial-ml" aria-labelledby="workspace-heading" className="ql-research-workspace">
+  return <section id="historial-practica" aria-labelledby="workspace-heading" className="ql-research-workspace">
     <div className="ql-ml-hero">
       <div className="ql-ml-hero-main">
         <div className="ql-ml-hero-topline">

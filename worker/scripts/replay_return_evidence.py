@@ -20,6 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('--results', required=True)
     parser.add_argument('--round', type=int, required=True, choices=range(1, 5))
     parser.add_argument('--output', required=True)
+    parser.add_argument('--predictions', help='Optional own CSV to reproduce this round score')
     args = parser.parse_args()
     response = requests.get(args.results, timeout=60)
     response.raise_for_status()
@@ -39,4 +40,8 @@ if __name__ == '__main__':
         if ml_storage.sha256_df(frame) != entry['dataset']['files'][kind]['hash']:
             raise SystemExit(f'Public dataset replay mismatch: {kind}')
     Path(args.output).write_text(json.dumps(source, ensure_ascii=False, indent=2), encoding='utf-8')
+    if args.predictions:
+        actual = {x['id']: x['return'] for x in entry['assets']}
+        prediction = p.validate_csv(Path(args.predictions).read_bytes(), list(actual))
+        print(json.dumps(p.score(prediction, actual)))
     print('Verified and decrypted the final source. Future tournament keys remain private.')

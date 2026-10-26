@@ -7,7 +7,7 @@ Interfaz de investigación de QuantLab para el semillero DeepFin de la Universid
 - [Guía para evaluadores](../docs/evaluation-guide.md)
 - [Protocolo técnico ML](../docs/ml-tournaments.md)
 
-El piloto publicado usa una cuenta técnica y datos artificiales. Su puntuación Spearman mide orden relativo dentro de cada era; no mide rentabilidad ni demuestra adopción externa. Las rondas con datos financieros reales y los pagos permanecen desactivados para esta entrega.
+El piloto publicado usa una cuenta técnica y datos artificiales. Su puntuación Spearman mide orden relativo dentro de cada era; no mide rentabilidad ni demuestra adopción externa. El [nuevo torneo semanal de retornos reales](../docs/daily-return-tournaments.md) usa cuatro rondas y una puntuación de error distinta. Los pagos permanecen desactivados.
 
 ## Ejecutar localmente
 

@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-placeholder
+      NEXT_PUBLIC_WORKER_URL: https://quantlab2.onrender.com
+      NEXT_PUBLIC_SITE_URL: http://localhost:3100
     defaults:
       run:
         working-directory: web
@@ -23,10 +28,6 @@ jobs:
       - run: npm audit --omit=dev --audit-level=low
       - run: npx tsc --noEmit
       - run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-placeholder
-          NEXT_PUBLIC_WORKER_URL: https://quantlab-worker.onrender.com
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
