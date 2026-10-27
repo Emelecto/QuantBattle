@@ -57,7 +57,7 @@ Desde el sábado 00:30, y solo con todas las rondas resueltas, se publica en con
 
 ## Operación y verificación
 
-1. Aplicar `0030_weekly_return_tournaments.sql` antes de desplegar el worker y la web.
+1. Aplicar `0030_weekly_return_tournaments.sql` y después `0031_return_submission_wall_clock.sql` antes de desplegar el worker y la web. La segunda revisa la hora real tras adquirir el bloqueo de selección; `now()` conserva la hora de inicio de la transacción y no sirve para ese control después de una espera.
 2. Configurar en GitHub los secretos existentes SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY y DATASET_SALT (mínimo 24 caracteres). No cambiar el salt durante una semana abierta.
 3. Activar la variable `ML_DAILY_TOURNAMENTS_ENABLED=true`. Este flujo no activa los antiguos modos real/historical/prospective de cinco días.
 4. `daily-return-tournaments.yml` ejecuta el árbitro cada 30 minutos y permite lanzamiento manual. La concurrencia de GitHub y la selección transaccional de archivos evitan duplicados.

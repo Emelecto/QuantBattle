@@ -82,6 +82,8 @@ La web revisa el CSV usando exclusivamente IDs públicos y calcula su SHA-256. E
 
 La base de datos selecciona el archivo válido dentro de una transacción que bloquea la ronda y vuelve a comprobar hora, estado y versión. Un intento inválido no sustituye al archivo válido anterior. Si el plazo termina durante una carga, la API no anuncia una selección exitosa.
 
+En la revisión final se corrigió una condición de borde: PostgreSQL conserva `now()` desde el inicio de una transacción. Si esa transacción esperaba por el bloqueo de otro envío, podía seguir viendo una hora anterior al cierre. La migración `0031_return_submission_wall_clock.sql` utiliza `clock_timestamp()` después de obtener el bloqueo. Una prueba SQL con rollback reprodujo la aceptación tardía en la versión anterior y confirmó el rechazo después de aplicar la corrección, sin crear torneos ni archivos de prueba visibles.
+
 El usuario puede consultar fecha, filas, versión, huella, intento seleccionado e historial. Antes del cierre general se muestra «validado · resultado retenido»; ese estado confirma el archivo, no la calidad de la predicción.
 
 Se permite información pública disponible antes del plazo de envío. La ofuscación dificulta vincular las filas con activos concretos, pero no transforma esa regla en una garantía de que solo se usaron los archivos entregados.
@@ -105,6 +107,8 @@ No hay premios QP, pagos ni ejecución de operaciones en esta modalidad.
 ## Automatización y controles de acceso
 
 Se aplicó la migración `0030_weekly_return_tournaments.sql` en el proyecto Supabase de QuantLab. Añade semanas, rondas y envíos sin reinterpretar las rondas sintéticas anteriores. Las tres tablas nuevas tienen RLS y deniegan lecturas directas tanto a anon como a authenticated; el worker utiliza su credencial de servidor.
+
+También se aplicó `0031_return_submission_wall_clock.sql`, con la corrección del reloj de cierre comprobada en la base de datos real.
 
 El embargo se aplica en la API además de los permisos de la base de datos. Los comprobantes excluyen scores mientras la semana no esté liberada. El endpoint final requiere la fecha mínima de publicación y las cuatro rondas resueltas. El material público con símbolos y claves no se crea antes de cumplir esas condiciones. Los archivos originales cifrados permanecen en el bucket privado de targets.
 
@@ -130,9 +134,11 @@ Se actualizaron README, documentación pública, guía de participación, reglas
 - **Worker:** 197 pruebas locales sin servicios externos aprobadas; 17 pruebas marcadas external excluidas de ese comando. Siete pruebas nuevas cubren calendario, retornos firmados, cifrado autenticado, transformación, semana completa, reemplazo, cierre, embargo, ranking 4/4, idempotencia y fallo de la fuente. El ciclo prospectivo completo de esas pruebas usa un reloj y un mercado simulados.
 - **CI del backend:** [ejecución aprobada](https://github.com/Emelecto/QuantLab/actions/runs/40397157823), y [verificación del commit de interfaz](https://github.com/Emelecto/QuantLab/actions/runs/40422447377).
 - **Web:** compilación de producción y tipos aprobados con la versión fijada Next.js 16.4.1. Se sincronizó la instalación local, que antes estaba en 16.3.8. Los archivos modificados pasan lint. La auditoría de dependencias de producción no reportó vulnerabilidades.
+- **CI de la web publicada:** [ejecución final aprobada](https://github.com/Emelecto/QuantLab/actions/runs/40423258250), incluyendo instalación limpia, auditoría de producción, tipos, compilación y pruebas de navegador. Vercel confirmó la publicación del mismo código `cb7aa09`; la corrección SQL posterior se aplicó directamente a Supabase.
 - **Navegador local:** 48 pruebas aprobadas sin casos omitidos; después de la corrección visual se aprobaron nuevamente los seis casos de la modalidad nueva, incluidos escritorio y móvil.
 - **Configuración de pruebas:** Playwright carga los mismos hosts públicos que la aplicación y la CI los define expresamente. Esto evita omitir las pruebas de autenticación y API por falta de variables.
 - **API/Storage/auth reales:** 18 controles aprobados, con descargas y hashes de los tres archivos, live sin respuesta, envío válido, CSV incorrecto rechazado, último válido preservado y reemplazado, resultados retenidos, envío anónimo rechazado, lecturas directas denegadas en las tres tablas y fuente privada no pública.
+- **Plazo en PostgreSQL real:** prueba transaccional `supabase/tests/weekly_return_deadline.sql`; acepta un envío dentro del plazo, rechaza otro cuando el reloj real supera el cierre aunque la transacción comenzara antes, y conserva el envío anterior. Todos los registros de esa prueba se revierten.
 - **Web publicada:** 13 controles aprobados en escritorio y móvil: ronda real cargada, cuatro rondas, símbolos y scores ausentes, revisión de CSV, carga real con comprobante, ausencia de desbordamiento y ausencia de errores de JavaScript observados.
 
 La cuenta utilizada es una **cuenta técnica identificada**, creada confirmada sin enviar correos. No representa adopción externa. Se entrenó solo con los archivos públicos y se seleccionó configuración con validation; la auditoría privada de fuente se hizo por separado de esa selección.
