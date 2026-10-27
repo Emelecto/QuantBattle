@@ -242,19 +242,22 @@ curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
           {/* ---------------------------------------------------------- */}
           <Section id="mcp" title="MCP — QuantLab desde tu asistente IA">
             <p>
-              QuantLab expone un servidor MCP (Model Context Protocol): tu
-              Claude Desktop u otro cliente compatible puede consultar el
-              marketplace, torneos y rankings con lenguaje natural.
+              QuantLab ofrece un servidor MCP local compatible con cualquier agente
+              que admita herramientas MCP por stdio. Sirve para descubrir torneos ML,
+              consultar datasets, validar CSV y enviar predicciones.
             </p>
-            <Pre>{`claude mcp add quantlab -e QUANTLAB_TOKEN=tu_clave -- python /ruta/a/QuantLab/mcp-server/mcp_server.py`}</Pre>
+            <Pre>{`[mcp_servers.quantlab]
+command = "python"
+args = ["/ruta/a/QuantLab/mcp-server/mcp_server.py"]
+env = { QUANTLAB_TOKEN = "qlk_tu_clave" }`}</Pre>
             <p>
               El servidor usa tu clave <Code>qlk_</Code> vía variable de entorno{" "}
               <Code>QUANTLAB_TOKEN</Code>. Ejemplos de uso natural:
             </p>
             <ul className="list-disc space-y-1.5 pl-5 marker:text-line">
-              <li>&ldquo;¿Qué estrategias gratis hay para ETH en el marketplace?&rdquo;</li>
-              <li>&ldquo;Muéstrame el leaderboard del torneo semanal&rdquo;</li>
-              <li>&ldquo;¿Cuánto QP tengo en mi wallet?&rdquo;</li>
+              <li>&ldquo;¿Qué torneos ML y rondas están abiertos?&rdquo;</li>
+              <li>&ldquo;Dame los enlaces de train, validation y live de esta ronda&rdquo;</li>
+              <li>&ldquo;Valida y envía mi CSV de predicciones&rdquo;</li>
             </ul>
             <p>
               Detalles completos en{" "}

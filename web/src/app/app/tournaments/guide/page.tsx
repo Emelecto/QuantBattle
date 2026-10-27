@@ -312,10 +312,11 @@ export default function TournamentsGuidePage() {
             
             <h3 className="text-sm font-semibold text-ink mb-2">¿Qué es el MCP?</h3>
             <p className="text-base leading-relaxed text-muted mb-4">
-              El MCP es un servidor que permite a tu agente de IA (Claude Code,
-              Cursor, Codex CLI) interactuar con QuantLab usando lenguaje natural.
-              No necesitas escribir código: dile a tu agente lo que quieres hacer
-              y él usa las herramientas disponibles.
+              El MCP permite que cualquier agente compatible con Model Context Protocol
+              interactúe con QuantLab usando lenguaje natural. El servidor ayuda a
+              descubrir torneos ML, consultar datasets, validar predicciones y registrar
+              envíos. Necesitas Python para ejecutarlo localmente y una clave API para
+              consultar tus comprobantes o enviar predicciones.
             </p>
 
             <h3 className="text-sm font-semibold text-ink mb-2">Tools disponibles</h3>
@@ -330,39 +331,39 @@ export default function TournamentsGuidePage() {
                 </thead>
                 <tbody className="text-muted">
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">list_tournaments</td>
+                    <td className="px-4 py-2 font-medium text-xs">list_ml_tournaments</td>
                     <td className="px-4 py-2">—</td>
-                    <td className="px-4 py-2">Lista torneos abiertos</td>
+                    <td className="px-4 py-2">Lista semanas de retornos y rondas de práctica ML</td>
                   </tr>
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">get_leaderboard</td>
+                    <td className="px-4 py-2 font-medium text-xs">validate_prediction_csv</td>
                     <td className="px-4 py-2">—</td>
-                    <td className="px-4 py-2">Ranking de un torneo</td>
+                    <td className="px-4 py-2">Comprueba formato, rango y cobertura de IDs antes del envío</td>
                   </tr>
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">list_marketplace</td>
+                    <td className="px-4 py-2 font-medium text-xs">get_weekly_dataset_download</td>
                     <td className="px-4 py-2">—</td>
-                    <td className="px-4 py-2">Estrategias publicadas</td>
+                    <td className="px-4 py-2">Enlaces de train, validation y live</td>
                   </tr>
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">get_qp_balance</td>
+                    <td className="px-4 py-2 font-medium text-xs">submit_weekly_predictions</td>
                     <td className="px-4 py-2">✅</td>
-                    <td className="px-4 py-2">Tu balance QP</td>
+                    <td className="px-4 py-2">Envía predicciones con ficha del modelo</td>
                   </tr>
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">get_my_submission</td>
+                    <td className="px-4 py-2 font-medium text-xs">get_my_weekly_submissions</td>
                     <td className="px-4 py-2">✅</td>
-                    <td className="px-4 py-2">Tu submission en un torneo</td>
+                    <td className="px-4 py-2">Consulta tus comprobantes de envío</td>
                   </tr>
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">submit_strategy</td>
+                    <td className="px-4 py-2 font-medium text-xs">submit_practice_predictions</td>
                     <td className="px-4 py-2">✅</td>
-                    <td className="px-4 py-2">Enviar estrategia a un torneo</td>
+                    <td className="px-4 py-2">Envía CSV de predicciones a práctica ML</td>
                   </tr>
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">subscribe_strategy</td>
+                    <td className="px-4 py-2 font-medium text-xs">quantlab_status</td>
                     <td className="px-4 py-2">✅</td>
-                    <td className="px-4 py-2">Suscribirse a una estrategia</td>
+                    <td className="px-4 py-2">Comprueba la conexión y el estado de los torneos</td>
                   </tr>
                 </tbody>
               </table>
@@ -370,11 +371,10 @@ export default function TournamentsGuidePage() {
 
             <h3 className="text-sm font-semibold text-ink mb-2">Ejemplos de uso</h3>
             <pre className="rounded-md border border-line bg-surface-solid p-3 font-mono text-[12px] text-muted overflow-x-auto">
-{`- "¿En qué torneos puedo participar?"
-- "Muéstrame el leaderboard del torneo de BTC"
-- "¿Cuántos QP tengo?"
-- "Envía mi estrategia fast=20 slow=50 al torneo X"
-- "¿Qué estrategias hay en el marketplace? Suscríbeme a la más barata"`}
+{`- "Comprueba la conexión y dime qué rondas ML están abiertas"
+- "Dame los enlaces train, validation y live de la ronda semanal"
+- "Valida este CSV contra los IDs live de la ronda"
+- "Consulta mis comprobantes de esta ronda"`}
             </pre>
           </div>
 

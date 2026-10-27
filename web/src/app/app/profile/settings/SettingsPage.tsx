@@ -246,16 +246,16 @@ export function SettingsPage() {
                     Servidor MCP
                   </h2>
                   <p className="text-sm text-muted mb-3">
-                    Conecta tu agente de IA directamente con el motor de
-                    backtest de QuantLab.
+                    Conecta cualquier agente compatible con MCP a los torneos ML
+                    y flujos de predicción de QuantLab.
                   </p>
                   <pre className="overflow-x-auto rounded-md border border-line bg-surface-solid p-3 font-mono text-sm text-muted">
-{`claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python mcp_server.py`}
+{`[mcp_servers.quantlab]\ncommand = "python"\nargs = ["/ruta/a/QuantLab/mcp-server/mcp_server.py"]\nenv = { QUANTLAB_TOKEN = "qlk_tu_clave" }`}
                   </pre>
                   <p className="mt-2 text-[13px] text-muted">
-                    Guia completa en{" "}
+                    Guía completa en{" "}
                     <Link
-                      href="/app/api-keys/instructions"
+                    href="/app/api-keys/instructions"
                       className="text-accent hover:underline"
                     >
                       instrucciones del servidor MCP

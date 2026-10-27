@@ -13,7 +13,7 @@ export const NAV = [
   { href: "/app/library", label: "Datasets", group: "General" },
   { href: "/app/rankings", label: "Rankings", group: "General" },
   { href: "/app/wallet", label: "Wallet QP", group: "General" },
-  { href: "/app/api-keys", label: "API Keys", group: "General" },
+  { href: "/app/api-keys", label: "API y MCP", group: "General" },
   { href: "/app/profile", label: "Perfil", group: "General" },
 ] as const;
 

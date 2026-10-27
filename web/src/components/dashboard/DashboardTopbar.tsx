@@ -11,7 +11,7 @@ const labels: Record<string, string> = {
   "/app/academia": "Academia",
   "/app/strategies": "Estrategias",
   "/app/marketplace": "Marketplace",
-  "/app/api-keys": "API Keys",
+  "/app/api-keys": "API y MCP",
   "/app/profile": "Perfil",
 };
 

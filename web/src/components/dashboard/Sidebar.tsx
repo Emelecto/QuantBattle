@@ -20,7 +20,7 @@ export const DASHBOARD_NAV = [
   { href: "/app/academia", label: "Academia", icon: "book" },
   { href: "/app/strategies", label: "Estrategias", icon: "strategies" },
   { href: "/app/marketplace", label: "Marketplace", icon: "store" },
-  { href: "/app/api-keys", label: "API Keys", icon: "key" },
+  { href: "/app/api-keys", label: "API y MCP", icon: "key" },
 ] as const;
 
 const COLLAPSE_KEY = "ql:sidebar-collapsed";

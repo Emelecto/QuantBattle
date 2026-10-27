@@ -25,6 +25,17 @@ export default function ApiKeysPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
+  const [client, setClient] = useState<"generic" | "claude" | "cursor" | "codex">("generic");
+
+  const mcpConfig = newKey
+    ? client === "claude"
+      ? `claude mcp add quantlab -e QUANTLAB_TOKEN=${newKey} -- python C:/Users/ecard/QuantLab/mcp-server/mcp_server.py`
+      : client === "cursor"
+        ? JSON.stringify({ mcpServers: { quantlab: { command: "python", args: ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"], env: { QUANTLAB_TOKEN: newKey } } } }, null, 2)
+        : client === "codex"
+          ? `[mcp_servers.quantlab]\ncommand = "python"\nargs = ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"]\nenv = { QUANTLAB_TOKEN = "${newKey}" }`
+          : JSON.stringify({ mcpServers: { quantlab: { command: "python", args: ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"], env: { QUANTLAB_TOKEN: newKey } } } }, null, 2)
+    : "";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -78,13 +89,12 @@ export default function ApiKeysPage() {
         <section className="border-b border-line">
           <div className="mx-auto w-full max-w-4xl px-6 py-16">
             <h1 className="text-3xl font-semibold tracking-tight text-ink">
-              Claves de API
+              API y MCP
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-              Conecta agentes de IA y herramientas externas a QuantLab con una clave
-              dedicada que no expira. Úsala como{" "}
-              <code className="font-mono text-accent">QUANTLAB_TOKEN</code> en el
-              servidor MCP.
+              Crea una clave para conectar cualquier agente compatible con MCP a
+              QuantLab. Necesitarás iniciar sesión para crear, consultar o revocar
+              tus claves.
             </p>
           </div>
         </section>
@@ -99,7 +109,7 @@ export default function ApiKeysPage() {
             </h2>
             <p className="text-sm leading-relaxed text-muted">
               Las claves API son personales y te permiten conectar tu agente de IA
-              directamente con el motor de backtest. Crea una cuenta gratuita o
+              con QuantLab. Crea una cuenta gratuita o
               inicia sesión para empezar.
             </p>
             <div className="flex w-full flex-col gap-3 sm:flex-row">
@@ -125,11 +135,11 @@ export default function ApiKeysPage() {
   return (
     <main className="flex min-h-screen flex-col">
       <section className="ql-page flex-1">
-        <h1 className="text-3xl font-semibold tracking-tight text-ink">Claves de API</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-ink">API y MCP</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Conecta agentes de IA y herramientas externas a QuantLab con una clave
-          dedicada que no expira. Úsala como <code className="font-mono text-accent">QUANTLAB_TOKEN</code> en el
-          servidor MCP.
+          Administra tus claves API y conecta cualquier agente compatible con MCP
+          a los torneos ML de QuantLab. La clave se muestra una sola vez y puedes
+          revocarla cuando quieras.
         </p>
 
         {/* Crear nueva clave */}
@@ -139,7 +149,7 @@ export default function ApiKeysPage() {
               aria-label="Nombre de la clave"
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
-              placeholder="Nombre de la clave (ej: Mi Claude Code)"
+              placeholder="Nombre de la clave (ej: Mi agente de investigación)"
               maxLength={50}
               className="ql-input flex-1 rounded-md px-3 py-2 text-sm text-ink"
             />
@@ -182,35 +192,27 @@ export default function ApiKeysPage() {
               </button>
             </div>
 
-            {/* Comando completo listo para pegar */}
-            <div className="mt-5">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-medium text-muted">
-                  O copia el comando completo para Claude Code (incluye tu clave):
-                </p>
-              </div>
-              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                <code className="flex-1 overflow-x-auto rounded-md border border-line bg-surface-solid px-3 py-2 font-mono text-sm text-muted">
-                  claude mcp add quantlab -e QUANTLAB_TOKEN={newKey} -- python mcp_server.py
-                </code>
+            <div className="mt-5 rounded-lg border border-line p-4">
+              <p className="text-sm font-semibold text-ink">Configura tu agente MCP</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                QuantLab usa MCP estándar por stdio. Elige un cliente para ver su configuración; otros agentes compatibles pueden usar el ejemplo JSON genérico.
+              </p>
+              <label className="mt-4 block text-xs font-medium text-muted" htmlFor="mcp-client">Cliente de IA</label>
+              <select id="mcp-client" value={client} onChange={(event) => setClient(event.target.value as typeof client)} className="ql-input mt-1 w-full rounded-md px-3 py-2 text-sm text-ink sm:max-w-xs">
+                <option value="generic">Otro agente MCP (JSON)</option>
+                <option value="claude">Claude Code</option>
+                <option value="cursor">Cursor</option>
+                <option value="codex">Codex CLI</option>
+              </select>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-md border border-line bg-surface-solid p-3 font-mono text-xs leading-relaxed text-muted">{mcpConfig}</pre>
                 <button
-                  onClick={() => {
-                    navigator.clipboard
-                      .writeText(
-                        `claude mcp add quantlab -e QUANTLAB_TOKEN=${newKey} -- python mcp_server.py`,
-                      )
-                      .then(() => {
-                        setCopiedCmd(true);
-                        setTimeout(() => setCopiedCmd(false), 2000);
-                      }).catch(() => setError("No se pudo copiar. Selecciona el comando y cópialo manualmente."));
-                  }}
-                  className={buttonClasses("secondary", "sm") + " shrink-0"}
-                >
-                  {copiedCmd ? "✓ Copiado" : "Copiar comando"}
-                </button>
+                  onClick={() => navigator.clipboard.writeText(mcpConfig).then(() => { setCopiedCmd(true); setTimeout(() => setCopiedCmd(false), 2000); }).catch(() => setError("No se pudo copiar. Selecciona la configuración y cópiala manualmente."))}
+                  className={buttonClasses("secondary", "sm") + " shrink-0 self-start"}
+                >{copiedCmd ? "✓ Copiada" : "Copiar configuración"}</button>
               </div>
-              <p className="mt-2 font-mono text-[13px] text-muted">
-                Ejecútalo en tu terminal y reinicia Claude Code. Guía para Cursor/Codex en el README del repo (mcp-server/).
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                Reemplaza la ruta de ejemplo por la ubicación de <code className="font-mono">mcp_server.py</code> en tu equipo. Guarda la clave como variable <code className="font-mono">QUANTLAB_TOKEN</code> y no la compartas.
               </p>
             </div>
           </div>
@@ -309,22 +311,10 @@ export default function ApiKeysPage() {
           </div>
         )}
 
-        {/* Instrucciones MCP */}
         <div className="ql-glass ql-elev-1 mt-10 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-ink">Conecta tu agente de IA</h3>
-          <p className="mt-2 text-[13px] leading-relaxed text-muted">
-            Con tu clave copiada, registra el servidor MCP de QuantLab:
-          </p>
-          <pre className="mt-3 overflow-x-auto rounded-md border border-line bg-surface-solid p-3 font-mono text-sm text-muted">
-{`claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python mcp_server.py`}
-          </pre>
-          <p className="mt-2 text-sm text-muted">
-            Guía completa en{" "}
-            <Link href="/app/api-keys/instructions" className="text-accent hover:underline">
-              instrucciones del servidor MCP
-            </Link>{" "}
-            o en el README del repo (<code className="font-mono">mcp-server/</code>).
-          </p>
+          <h3 className="text-sm font-semibold text-ink">¿Qué puedes hacer con el MCP?</h3>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted">Descubrir torneos ML, consultar plazos y reglas, localizar datasets públicos, validar predicciones y enviar tu CSV con la ficha del modelo. Las acciones de cuenta usan esta clave API.</p>
+          <p className="mt-3 text-sm text-muted">Consulta las <Link href="/app/api-keys/instructions" className="text-accent hover:underline">instrucciones de conexión</Link> para más ejemplos de clientes MCP.</p>
         </div>
       </section>
     </main>
