@@ -1,37 +1,33 @@
-# QuantLab MCP Server
+# QuantLab MCP
 
-Conecta tu agente de IA (**Claude Code**, **Cursor**, **Codex CLI**) a QuantLab para
-operar la plataforma en lenguaje natural: ver torneos, enviar estrategias, consultar
-tu balance de QuantPoints (QP) y suscribirte a estrategias del marketplace.
+Conecta Claude Code, Cursor, Codex u otro cliente MCP con los torneos de predicción ML de QuantLab. El servidor es un proceso local por `stdio`: el agente llama las herramientas y estas consultan el worker oficial. No hay código de estrategia ni operaciones QP en este flujo.
+
+## Requisitos
+
+- Python 3.10 o superior.
+- Una clave API personal de QuantLab (`qlk_…`) para enviar predicciones y consultar tus comprobantes. Créala en `https://quant-lab-nine.vercel.app/app/api-keys`; se muestra una sola vez y puedes revocarla desde la app.
+- Los enlaces y datasets públicos se pueden consultar sin clave.
 
 ## Instalación
 
-```bash
-cd mcp-server
+```powershell
+cd C:\Users\ecard\QuantLab\mcp-server
 python -m pip install -r requirements.txt
 ```
 
-Requiere Python 3.10+.
+Worker predeterminado: `https://quantlab2.onrender.com` (configurado también como worker del frontend y comprobado en producción). Para un entorno alternativo, establece `QUANTLAB_WORKER_URL`.
 
-## Obtén tu QUANTLAB_TOKEN (clave de API, no expira)
-
-1. Inicia sesión en https://quant-lab-nine.vercel.app
-2. Ve a **/app/api-keys** (Claves de API)
-3. Crea una clave con el nombre que quieras → cópiala (empieza con `qlk_`, se muestra UNA sola vez)
-
-> La clave no expira y puedes revocarla desde la misma página cuando quieras.
-
-## Configuración
+## Configurar el cliente
 
 ### Claude Code
 
-```bash
-claude mcp add quantlab -e QUANTLAB_TOKEN=tu_token -- python C:/Users/ecard/QuantLab/mcp-server/mcp_server.py
+```powershell
+claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python C:/Users/ecard/QuantLab/mcp-server/mcp_server.py
 ```
 
 ### Cursor
 
-En `~/.cursor/mcp.json` (o `.cursor/mcp.json` del proyecto):
+En `.cursor/mcp.json`:
 
 ```json
 {
@@ -40,7 +36,7 @@ En `~/.cursor/mcp.json` (o `.cursor/mcp.json` del proyecto):
       "command": "python",
       "args": ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"],
       "env": {
-        "QUANTLAB_TOKEN": "tu_token"
+        "QUANTLAB_TOKEN": "qlk_tu_clave"
       }
     }
   }
@@ -55,33 +51,43 @@ En `~/.codex/config.toml`:
 [mcp_servers.quantlab]
 command = "python"
 args = ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"]
-env = { "QUANTLAB_TOKEN" = "tu_token" }
+env = { QUANTLAB_TOKEN = "qlk_tu_clave" }
 ```
 
-## Ejemplos de uso
+Reinicia o vuelve a cargar el cliente después de registrar el servidor.
 
-Con el servidor configurado, habla naturalmente con tu agente:
+## Flujo para empezar
 
-- *"¿En qué torneos puedo participar?"*
-- *"Muéstrame el leaderboard del torneo de BTC"*
-- *"¿Cuántos QP tengo?"*
-- *"Envía mi estrategia fast=20 slow=50 al torneo X"*
-- *"¿Qué estrategias hay en el marketplace? Suscríbeme a la más barata"*
+1. Pregunta **“¿Qué torneos ML y rondas están abiertos?”**. `list_ml_tournaments` distingue práctica y retornos diarios, y muestra identificadores, plazos y datasets publicados.
+2. Para una ronda semanal, descarga `train`, `validation` y `live` con `get_weekly_dataset_download`. Para la práctica, usa `list_practice_datasets` y `get_practice_dataset_download`.
+3. Entrena/selecciona el modelo con train y validation. Genera UTF-8 `id,prediction` con cada ID de live una sola vez. `validate_prediction_csv` compara la cobertura contra el índice live publicado; `get_weekly_live_ids` también permite recuperar los IDs para la ronda semanal.
+4. Registra el envío con `submit_weekly_predictions` o `submit_practice_predictions`. Incluye la ficha experimental JSON y la clave API se envía en Bearer al worker. Consulta después `get_my_weekly_submissions` o `get_my_practice_submission` para verificar el comprobante.
 
-## Tools disponibles
+La IA puede ayudar a escribir o explicar el código de entrenamiento en el entorno del usuario, pero el servidor MCP no ejecuta notebooks, no ve los targets de live ni inventa predicciones. El usuario genera el CSV y lo entrega al agente mediante la ruta local.
 
-| Tool | Auth | Descripción |
-|------|------|-------------|
-| `list_tournaments` | — | Torneos abiertos |
-| `get_leaderboard` | — | Ranking de un torneo |
-| `list_marketplace` | — | Estrategias publicadas |
-| `get_qp_balance` | ✅ | Tu balance QP |
-| `get_my_submission` | ✅ | Tu submission en un torneo |
-| `submit_strategy` | ✅ | Enviar estrategia a un torneo |
-| `subscribe_strategy` | ✅ | Suscribirse a una estrategia |
+## Protocolos
 
-## Seguridad
+| Flujo | Predicción | Métrica / reglas |
+|---|---|---|
+| Práctica ML | `0` a `1` | `spearman_era_v1`; cada era necesita variación; datasets sintéticos/históricos según ronda |
+| Retornos diarios semanal | `-1` a `10` en retorno decimal (`0.025` = +2,5 %) | `daily_return_mae_v1`; permite predicciones constantes; el ranking general necesita cuatro rondas |
 
-- Tu token solo se envía al worker oficial de QuantLab (`https://quantlab-worker.onrender.com`).
-- Los permisos los valida el worker en cada llamada; este servidor no guarda nada.
-- No compartas tu `QUANTLAB_TOKEN`: da acceso completo a tu cuenta de QuantLab.
+Ambos requieren exactamente todos los IDs live, sin duplicados, y columnas exactas `id,prediction`. Los resultados se mantienen ocultos según el protocolo; no compares sus scores.
+
+## Herramientas
+
+- `quantlab_status`: worker, conteo de datasets/torneos y estado de configuración de credencial.
+- `list_ml_tournaments`, `get_weekly_tournament`: descubrimiento y detalle de semanas y rondas.
+- `list_practice_datasets`, `get_practice_dataset_download`, `get_weekly_dataset_download`, `get_weekly_live_ids`: preparación de datos públicos.
+- `validate_prediction_csv`: validación local de formato/rango y cobertura exacta de IDs.
+- `submit_practice_predictions`, `submit_weekly_predictions`: envío autenticado con ficha experimental.
+- `get_my_practice_submission`, `get_my_weekly_submissions`: comprobantes autenticados.
+- `get_ml_leaderboard`, `get_weekly_results`: rankings/resultados públicos cuando estén liberados.
+
+Ficha de envío (`experiment_json`), por ejemplo:
+
+```json
+{"model_name":"Ridge","parameters":{"alpha":1.0},"seed":42,"note":"Seleccionado en validation"}
+```
+
+La clave `qlk_` concede acceso a la cuenta: no la pegues en conversaciones ni código compartido. Se guarda en la configuración local del cliente y se transmite solo al worker configurado.
