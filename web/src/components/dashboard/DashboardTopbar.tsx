@@ -9,8 +9,10 @@ const labels: Record<string, string> = {
   "/app/tournaments": "Torneos ML",
   "/app/library": "Datasets",
   "/app/academia": "Academia",
-  "/app/strategies": "Estrategias",
-  "/app/marketplace": "Marketplace",
+  "/app/strategies": "Mis proyectos ML",
+  "/app/marketplace": "Biblioteca ML",
+  "/app/learn": "Aprender practicando",
+  "/app/backtesting": "Backtesting clásico",
   "/app/api-keys": "API y MCP",
   "/app/profile": "Perfil",
 };

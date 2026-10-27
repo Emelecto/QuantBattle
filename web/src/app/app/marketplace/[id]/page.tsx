@@ -242,7 +242,7 @@ export default function StrategyDetailPage() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-6">
         <p className="text-muted">Estrategia no encontrada.</p>
-        <Link href="/app/marketplace" className={buttonClasses("secondary", "sm")}>
+        <Link href="/app/marketplace/trading" className={buttonClasses("secondary", "sm")}>
           Volver al marketplace
         </Link>
       </main>

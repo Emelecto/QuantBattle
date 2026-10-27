@@ -103,7 +103,7 @@ export default function MySubscriptionsPage() {
               </p>
             </div>
             <Link
-              href="/app/marketplace"
+              href="/app/marketplace/trading"
               className="ql-btn-secondary h-9 rounded-md px-3 text-[13px]"
             >
               Explorar marketplace
@@ -168,7 +168,7 @@ export default function MySubscriptionsPage() {
                 marketplace para encontrar una que se ajuste a tu estilo.
               </p>
               <Link
-                href="/app/marketplace"
+                href="/app/marketplace/trading"
                 className={buttonClasses("primary", "md")}
               >
                 Explorar marketplace

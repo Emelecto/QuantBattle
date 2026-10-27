@@ -198,6 +198,8 @@ from weekly_api import router as weekly_router
 app.include_router(weekly_router)
 from ml_workspace import router as ml_workspace_router
 app.include_router(ml_workspace_router)
+from ml_learning import router as ml_learning_router
+app.include_router(ml_learning_router)
 app.include_router(notifications_router)
 app.include_router(referrals_router)
 app.include_router(badges_router)

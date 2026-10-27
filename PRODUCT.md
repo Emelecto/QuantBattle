@@ -13,5 +13,8 @@ Spanish-speaking students and researchers, including academic judges, need to un
 - Do not invent performance, endorsements, user counts or prize promises.
 - Preserve existing routes and secondary product functions.
 
+## Learning and research projects
+The main strategies area contains ML tournament projects with immutable model versions and private submission links. The marketplace is a free, moderated notebook library with explicit licenses, limitations and lineage. Historical trading tools remain secondary. Practical learning includes a first-tournament journey, synthetic missions, a visual glossary and a private error lab available only after the entire real tournament is released. Content review is not verified notebook execution. No learning mission awards tournament QP.
+
 ## Visual mandate
 The approved landing and dashboard mockups define a light institutional identity: paper and pale blue surfaces, navy typography, blue actions, and restrained green status. Build in the existing Next.js application. The public landing leads with the tournament workflow and verifiable synthetic pilot; the authenticated dashboard prioritizes the next ML action, evidence, private history and honest loading/error states. Secondary product routes must remain usable under the shared light shell.

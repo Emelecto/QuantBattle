@@ -37,7 +37,7 @@ export default function CommunityPage() {
     } catch {
       toast.error("No se pudo copiar el código.");
     }
-    router.push("/app/strategies/new");
+    router.push("/app/backtesting/new");
   }
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export default function CommunityPage() {
                 &ldquo;Compartir en la comunidad&rdquo; y aparece aquí.
               </p>
               <Link
-                href="/app/strategies/new"
+                href="/app/backtesting/new"
                 className={buttonClasses("primary", "sm")}
               >
                 Crear estrategia

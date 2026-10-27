@@ -3,6 +3,7 @@ import type { AcademiaJourneyLesson } from "@/components/academia/AcademiaProgre
 import { AcademiaContinueCta } from "@/components/academia/AcademiaContinueCta";
 import { AcademiaCourseCard } from "@/components/academia/AcademiaCourseCard";
 import "./academia.css";
+import Link from "next/link";
 
 // Hub de Academia: hero compacto + grid de 6 cursos abiertos
 // (sin gates ni stats) + CTA continuar (siguiente lección pendiente).
@@ -32,6 +33,12 @@ export default function AcademiaPage() {
           <h1>Aprende midiendo</h1>
           <p>Los seis cursos están abiertos. Avanza a tu ritmo, lección a lección.</p>
         </header>
+        <div className="academia-cta-row flex flex-wrap gap-4">
+          <Link className="text-accent underline underline-offset-4" href="/app/learn/first-tournament">Ruta de primer torneo</Link>
+          <Link className="text-accent underline underline-offset-4" href="/app/learn/missions">Misiones de práctica</Link>
+          <Link className="text-accent underline underline-offset-4" href="/app/learn/errors">Laboratorio de errores</Link>
+          <Link className="text-accent underline underline-offset-4" href="/app/learn/glossary">Glosario visual</Link>
+        </div>
 
         <div className="academia-cta-row">
           <AcademiaContinueCta journey={journey} />

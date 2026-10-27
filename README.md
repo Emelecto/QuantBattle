@@ -7,6 +7,7 @@ Prototipo de investigación de Emilio Cardona Lopez para una comunidad de invest
 - [Protocolo ML](docs/ml-tournaments.md)
 - [Torneo semanal de retornos reales](docs/daily-return-tournaments.md)
 - [Guía para evaluadores](docs/evaluation-guide.md)
+- [Proyectos ML, aprendizaje práctico y biblioteca de notebooks](docs/ml-learning-projects.md)
 
 ## Alcance de la entrega
 

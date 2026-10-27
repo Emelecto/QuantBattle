@@ -123,7 +123,7 @@ export default function ResultsPage() {
       }
       setPublishMsg(`Publicada con métricas guardadas (id ${res.id.slice(0, 8)}…). Redirigiendo…`);
       // Dar tiempo a que el usuario vea la confirmación antes de navegar.
-      setTimeout(() => router.push("/app/marketplace"), 1200);
+      setTimeout(() => router.push("/app/marketplace/trading"), 1200);
     } catch (e) {
       setPublishMsg(`❌ ${e instanceof Error ? e.message : "No se pudo publicar."}`);
     } finally {
@@ -262,11 +262,11 @@ export default function ResultsPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/app/strategies/new" className={buttonClasses("primary", "lg")}>
+          <Link href="/app/backtesting/new" className={buttonClasses("primary", "lg")}>
             Nuevo backtest
           </Link>
           <Link
-            href={`/app/strategies/new?clone=${encodeURIComponent(run.config.code)}`}
+            href={`/app/backtesting/new?clone=${encodeURIComponent(run.config.code)}`}
             className={buttonClasses("secondary", "lg")}
           >
             Clonar esta estrategia

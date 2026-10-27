@@ -1,9 +1,14 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T23:49:14Z",
+  "generatedAt": "2026-10-27T05:46:32Z",
   "title": "QuantLab visual system",
   "extensions": {
     "motion": [
+      {
+        "name": "ml-control-feedback",
+        "value": "background 0.16s",
+        "purpose": "Background feedback on ML learning and project buttons; removed for reduced motion."
+      },
       {
         "name": "weekly-control-feedback",
         "value": "160ms ease",
@@ -11,6 +16,10 @@
       }
     ],
     "breakpoints": [
+      {
+        "name": "ml-form-stack",
+        "value": "600px"
+      },
       {
         "name": "weekly-calendar-two-columns",
         "value": "850px"
@@ -22,6 +31,20 @@
     ]
   },
   "components": [
+    {
+      "name": "ML labeled field",
+      "kind": "input",
+      "description": "White, visibly labeled field used by project and learning forms; these forms cap at 760px and paired fields stack at 600px.",
+      "html": "<label class=\"ds-ml-field\">Modelo<input placeholder=\"HistGradientBoostingRegressor\"></label>",
+      "css": ".ds-ml-field{display:grid;gap:7px;max-width:760px;color:#172840;font:550 16px/1.5 'DM Sans',sans-serif}.ds-ml-field input{width:100%;min-height:44px;padding:10px 12px;border:1px solid #a9bbcc;background:white;border-radius:7px;color:#172840;font:400 16px 'DM Sans',sans-serif}.ds-ml-field input:focus-visible{outline:3px solid #245ce5;outline-offset:3px}"
+    },
+    {
+      "name": "ML project record",
+      "kind": "custom",
+      "description": "Flat, wrapping record with a divider and direct action; specimen content is illustrative. The same pattern carries publication protocol, license and written review state.",
+      "html": "<article class=\"ds-ml-record\"><div><h2><a href=\"#proyecto\">Hipótesis de validación</a></h2><p>Comparar una regresión con la referencia cero.</p><p class=\"ds-ml-muted\">Retornos · MAE</p></div><a href=\"#proyecto\">Abrir proyecto</a></article>",
+      "css": ".ds-ml-record{display:flex;flex-wrap:wrap;align-items:start;justify-content:space-between;gap:16px;padding:22px 0;border-bottom:1px solid #dce6ef;color:#172840;font:400 16px/1.65 'DM Sans',sans-serif}.ds-ml-record h2{font:650 1.35rem Manrope,sans-serif;margin:30px 0 14px}.ds-ml-record p{max-width:68ch}.ds-ml-record .ds-ml-muted{color:#52677d;font-size:.94rem}.ds-ml-record a{color:#245ce5;text-decoration:none;text-underline-offset:4px}.ds-ml-record a:hover{text-decoration:underline}.ds-ml-record a:focus-visible{outline:3px solid #245ce5;outline-offset:3px}"
+    },
     {
       "name": "Weekly primary action",
       "kind": "button",

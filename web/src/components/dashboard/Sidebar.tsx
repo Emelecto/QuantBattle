@@ -18,8 +18,9 @@ export const DASHBOARD_NAV = [
   { href: "/app/library", label: "Datasets", icon: "database" },
   { href: "/app#historial-ml", label: "Mis envíos", icon: "strategies" },
   { href: "/app/academia", label: "Academia", icon: "book" },
-  { href: "/app/strategies", label: "Estrategias", icon: "strategies" },
-  { href: "/app/marketplace", label: "Marketplace", icon: "store" },
+  { href: "/app/learn", label: "Aprender practicando", icon: "book" },
+  { href: "/app/strategies", label: "Mis proyectos ML", icon: "strategies" },
+  { href: "/app/marketplace", label: "Biblioteca ML", icon: "store" },
   { href: "/app/api-keys", label: "API y MCP", icon: "key" },
 ] as const;
 
@@ -31,6 +32,7 @@ const COLLAPSED_WIDTH = 72;
 
 const ADMIN_NAV = [
   { href: "/app/admin", label: "Admin", icon: "shield" },
+  { href: "/app/admin/notebooks", label: "Revisar notebooks", icon: "book" },
 ] as const;
 
 const SOCIAL_LINKS = [
