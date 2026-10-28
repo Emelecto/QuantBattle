@@ -7,7 +7,7 @@
 .research-landing a:focus-visible,.research-landing summary:focus-visible,.ql-public-header--landing a:focus-visible { outline:3px solid #79a3ff; outline-offset:4px; }
 .research-landing h1,.research-landing h2,.research-landing h3,.research-landing h4 { font-family:Manrope,var(--font-geist-sans),sans-serif; }
 .research-hero { display:grid; grid-template-columns:minmax(0,1.72fr) minmax(250px,.58fr); align-items:end; gap:50px; padding-block:78px 51px; }
-.research-hero h1 { margin:0; max-width:1080px; font-size:clamp(54px,5.5vw,88px); line-height:1.04; letter-spacing:-.068em; font-weight:800; }
+.research-hero h1 { margin:0; max-width:1080px; color:var(--blue); font-size:clamp(54px,5.5vw,88px); line-height:1.04; letter-spacing:-.068em; font-weight:800; }
 .research-hero h1 span { color:var(--blue); }
 .research-hero-lead { max-width:760px; margin:27px 0 0; color:#4d5f75; font-size:21px; line-height:1.47; }
 .research-actions { display:flex; align-items:center; flex-wrap:wrap; gap:22px; margin-top:33px; }
