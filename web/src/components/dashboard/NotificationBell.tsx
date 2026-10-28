@@ -25,18 +25,9 @@ export function NotificationBell() {
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      const [notifs, count] = await Promise.all([
-        listNotifications(true, 10),
-        unreadCount(),
-      ]);
-      setNotifications(notifs);
-      setUnread(count);
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  const load = useCallback(() => Promise.all([listNotifications(true, 10), unreadCount()])
+    .then(([notifs, count]) => { setNotifications(notifs); setUnread(count); })
+    .catch((e: unknown) => { void e; }), []);
 
   useEffect(() => {
     load();

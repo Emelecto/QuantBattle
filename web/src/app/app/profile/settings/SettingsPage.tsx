@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/useAuth";
 import { buttonClasses } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -27,6 +28,7 @@ const TABS: { key: TabKey; label: string }[] = [
 ];
 
 export function SettingsPage() {
+  const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();
   const [tab, setTab] = useState<TabKey>("notifications");
 
@@ -64,8 +66,14 @@ export function SettingsPage() {
   }, [user]);
 
   useEffect(() => {
-    if (tab === "api") loadKeys();
-  }, [tab, loadKeys]);
+    if (tab !== "api" || !user) return;
+    let active = true;
+    call<ApiKeyRow[]>("/account/api-keys")
+      .then((data) => { if (active) setKeys(data); })
+      .catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "No se pudieron cargar las claves."); })
+      .finally(() => { if (active) setKeysLoading(false); });
+    return () => { active = false; };
+  }, [tab, user]);
 
   const handleRegenerate = useCallback(async () => {
     if (!user) return;
@@ -86,12 +94,12 @@ export function SettingsPage() {
     setSigningOutAll(true);
     try {
       await signOut();
-      window.location.href = "/login";
+      router.replace("/login");
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo cerrar la sesión.");
       setSigningOutAll(false);
     }
-  }, [signOut]);
+  }, [signOut, router]);
 
   async function changePassword(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

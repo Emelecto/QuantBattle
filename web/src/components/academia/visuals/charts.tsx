@@ -45,9 +45,9 @@ export function AcademiaAreaChart({
   const contenedor = useRef<HTMLDivElement>(null);
   const serie = useRef<ISeriesApi<"Area"> | null>(null);
   const formatoRef = useRef(formato);
-  formatoRef.current = formato;
+  useEffect(() => { formatoRef.current = formato; }, [formato]);
   const etiquetaRef = useRef(etiqueta);
-  etiquetaRef.current = etiqueta;
+  useEffect(() => { etiquetaRef.current = etiqueta; }, [etiqueta]);
   const [tip, setTip] = useState<{ x: number; y: number; fecha: string; valor: number } | null>(null);
 
   const puntos = useMemo(
@@ -106,7 +106,7 @@ export function AcademiaAreaChart({
       }
       const original = puntos.find((p) => p.time === param.time);
       setTip({
-        x: param.point.x,
+        x: Math.min(param.point.x + 12, el.clientWidth - 180),
         y: param.point.y,
         fecha: original ? fechaCorta(original.fecha) : "",
         valor: v,
@@ -139,13 +139,13 @@ export function AcademiaAreaChart({
         <div
           className="academia-chart-tip"
           style={{
-            left: Math.min(tip.x + 12, (contenedor.current?.clientWidth ?? 400) - 180),
+            left: tip.x,
             top: Math.max(tip.y - 56, 8),
           }}
         >
           <div className="academia-chart-tip-fecha">{tip.fecha}</div>
           <div className="academia-chart-tip-valor">
-            {etiquetaRef.current} {formatoRef.current(tip.valor)}
+            {etiqueta} {formato(tip.valor)}
           </div>
         </div>
       )}
@@ -168,7 +168,7 @@ export function CountUp({
   const ref = useRef<HTMLSpanElement>(null);
   const [mostrado, setMostrado] = useState(0);
   const [arrancado, setArrancado] = useState(false);
-  const primera = useRef(true);
+  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -187,29 +187,25 @@ export function CountUp({
   }, []);
 
   useEffect(() => {
-    if (!arrancado) return;
-    if (!primera.current) {
-      setMostrado(valor);
-      return;
-    }
-    primera.current = false;
+    if (!arrancado || finished) return;
     let raf = 0;
     const t0 = performance.now();
-    const duracion = 900;
+    const duracion = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 900;
     const paso = (t: number) => {
-      const p = Math.min(1, (t - t0) / duracion);
+      const p = duracion === 0 ? 1 : Math.min(1, (t - t0) / duracion);
       const e = 1 - Math.pow(1 - p, 3);
       setMostrado(valor * e);
       if (p < 1) raf = requestAnimationFrame(paso);
+      else setFinished(true);
     };
     raf = requestAnimationFrame(paso);
     return () => cancelAnimationFrame(raf);
-  }, [arrancado, valor]);
+  }, [arrancado, valor, finished]);
 
   return (
     <span ref={ref}>
       {prefijo}
-      {mostrado.toFixed(decimales)}
+      {(finished ? valor : mostrado).toFixed(decimales)}
       {sufijo}
     </span>
   );

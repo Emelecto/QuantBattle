@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useEffect, Suspense } from "react";
+import { FormEvent, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -19,13 +19,7 @@ function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
-
-  // Capturar código de referido de la URL
-  useEffect(() => {
-    const ref = searchParams.get("ref");
-    if (ref) setReferralCode(ref);
-  }, [searchParams]);
+  const referralCode = searchParams.get("ref");
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState, Suspense } from "react";
+import { FormEvent, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -17,7 +17,7 @@ function LoginInner() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => searchParams.get("error_description") || searchParams.get("error"));
   const [loading, setLoading] = useState(false);
 
   // Recuperar contraseña
@@ -26,15 +26,6 @@ function LoginInner() {
   const [resetInfo, setResetInfo] = useState<string | null>(null);
   const [resetError, setResetError] = useState<string | null>(null);
   const [resetLoading, setResetLoading] = useState(false);
-
-  // Errores que el callback de auth puede haber reenviado como query (?error=).
-  useEffect(() => {
-    const err = searchParams.get("error_description") || searchParams.get("error");
-    if (err) {
-      // URLSearchParams ya decodificó el valor; un segundo decode falla con «%».
-      setError(err);
-    }
-  }, [searchParams]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

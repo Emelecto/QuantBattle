@@ -44,7 +44,7 @@ export default async function AcademiaCoursePage({
           <p>
             {lessonCount} lecciones{examCount > 0 ? ` + ${examCount} examen` : ""} · +{qp} QP + {PERFECT_BONUS_QP} bonus todo-perfecto
           </p>
-          <AcademiaProgress totalLessons={lessons.length} />
+          <AcademiaProgress totalLessons={lessons.length} lessonIds={lessons.map((lesson) => lesson.id)} />
         </header>
 
         <section>

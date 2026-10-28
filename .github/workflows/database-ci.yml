@@ -1,0 +1,33 @@
+name: database-ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r worker/requirements.txt -r worker/requirements-research.txt
+      - name: Rebuild isolated schema and verify privacy policies
+        run: python scripts/verify_database.py --workdir "$RUNNER_TEMP/quantlab-validation" --start --bootstrap
+      - name: Check actual authentication, storage and API journeys in staging
+        run: python scripts/verify_product_staging.py --workdir "$RUNNER_TEMP/quantlab-validation"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: database-evidence-${{ github.sha }}
+          path: artifacts/release
+      - name: Stop only the isolated validation stack
+        if: always()
+        run: supabase stop --workdir "$RUNNER_TEMP/quantlab-validation"

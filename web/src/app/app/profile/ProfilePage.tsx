@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/useAuth";
 import { getBalance } from "@/lib/tokens";
 import { LESSONS } from "@/lib/academia/catalog";
-import { loadAcademiaProgress } from "@/components/academia/progress-store";
+import { useAcademiaProgress } from "@/components/academia/progress-store";
 import { TIER } from "@/lib/constants";
 import { TierBadge } from "@/components/ui/TierBadge";
 import { Avatar } from "@/components/ui/Avatar";
@@ -72,20 +72,18 @@ function StatTile({
 }
 
 export function ProfilePage() {
-  const { user, loading: authLoading } = useAuth();
+  const auth = useAuth();
+  return <ProfileContent key={auth.user?.id ?? "guest"} {...auth} />;
+}
+
+function ProfileContent({ user, loading: authLoading }: ReturnType<typeof useAuth>) {
   // Progreso de Academia (store local multi-curso C1–C6; el panel del quiz
   // lo sincroniza a Supabase en completed_lessons + QP vía earnQP).
-  const [academiaDone, setAcademiaDone] = useState<string[]>([]);
+  const academiaDone = useAcademiaProgress().completed;
   const [tournamentsEntered, setTournamentsEntered] = useState<number | null>(null);
-  useEffect(() => {
-    setAcademiaDone(loadAcademiaProgress().completed);
-  }, []);
   // Torneos entrados: conteo real en Supabase (tabla submissions).
   useEffect(() => {
-    if (!user) {
-      setTournamentsEntered(null);
-      return;
-    }
+    if (!user) return;
     let active = true;
     (async () => {
       try {
@@ -127,11 +125,7 @@ export function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!user) {
-      setBalanceLoading(false);
-      return;
-    }
-    setBalanceLoading(true);
+    if (!user) return;
     getBalance()
       .then(setBalance)
       .catch(() => setBalance(null))
@@ -144,7 +138,6 @@ export function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     let active = true;
-    setProfileLoading(true);
     const loadProfile = async () => {
       try {
         const supabase = createBrowserSupabaseClient();
@@ -162,7 +155,7 @@ export function ProfilePage() {
             username: data.username ?? null,
             display_name: data.display_name ?? null,
             avatar_url: data.avatar_url ?? null,
-            username_updated_at: (data as any).username_updated_at ?? null,
+            username_updated_at: null,
           });
           setUsernameInput(data.username ?? "");
         }
@@ -210,8 +203,8 @@ export function ProfilePage() {
 
   const displayName =
     profile?.display_name ||
-    (user?.user_metadata as any)?.full_name ||
-    (user?.user_metadata as any)?.name ||
+    (typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null) ||
+    (typeof user.user_metadata?.name === "string" ? user.user_metadata.name : null) ||
     user?.email?.split("@")[0] ||
     "Trader";
 
@@ -259,8 +252,8 @@ export function ProfilePage() {
       // Refrescar perfil
       setProfile((p) => (p ? { ...p, avatar_url: urlData.publicUrl } : p));
       setUsernameSuccess("Foto de perfil actualizada correctamente.");
-    } catch (err: any) {
-      setUsernameError(err?.message || "Error al subir la foto.");
+    } catch (err: unknown) {
+      setUsernameError(err instanceof Error ? err.message : "Error al subir la foto.");
     } finally {
       setProfileLoading(false);
       e.target.value = "";
@@ -301,8 +294,8 @@ export function ProfilePage() {
         setUsernameSuccess("Username actualizado.");
         setUsernameEdit(false);
       }
-    } catch (err: any) {
-      setUsernameError(err?.message || "Error al actualizar el username.");
+    } catch (err: unknown) {
+      setUsernameError(err instanceof Error ? err.message : "Error al actualizar el username.");
     } finally {
       setUsernameSaving(false);
     }

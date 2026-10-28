@@ -22,18 +22,9 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
   const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const load = useCallback(async () => {
-    try {
-      const [notifs, count] = await Promise.all([
-        listNotifications(true, 5),
-        unreadCount(),
-      ]);
-      setNotifications(notifs);
-      setUnread(count);
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  const load = useCallback(() => Promise.all([listNotifications(true, 5), unreadCount()])
+    .then(([notifs, count]) => { setNotifications(notifs); setUnread(count); })
+    .catch((e: unknown) => { void e; }), []);
 
   useEffect(() => {
     load();

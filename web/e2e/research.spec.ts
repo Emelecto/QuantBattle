@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+test("los pagos del piloto están cerrados y no generan checkout", async ({ request }) => {
+  const response = await request.post("/api/stripe/checkout", { data: { plan: "plus" } });
+  expect(response.status()).toBe(503);
+  const body = await response.json();
+  expect(body.error).toContain("no tiene pagos habilitados");
+  expect(body.url).toBeUndefined();
+});
+
 test("un evaluador encuentra el protocolo y la evidencia desde la portada", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Leer metodología y resultados" }).click();

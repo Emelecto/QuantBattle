@@ -1,4 +1,5 @@
 "use client";
+import { notifyStorageChange, useStorageValue } from "@/hooks/useStorageValue";
 
 import { useCallback, useEffect, useState } from "react";
 import { trackEvent } from "./analytics";
@@ -88,6 +89,7 @@ export function markStep(id: ActivationStepId): void {
   const next = { ...current, [id]: true };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    notifyStorageChange(STORAGE_KEY);
   } catch {
     /* noop */
   }
@@ -105,47 +107,25 @@ export function nextPending(state: ActivationState): ActivationStep | null {
 }
 
 export function useActivation() {
-  const [state, setState] = useState<ActivationState>({ ...EMPTY });
+  const raw = useStorageValue(STORAGE_KEY);
+  const state: ActivationState = { ...EMPTY };
+  try {
+    const saved = JSON.parse(raw || "{}");
+    for (const step of ACTIVATION_STEPS) state[step.id] = saved?.[step.id] === true;
+  } catch { /* Corrupt local progress starts empty. */ }
   const [server, setServer] = useState(false);
-
   useEffect(() => {
-    setState(readLocal());
-    fetch("/api/activation")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((json) => {
-        if (json?.steps && typeof json.steps === "object") {
-          setServer(true);
-          setState((prev) => {
-            const merged = { ...prev };
-            for (const s of ACTIVATION_STEPS) {
-              if (json.steps[s.id]) merged[s.id] = true;
-            }
-            try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-            } catch {
-              /* noop */
-            }
-            return merged;
-          });
-        }
-      })
-      .catch(() => undefined);
+    let active = true;
+    fetch("/api/activation").then((r) => r.ok ? r.json() : null).then((json) => {
+      if (!active || !json?.steps || typeof json.steps !== "object") return;
+      const merged = readLocal();
+      for (const step of ACTIVATION_STEPS) if (json.steps[step.id] === true) merged[step.id] = true;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); notifyStorageChange(STORAGE_KEY); } catch { /* optional persistence */ }
+      setServer(true);
+    }).catch(() => undefined);
+    return () => { active = false; };
   }, []);
-
-  const complete = useCallback((id: ActivationStepId) => {
-    setState((prev) => {
-      if (prev[id]) return prev;
-      const next = { ...prev, [id]: true };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        /* noop */
-      }
-      return next;
-    });
-    markStep(id);
-  }, []);
-
-  const done = ACTIVATION_STEPS.filter((s) => state[s.id]).length;
+  const complete = useCallback((id: ActivationStepId) => markStep(id), []);
+  const done = ACTIVATION_STEPS.filter((step) => state[step.id]).length;
   return { state, done, total: ACTIVATION_STEPS.length, server, complete, next: nextPending(state) };
 }

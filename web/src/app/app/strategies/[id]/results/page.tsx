@@ -1,4 +1,5 @@
 "use client";
+import { useHydrated } from "@/hooks/useHydrated";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -37,24 +38,29 @@ function Metric({
 import { useAuth } from "@/lib/useAuth";
 
 export default function ResultsPage() {
-  const { user, loading: authLoading } = useAuth();
+  const auth = useAuth();
   const params = useParams<{ id: string }>();
+  return <ResultsContent key={`${auth.user?.id ?? "guest"}:${params.id}`} auth={auth} id={params.id} />;
+}
+
+function ResultsContent({ auth, id }: { auth: ReturnType<typeof useAuth>; id: string }) {
+  const { user, loading: authLoading } = auth;
+  const params = { id };
   const router = useRouter();
-  const [run, setRun] = useState<BacktestResult | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [remoteRun, setRun] = useState<BacktestResult | null>(null);
+  const [remoteLoaded, setLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
   const [priceQpWeek, setPriceQpWeek] = useState(0);
 
+  const hydrated = useHydrated();
+  const run = (hydrated && !authLoading ? getRun(params.id, user?.id) : null) ?? remoteRun;
+  const loaded = hydrated && (!!run || remoteLoaded);
+
   useEffect(() => {
     if (authLoading) return;
-    const local = getRun(params.id, user?.id);
-    if (local) {
-      setRun(local);
-      setLoaded(true);
-      return;
-    }
+    if (getRun(params.id, user?.id)) return;
     let active = true;
     (async () => {
       if (user) {

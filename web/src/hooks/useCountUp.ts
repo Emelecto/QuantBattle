@@ -12,13 +12,13 @@ export function useCountUp(target: number, duration = 400): number {
   const rafRef = useRef<number | null>(null);
   // Espejo del último valor para el cleanup sin leer estado en el efecto.
   const valueRef = useRef(value);
-  valueRef.current = value;
+  useEffect(() => { valueRef.current = value; }, [value]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       fromRef.current = target;
-      setValue(target);
-      return;
+      const frame = requestAnimationFrame(() => { setValue(target); valueRef.current = target; });
+      return () => cancelAnimationFrame(frame);
     }
 
     const from = fromRef.current;
@@ -30,7 +30,9 @@ export function useCountUp(target: number, duration = 400): number {
       const t = Math.min((now - start) / duration, 1);
       // ease-out cubic
       const eased = 1 - Math.pow(1 - t, 3);
-      setValue(Math.round(from + (target - from) * eased));
+      const next = Math.round(from + (target - from) * eased);
+      valueRef.current = next;
+      setValue(next);
       if (t < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {

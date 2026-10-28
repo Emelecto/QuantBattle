@@ -18,6 +18,16 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="", tags=["admin"])
 
+
+@router.get('/admin/launch-readiness')
+def launch_readiness(request: Request):
+    _require_admin(request)
+    from operations import readiness_report
+    try:
+        return readiness_report(_get_supabase())
+    except Exception as exc:
+        raise _opaque_500(exc, 'launch_readiness') from exc
+
 # IDs de admin. Configurable vía env ADMIN_USER_IDS (coma-separado);
 # por defecto el UUID del admin actual (Emilio).
 _DEFAULT_ADMIN_ID = "2ca7b197-86f5-4605-9789-266bf8a0df01"

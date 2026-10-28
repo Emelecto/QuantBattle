@@ -14,3 +14,6 @@ supabase/.temp/
 web/test-results/
 web/playwright-report/
 worker/.return-pilot-*.json
+worker/test-results/
+artifacts/launch-staging/
+artifacts/quantlab-validation/

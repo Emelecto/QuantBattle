@@ -38,17 +38,12 @@ export default function MySubscriptionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  async function load() {
-    setLoading(true);
-    try {
-      const data = await getMySubscriptions();
-      setSubs(data);
-      setError(null);
-    } catch (e) {
+  function load() {
+    return getMySubscriptions().then((data) => {
+      setSubs(data); setError(null);
+    }).catch((e: unknown) => {
       setError(e instanceof Error ? e.message : "Error al cargar suscripciones");
-    } finally {
-      setLoading(false);
-    }
+    }).finally(() => setLoading(false));
   }
 
   useEffect(() => {

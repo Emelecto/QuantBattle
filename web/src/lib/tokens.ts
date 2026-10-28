@@ -77,14 +77,23 @@ export async function cancelSubscription(id: string): Promise<{ status: string }
   return call<{ status: string }>(`/marketplace/${id}/unsubscribe`, { method: "POST" });
 }
 
-export async function getPublicProfile(userId: string): Promise<any> {
+export interface PublicProfile {
+  id: string; username: string; display_name: string | null; avatar_url: string | null;
+  country: string | null; bio: string | null; tier: string | null;
+  strategies_count: number; tournaments_won: number; badges: string[];
+  qp_balance: number; current_streak: number | null;
+}
+
+export async function getPublicProfile(userId: string): Promise<PublicProfile | null> {
   const supabase = createBrowserSupabaseClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
-  return data;
+  const [profile, strategies] = await Promise.all([
+    supabase.from("profiles").select("id, username, display_name, avatar_url, country, bio, total_qp_earned, tournaments_won, current_streak").eq("id", userId).maybeSingle(),
+    supabase.from("strategies").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("is_public", true),
+  ]);
+  if (profile.error || strategies.error) throw new Error("No se pudo cargar el perfil público.");
+  if (!profile.data) return null;
+  return { ...profile.data, tier: null, strategies_count: strategies.count ?? 0, badges: [], qp_balance: Number(profile.data.total_qp_earned ?? 0) };
+
 }
 
 export type { Subscription } from "./tournaments";

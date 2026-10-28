@@ -32,6 +32,8 @@ export function CommandPalette() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
+        setQuery("");
+        setActive(0);
         setOpen((o) => !o);
       } else if (e.key === "Escape") {
         setOpen(false);
@@ -43,8 +45,6 @@ export function CommandPalette() {
 
   useEffect(() => {
     if (open) {
-      setQuery("");
-      setActive(0);
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [open ]);
@@ -60,9 +60,6 @@ export function CommandPalette() {
     );
   }, [query]);
 
-  useEffect(() => {
-    setActive(0);
-  }, [query]);
 
   function go(href: string) {
     setOpen(false);
@@ -86,7 +83,7 @@ export function CommandPalette() {
         <input
           ref={inputRef}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => { setQuery(e.target.value); setActive(0); }}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               e.preventDefault();

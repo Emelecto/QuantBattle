@@ -1,5 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
+import { notifyStorageChange, useStorageValue } from "@/hooks/useStorageValue";
+
 // Progreso local de Academia (multi-curso C1–C6). Clave propia, separada del
 // progreso heredado de la Ruta Aprendiz. La sincronización con Supabase
 // (completed_lessons) se intenta en el panel del quiz; si la columna aún
@@ -11,6 +14,19 @@ export interface AcademiaProgressState {
 }
 
 const STORAGE_KEY = "quantlab.academia.v1";
+
+export function useAcademiaProgress(): AcademiaProgressState {
+  const raw = useStorageValue(STORAGE_KEY);
+  return useMemo(() => {
+    try {
+      const parsed = JSON.parse(raw || "{}") as Partial<AcademiaProgressState>;
+      return {
+        completed: Array.isArray(parsed.completed) ? parsed.completed.filter((id): id is string => typeof id === "string") : [],
+        perfect: Array.isArray(parsed.perfect) ? parsed.perfect.filter((id): id is string => typeof id === "string") : [],
+      };
+    } catch { return { completed: [], perfect: [] }; }
+  }, [raw]);
+}
 
 export function loadAcademiaProgress(): AcademiaProgressState {
   if (typeof window === "undefined") return { completed: [], perfect: [] };
@@ -30,6 +46,7 @@ export function loadAcademiaProgress(): AcademiaProgressState {
 function saveAcademiaProgress(state: AcademiaProgressState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    notifyStorageChange(STORAGE_KEY);
   } catch {
     /* ignore quota */
   }

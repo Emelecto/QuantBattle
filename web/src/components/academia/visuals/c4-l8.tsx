@@ -13,13 +13,12 @@ export default function C4L8Visual() {
   const [activado, setActivado] = useState(true);
 
   const sim = useMemo(() => {
-    let detenidas = 0; let salvado = 0;
     const filas = C4_DIARIO.map((d) => {
       const dispara = activado && d.pnl <= -umbral;
-      if (dispara) detenidas += 1;
-      if (d.kill) salvado += 1;
       return { ...d, dispara };
     });
+    const detenidas = filas.filter((d) => d.dispara).length;
+    const salvado = filas.filter((d) => d.kill).length;
     const pnlSinKS = C4_DIARIO.reduce((a, d) => a + d.pnl, 0);
     return { filas, detenidas, salvado, pnlSinKS };
   }, [umbral, activado]);

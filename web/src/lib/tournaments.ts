@@ -347,7 +347,7 @@ export async function call<T>(
     // esto es imposible saber cuál falló. Leer también `detail` porque
     // FastAPI serializa HTTPException como {detail}, no como {error}.
     const detail =
-      (json as any).error || (json as any).detail || `HTTP ${res.status}`;
+      (json as Record<string, unknown>).error || (json as Record<string, unknown>).detail || `HTTP ${res.status}`;
     const message = `${path}: ${detail}`;
     console.error(`[tournaments] ${message}`, { status: res.status, body: json });
     const err = new Error(message) as Error & { code?: string };
@@ -457,7 +457,7 @@ export async function getGlobalLeaderboard(
       .limit(limit);
     if (error) throw new Error("No se pudo cargar el ranking. Vuelve a intentarlo.");
     if (!data) return [];
-    return data.map((p: any, i: number) => ({
+    return data.map((p, i) => ({
       rank: i + 1,
       user_id: p.id,
       username: p.username ?? "trader",
@@ -466,7 +466,7 @@ export async function getGlobalLeaderboard(
       qp_earned: Number(p.total_qp_earned ?? 0),
       tournaments_won: Number(p.tournaments_won ?? 0),
       sharpe_best: undefined,
-      tier: p.tier ?? "bronze",
+      tier: undefined,
     }));
   }
 
@@ -480,7 +480,7 @@ export async function getGlobalLeaderboard(
       .limit(limit);
     if (error) throw new Error("No se pudo cargar el ranking. Vuelve a intentarlo.");
     if (!data) return [];
-    return data.map((p: any, i: number) => ({
+    return data.map((p, i) => ({
       rank: i + 1,
       user_id: p.id,
       username: p.username ?? "trader",
@@ -489,7 +489,7 @@ export async function getGlobalLeaderboard(
       qp_earned: Number(p.total_qp_earned ?? 0),
       tournaments_won: Number(p.tournaments_won ?? 0),
       sharpe_best: undefined,
-      tier: p.tier ?? "bronze",
+      tier: undefined,
     }));
   }
 
@@ -504,7 +504,7 @@ export async function getGlobalLeaderboard(
   if (!data) return [];
 
   const grouped = new Map<string, PublicLeaderboardEntry>();
-  for (const p of data as any[]) {
+  for (const p of data) {
     const c = p.country ?? "ZZ";
     const existing = grouped.get(c);
     if (existing) {
@@ -520,7 +520,7 @@ export async function getGlobalLeaderboard(
         qp_earned: Number(p.total_qp_earned ?? 0),
         tournaments_won: Number(p.tournaments_won ?? 0),
         sharpe_best: undefined,
-        tier: p.tier ?? "bronze",
+        tier: undefined,
       });
     }
   }
@@ -543,7 +543,7 @@ export async function getGlobalLeaderboard(
  * TODAS las estrategias (undefined >= 0 es false), así que lo recién
  * publicado nunca se veía.
  */
-function normalizeMarketplaceRow(raw: any): MarketplaceStrategy {
+function normalizeMarketplaceRow(raw: Partial<MarketplaceStrategy>): MarketplaceStrategy {
   const profile = raw?.profiles ?? {};
   const metrics = raw?.backtest_metrics ?? {};
   const priceWeek = Number(raw?.price_qp_week ?? raw?.price_qp ?? 0);
@@ -579,7 +579,7 @@ export async function getMarketplaceStrategies(
   const q = new URLSearchParams();
   if (filters?.asset_type) q.set("asset_type", filters.asset_type);
   if (filters?.symbol) q.set("symbol", filters.symbol);
-  const rows = await call<any[]>(`/marketplace?${q.toString()}`);
+  const rows = await call<Partial<MarketplaceStrategy>[]>(`/marketplace?${q.toString()}`);
   return (Array.isArray(rows) ? rows : []).map(normalizeMarketplaceRow);
 }
 
@@ -625,14 +625,24 @@ export async function getMySubscriptions(): Promise<Subscription[]> {
   return call<Subscription[]>(`/marketplace/my-subscriptions`);
 }
 
-export async function getProfileTournamentHistory(
-  userId: string,
-): Promise<any[]> {
+export interface ProfileTournamentHistory {
+  id: string;
+  name: string;
+  placed: number | null;
+  qp_prize: number;
+  joined_at: string;
+}
+
+export async function getProfileTournamentHistory(userId: string): Promise<ProfileTournamentHistory[]> {
   const supabase = createBrowserSupabaseClient();
-  const { data } = await supabase
-    .from("tournament_participants")
-    .select("*, tournaments(*)")
+  const { data, error } = await supabase
+    .from("submissions")
+    .select("id, rank, qp_earned, submitted_at, tournaments(name)")
     .eq("user_id", userId)
-    .order("joined_at", { ascending: false });
-  return data || [];
+    .order("submitted_at", { ascending: false });
+  if (error) throw new Error("No se pudo cargar el historial de torneos.");
+  return (data ?? []).map((row) => {
+    const tournament = Array.isArray(row.tournaments) ? row.tournaments[0] : row.tournaments;
+    return { id: row.id, name: tournament?.name ?? "Torneo", placed: row.rank, qp_prize: Number(row.qp_earned ?? 0), joined_at: row.submitted_at };
+  });
 }

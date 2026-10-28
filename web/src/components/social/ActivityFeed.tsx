@@ -78,8 +78,6 @@ export function ActivityFeed() {
 
   useEffect(() => {
     let active = true;
-    setEvents(null);
-    setError(null);
     (async () => {
       const list =
         tab === "following" ? await getActivityFeed(30) : await getGlobalActivity(30);
@@ -117,7 +115,7 @@ export function ActivityFeed() {
               key={t.key}
               role="tab"
               aria-selected={tab === t.key}
-              onClick={() => setTab(t.key)}
+              onClick={() => { if (t.key !== tab) { setEvents(null); setError(null); setTab(t.key); } }}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 tab === t.key
                   ? "bg-accent/15 text-accent"

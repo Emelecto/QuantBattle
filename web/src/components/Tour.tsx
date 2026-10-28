@@ -1,6 +1,7 @@
 "use client";
+import { useHydrated } from "@/hooks/useHydrated";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const STORAGE_KEY = "ql_tour_done";
 
@@ -30,16 +31,10 @@ const STEPS: Step[] = [
  * Respeta prefers-reduced-motion vía la regla global de globals.css.
  */
 export function Tour() {
-  const [open, setOpen] = useState(false);
+  const hydrated = useHydrated();
+  const [closed, setClosed] = useState(false);
+  const open = hydrated && !closed && (() => { try { return !localStorage.getItem(STORAGE_KEY); } catch { return false; } })();
   const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) setOpen(true);
-    } catch {
-      /* localStorage no disponible: no mostramos el tour */
-    }
-  }, []);
 
   function finish(neverShow: boolean) {
     if (neverShow) {
@@ -49,7 +44,7 @@ export function Tour() {
         /* sin persistencia: simplemente cerramos */
       }
     }
-    setOpen(false);
+    setClosed(true);
   }
 
   if (!open) return null;

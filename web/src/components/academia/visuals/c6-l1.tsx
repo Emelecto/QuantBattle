@@ -4,13 +4,13 @@
  * C6-L1 · Submission por eras — validador CSV id,prediction.
  * Datos reales: muestra + resumen de c6_l1.csv (60 filas, 12 eras x 5 activos).
  */
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CountUp, Reveal } from "./charts";
 import { C6_L1_MUESTRA, C6_L1_RESUMEN } from "./lesson-data";
 
 export default function C6L1Visual() {
   const [texto, setTexto] = useState("id,prediction\nactivo_001,0.61\nactivo_002,0.40\nactivo_003,0.16");
-  const veredicto = useMemo(() => {
+  const veredicto = (() => {
     const lineas = texto.trim().split(/\n+/);
     if (lineas.length < 2) return { ok: false, msg: "Pega un CSV con cabecera id,prediction y al menos 1 fila." };
     const cab = lineas[0].trim().toLowerCase();
@@ -22,7 +22,7 @@ export default function C6L1Visual() {
       if (!Number.isFinite(v)) return { ok: false, msg: `Fila ${i}: prediction no numérico ("${partes[1]}").` };
     }
     return { ok: true, msg: `Válido: ${lineas.length - 1} predicciones, 0 errores. Formato listo para enviar.` };
-  }, [texto]);
+  })();
 
   return (
     <div className="academia-viz">

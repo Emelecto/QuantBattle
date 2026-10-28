@@ -1,24 +1,25 @@
 -- Run against the configured database after 0031. Everything is rolled back:
 -- this creates no visible tournament, upload, user, or retained test record.
--- Requires the existing confirmed technical pilot account.
+-- Creates its own technical identity in the rollback transaction.
 begin;
 do $$
 declare week_id uuid := gen_random_uuid();
 declare round_id uuid := gen_random_uuid();
 declare submission_id uuid := gen_random_uuid();
 declare selected_id uuid := gen_random_uuid();
-declare owner_id uuid;
+declare owner_id uuid := gen_random_uuid();
 declare cutoff timestamptz;
 declare rejected boolean := false;
 begin
-  select id into strict owner_id from auth.users where email='returns-technical@quantlab.example';
+  insert into auth.users(id,aud,role,email) values (owner_id,'authenticated','authenticated','deadline-' || owner_id::text || '@example.invalid');
+  insert into public.profiles(id,username) values (owner_id,'deadline-' || owner_id::text) on conflict(id) do nothing;
   perform set_config('request.jwt.claim.role', 'service_role', true);
   perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
   insert into public.ml_return_weeks
     (id,week_start,name,release_at,asset_count,universe_path,universe_hash)
     values (week_id,'2199-01-07','Transactional rollback deadline test',
       clock_timestamp()+interval '7 days',30,'rollback-only','rollback-only');
-  cutoff := clock_timestamp()+interval '200 milliseconds';
+  cutoff := clock_timestamp()+interval '1 second';
   insert into public.ml_return_rounds
     (id,week_id,ordinal,observation_day,submission_day,target_day,
      opens_at,closes_at,target_start,target_end,status,version)
@@ -32,7 +33,7 @@ begin
     (id,round_id,user_id,file_path,file_sha256,dataset_version,row_count)
     values (submission_id,round_id,owner_id,'rollback-only','rollback-only','rollback-only',30);
   -- Models a transaction that began before cutoff and resumes after a lock wait.
-  perform pg_sleep(0.4);
+  perform pg_sleep(1.2);
   if not (now() < cutoff and clock_timestamp() >= cutoff) then
     raise exception 'Deadline fixture did not straddle the transaction clock';
   end if;

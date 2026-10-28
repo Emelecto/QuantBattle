@@ -77,7 +77,7 @@ export function SubmitStrategyModal({
 
   // Espejo del id seleccionado: el auto-select inicial no debe re-disparar la carga.
   const selectedIdRef = useRef(selectedId);
-  selectedIdRef.current = selectedId;
+  useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
 
   const applyStrategy = useCallback((s: MyStrategy) => {
     setCode(s.code ?? "");

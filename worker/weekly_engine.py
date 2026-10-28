@@ -269,19 +269,21 @@ def publish_week(sb, week: dict, rounds: list[dict], now: datetime) -> bool:
     return True
 
 
-def run_tick(sb, now: datetime | None = None) -> dict:
+def run_tick(sb, now: datetime | None = None, *, allow_create: bool = True) -> dict:
     now = now or datetime.now(timezone.utc)
     local = now.astimezone(p.TZ)
     monday = local.date() - timedelta(days=local.weekday())
     # Never backfill forecasts whose target day already started.
-    if local.weekday() < 4 and local >= p.local_midnight(local.date()) + timedelta(minutes=30):
+    if allow_create and local.weekday() < 4 and local >= p.local_midnight(local.date()) + timedelta(minutes=30):
         ensure_week(sb, monday, now)
     counts = {'created_rounds': 0, 'settled_rounds': 0, 'published_weeks': 0}
     failures = []
     for week in all_rows(sb, 'ml_return_weeks', status='open'):
         for row in all_rows(sb, 'ml_return_rounds', week_id=week['id']):
             try:
-                counts['created_rounds'] += int(build_round(sb, week, row, now))
+                # Pausing creation still settles existing forecasts and records missed deadlines.
+                if allow_create or now >= parse_time(row['closes_at']):
+                    counts['created_rounds'] += int(build_round(sb, week, row, now))
                 # Refresh after a possible build, so the next tick can settle safely.
                 fresh = sb.table('ml_return_rounds').select('*').eq('id', row['id']).execute().data[0]
                 counts['settled_rounds'] += int(settle_round(sb, week, fresh, now))

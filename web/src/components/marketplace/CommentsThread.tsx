@@ -173,6 +173,10 @@ function CommentRow({
 }
 
 export default function CommentsThread({ strategyId }: { strategyId: string }) {
+  return <CommentsContent key={strategyId} strategyId={strategyId} />;
+}
+
+function CommentsContent({ strategyId }: { strategyId: string }) {
   const { user, loading: authLoading } = useAuth();
 
   // null = cargando la lista; [] = vacía (estado honesto)
@@ -184,21 +188,11 @@ export default function CommentsThread({ strategyId }: { strategyId: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoadError(null);
-    try {
-      const list = await listStrategyComments(strategyId);
-      setComments(list);
-    } catch (e) {
-      setComments([]);
-      setLoadError(
-        e instanceof Error ? e.message : "No se pudieron cargar los comentarios.",
-      );
-    }
-  }, [strategyId]);
+  const load = useCallback(() => listStrategyComments(strategyId)
+    .then((list) => { setComments(list); setLoadError(null); })
+    .catch((e: unknown) => { setComments([]); setLoadError(e instanceof Error ? e.message : "No se pudieron cargar los comentarios."); }), [strategyId]);
 
   useEffect(() => {
-    setComments(null);
     load();
   }, [load]);
 

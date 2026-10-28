@@ -82,11 +82,11 @@ export function QuantChart({
 
   // Drawdown acumulado desde el máximo.
   const drawdown = useMemo(() => {
-    let peak = -Infinity;
-    return series.strat.map((p) => {
-      peak = Math.max(peak, p.value);
-      return { time: p.time, value: peak > 0 ? (p.value / peak - 1) : 0 };
-    });
+    return series.strat.reduce<{ time: UTCTimestamp; value: number; peak: number }[]>((result, p) => {
+      const peak = Math.max(result.at(-1)?.peak ?? -Infinity, p.value);
+      result.push({ time: p.time, value: peak > 0 ? (p.value / peak - 1) : 0, peak });
+      return result;
+    }, []);
   }, [series]);
 
   useEffect(() => {
@@ -158,7 +158,7 @@ export function QuantChart({
       }
       const d = new Date((param.time as number) * 1000);
       setTooltip({
-        x: param.point.x,
+        x: Math.min(param.point.x + 12, (containerRef.current?.clientWidth ?? 400) - 170),
         y: param.point.y,
         date: d.toLocaleDateString("es-CO", { year: "numeric", month: "short", day: "numeric" }),
         strategy: stratVal,
@@ -226,7 +226,7 @@ export function QuantChart({
         <div
           className="pointer-events-none absolute z-20 rounded-lg border border-line bg-surface-solid/95 px-3 py-2 font-mono text-[11px] leading-relaxed shadow-lg"
           style={{
-            left: Math.min(tooltip.x + 12, (containerRef.current?.clientWidth ?? 400) - 170),
+            left: tooltip.x,
             top: Math.max(tooltip.y - 60, 8),
           }}
         >

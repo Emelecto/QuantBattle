@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { loadAcademiaProgress } from "./progress-store";
+import { useAcademiaProgress } from "./progress-store";
+import { LESSONS, lessonQP } from "@/lib/academia/catalog";
 import "./academia-progress.css";
 
 // Nodo del journey del hub (datos estáticos desde el servidor; el estado
@@ -21,23 +21,17 @@ export interface AcademiaJourneyLesson {
 export function AcademiaProgress({
   totalLessons = 7,
   journey,
+  lessonIds,
 }: {
   totalLessons?: number;
   journey?: AcademiaJourneyLesson[];
+  lessonIds?: string[];
 }) {
-  const [done, setDone] = useState(0);
-  const [perfect, setPerfect] = useState(0);
-  const [completedIds, setCompletedIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      const saved = loadAcademiaProgress();
-      setDone(saved.completed.length);
-      setPerfect(saved.perfect.length);
-      setCompletedIds(saved.completed);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, []);
+  const saved = useAcademiaProgress();
+  const allowed = new Set(lessonIds ?? journey?.map((lesson) => lesson.id) ?? LESSONS.filter((lesson) => !lesson.draft).map((lesson) => lesson.id));
+  const completedIds = [...new Set(saved.completed.filter((id) => allowed.has(id)))];
+  const done = completedIds.length;
+  const perfect = [...new Set(saved.perfect.filter((id) => allowed.has(id)))].reduce((sum, id) => sum + lessonQP(id), 0);
 
   const pct = totalLessons > 0 ? Math.round((done / totalLessons) * 100) : 0;
   const currentId = journey?.find((l) => !completedIds.includes(l.id))?.id;

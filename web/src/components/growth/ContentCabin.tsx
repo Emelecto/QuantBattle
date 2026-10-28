@@ -1,4 +1,5 @@
 "use client";
+import { useHydrated } from "@/hooks/useHydrated";
 
 import { useEffect, useMemo, useState } from "react";
 import { buttonClasses } from "@/components/ui/Button";
@@ -35,7 +36,12 @@ function uid(): string {
 const norm = (s: string) =>
   s.trim().toLowerCase().replace(/\s+/g, " ");
 
-export function ContentCabin({
+export function ContentCabin(props: ContentCabinProps) {
+  const hydrated = useHydrated();
+  return hydrated ? <ContentCabinState key={props.storageKey} {...props} /> : null;
+}
+
+function ContentCabinState({
   network,
   tagline,
   storageKey,
@@ -44,38 +50,23 @@ export function ContentCabin({
   seeds,
   hooks,
 }: ContentCabinProps) {
-  const [ideas, setIdeas] = useState<Idea[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [ideas, setIdeas] = useState<Idea[]>(() => {
+    try { const saved = JSON.parse(localStorage.getItem(storageKey) || "[]"); return Array.isArray(saved) ? saved : []; } catch { return []; }
+  });
   const [text, setText] = useState("");
   const [pilar, setPilar] = useState(pilares[0]);
   const [formato, setFormato] = useState(formatos[0]);
   const [hookIdx, setHookIdx] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // Carga inicial desde localStorage (solo cliente).
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Idea[];
-        if (Array.isArray(parsed)) setIdeas(parsed);
-      }
-    } catch {
-      /* arranca vacío */
-    } finally {
-      setLoaded(true);
-    }
-  }, [storageKey]);
-
   // Persiste cada cambio (tras la carga inicial).
   useEffect(() => {
-    if (!loaded) return;
     try {
       localStorage.setItem(storageKey, JSON.stringify(ideas));
     } catch {
       /* cuota llena o storage bloqueado: no rompe la página */
     }
-  }, [ideas, loaded, storageKey]);
+  }, [ideas, storageKey]);
 
   const byPilar = useMemo(() => {
     const m = new Map<string, number>();

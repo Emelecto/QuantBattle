@@ -4,6 +4,13 @@ on:
     # 05:30 UTC = 00:30 Colombia. Other ticks recover delays and settle data.
     - cron: '0,30 * * * *'
   workflow_dispatch:
+    inputs:
+      check_only:
+        description: 'Solo comprobar configuración y esquema, sin cambios'
+        type: boolean
+        default: false
+permissions:
+  contents: read
 concurrency:
   group: daily-return-tournament-referee
   cancel-in-progress: false
@@ -28,4 +35,11 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           DATASET_SALT: ${{ secrets.DATASET_SALT }}
           ML_DAILY_TOURNAMENTS_ENABLED: ${{ vars.ML_DAILY_TOURNAMENTS_ENABLED }}
-        run: python run_return_tournaments.py
+          ML_DAILY_TOURNAMENTS_CREATE_ENABLED: ${{ vars.ML_DAILY_TOURNAMENTS_CREATE_ENABLED || 'true' }}
+          CHECK_ONLY: ${{ inputs.check_only || false }}
+        run: |
+          if [ "$CHECK_ONLY" = "true" ]; then
+            python run_return_tournaments.py --check
+          else
+            python run_return_tournaments.py
+          fi

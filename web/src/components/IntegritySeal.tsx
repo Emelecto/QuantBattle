@@ -28,7 +28,7 @@ export function IntegritySeal({
   method,
   size = "sm",
 }: IntegritySealProps) {
-  const m = (backtest_metrics ?? {}) as Record<string, any>;
+  const m = (backtest_metrics ?? {}) as Record<string, unknown>;
 
   // Replicable: prioriza la columna nueva, sino el flag dentro de backtest_metrics.
   const isReplicable =

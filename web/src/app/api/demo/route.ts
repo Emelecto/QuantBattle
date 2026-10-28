@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
       result,
       data_source: "simulated",  // explícitamente rotulado
     });
-  } catch (e: any) {
-    return errorResponse(`Error en el backtest: ${e.message}`, 500);
+  } catch (e: unknown) {
+    return errorResponse(`Error en el backtest: ${e instanceof Error ? e.message : "Fallo inesperado"}`, 500);
   }
 }
 

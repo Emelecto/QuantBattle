@@ -1,0 +1,27 @@
+name: Problema en el piloto
+description: Reporta un problema de QuantLab sin compartir credenciales ni datos privados.
+title: "[Piloto] "
+body:
+  - type: markdown
+    attributes:
+      value: "Este reporte será público. No incluyas contraseñas, claves, predicciones privadas ni datos personales."
+  - type: input
+    id: route
+    attributes:
+      label: Sección y momento del problema
+      description: Ruta de la página, fecha y hora aproximadas con zona horaria.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Qué hiciste y qué ocurrió
+      description: Incluye los pasos y el mensaje de error visible, si existe.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Qué esperabas que ocurriera
+    validations:
+      required: true

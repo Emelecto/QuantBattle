@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchMarketSeries,
   sma,
@@ -46,36 +46,23 @@ export function LiveSignals({
   timeframe,
   code,
 }: LiveSignalsProps) {
-  const [closes, setCloses] = useState<number[]>([]);
-  const [signals, setSignals] = useState<ReturnType<typeof crossoverSignals>>([]);
-  const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
-  const reqId = useRef(0);
+  const requestKey = JSON.stringify([asset_type, symbol, timeframe, code]);
+  const [result, setResult] = useState<{ key: string; closes: number[]; signals: ReturnType<typeof crossoverSignals>; status: "ok" | "error" } | null>(null);
+  const current = result?.key === requestKey ? result : null;
+  const closes = current?.closes ?? [];
+  const signals = current?.signals ?? [];
+  const status = current?.status ?? "loading";
 
   useEffect(() => {
-    const id = ++reqId.current;
-    setStatus("loading");
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const series = await fetchMarketSeries(asset_type, symbol, timeframe);
-        if (cancelled || id !== reqId.current) return;
-        const { fast, slow } = parseFastSlow(code);
-        const f = sma(series.closes, fast);
-        const s = sma(series.closes, slow);
-        const sig = crossoverSignals(f, s, series.closes);
-        setCloses(series.closes);
-        setSignals(sig);
-        setStatus("ok");
-      } catch {
-        if (!cancelled && id === reqId.current) setStatus("error");
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [asset_type, symbol, timeframe, code]);
+    let active = true;
+    fetchMarketSeries(asset_type, symbol, timeframe).then((series) => {
+      if (!active) return;
+      const { fast, slow } = parseFastSlow(code);
+      const signals = crossoverSignals(sma(series.closes, fast), sma(series.closes, slow), series.closes);
+      setResult({ key: requestKey, closes: series.closes, signals, status: "ok" });
+    }).catch(() => { if (active) setResult({ key: requestKey, closes: [], signals: [], status: "error" }); });
+    return () => { active = false; };
+  }, [asset_type, symbol, timeframe, code, requestKey]);
 
   const pricePath =
     closes.length > 1 ? buildPath(closes, Math.min(...closes), Math.max(...closes)) : "";

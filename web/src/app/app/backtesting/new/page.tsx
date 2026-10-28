@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { StrategyEditor, DEFAULT_STRATEGY_CODE } from "@/components/Editor";
@@ -31,16 +31,21 @@ export const dynamic = "force-dynamic";
 export default function NewStrategyPage() {
   return (
     <Suspense fallback={<div className="p-6 text-muted">Cargando editor…</div>}>
-      <NewStrategyPageInner />
+      <NewStrategyPageRoute />
     </Suspense>
   );
 }
 
-function NewStrategyPageInner() {
+function NewStrategyPageRoute() {
+  const params = useSearchParams();
+  return <NewStrategyPageInner key={params.toString()} demo={!!params.get("demo")} clone={params.get("clone")} />;
+}
+
+function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | null }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [config, setConfig] = useState<StrategyConfig>({
-    code: DEFAULT_STRATEGY_CODE,
+  const [config, setConfig] = useState<StrategyConfig>(() => ({
+    code: clone || DEFAULT_STRATEGY_CODE,
     asset_type: "crypto",
     symbol: "BTCUSDT",
     timeframe: "1d",
@@ -49,19 +54,19 @@ function NewStrategyPageInner() {
     slippage: 0.0005,
     folds: 3,
     split: 70,
-    start: "",
-    end: "",
-  });
+    start: demo ? new Date(Date.now() - 365 * 86400 * 1000).toISOString().slice(0, 10) : "",
+    end: demo ? new Date().toISOString().slice(0, 10) : "",
+  }));
   const [isPublic, setIsPublic] = useState(false);
   const [running, setRunning] = useState(false);
   const [wakeMsg, setWakeMsg] = useState<string | null>(null);
   // Modo demo (landing → ?demo=1): config precargada lista para correr.
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(demo);
   const [error, setError] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
-  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [importMsg, setImportMsg] = useState<string | null>(demo ? "Modo demo: estrategia SMA clásica con datos reales de BTC. Solo pulsa Ejecutar." : null);
 
   // Compartir / torneo
   const [publishing, setPublishing] = useState(false);
@@ -82,39 +87,6 @@ function NewStrategyPageInner() {
       setTournaments([]);
     }
   }
-
-  // Demo guiada (?demo=1): SMA crossover con config completa lista para correr.
-  // También soporta ?clone=<código> para precargar solo el código.
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    const demo = searchParams.get("demo");
-    const clone = searchParams.get("clone");
-    if (!demo && !clone) return;
-
-    const iso = (d: Date) => d.toISOString().slice(0, 10);
-    const today = new Date();
-    const yearAgo = new Date(today.getTime() - 365 * 86400 * 1000);
-
-    setConfig((c) => ({
-      ...c,
-      ...(clone ? { code: clone } : {}),
-      ...(demo
-        ? {
-            asset_type: "crypto" as const,
-            symbol: "BTCUSDT",
-            timeframe: "1d" as const,
-            start: iso(yearAgo),
-            end: iso(today),
-          }
-        : {}),
-    }));
-    if (demo) {
-      setDemoMode(true);
-      setImportMsg(
-        "Modo demo: estrategia SMA clásica con datos reales de BTC. Solo pulsa Ejecutar.",
-      );
-    }
-  }, [searchParams]);
 
   /** Publica la estrategia actual en el marketplace. */
   async function handlePublish() {

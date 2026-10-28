@@ -24,20 +24,9 @@ export default function BadgesPage() {
   const [available, setAvailable] = useState<Record<string, BadgeDefinition>>({});
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    try {
-      const [b, a] = await Promise.all([
-        call<{ badges?: Badge[] }>("/badges"),
-        call<{ badges?: Record<string, BadgeDefinition> }>("/badges/available"),
-      ]);
-      setBadges(b?.badges || []);
-      setAvailable(a?.badges || {});
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const load = useCallback(() => Promise.all([call<{ badges?: Badge[] }>("/badges"), call<{ badges?: Record<string, BadgeDefinition> }>("/badges/available")])
+    .then(([b, a]) => { setBadges(b?.badges || []); setAvailable(a?.badges || {}); })
+    .catch((e: unknown) => { console.error(e); }).finally(() => setLoading(false)), []);
 
   useEffect(() => {
     load();

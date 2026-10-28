@@ -161,7 +161,7 @@ export default function RankingsPage() {
   const { user } = useAuth();
   const [mode, setMode] = useState<RankMode>("global");
   const [tab, setTab] = useState<LeaderboardTab>("qp");
-  const [countrySel, setCountrySel] = useState<string>("");
+  const [selectedCountry, setCountrySel] = useState<string>("");
   const [rows, setRows] = useState<PublicLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -169,12 +169,11 @@ export default function RankingsPage() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
     // En modo país traemos la lista individual para filtrar por profiles.country en cliente
     getGlobalLeaderboard(mode === "country" ? "qp" : tab, 100)
       .then((data) => {
         if (!active) return;
-        setRows(data as any);
+        setRows(data);
         setError(null);
       })
       .catch((e) => {
@@ -201,16 +200,7 @@ export default function RankingsPage() {
   );
   const withoutCountry = rows.filter((r) => !r.country).length;
 
-  // Auto-seleccionar el primer país al entrar al modo o cuando cambian los datos
-  useEffect(() => {
-    if (
-      mode === "country" &&
-      countries.length > 0 &&
-      !countries.includes(countrySel)
-    ) {
-      setCountrySel(countries[0]);
-    }
-  }, [mode, countries, countrySel]);
+  const countrySel = countries.includes(selectedCountry) ? selectedCountry : (countries[0] ?? "");
 
   // Modo país: solo usuarios del país elegido, re-ranqueados desde 1
   let displayRows = rows;
@@ -247,7 +237,7 @@ export default function RankingsPage() {
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => setMode(t.id)}
+                  onClick={() => { if (t.id !== mode) { setLoading(true); setMode(t.id); } }}
                   className={`h-8 rounded-md px-3 text-[13px] font-semibold transition-colors active:scale-[0.96] ${
                     mode === t.id
                       ? "bg-accent/15 text-accent border border-accent/30"
@@ -265,7 +255,7 @@ export default function RankingsPage() {
                   <button
                     key={t.id}
                     type="button"
-                    onClick={() => setTab(t.id)}
+                    onClick={() => { if (t.id !== tab) { setLoading(true); setTab(t.id); } }}
                     className={`h-8 rounded-md px-3 text-[13px] font-medium transition-colors active:scale-[0.96] ${
                       tab === t.id
                         ? "bg-accent/15 text-accent border border-accent/30"
@@ -319,7 +309,7 @@ export default function RankingsPage() {
           ) : error ? (
             <div className="rounded-lg border border-short/40 bg-short/[0.08] px-4 py-3 text-sm text-short animate-fadeIn">
               {error}
-              <button type="button" className="ml-3 underline" onClick={()=>setRetry(value=>value+1)}>Reintentar ranking</button>
+              <button type="button" className="ml-3 underline" onClick={()=>{setLoading(true);setRetry(value=>value+1);}}>Reintentar ranking</button>
             </div>
           ) : displayRows.length === 0 ? (
             <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center animate-fadeIn">

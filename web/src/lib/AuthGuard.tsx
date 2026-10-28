@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/useAuth";
 
@@ -28,5 +28,5 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       );
     }
 
-  return <>{children}</>;
+  return <Fragment key={user.id}>{children}</Fragment>;
 }

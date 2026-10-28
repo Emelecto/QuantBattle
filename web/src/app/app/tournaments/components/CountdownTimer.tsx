@@ -1,9 +1,12 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useSyncExternalStore} from "react";
 import {cn} from "@/lib/cn";
+const subscribeClock = (changed: () => void) => { const timer = setInterval(changed, 60000); return () => clearInterval(timer); };
+const clockSnapshot = () => Math.floor(Date.now() / 60000) * 60000;
+const serverClock = () => null;
+
 export function CountdownTimer({deadline,className}:{deadline:string;className?:string}) {
- const [now,setNow]=useState<number|null>(null);
- useEffect(()=>{setNow(Date.now());const timer=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(timer);},[deadline]);
+ const now = useSyncExternalStore(subscribeClock, clockSnapshot, serverClock);
  const end=Date.parse(deadline);
  if(!Number.isFinite(end))return <span className="text-sm text-muted">Cierre por anunciar</span>;
  const remaining=now===null?null:Math.max(0,Math.ceil((end-now)/60000));

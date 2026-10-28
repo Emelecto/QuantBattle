@@ -2,11 +2,12 @@ name: backend-ci
 
 on:
   push:
-    paths:
-      - "worker/**"
+    branches: [main]
   pull_request:
-    paths:
-      - "worker/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -20,4 +21,9 @@ jobs:
         run: python -m pip install -r worker/requirements.txt -r worker/requirements-research.txt
       - name: Run worker tests
         working-directory: worker
-        run: TESTING=1 python -m pytest tests/ -q -x -m "not external"
+        run: TESTING=1 python -m pytest tests/ -q -m "not external" --junitxml=test-results/worker.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: worker-evidence-${{ github.sha }}
+          path: worker/test-results

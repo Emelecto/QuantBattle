@@ -143,6 +143,7 @@ export function totalQP(curso?: string): number {
  * PERFECT_BONUS_QP todo-perfecto, examen C6), nunca requisito de acceso.
  */
 export function gateCheck(_userQP: number, _curso?: string): { unlocked: boolean; missing: number } {
+  void _userQP; void _curso;
   return { unlocked: true, missing: 0 };
 }
 

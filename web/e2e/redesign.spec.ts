@@ -7,7 +7,7 @@ test("la portada clara conserva navegación y no desborda", async ({ page }) => 
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /Del dataset a una predicción verificable/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Crea modelos de machine learning.*aplicados en finanzas/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Explorar torneos" }).first()).toHaveAttribute("href", "/app/tournaments");
   await expect(page.getByRole("link", { name: "Leer metodología y resultados" })).toHaveAttribute("href", "/docs#evaluacion");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

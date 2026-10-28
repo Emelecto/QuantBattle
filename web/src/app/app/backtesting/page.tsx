@@ -114,12 +114,9 @@ function StrategiesContent() {
   useEffect(() => {
     if (!user) return;
     let active = true;
-    setRuns(getRuns(user.id));
-    setSyncError(false);
-    setLoading(true);
     syncRunsFromSupabase(user.id)
-      .then((saved) => { if (active) setRuns(saved); })
-      .catch(() => { if (active) setSyncError(true); })
+      .then((saved) => { if (active) { setRuns(saved); setSyncError(false); } })
+      .catch(() => { if (active) { setRuns(getRuns(user.id)); setSyncError(true); } })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [user, retry]);
@@ -145,7 +142,7 @@ function StrategiesContent() {
           </Link>
         </div>
 
-        {syncError && <div role="alert" className="mt-6 text-sm text-short"><p>No se pudieron sincronizar tus estrategias. Se conservan las copias locales de esta cuenta.</p><button className="ql-btn-secondary mt-3" onClick={() => setRetry((value) => value + 1)}>Reintentar sincronización</button></div>}
+        {syncError && <div role="alert" className="mt-6 text-sm text-short"><p>No se pudieron sincronizar tus estrategias. Se conservan las copias locales de esta cuenta.</p><button className="ql-btn-secondary mt-3" onClick={() => { setLoading(true); setRetry((value) => value + 1); }}>Reintentar sincronización</button></div>}
         {loading ? (
           <div className="mt-10 space-y-3">
             {[1, 2, 3].map((i) => (

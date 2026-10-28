@@ -74,22 +74,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      const [s, a, act] = await Promise.all([
-        getAdminStats(),
-        getAdminAlerts(),
-        getAdminActivity(),
-      ]);
-      setStats(s);
-      setAlerts(a);
-      setActivity(act);
-    } catch (e: any) {
-      setError(e.message || "Error cargando datos");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const load = useCallback(() => Promise.all([getAdminStats(), getAdminAlerts(), getAdminActivity()])
+    .then(([s, a, act]) => { setStats(s); setAlerts(a); setActivity(act); setError(null); })
+    .catch((e: unknown) => { setError(e instanceof Error ? e.message : "Error cargando datos"); }).finally(() => setLoading(false)), []);
 
   useEffect(() => {
     load();

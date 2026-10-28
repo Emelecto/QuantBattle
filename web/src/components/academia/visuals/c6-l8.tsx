@@ -30,8 +30,7 @@ export default function C6L8Visual() {
   const max = Math.max(...dias.map((_, i) => dias.slice(0, i + 1).reduce((s, d) => s + d.pnl, 100)));
   void max;
   const curva = useMemo(() => {
-    let e = 100;
-    return dias.map((d) => { e *= (100 + d.pnl) / 100; return e; });
+    return dias.reduce<number[]>((values, d) => { values.push((values.at(-1) ?? 100) * (100 + d.pnl) / 100); return values; }, []);
   }, [dias]);
   const cMax = Math.max(...curva), cMin = Math.min(...curva);
   const pts = curva.map((v, i) => `${(i / Math.max(curva.length - 1, 1)) * 100},${34 - ((v - cMin) / Math.max(cMax - cMin, 1e-9)) * 30}`).join(" ");

@@ -39,27 +39,26 @@ export default function StatusPage() {
   const [latency, setLatency] = useState<number | null>(null);
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
 
-  const check = useCallback(async () => {
-    setStatus("checking");
-    setLatency(null);
+  const check = useCallback(() => {
     const start = performance.now();
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 55_000);
-    try {
-      if (!WORKER_URL) throw new Error("WORKER_URL no configurada");
-      const res = await fetch(`${WORKER_URL}/health`, { signal: ctrl.signal, cache: "no-store" });
-      const ms = Math.round(performance.now() - start);
+    const request = WORKER_URL
+      ? fetch(`${WORKER_URL}/health`, { signal: ctrl.signal, cache: "no-store" })
+      : Promise.reject(new Error("API no configurada"));
+    return request.then(async (res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await res.json();
+      const ms = Math.round(performance.now() - start);
       setLatency(ms);
       setStatus(ms > 2000 ? "slow" : "ok");
-      setCheckedAt(new Date().toLocaleTimeString("es-CO", { hour12: false }));
-    } catch {
+    }).catch(() => {
       setStatus("down");
+      setLatency(null);
+    }).finally(() => {
       setCheckedAt(new Date().toLocaleTimeString("es-CO", { hour12: false }));
-    } finally {
       clearTimeout(timer);
-    }
+    });
   }, []);
 
   useEffect(() => {
@@ -132,6 +131,12 @@ export default function StatusPage() {
           vuelve a intentar. La documentación y la evidencia siguen disponibles
           desde la web.
         </p>
+        <section className="mt-8 border-t border-line pt-6" aria-labelledby="pilot-stage">
+          <h2 id="pilot-stage" className="text-lg font-semibold text-ink">Piloto controlado</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted">QuantLab está en evaluación académica. La convocatoria abierta depende de completar la revisión del ciclo semanal real y recoger retroalimentación externa. Los pagos están desactivados.</p>
+          <p className="mt-3 text-sm text-muted">Las rondas de práctica usan datos sintéticos; el torneo de retornos usa datos de mercado. Consulta en cada torneo su estado y fecha de cierre.</p>
+          <a href="https://github.com/Emelecto/QuantLab/issues/new?template=bug_report.yml" className="mt-3 inline-block text-sm text-accent underline">Reportar un problema del piloto</a>
+        </section>
         <Link href="/docs#evaluacion" className="mt-4 inline-block text-sm text-accent underline">Consultar evidencia técnica</Link>
       </section>
     </main>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { loadAcademiaProgress } from "./progress-store";
+import { useAcademiaProgress } from "./progress-store";
 
 // Card grande del hub: nº de curso, título, nivel, nº de lecciones,
 // barra de progreso propia (store local) y CTA de entrada.
@@ -22,12 +21,8 @@ export function AcademiaCourseCard({
   lessonCount: number;
   lessonIds: string[];
 }) {
-  const [done, setDone] = useState(0);
-
-  useEffect(() => {
-    const saved = loadAcademiaProgress();
-    setDone(lessonIds.filter((id) => saved.completed.includes(id)).length);
-  }, [lessonIds]);
+  const saved = useAcademiaProgress();
+  const done = lessonIds.filter((id) => saved.completed.includes(id)).length;
 
   const pct = lessonCount > 0 ? Math.round((done / lessonCount) * 100) : 0;
 

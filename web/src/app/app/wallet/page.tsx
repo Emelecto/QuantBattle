@@ -110,7 +110,7 @@ export default function WalletPage() {
       const json = await res.json();
 
       if (res.ok && json.url) {
-        window.location.href = json.url;
+        window.location.assign(json.url);
         return;
       }
 

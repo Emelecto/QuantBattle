@@ -52,8 +52,13 @@ export default function ApiKeysPage() {
 
   useEffect(() => {
     if (!user) return;
-    load();
-  }, [user, load]);
+    let active = true;
+    call<ApiKeyRow[]>("/account/api-keys")
+      .then((data) => { if (active) { setKeys(data); setError(null); } })
+      .catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "Error al cargar claves"); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [user]);
 
   async function createKey() {
     setCreating(true);

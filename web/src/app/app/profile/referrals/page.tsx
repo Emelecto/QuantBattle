@@ -16,17 +16,9 @@ export default function ReferralsPanel() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      const [c, s] = await Promise.all([getMyReferralCode(), getReferralStats()]);
-      setCode(c);
-      setStats(s);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const load = useCallback(() => Promise.all([getMyReferralCode(), getReferralStats()])
+    .then(([c, s]) => { setCode(c); setStats(s); })
+    .catch((e: unknown) => { console.error(e); }).finally(() => setLoading(false)), []);
 
   useEffect(() => {
     load();

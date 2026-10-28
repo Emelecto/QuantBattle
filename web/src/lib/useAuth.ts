@@ -27,20 +27,33 @@ export function useAuth(): AuthState {
 
   useEffect(() => {
     const client = createBrowserSupabaseClient();
-    setSupabase(client);
+    let active = true;
+    let authChanged = false;
 
     client.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
+      if (!active) return;
+      setSupabase(client);
+      if (!authChanged) setUser(data.user ?? null);
+      setLoading(false);
+    }).catch(() => {
+      if (!active) return;
+      setSupabase(client);
       setLoading(false);
     });
 
     const {
       data: { subscription },
     } = client.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      // A cached initial session is checked by getUser before exposing its account.
+      if (_event === "INITIAL_SESSION") return;
+      authChanged = true;
+      setSupabase(client);
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
   const signOut = useCallback(async () => {

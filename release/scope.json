@@ -1,0 +1,17 @@
+{
+  "stage": "controlled-pilot",
+  "repository": "Emelecto/QuantLab",
+  "site_url": "https://quant-lab-nine.vercel.app",
+  "worker_url": "https://quantlab2.onrender.com",
+  "render_service_id": "srv-da6dervavr4c73es6ir0",
+  "required_workflows": ["web-ci", "backend-ci", "database-ci", "Daily return tournament referee", "operations-monitor"],
+  "journeys": [
+    {"name": "Public site and authentication", "routes": ["/", "/login", "/register", "/status"], "browser": ["web/e2e/auth.spec.ts", "web/e2e/research.spec.ts", "web/e2e/redesign.spec.ts"]},
+    {"name": "Academia", "routes": ["/app/academia", "/app/academia/fundamentos/1"], "browser": ["web/e2e/launch-journeys.spec.ts"], "services": ["scripts/verify_product_staging.py", "supabase/tests/product_privacy.sql"]},
+    {"name": "ML practice and real returns", "routes": ["/app/tournaments", "/app/tournaments/weekly/[id]"], "browser": ["web/e2e/return-tournaments.spec.ts", "web/e2e/prediction-review.spec.ts"], "server": ["worker/tests/test_ml_tournaments.py", "worker/tests/test_weekly_returns.py"], "services": ["supabase/tests/weekly_return_deadline.sql"]},
+    {"name": "ML projects and notebook library", "routes": ["/app/strategies", "/app/marketplace", "/app/admin/notebooks"], "browser": ["web/e2e/ml-learning.spec.ts"], "services": ["scripts/verify_product_staging.py", "supabase/tests/ml_learning_privacy.sql"]},
+    {"name": "Historical backtesting", "routes": ["/app/backtesting", "/app/backtesting/new", "/app/strategies/[id]/results"], "browser": ["web/e2e/launch-journeys.spec.ts"], "server": ["worker/tests/test_engine.py", "worker/tests/test_realistic_robust.py"], "services": ["scripts/verify_product_staging.py", "supabase/tests/product_privacy.sql"]},
+    {"name": "Dashboard and account tools", "routes": ["/app", "/app/profile", "/app/api-keys", "/app/rankings"], "browser": ["web/e2e/dashboard.spec.ts", "web/e2e/redesign.spec.ts"], "server": ["worker/tests/test_api.py", "worker/tests/test_social.py"]}
+  ],
+  "outside_launch": ["Payments and monetary prizes", "External adoption claims", "Portfolio profitability claims", "Verified execution of community notebooks"]
+}

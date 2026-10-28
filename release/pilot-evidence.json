@@ -1,0 +1,6 @@
+{
+  "real_week_id": null,
+  "real_week_review": null,
+  "external_feedback": [],
+  "note": "Populate only with actual released-week review and consented, redacted external feedback references. Technical test accounts do not count as external participants."
+}

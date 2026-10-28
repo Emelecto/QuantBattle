@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { buttonClasses } from "@/components/ui/Button";
 import { inputClasses } from "@/components/ui/Form";
 
@@ -27,12 +27,13 @@ export function StrategyBuilder({
   const [invert, setInvert] = useState(parsed.invert);
 
   // Sincroniza con cambios externos al code (plantillas, IA, bloques).
-  useEffect(() => {
-    const p = parseCode(code);
-    setFast(p.fast);
-    setSlow(p.slow);
-    setInvert(p.invert);
-  }, [code]);
+  const [previousCode, setPreviousCode] = useState(code);
+  if (previousCode !== code) {
+    setPreviousCode(code);
+    setFast(parsed.fast);
+    setSlow(parsed.slow);
+    setInvert(parsed.invert);
+  }
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);

@@ -1,10 +1,11 @@
 // Cliente del motor de backtest (worker QuantLab).
-// El worker corre con CORS abierto (ver NEXT_PUBLIC_WORKER_URL). No hay
-// Supabase en esta capa: el puente de persistencia es localStorage.
+// El worker permite los orígenes configurados y exige una sesión Supabase.
+// La persistencia de resultados se gestiona en runs.ts, con caché por cuenta.
 //
 // CONTRATO: split es ENTERO (porcentaje de train, ej. 70), NO fracción.
 
 import { fetchWithWakeRetry } from "./worker-fetch";
+import { createBrowserSupabaseClient } from "./supabase/client";
 
 export type AssetType = "crypto" | "stock" | "etf";
 export type Timeframe =
@@ -90,20 +91,23 @@ async function postJson<T>(
 ): Promise<T> {
   const timeoutMs = opts.timeoutMs ?? WORKER_TIMEOUT_MS;
   const maxAttempts = opts.maxAttempts ?? WORKER_MAX_ATTEMPTS;
+  const { data, error } = await createBrowserSupabaseClient().auth.getSession();
+  const token = data.session?.access_token;
+  if (error || !token) throw new BacktestError("Inicia sesión para ejecutar un backtest.", 401);
   let res: Response;
   try {
     res = await fetchWithWakeRetry(
       `${WORKER_URL}${path}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(config),
       },
       { timeoutMs, maxAttempts, onAttempt: opts.onWake },
     );
   } catch {
     throw new BacktestError(
-      `No se pudo conectar al motor tras ${maxAttempts} intentos. El worker puede estar despertando; reintenta en unos segundos. ¿Está corriendo en :8001?`,
+      "No se pudo conectar al motor. Espera unos segundos y vuelve a intentarlo.",
     );
   }
 
@@ -117,8 +121,9 @@ async function postJson<T>(
     }
     let message = "El motor rechazó la solicitud.";
     try {
-      const data = (await res.json()) as { error?: string };
-      if (data?.error) message = data.error;
+      const data = (await res.json()) as { error?: string; detail?: string };
+      if (res.status === 401) message = "Tu sesión ha expirado. Inicia sesión de nuevo.";
+      else if (data?.error || data?.detail) message = data.error || data.detail || message;
     } catch {
       /* cuerpo no legible: dejamos el mensaje por defecto */
     }
@@ -138,15 +143,10 @@ export async function runBacktest(
 
 /**
  * Valida sintaxis/seguridad del código. El worker rechaza 'import os',
- * 'subprocess', '__import__', 'eval('. Ante fallo de red devuelve válido
- * (la validación pesada la hace el worker en /backtest igualmente).
+ * 'subprocess', '__import__', 'eval('. Los fallos de conexión se muestran al usuario.
  */
 export async function validateStrategy(
   config: StrategyConfig,
 ): Promise<ValidationResult> {
-  try {
-    return await postJson<ValidationResult>("/backtest/validate", config);
-  } catch {
-    return { valid: true, warnings: [] };
-  }
+  return postJson<ValidationResult>("/backtest/validate", config);
 }
