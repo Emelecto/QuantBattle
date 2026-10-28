@@ -21,14 +21,14 @@ export default function Home() {
   return <div className="research-landing">
     <section className="research-hero research-wrap" aria-labelledby="research-title">
       <div className="research-hero-main">
-        <h1 id="research-title">Del dataset a una<br /> <span>predicción verificable.</span></h1>
-        <p className="research-hero-lead">Un laboratorio en español para construir modelos de machine learning financiero, enviar predicciones y evaluar sus resultados con un proceso documentado.</p>
+        <h1 id="research-title">Crea y pon a prueba<br /><span>modelos de machine learning aplicados a finanzas</span></h1>
+        <p className="research-hero-lead">Aprende desde cero, construye tus modelos con datos reales y compite con otros participantes.</p>
         <div className="research-actions">
           <Link href="/app/tournaments" className="research-primary-action">Explorar torneos <span aria-hidden="true">↗</span></Link>
-          <a href="/research/judge-pilot.json" className="research-secondary-action">Revisar el piloto técnico <span aria-hidden="true">↗</span></a>
+          <Link href="/app/academia" className="research-secondary-action">Aprende desde cero <span aria-hidden="true">↗</span></Link>
         </div>
       </div>
-      <aside className="research-hero-aside"><strong>Plataforma experimental</strong><p>Una iniciativa de Emilio Cardona López desarrollada en el semillero DeepFin de la Universidad EIA. El piloto mostrado usa datos sintéticos.</p></aside>
+      <aside className="research-hero-aside"><strong>De la primera lección al primer torneo</strong><p>Aprende los fundamentos, practica con ejercicios y lleva tus ideas a los torneos de QuantLab.</p></aside>
     </section>
 
     <section className="research-exhibit research-wrap" aria-labelledby="product-view-title">
