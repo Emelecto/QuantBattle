@@ -21,7 +21,7 @@ export default function Home() {
   return <div className="research-landing">
     <section className="research-hero research-wrap" aria-labelledby="research-title">
       <div className="research-hero-main">
-        <h1 id="research-title">Crea modelos de<br /><span>machine learning</span><br />aplicados a <span>finanzas</span></h1>
+        <h1 id="research-title"><span className="research-hero-title-dark">Crea modelos de machine learning</span><br /><span>aplicados en finanzas</span></h1>
         <p className="research-hero-lead">Aprende desde cero, construye tus modelos con datos reales y compite con otros participantes.</p>
         <div className="research-actions">
           <Link href="/app/tournaments" className="research-primary-action">Explorar torneos <span aria-hidden="true">↗</span></Link>
