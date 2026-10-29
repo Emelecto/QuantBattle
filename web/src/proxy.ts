@@ -19,11 +19,8 @@ import { NextResponse, type NextRequest } from "next/server";
  * respuesta mediante `setAll`, de modo que el navegador (y los Server
  * Components) siempre ven una sesión fresca.
  *
- * También protege la ruta /app/admin: solo usuarios con user_id en la lista
- * de admins pueden acceder. Los demás son redirigidos a /app.
- *
- * No redirige a propósito en /app: la protección de rutas la hace `AuthGuard`
- * en el cliente. Aquí solo mantenemos la cookie viva.
+ * Protege todo el dashboard /app en el servidor y mantiene la comprobación de
+ * rol para /app/admin. La interfaz nunca se sirve a visitantes anónimos.
  */
 
 // IDs de usuarios admin (puedes agregar más)
@@ -56,10 +53,15 @@ export async function proxy(request: NextRequest) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { pathname } = request.nextUrl;
+  const isAppRoute = pathname === "/app" || pathname.startsWith("/app/");
 
-  // Sin credenciales no hay nada que refrescar (p. ej. build o preview sin env).
-  // Dejamos pasar el request en lugar de lanzar un 500.
+  // Sin credenciales no es posible verificar la sesión. El dashboard debe
+  // fallar cerrado; las rutas públicas siguen funcionando.
   if (!url || !anonKey) {
+    if (isAppRoute) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
     return supabaseResponse;
   }
 
@@ -88,8 +90,13 @@ export async function proxy(request: NextRequest) {
   // IMPORTANTE: no quitar ni mover. Este await es el que dispara el refresh.
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Bloqueo de servidor para todas las páginas del dashboard. No dependemos
+  // de que React hidrate ni de que una página individual recuerde AuthGuard.
+  if (isAppRoute && !user) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   // Proteger ruta /app/admin: solo admins
-  const { pathname } = request.nextUrl;
   if (pathname === "/app/admin" || pathname.startsWith("/app/admin/")) {
     if (!user || !ADMIN_USER_IDS.includes(user.id)) {
       return NextResponse.redirect(new URL("/app", request.url));
