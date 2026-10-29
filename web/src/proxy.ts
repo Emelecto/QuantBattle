@@ -2,22 +2,19 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Refresco de sesión en cada request (persistencia).
+ * Verificación y refresco de sesión al entrar al dashboard protegido.
  *
  * NOTA Next 16: el convenio `middleware.ts` está DEPRECADO y se renombró a
  * `proxy.ts` (v16.0.0). La lógica es idéntica; solo cambia el nombre del
  * archivo y de la función exportada. Mantenerlo como `middleware.ts` compila,
  * pero emite un warning de deprecación en cada build.
  *
- * PROBLEMA QUE RESUELVE: sin este middleware la cookie de sesión de Supabase
- * nunca se renovaba en el servidor. Al expirar el access token (1 h por
- * defecto) el usuario "perdía" la sesión al volver a /app y el AuthGuard lo
- * mandaba a /login, aunque el refresh token siguiera siendo válido.
+ * Al entrar a /app, `supabase.auth.getUser()` valida el token y, si hace falta,
+ * lo renueva usando el refresh token. Las rutas públicas como /login no
+ * dependen de una llamada de red a Supabase para poder cargar.
  *
- * `supabase.auth.getUser()` valida el token contra Supabase y, si hace falta,
- * lo rota usando el refresh token. Las cookies nuevas se escriben en la
- * respuesta mediante `setAll`, de modo que el navegador (y los Server
- * Components) siempre ven una sesión fresca.
+ * Las cookies nuevas se escriben en la respuesta mediante `setAll`, de modo
+ * que el navegador y los Server Components ven una sesión fresca.
  *
  * Protege todo el dashboard /app en el servidor y mantiene la comprobación de
  * rol para /app/admin. La interfaz nunca se sirve a visitantes anónimos.
@@ -48,21 +45,23 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Respuesta que iremos reemplazando si Supabase decide setear cookies.
+  const { pathname } = request.nextUrl;
+  const isAppRoute = pathname === "/app" || pathname.startsWith("/app/");
   let supabaseResponse = NextResponse.next({ request });
+
+  // No bloquear landing, login ni endpoints públicos esperando una respuesta
+  // de Supabase. La autenticación de servidor solo es necesaria para /app.
+  if (!isAppRoute) {
+    return supabaseResponse;
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const { pathname } = request.nextUrl;
-  const isAppRoute = pathname === "/app" || pathname.startsWith("/app/");
 
   // Sin credenciales no es posible verificar la sesión. El dashboard debe
   // fallar cerrado; las rutas públicas siguen funcionando.
   if (!url || !anonKey) {
-    if (isAppRoute) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-    return supabaseResponse;
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const supabase = createServerClient(url, anonKey, {
@@ -77,12 +76,14 @@ export async function proxy(request: NextRequest) {
         });
 
         // 2) Recreamos la respuesta con el request ya actualizado…
-        supabaseResponse = NextResponse.next({ request });
+        const refreshedResponse = NextResponse.next({ request });
 
         // 3) …y devolvemos las cookies al navegador (Set-Cookie).
         cookiesToSet.forEach(({ name, value, options }) => {
-          supabaseResponse.cookies.set(name, value, options);
+          refreshedResponse.cookies.set(name, value, options);
         });
+        // `supabaseResponse` is replaced after Supabase rotates the cookie.
+        supabaseResponse = refreshedResponse;
       },
     },
   });
