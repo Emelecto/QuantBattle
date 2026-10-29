@@ -64,7 +64,7 @@ export const ACHIEVEMENTS: Record<AchievementId, { label: string }> = {
   btc: { label: "Superó a BTC" },
 };
 
-/** Chip de logro: .ql-glass con icono SVG inline. */
+/** Chip de logro: .qb-glass con icono SVG inline. */
 export function AchievementBadge({
   id,
   label,
@@ -74,7 +74,7 @@ export function AchievementBadge({
 }) {
   return (
     <span
-      className="ql-glass inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[12px] font-medium text-ink"
+      className="qb-glass inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[12px] font-medium text-ink"
       title={label}
     >
       <span aria-hidden className="text-accent">

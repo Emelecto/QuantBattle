@@ -44,7 +44,7 @@ export function NextAction({
     <section
       aria-label="Siguiente acción"
       data-tour="siguiente-accion"
-      className="ql-glass ql-elev-1 mb-4 rounded-xl p-4 md:p-5"
+      className="qb-glass qb-elev-1 mb-4 rounded-xl p-4 md:p-5"
     >
       <div className="flex flex-wrap items-center gap-3 md:gap-4">
         <span

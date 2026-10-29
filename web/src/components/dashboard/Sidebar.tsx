@@ -36,7 +36,7 @@ const ADMIN_NAV = [
 ] as const;
 
 const SOCIAL_LINKS = [
-  { href: "https://github.com/Emelecto/QuantLab", label: "Repositorio de QuantLab", icon: "code" },
+  { href: "https://github.com/Emelecto/QuantBattle", label: "Repositorio de QuantBattle", icon: "code" },
 ] as const;
 
 export function Icon({ name, size = 18 }: { name: string; size?: number }) {
@@ -148,7 +148,7 @@ export function Icon({ name, size = 18 }: { name: string; size?: number }) {
       return (
         <svg {...common} fill="currentColor" stroke="none">
           <path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.33z" />
-          <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="var(--ql-bg)" />
+          <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="var(--qb-bg)" />
         </svg>
       );
     case "x":
@@ -346,27 +346,27 @@ export function Sidebar() {
   return (
     <aside
       ref={sidebarRef}
-      className={`ql-sidebar${collapsed ? " collapsed" : ""}`}
+      className={`qb-sidebar${collapsed ? " collapsed" : ""}`}
       style={{
         width: collapsed ? COLLAPSED_WIDTH : width,
         flexBasis: collapsed ? COLLAPSED_WIDTH : width,
       }}
     >
       {/* Glow vertical sutil en borde izquierdo */}
-      <div className="ql-sidebar-glow" />
+      <div className="qb-sidebar-glow" />
 
-      <Link href="/app" className="ql-side-brand" title="QuantLab · Inicio">
-        <span aria-hidden="true">Q</span>{!collapsed && <strong>QuantLab</strong>}
+      <Link href="/app" className="qb-side-brand" title="QuantBattle · Inicio">
+        <span aria-hidden="true">Q</span>{!collapsed && <strong>QuantBattle</strong>}
       </Link>
 
       {/* Top row: Avatar + Usuario (izquierda) | QP (derecha) */}
-      <div className="ql-sidebar-top">
-        <Link href="/app/profile" className="ql-user-block" title="Perfil">
+      <div className="qb-sidebar-top">
+        <Link href="/app/profile" className="qb-user-block" title="Perfil">
           <Avatar src={avatarSrc} name={displayName} size={collapsed ? 32 : 36} />
           {!collapsed && (
-            <div className="ql-user-info">
-              <span className="ql-user-name">{displayName}</span>
-              <span className="ql-user-username">@{profile?.username || displayName.toLowerCase()}</span>
+            <div className="qb-user-info">
+              <span className="qb-user-name">{displayName}</span>
+              <span className="qb-user-username">@{profile?.username || displayName.toLowerCase()}</span>
             </div>
           )}
         </Link>
@@ -375,7 +375,7 @@ export function Sidebar() {
           <Link
             href="/app/wallet"
             data-tour="qp-badge"
-            className="ql-qp-button"
+            className="qb-qp-button"
             title="Mi wallet de QuantPoints"
           >
             <svg
@@ -390,7 +390,7 @@ export function Sidebar() {
               <path d="M6 3h12l3 9-9 9-9-9 3-9Z" />
               <path d="M9 8h6" />
             </svg>
-            <span className="ql-qp-amount">
+            <span className="qb-qp-amount">
               {balance != null ? `${balance.toLocaleString()} QP` : "QP …"}
             </span>
           </Link>
@@ -398,10 +398,10 @@ export function Sidebar() {
       </div>
 
       {/* Nav items */}
-      <nav className="ql-nav" aria-label="Navegación principal">
+      <nav className="qb-nav" aria-label="Navegación principal">
         {DASHBOARD_NAV.map((item, index) => (
-          <div key={item.href} className="ql-nav-wrap">
-          {!collapsed && (index === 0 || index === 5) && <span className="ql-nav-section">{index === 0 ? "Mi espacio" : "Explorar"}</span>}
+          <div key={item.href} className="qb-nav-wrap">
+          {!collapsed && (index === 0 || index === 5) && <span className="qb-nav-section">{index === 0 ? "Mi espacio" : "Explorar"}</span>}
           <Link
             key={item.href}
             href={item.href}
@@ -412,7 +412,7 @@ export function Sidebar() {
                   ? "tournaments-link"
                   : undefined
             }
-            className={`ql-nav-item${isActive(item.href) ? " active" : ""}`}
+            className={`qb-nav-item${isActive(item.href) ? " active" : ""}`}
             title={collapsed ? item.label : undefined}
             aria-label={item.label}
             aria-current={isActive(item.href) ? "page" : undefined}
@@ -420,7 +420,7 @@ export function Sidebar() {
             <span className="ic">
               <Icon name={item.icon} />
             </span>
-            {!collapsed && <span className="ql-nav-label">{item.label}</span>}
+            {!collapsed && <span className="qb-nav-label">{item.label}</span>}
           </Link>
           </div>
         ))}
@@ -431,42 +431,42 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`ql-nav-item${isActive(item.href) ? " active" : ""}`}
+              className={`qb-nav-item${isActive(item.href) ? " active" : ""}`}
               title={collapsed ? item.label : undefined}
             >
               <span className="ic">
                 <Icon name={item.icon} />
               </span>
-              {!collapsed && <span className="ql-nav-label">{item.label}</span>}
+              {!collapsed && <span className="qb-nav-label">{item.label}</span>}
             </Link>
           ))}
 
       </nav>
 
-      <div className="ql-sidebar-spacer" />
+      <div className="qb-sidebar-spacer" />
 
       {/* Bottom section */}
-      <div className="ql-sidebar-bottom">
+      <div className="qb-sidebar-bottom">
         {/* Notificaciones (popover condicional) */}
         <NotificationPopover collapsed={collapsed} />
 
         {/* Configuración */}
-        <Link href="/app/profile/settings" className="ql-nav-item" title="Configuración">
+        <Link href="/app/profile/settings" className="qb-nav-item" title="Configuración">
           <span className="ic">
             <Icon name="settings" />
           </span>
-          {!collapsed && <span className="ql-nav-label">Configuración</span>}
+          {!collapsed && <span className="qb-nav-label">Configuración</span>}
         </Link>
 
         {/* Redes sociales */}
-        <div className={`ql-social-row${collapsed ? " collapsed" : ""}`}>
+        <div className={`qb-social-row${collapsed ? " collapsed" : ""}`}>
           {SOCIAL_LINKS.map((s) => (
             <a
               key={s.label}
               href={s.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="ql-social-icon"
+              className="qb-social-icon"
               title={s.label}
               aria-label={s.label}
             >
@@ -478,7 +478,7 @@ export function Sidebar() {
 
       {/* Collapse toggle — siempre visible */}
       <button
-        className="ql-collapse-toggle"
+        className="qb-collapse-toggle"
         type="button"
         onClick={toggle}
         title={collapsed ? "Expandir" : "Colapsar"}
@@ -491,7 +491,7 @@ export function Sidebar() {
       {!collapsed && (
         <div
           onMouseDown={onMouseDown}
-          className="ql-sidebar-resize"
+          className="qb-sidebar-resize"
           style={{
             position: "absolute" as const,
             top: 0,
@@ -500,7 +500,7 @@ export function Sidebar() {
             height: "100%",
             cursor: "col-resize",
             zIndex: 40,
-            background: dragging ? "var(--ql-accent)" : "var(--ql-line)",
+            background: dragging ? "var(--qb-accent)" : "var(--qb-line)",
             opacity: dragging ? 0.7 : 0.25,
             transition: "opacity 0.15s",
           }}

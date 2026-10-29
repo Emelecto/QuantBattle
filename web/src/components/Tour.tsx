@@ -13,7 +13,7 @@ type Step = {
 const STEPS: Step[] = [
   {
     title: "1 · Crea tu estrategia",
-    body: "En QuantLab puedes armar tu estrategia con el asistente visual o escribiendo código Python. Elige el activo, el capital y los parámetros de walk-forward.",
+    body: "En QuantBattle puedes armar tu estrategia con el asistente visual o escribiendo código Python. Elige el activo, el capital y los parámetros de walk-forward.",
   },
   {
     title: "2 · Prueba con datos reales OOS",
@@ -60,14 +60,14 @@ export function Tour() {
       aria-modal="true"
       aria-label="Tour de bienvenida"
     >
-      <div className="ql-glass ql-elev-2 w-full max-w-md rounded-2xl p-6">
+      <div className="qb-glass qb-elev-2 w-full max-w-md rounded-2xl p-6">
         <div className="flex items-center gap-2">
           <span
             aria-hidden
-            className="ql-glow-box inline-block h-2.5 w-2.5 rounded-sm bg-accent"
+            className="qb-glow-box inline-block h-2.5 w-2.5 rounded-sm bg-accent"
           />
           <span className="text-sm font-semibold tracking-tight text-ink">
-            Bienvenido a QuantLab
+            Bienvenido a QuantBattle
           </span>
         </div>
 
@@ -102,7 +102,7 @@ export function Tour() {
               <button
                 type="button"
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
-                className="ql-btn-secondary rounded-md px-3 py-1.5 text-[13px]"
+                className="qb-btn-secondary rounded-md px-3 py-1.5 text-[13px]"
               >
                 Atrás
               </button>
@@ -110,7 +110,7 @@ export function Tour() {
             <button
               type="button"
               onClick={() => finish(false)}
-              className="ql-btn-primary rounded-md px-4 py-1.5 text-[13px]"
+              className="qb-btn-primary rounded-md px-4 py-1.5 text-[13px]"
             >
               {isLast ? "Empezar" : "Siguiente"}
             </button>

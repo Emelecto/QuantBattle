@@ -18,7 +18,7 @@ type TourStep = {
 };
 
 const STEPS: TourStep[] = [
-  { title: "Investiga con QuantLab", text: "Participa en torneos de machine learning: descarga datos, entrena un modelo y envía sus predicciones.", selector: null },
+  { title: "Investiga con QuantBattle", text: "Participa en torneos de machine learning: descarga datos, entrena un modelo y envía sus predicciones.", selector: null },
   { title: "Consulta las rondas publicadas", text: "La práctica usa datos sintéticos. Cada ronda tiene su propia versión y fecha de cierre; no otorga premios QP.", selector: '[data-tour="tournaments-link"], a[href="/app/tournaments"]', cta: { label: "Ver torneos", href: "/app/tournaments" } },
   { title: "Prepara tu primer envío", text: "La guía explica las particiones train, validation y live, el formato del CSV y cuándo se publica la puntuación.", selector: null, cta: { label: "Leer la guía", href: "/app/tournaments/guide" } },
   { title: "Revisa la evidencia", text: "Puedes inspeccionar el protocolo y los resultados del piloto técnico. La Academia complementa tu aprendizaje.", selector: null, cta: { label: "Ver evidencia", href: "/docs#evaluacion" } },
@@ -305,20 +305,20 @@ export function OnboardingTour() {
   }
 
   // Portal a <body>: si el tour viviera dentro de <main>, el transform
-  // residual de ql-fade-in (fill-mode both en el CSS global) volvería a main
+  // residual de qb-fade-in (fill-mode both en el CSS global) volvería a main
   // el containing block de los position:fixed y TODO se desplazaría — tooltip
   // "muy abajo" y spotlights que no apuntan al elemento real.
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label="Tour de bienvenida" className="ql-light-tour">
+    <div role="dialog" aria-modal="true" aria-label="Tour de bienvenida" className="qb-light-tour">
       <style>{`
-        @keyframes ql-tour-fade { from { opacity: 0 } to { opacity: 1 } }
-        .ql-tour-glide { transition: top 300ms cubic-bezier(.22,.9,.3,1), left 300ms cubic-bezier(.22,.9,.3,1); }
-        @media (prefers-reduced-motion: reduce) { .ql-tour-glide { transition: none; } }
+        @keyframes qb-tour-fade { from { opacity: 0 } to { opacity: 1 } }
+        .qb-tour-glide { transition: top 300ms cubic-bezier(.22,.9,.3,1), left 300ms cubic-bezier(.22,.9,.3,1); }
+        @media (prefers-reduced-motion: reduce) { .qb-tour-glide { transition: none; } }
       `}</style>
       {/* Spotlight sobre el elemento objetivo (recorte + halo). */}
       {rect ? (
         <div
-          className={`pointer-events-auto fixed z-[90] rounded-xl ${glide ? "ql-tour-glide" : ""}`}
+          className={`pointer-events-auto fixed z-[90] rounded-xl ${glide ? "qb-tour-glide" : ""}`}
           style={{
             top: rect.top - 6,
             left: rect.left - 6,
@@ -344,7 +344,7 @@ export function OnboardingTour() {
       <div
         ref={tipRef}
         style={{ ...tooltipStyle, zIndex: 100 }}
-        className={`ql-elev-2 max-h-[calc(100vh-24px)] overflow-y-auto rounded-lg border border-[#dce6ef] bg-white p-5 shadow-[0_18px_50px_rgba(20,45,78,0.24)] ${glide ? "ql-tour-glide" : ""}`}
+        className={`qb-elev-2 max-h-[calc(100vh-24px)] overflow-y-auto rounded-lg border border-[#dce6ef] bg-white p-5 shadow-[0_18px_50px_rgba(20,45,78,0.24)] ${glide ? "qb-tour-glide" : ""}`}
       >
         {/* Flechas FUERA del contenedor (sin overflow que las corte) y con
             margen de seguridad para el radio del borde. */}

@@ -1,4 +1,4 @@
-# QuantLab worker — imagen para Railway / Render / cualquier registry OCI
+# QuantBattle worker — imagen para Railway / Render / cualquier registry OCI
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \

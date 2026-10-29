@@ -1,4 +1,4 @@
-# Guía de evaluación · QuantLab / DeepFin
+# Guía de evaluación · QuantBattle / DeepFin
 
 Autor: Emilio Cardona Lopez · Universidad EIA · Semillero DeepFin.
 

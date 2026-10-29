@@ -54,7 +54,7 @@ const SEEDS: SeedIdea[] = [
   { text: "Día 23 · Reel: una estrategia con integridad baja no sirve, aunque brille en papel", pilar: "Métricas", formato: "Reel" },
   { text: "Día 24 · Carrusel: limitaciones honestas, predicción direccional no es señal de entrada", pilar: "Ensemble", formato: "Carrusel" },
   { text: "Día 25 · Historia: pregunta a la comunidad ¿qué activo backtesteas esta semana?", pilar: "Torneos y QP", formato: "Historia" },
-  { text: "Día 26 · Reel: API con claves qlk_ y servidor MCP para tu flujo con IA", pilar: "Motor y datos", formato: "Reel" },
+  { text: "Día 26 · Reel: API con claves qbt_ y servidor MCP para tu flujo con IA", pilar: "Motor y datos", formato: "Reel" },
   { text: "Día 27 · Carrusel: pasado ≠ futuro, pero el walk-forward evita mentirte", pilar: "Overfitting", formato: "Carrusel" },
   { text: "Día 28 · Post: guía del torneo, rounds con deadline y evaluación automática", pilar: "Torneos y QP", formato: "Post" },
   { text: "Día 29 · Reel: curva de equity OOS, cómo leerla en 20 segundos", pilar: "Métricas", formato: "Reel" },

@@ -1,6 +1,6 @@
 # Visual work: research first
 
-Inventory: QuantLab; Emilio Cardona Lopez; DeepFin; Universidad EIA; Spanish-language research; versioned datasets; Colombia deadlines; private experiment records; CSV fingerprints; held-out targets; synthetic technical pilot; no external adoption claimed.
+Inventory: QuantBattle; Emilio Cardona Lopez; DeepFin; Universidad EIA; Spanish-language research; versioned datasets; Colombia deadlines; private experiment records; CSV fingerprints; held-out targets; synthetic technical pilot; no external adoption claimed.
 
 Argument: research through prediction (tournament route); understand the sequence (download/train/submit/evaluate); inspect evidence (public pilot report with reproducible score); join a round (existing authenticated flow).
 

@@ -113,7 +113,7 @@ export default function CommunityPage() {
             aria-label="Filtrar por activo"
             value={assetFilter}
             onChange={(e) => setAssetFilter(e.target.value)}
-            className="ql-input h-9 rounded-md px-3 text-[13px]"
+            className="qb-input h-9 rounded-md px-3 text-[13px]"
           >
             <option value="all">Activo ▾</option>
             <option value="BTC">BTC</option>
@@ -128,7 +128,7 @@ export default function CommunityPage() {
             aria-label="Ordenar por"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="ql-input h-9 rounded-md px-3 text-[13px]"
+            className="qb-input h-9 rounded-md px-3 text-[13px]"
           >
             <option value="sharpe">Orden ▾</option>
             <option value="recent">Más recientes</option>
@@ -141,7 +141,7 @@ export default function CommunityPage() {
             aria-label="Buscar estrategia"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="ql-input h-9 min-w-[160px] flex-1 rounded-md px-3 text-[13px]"
+            className="qb-input h-9 min-w-[160px] flex-1 rounded-md px-3 text-[13px]"
           />
 
           <span className="metric ml-auto text-[12px] text-muted">
@@ -164,7 +164,7 @@ export default function CommunityPage() {
               {fetchError}
             </div>
           ) : visible.length === 0 ? (
-            <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center">
+            <div className="qb-glass qb-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center">
               <p className="text-lg font-semibold text-ink">
                 Sé el primero en compartir
               </p>
@@ -182,7 +182,7 @@ export default function CommunityPage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {visible.map((s) => (
-                <SpotlightCard key={s.id} className="ql-glass ql-elev-1 flex flex-col">
+                <SpotlightCard key={s.id} className="qb-glass qb-elev-1 flex flex-col">
                   <div className="flex items-center gap-2.5 px-5 pt-5">
                     <span
                       aria-hidden

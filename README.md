@@ -1,9 +1,9 @@
-# QuantLab · DeepFin / Universidad EIA
+# QuantBattle · DeepFin / Universidad EIA
 
 Prototipo de investigación de Emilio Cardona Lopez para una comunidad de investigación cuantitativa en español. Incluye **práctica sintética con piloto reproducible** y un **torneo semanal de cuatro rondas prospectivas de retornos reales**, con validación de CSV, fuentes privadas y publicación de resultados solo al cierre completo.
 
-- Plataforma: https://quant-lab-nine.vercel.app
-- Evaluación técnica y resultados: https://quant-lab-nine.vercel.app/docs#evaluacion
+- Plataforma: https://www.quantbattle.co
+- Evaluación técnica y resultados: https://www.quantbattle.co/docs#evaluacion
 - [Protocolo ML](docs/ml-tournaments.md)
 - [Torneo semanal de retornos reales](docs/daily-return-tournaments.md)
 - [Guía para evaluadores](docs/evaluation-guide.md)

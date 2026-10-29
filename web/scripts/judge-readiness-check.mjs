@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 if(process.env.QL_ENABLE_LIVE_UI_TEST !== 'true') throw new Error('Activar QL_ENABLE_LIVE_UI_TEST=true para usar la cuenta técnica.');
 const root=resolve('..'), output=resolve(root,'artifacts/judge-readiness');
 await mkdir(output,{recursive:true});
-const base=process.env.QL_UI_BASE_URL || 'https://quant-lab-nine.vercel.app';
+const base=process.env.QL_UI_BASE_URL || 'https://www.quantbattle.co';
 const capture=process.env.QL_SKIP_SCREENSHOTS !== 'true';
 const browser=await chromium.launch();
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
@@ -44,7 +44,7 @@ try {
     recoveryDestination=new URL(route.request().url()).searchParams.get('redirect_to') || '';
     await route.fulfill({status:200,contentType:'application/json',body:'{}'});
   });
-  await page.locator('#resetEmail').fill('technical-demo@quantlab.example');
+  await page.locator('#resetEmail').fill('technical-demo@quantbattle.example');
   await page.getByRole('button',{name:'Enviar enlace',exact:true}).click();
   await expect(page.getByRole('status')).toContainText('enlace para restablecer');
   if(new URL(recoveryDestination).searchParams.get('next')!=='/app/profile/settings#security')throw new Error('Destino de recuperación incorrecto');
@@ -55,7 +55,7 @@ try {
   const updated=await admin.auth.admin.updateUserById(manifest.user_id,{password});
   if(updated.error)throw updated.error;
   await page.goto(base+'/login');
-  await page.getByLabel('Correo electrónico',{exact:true}).fill('technical-demo@quantlab.example');
+  await page.getByLabel('Correo electrónico',{exact:true}).fill('technical-demo@quantbattle.example');
   await page.getByLabel('Contraseña',{exact:true}).fill(password);
   await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click();
   await page.waitForURL(/\/app(?:\/|$)/);

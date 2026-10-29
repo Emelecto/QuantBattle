@@ -30,7 +30,7 @@ def main():
         command(['supabase', 'init', '--workdir', str(workdir)])
     text = config.read_text(encoding='utf-8')
     project = re.search(r'^project_id = "([^"]+)"', text, re.M).group(1)
-    if project not in ('quantlab-validation', 'launch-staging'):
+    if project not in ('quantbattle-validation', 'launch-staging'):
         raise RuntimeError('Only dedicated validation projects are allowed')
     if args.start:
         for port in range(54320, 54330):

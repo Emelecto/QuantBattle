@@ -1,4 +1,4 @@
-# Módulo de autenticación para el worker de QuantLab.
+# Módulo de autenticación para el worker de QuantBattle.
 # Extrae el user_id del JWT de Supabase en el header Authorization.
 #
 # NOTA DE SEGURIDAD: el bypass de tests (TESTING + ALLOW_TEST_AUTH, ver
@@ -179,15 +179,15 @@ def get_user_id_from_request(request: Request) -> Optional[str]:
 
     Acepta dos formatos:
     - Bearer <JWT de Supabase>  → verifica firma ES256 vía JWKS.
-    - Bearer qlk_<hex>          → clave de API dedicada (hash SHA-256 en api_keys).
+    - Bearer qbt_<hex> / qlk_<hex> → clave de API dedicada (hash SHA-256 en api_keys).
     """
     auth_header = request.headers.get("authorization", "")
     if not auth_header.startswith("Bearer "):
         return None
     token = auth_header[7:].strip()
 
-    # Clave de API dedicada (qlk_...): lookup por hash, sin expiración.
-    if token.startswith("qlk_"):
+    # qlk_ remains accepted for keys issued before the QuantBattle rename.
+    if token.startswith(("qbt_", "qlk_")):
         return _user_id_from_api_key(token)
 
     payload = _verify_jwt(token)
@@ -212,7 +212,7 @@ def _get_service_client():
 
 
 def _user_id_from_api_key(key: str) -> Optional[str]:
-    """Resuelve user_id desde una clave de API (qlk_...). Hash SHA-256 lookup."""
+    """Resuelve user_id desde una clave de API con prefijo qbt_ o legado qlk_."""
     import hashlib
     from datetime import datetime, timezone
 

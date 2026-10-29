@@ -231,7 +231,7 @@ export function FirstTournament() {
               <a href="/ml/ejemplo_retornos_diarios.ipynb" download>
                 Notebook de retornos
               </a>
-              <a href="/ml/ejemplo_quantlab.ipynb" download>
+              <a href="/ml/ejemplo_quantbattle.ipynb" download>
                 Notebook de práctica sintética
               </a>
               <Link href="/app/academia/python/1">

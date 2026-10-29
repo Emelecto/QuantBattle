@@ -1,4 +1,4 @@
--- QuantLab: índices para rankings temporales (token_ledger)
+-- QuantBattle: índices para rankings temporales (token_ledger)
 -- Acelera consultas de QP por rango de fechas en el dashboard.
 
 create index if not exists idx_ledger_user_created_type

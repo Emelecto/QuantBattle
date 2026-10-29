@@ -9,7 +9,7 @@ import {
 
 /**
  * Checklist de activación crea → corre → publica → compite.
- * Solo usa clases Glass Terminal existentes (ql-glass, ql-elev-1) +
+ * Solo usa clases Glass Terminal existentes (qb-glass, qb-elev-1) +
  * utilidades Tailwind ya presentes en el codebase. Al completarse se
  * colapsa a una línea de celebración.
  */
@@ -18,7 +18,7 @@ export function ActivationChecklist() {
 
   if (!next) {
     return (
-      <div className="ql-glass ql-elev-1 rounded-xl p-4">
+      <div className="qb-glass qb-elev-1 rounded-xl p-4">
         <p className="text-sm font-semibold text-ink">
           Activación completa — {ACTIVATION_TOTAL_QP} QP en juego 🎉
         </p>
@@ -39,7 +39,7 @@ export function ActivationChecklist() {
   const pct = Math.round((done / total) * 100);
 
   return (
-    <div className="ql-glass ql-elev-1 rounded-xl p-4" data-tour="activation-checklist">
+    <div className="qb-glass qb-elev-1 rounded-xl p-4" data-tour="activation-checklist">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-ink">Tu activación</h3>
         <span className="font-mono text-xs text-muted">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * /legal — Hub de documentos legales de QuantLab.
+ * /legal — Hub de documentos legales de QuantBattle.
  */
 
 const DOCUMENTS = [
@@ -18,12 +18,12 @@ const DOCUMENTS = [
   {
     href: "/disclaimer",
     title: "Disclaimer",
-    desc: "QuantLab es una herramienta de investigación, no asesoría financiera. El desempeño pasado no garantiza resultados futuros.",
+    desc: "QuantBattle es una herramienta de investigación, no asesoría financiera. El desempeño pasado no garantiza resultados futuros.",
   },
 ];
 
 export const metadata = {
-  title: "Legales — QuantLab",
+  title: "Legales — QuantBattle",
 };
 
 export default function LegalPage() {
@@ -33,7 +33,7 @@ export default function LegalPage() {
         Legales
       </h1>
       <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted">
-        Documentos que regulan el uso de QuantLab. Usar el servicio implica
+        Documentos que regulan el uso de QuantBattle. Usar el servicio implica
         aceptar los Términos de Servicio y la Política de Privacidad.
       </p>
 
@@ -42,7 +42,7 @@ export default function LegalPage() {
           <Link
             key={doc.href}
             href={doc.href}
-            className="ql-glass ql-elev-1 group rounded-xl px-5 py-4 transition-colors hover:border-accent"
+            className="qb-glass qb-elev-1 group rounded-xl px-5 py-4 transition-colors hover:border-accent"
           >
             <span className="flex items-center justify-between gap-4">
               <span className="text-sm font-semibold text-ink">

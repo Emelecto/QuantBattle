@@ -119,9 +119,9 @@ export function SettingsPage() {
   if (authLoading) {
     return (
       <main className="flex min-h-screen flex-col">
-        <div className="ql-page flex-1">
-          <div className="ql-skeleton-line w-48 h-8" />
-          <div className="ql-skeleton-line w-72 h-4 mt-2" />
+        <div className="qb-page flex-1">
+          <div className="qb-skeleton-line w-48 h-8" />
+          <div className="qb-skeleton-line w-72 h-4 mt-2" />
         </div>
       </main>
     );
@@ -140,7 +140,7 @@ export function SettingsPage() {
 
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="ql-page flex-1">
+      <div className="qb-page flex-1">
         {/* Header */}
         <div className="flex flex-wrap items-center gap-4 animate-fadeIn">
           <Link
@@ -200,7 +200,7 @@ export function SettingsPage() {
                   </h2>
                   <p className="text-sm text-muted mb-4">
                     Usa esta clave para conectar agentes de IA y herramientas
-                    externas a QuantLab. No la compartas publicamente.
+                    externas a QuantBattle. No la compartas publicamente.
                   </p>
                   {apiKey ? (
                     <div className="rounded-lg border border-accent/40 bg-accent/[0.07] p-4">
@@ -227,7 +227,7 @@ export function SettingsPage() {
                           className="flex items-center gap-3 rounded-md border border-line bg-surface/30 px-3 py-2"
                         >
                           <code className="flex-1 font-mono text-xs text-muted truncate">
-                            qlk_••••••••••••••••
+                            api_••••••••••••••••
                           </code>
                           <span className="metric text-[13px] text-muted">
                             {new Date(k.created_at).toLocaleDateString("es-CO")}
@@ -255,10 +255,10 @@ export function SettingsPage() {
                   </h2>
                   <p className="text-sm text-muted mb-3">
                     Conecta cualquier agente compatible con MCP a los torneos ML
-                    y flujos de predicción de QuantLab.
+                    y flujos de predicción de QuantBattle.
                   </p>
                   <pre className="overflow-x-auto rounded-md border border-line bg-surface-solid p-3 font-mono text-sm text-muted">
-{`[mcp_servers.quantlab]\ncommand = "python"\nargs = ["/ruta/a/QuantLab/mcp-server/mcp_server.py"]\nenv = { QUANTLAB_TOKEN = "qlk_tu_clave" }`}
+{`[mcp_servers.quantbattle]\ncommand = "python"\nargs = ["/ruta/a/QuantBattle/mcp-server/mcp_server.py"]\nenv = { QUANTBATTLE_TOKEN = "qbt_tu_clave" }`}
                   </pre>
                   <p className="mt-2 text-[13px] text-muted">
                     Guía completa en{" "}

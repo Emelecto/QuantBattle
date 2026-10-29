@@ -1,4 +1,4 @@
-// Barrel de componentes del studio QuantLab.
+// Barrel de componentes del studio QuantBattle.
 // Re-exporta los componentes para poder importarlos desde "@/components/studio".
 export { StrategyTemplates } from "./StrategyTemplates";
 export { LiveSignals } from "./LiveSignals";

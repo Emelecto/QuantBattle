@@ -26,7 +26,7 @@ Entonces la regla que me tatuaría: si no puedes escribir la expectativa de tu s
 
 [VISUAL 2:10] Servilleta real con la fórmula escrita a mano.
 
-Y aquí en QuantLab jugamos la versión sana de este juego: los QP. Cada lección y cada quiz con expectativa positiva —estudiar, practicar, medir— te suma. Nada de dinero real hasta que la matemática esté de tu lado. (2:35)
+Y aquí en QuantBattle jugamos la versión sana de este juego: los QP. Cada lección y cada quiz con expectativa positiva —estudiar, practicar, medir— te suma. Nada de dinero real hasta que la matemática esté de tu lado. (2:35)
 
 [VISUAL 2:35] Pantalla de la academia: barra de QP subiendo lección a lección.
 

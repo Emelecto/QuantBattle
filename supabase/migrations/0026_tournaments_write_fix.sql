@@ -1,4 +1,4 @@
--- QuantLab migración 0026: restringir escritura de torneos a su creador.
+-- QuantBattle migración 0026: restringir escritura de torneos a su creador.
 -- Uso: Emilio la aplica MANUALMENTE en el SQL editor de Supabase.
 
 drop policy if exists "tournaments write" on public.tournaments;

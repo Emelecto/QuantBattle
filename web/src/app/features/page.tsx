@@ -24,7 +24,7 @@ const FEATURES = [
   },
   {
     title: "Comunidad en desarrollo",
-    text: "QuantLab busca reunir una comunidad de investigación cuantitativa en español. El prototipo incluye recursos educativos, código y módulos experimentales de estrategias; la evaluación del semillero se centra en el flujo de torneos ML.",
+    text: "QuantBattle busca reunir una comunidad de investigación cuantitativa en español. El prototipo incluye recursos educativos, código y módulos experimentales de estrategias; la evaluación del semillero se centra en el flujo de torneos ML.",
   },
 ];
 
@@ -34,7 +34,7 @@ export default function FeaturesPage() {
       <section className="border-b border-line">
         <div className="mx-auto w-full max-w-6xl px-6 pt-16 pb-12">
           <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-            Qué hace QuantLab
+            Qué hace QuantBattle
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted md:text-base">
             Un prototipo del semillero DeepFin de la Universidad EIA para

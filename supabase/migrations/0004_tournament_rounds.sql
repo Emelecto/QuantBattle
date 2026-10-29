@@ -1,4 +1,4 @@
--- QuantLab v2 — Rondas de torneo con deadline
+-- QuantBattle v2 — Rondas de torneo con deadline
 -- Idempotente: seguro de reaplicar. Solo AÑADE columnas; no recrea tablas.
 --
 -- round_number: número de ronda activa del torneo (default 1; los torneos

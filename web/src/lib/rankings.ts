@@ -1,5 +1,5 @@
 /**
- * Rankings de QuantLab — QP y Torneos, con filtro temporal.
+ * Rankings de QuantBattle — QP y Torneos, con filtro temporal.
  *
  * Filtros: "week" | "month" | "3months"
  * El ranking por QP suma el token_ledger en el período.

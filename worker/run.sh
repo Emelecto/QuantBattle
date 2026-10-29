@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Arranca la API FastAPI del worker de QuantLab.
+# Arranca la API FastAPI del worker de QuantBattle.
 #
 # Uso:
 #   ./run.sh
-#   CORS_ORIGINS="http://localhost:3000,https://app.quantlab.io" ./run.sh
+#   CORS_ORIGINS="http://localhost:3000,https://www.quantbattle.co" ./run.sh
 #
 # La API queda en 0.0.0.0:8000 (POST /backtest, GET /health, POST /backtest/validate).
 # Usa el intérprete del venv directamente para evitar problemas de conversión

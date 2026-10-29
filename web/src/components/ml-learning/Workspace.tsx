@@ -12,7 +12,7 @@ export function Workspace({
   children: ReactNode;
 }) {
   return (
-    <main className="ql-page ml-workspace">
+    <main className="qb-page ml-workspace">
       <header className="ml-heading">
         <h1>{title}</h1>
         <p>{intro}</p>
@@ -56,7 +56,7 @@ export function messageOf(error: unknown): string {
     return "No se pudo completar la acción. Vuelve a intentarlo.";
   const code = (error as Error & { code?: string }).code;
   if (code?.startsWith("WORKER_") || /https?:\/\//.test(error.message)) {
-    return "No se pudo conectar con QuantLab. Espera unos segundos y vuelve a intentarlo.";
+    return "No se pudo conectar con QuantBattle. Espera unos segundos y vuelve a intentarlo.";
   }
   const text = error.message.replace(/^\/ml\/[^:]+:\s*/, "").trim();
   if (/inicia sesi[oó]n|HTTP 401/i.test(text))

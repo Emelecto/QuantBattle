@@ -1,4 +1,4 @@
-"""API HTTP del worker de QuantLab.
+"""API HTTP del worker de QuantBattle.
 
 Expone el motor de backtest ya validado (engine.run_backtest) vía FastAPI.
 
@@ -38,12 +38,12 @@ import scheduler as _scheduler  # torneos de codigo (create/evaluate/signals)
 import ml_scheduler  # scoring ML y consensus_signals
 
 app = FastAPI(
-    title="QuantLab Worker API",
+    title="QuantBattle Worker API",
     description="Backtesting OOS con datos reales (Binance / yfinance) vía engine.run_backtest.",
     version="1.0.0",
 )
 
-logger = logging.getLogger("quantlab.worker")
+logger = logging.getLogger("quantbattle.worker")
 
 # ---------------------------------------------------------------------------
 # CORS: por defecto CERRADO. Solo se emite Access-Control-Allow-Origin cuando
@@ -52,7 +52,7 @@ logger = logging.getLogger("quantlab.worker")
 # navegador bloquea las lecturas cross-origin (fail-closed).
 #
 # Formato de CORS_ORIGINS: lista separada por comas, p.ej.
-#   "http://localhost:3000,https://app.quantlab.io"
+#   "http://localhost:3000,https://www.quantbattle.co"
 #
 # Nota importante: el frontend envía `Authorization: Bearer <jwt>` en requests
 # autenticados. Cuando una request lleva credenciales, el navegador RECHAZA la
@@ -62,6 +62,7 @@ logger = logging.getLogger("quantlab.worker")
 #   - Origin fuera de la lista (o sin lista) → sin headers CORS (cerrado).
 # ---------------------------------------------------------------------------
 _cors_env = os.environ.get("CORS_ORIGINS", "").strip()
+_cors_allowed_headers = "Authorization, Content-Type, X-QuantBattle-Experiment, X-QuantLab-Experiment"
 if _cors_env:
     _cors_allow_origins = [o.strip() for o in _cors_env.split(",") if o.strip()]
 else:
@@ -113,7 +114,7 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
                     resp.headers["Access-Control-Allow-Credentials"] = "true"
             # Sin lista blanca: sin Allow-Origin (CORS cerrado por defecto).
             resp.headers["Access-Control-Allow-Methods"] = "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
-            resp.headers["Access-Control-Allow-Headers"] = "*"
+            resp.headers["Access-Control-Allow-Headers"] = _cors_allowed_headers
             resp.headers["Access-Control-Max-Age"] = "600"
             return resp
 
@@ -127,7 +128,7 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
         # Sin lista blanca: no se emite Allow-Origin (CORS cerrado por defecto).
 
         response.headers.setdefault("Access-Control-Allow-Methods", "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT")
-        response.headers.setdefault("Access-Control-Allow-Headers", "*")
+        response.headers.setdefault("Access-Control-Allow-Headers", _cors_allowed_headers)
         response.headers.setdefault("Access-Control-Max-Age", "600")
         return response
 

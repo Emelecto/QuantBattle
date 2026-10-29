@@ -12,7 +12,7 @@ const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVIC
 const password=randomBytes(32).toString('base64url');
 const reset=await admin.auth.admin.updateUserById(manifest.user_id,{password});
 if(reset.error) throw reset.error;
-const base=process.env.QL_UI_BASE_URL || 'https://quant-lab-nine.vercel.app';
+const base=process.env.QL_UI_BASE_URL || 'https://www.quantbattle.co';
 const output=resolve(root,'artifacts/dashboard-audit',process.env.QL_AUDIT_STAGE || 'before');
 await mkdir(output,{recursive:true});
 const browser=await chromium.launch();
@@ -21,7 +21,7 @@ await context.addInitScript(()=>localStorage.setItem('ql_onboarded','1'));
 const page=await context.newPage();
 page.setDefaultTimeout(30000);
 await page.goto(base+'/login');
-await page.getByLabel('Correo electrónico',{exact:true}).fill('technical-demo@quantlab.example');
+await page.getByLabel('Correo electrónico',{exact:true}).fill('technical-demo@quantbattle.example');
 await page.getByLabel('Contraseña',{exact:true}).fill(password);
 await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click();
 await page.waitForURL(/\/app(?:\/|$)/);
@@ -36,7 +36,7 @@ for(const path of process.env.QL_FLOWS_ONLY === 'true' ? [] : paths){
   const response=await page.goto(base+path);
   await page.waitForTimeout(path==='/app'?5000:1800);
   const body=await page.locator('body').innerText();
-  const geometry=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,emptyIcons:[...document.querySelectorAll('.ql-dash-bottomnav a,.ql-back-nav-button')].filter(x=>!x.querySelector('svg')).length}));
+  const geometry=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,emptyIcons:[...document.querySelectorAll('.qb-dash-bottomnav a,.qb-back-nav-button')].filter(x=>!x.querySelector('svg')).length}));
   reports.push({path,status:response.status(),url:page.url(),errors,failures,geometry,body:body.slice(0,9000)});
   if(path==='/app')await page.screenshot({path:resolve(output,'desktop.png'),fullPage:true});
  }catch(e){reports.push({path,error:e.message});}
@@ -46,7 +46,7 @@ for(const path of process.env.QL_FLOWS_ONLY === 'true' ? [] : paths){
 await page.setViewportSize({width:390,height:844});
 for(const path of process.env.QL_FLOWS_ONLY === 'true' ? [] : ['/app','/app/profile/settings','/app/api-keys','/app/library']){
  await page.goto(base+path);await page.waitForTimeout(1800);
- reports.push({path,mobile:true,...await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,emptyIcons:[...document.querySelectorAll('.ql-dash-bottomnav a,.ql-back-nav-button')].filter(x=>!x.querySelector('svg')).length}))});
+ reports.push({path,mobile:true,...await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,emptyIcons:[...document.querySelectorAll('.qb-dash-bottomnav a,.qb-back-nav-button')].filter(x=>!x.querySelector('svg')).length}))});
  if(path==='/app')await page.screenshot({path:resolve(output,'mobile.png'),fullPage:true});
 }
 if(process.env.QL_FLOWS_ONLY !== 'true')await writeFile(resolve(output,'report.json'),JSON.stringify(reports,null,2));
@@ -71,7 +71,7 @@ if(process.env.QL_AUDIT_STAGE === 'after') {
  await page.getByRole('button',{name:'Actualizar contraseña'}).click();
  await expect(page.getByRole('status').filter({hasText:'Contraseña actualizada.'})).toBeVisible({timeout:30000});
  const verifier=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
- const verified=await verifier.auth.signInWithPassword({email:'technical-demo@quantlab.example',password:changedPassword});
+ const verified=await verifier.auth.signInWithPassword({email:'technical-demo@quantbattle.example',password:changedPassword});
  if(verified.error || verified.data.user?.id !== manifest.user_id)throw new Error('La nueva contraseña no permitió iniciar sesión');
  await page.goto(base+'/app/api-keys');
  await expect(page.getByText('Error interno del servidor',{exact:true})).toHaveCount(0);

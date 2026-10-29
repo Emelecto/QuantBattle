@@ -6,7 +6,7 @@ import { submitPredictions, type MlDataset, type MlSubmission } from "@/lib/mlTo
 import { reviewPredictionCsv, type CsvReview } from "@/lib/prediction-review";
 import { buttonClasses } from "@/components/ui/Button";
 
-const input = "mt-2 block w-full ql-input min-h-11 rounded-md px-3 py-2 text-base text-ink";
+const input = "mt-2 block w-full qb-input min-h-11 rounded-md px-3 py-2 text-base text-ink";
 const date = (value: string) => new Intl.DateTimeFormat("es-CO", {dateStyle:"medium",timeStyle:"short",timeZone:"America/Bogota"}).format(new Date(value));
 
 export function MlSubmitPanel({liveDataset, canSubmit}: {liveDataset: MlDataset | null; canSubmit: boolean}) {
@@ -72,7 +72,7 @@ export function MlSubmitPanel({liveDataset, canSubmit}: {liveDataset: MlDataset 
       if (response.submission.file_sha256 !== digest) throw new Error("La huella del comprobante no coincide con el archivo revisado. Consulta el historial.");
       setMine(response.submission); setFile(null); setReview(null);
       setFeedback({ok:true,message:"Envío validado y registrado. Tu ficha está guardada; el score se publica después del cierre."});
-      window.dispatchEvent(new Event("quantlab:ml-submitted"));
+      window.dispatchEvent(new Event("quantbattle:ml-submitted"));
     } catch (error) {
       setFeedback({ok:false,message:error instanceof SyntaxError ? "Los parámetros no son JSON válido. Ejemplo: {\"learning_rate\": 0.05}" : error instanceof Error ? error.message : "No se pudo registrar el envío."});
     } finally { setSending(false); }

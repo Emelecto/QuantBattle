@@ -9,7 +9,7 @@ import type { BacktestResult } from "@/lib/api";
 
 function EmptyState() {
   return (
-    <div className="ql-glass ql-elev-1 mt-10 flex flex-col items-center gap-4 rounded-xl px-6 py-14 text-center animate-fadeIn">
+    <div className="qb-glass qb-elev-1 mt-10 flex flex-col items-center gap-4 rounded-xl px-6 py-14 text-center animate-fadeIn">
       <span
         aria-hidden
         className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10 text-accent"
@@ -39,7 +39,7 @@ function EmptyState() {
       </div>
       <Link
         href="/app/backtesting/new"
-        className="ql-btn-primary ql-btn h-9 rounded-md px-5 text-sm font-medium"
+        className="qb-btn-primary qb-btn h-9 rounded-md px-5 text-sm font-medium"
       >
         Crear estrategia
       </Link>
@@ -56,7 +56,7 @@ function StrategyRow({ run }: { run: BacktestResult }) {
   return (
     <Link
       href={`/app/strategies/${run.id}/results`}
-      className="ql-glass ql-elev-1 ql-glass-hover flex flex-wrap items-center justify-between gap-4 rounded-xl px-5 py-4"
+      className="qb-glass qb-elev-1 qb-glass-hover flex flex-wrap items-center justify-between gap-4 rounded-xl px-5 py-4"
     >
       <div className="min-w-0">
         <p className="truncate text-[15px] font-semibold text-ink">
@@ -136,17 +136,17 @@ function StrategiesContent() {
           </div>
           <Link
             href="/app/backtesting/new"
-            className="ql-btn-primary ql-btn h-9 rounded-md px-5 text-sm font-medium"
+            className="qb-btn-primary qb-btn h-9 rounded-md px-5 text-sm font-medium"
           >
             Nueva estrategia
           </Link>
         </div>
 
-        {syncError && <div role="alert" className="mt-6 text-sm text-short"><p>No se pudieron sincronizar tus estrategias. Se conservan las copias locales de esta cuenta.</p><button className="ql-btn-secondary mt-3" onClick={() => { setLoading(true); setRetry((value) => value + 1); }}>Reintentar sincronización</button></div>}
+        {syncError && <div role="alert" className="mt-6 text-sm text-short"><p>No se pudieron sincronizar tus estrategias. Se conservan las copias locales de esta cuenta.</p><button className="qb-btn-secondary mt-3" onClick={() => { setLoading(true); setRetry((value) => value + 1); }}>Reintentar sincronización</button></div>}
         {loading ? (
           <div className="mt-10 space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="ql-skeleton-card h-20 rounded-xl" />
+              <div key={i} className="qb-skeleton-card h-20 rounded-xl" />
             ))}
           </div>
         ) : syncError && runs.length === 0 ? null : runs.length === 0 ? (
@@ -160,7 +160,7 @@ function StrategiesContent() {
         )}
 
         <p className="mt-10 text-[11px] text-muted">
-          QuantLab es una herramienta de investigación. No es asesoría
+          QuantBattle es una herramienta de investigación. No es asesoría
           financiera ni recomendación de inversión.
         </p>
       </section>

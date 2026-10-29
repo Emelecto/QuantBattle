@@ -1,4 +1,4 @@
-"""Generador de datasets para los torneos ML de QuantLab.
+"""Generador de datasets para los torneos ML de QuantBattle.
 
 Dos modos:
   - "sintetico": mercado artificial con estructura de factores, regimenes,

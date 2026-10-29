@@ -175,7 +175,7 @@ export function SubmitStrategyModal({
         if (e.target === e.currentTarget && !loading) onClose();
       }}
     >
-      <div className="ql-glass ql-elev-2 flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl">
+      <div className="qb-glass qb-elev-2 flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-line px-6 py-4">
           <div>
@@ -236,7 +236,7 @@ export function SubmitStrategyModal({
               {mode === "existing" && (
                 <div className="mt-5 flex flex-col gap-4">
                   {stratLoading ? (
-                    <div className="ql-skeleton-card h-10 rounded-md" />
+                    <div className="qb-skeleton-card h-10 rounded-md" />
                   ) : stratError ? (
                     <div className="rounded-md border border-short/30 bg-short/10 px-4 py-3 text-sm text-short">
                       {stratError}
@@ -252,7 +252,7 @@ export function SubmitStrategyModal({
                       <select
                         value={selectedId}
                         onChange={(e) => handleSelectStrategy(e.target.value)}
-                        className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                        className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                       >
                         {strategies.map((s) => (
                           <option key={s.id} value={s.id}>
@@ -265,7 +265,7 @@ export function SubmitStrategyModal({
                   )}
 
                   {mode === "existing" && strategies.length > 0 && (
-                    <div className="ql-glass ql-elev-1 overflow-hidden rounded-xl">
+                    <div className="qb-glass qb-elev-1 overflow-hidden rounded-xl">
                       <div className="border-b border-line px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted">
                         strategy.py
                       </div>
@@ -286,7 +286,7 @@ export function SubmitStrategyModal({
                       placeholder={"def indicator(data):\n    ...\n\ndef signal(fast, slow):\n    ..."}
                       rows={12}
                       spellCheck={false}
-                      className="ql-input resize-y rounded-md px-3 py-2 font-mono text-[13px] leading-relaxed text-ink"
+                      className="qb-input resize-y rounded-md px-3 py-2 font-mono text-[13px] leading-relaxed text-ink"
                     />
                   </label>
                 </div>
@@ -299,7 +299,7 @@ export function SubmitStrategyModal({
                   <select
                     value={assetType}
                     onChange={(e) => setAssetType(e.target.value)}
-                    className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                    className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                   >
                     {ASSET_TYPES.map((a) => (
                       <option key={a.value} value={a.value}>
@@ -314,7 +314,7 @@ export function SubmitStrategyModal({
                     value={symbol}
                     onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                     placeholder="BTCUSDT"
-                    className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                    className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-xs text-muted">
@@ -322,7 +322,7 @@ export function SubmitStrategyModal({
                   <select
                     value={timeframe}
                     onChange={(e) => setTimeframe(e.target.value)}
-                    className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                    className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                   >
                     {TIMEFRAMES.map((t) => (
                       <option key={t} value={t}>
@@ -359,7 +359,7 @@ export function SubmitStrategyModal({
                       min={0}
                       value={commissionPct}
                       onChange={(e) => setCommissionPct(Number(e.target.value))}
-                      className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                      className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                     />
                   </label>
                   <label className="flex flex-col gap-1 text-xs text-muted">
@@ -369,7 +369,7 @@ export function SubmitStrategyModal({
                       min={1}
                       value={capital}
                       onChange={(e) => setCapital(Number(e.target.value))}
-                      className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                      className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                     />
                   </label>
                   <label className="flex flex-col gap-1 text-xs text-muted">
@@ -380,7 +380,7 @@ export function SubmitStrategyModal({
                       max={10}
                       value={folds}
                       onChange={(e) => setFolds(Number(e.target.value))}
-                      className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                      className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                     />
                   </label>
                   <label className="flex flex-col gap-1 text-xs text-muted">
@@ -391,7 +391,7 @@ export function SubmitStrategyModal({
                       max={95}
                       value={split}
                       onChange={(e) => setSplit(Number(e.target.value))}
-                      className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                      className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                     />
                   </label>
                   <label className="flex flex-col gap-1 text-xs text-muted sm:col-span-2">
@@ -401,7 +401,7 @@ export function SubmitStrategyModal({
                       min={0}
                       value={qpStake}
                       onChange={(e) => setQpStake(Number(e.target.value))}
-                      className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                      className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                     />
                   </label>
                 </div>

@@ -1,4 +1,4 @@
-"""Scoring de torneos ML de QuantLab.
+"""Scoring de torneos ML de QuantBattle.
 
 Portado de `numerai-tools/scoring.py` (repo oficial de Numerai) y verificado
 ejecutando ambas implementaciones sobre los mismos datos: desviacion maxima

@@ -6,18 +6,18 @@ export default function TournamentsGuidePage() {
   return (
     <main className="flex min-h-screen flex-col">
       <section className="border-b border-line">
-        <div className="ql-page">
+        <div className="qb-page">
           <h1 className="text-3xl font-semibold tracking-tight text-ink">
             Guía de Torneos
           </h1>
           <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted">
-            Cómo funcionan los torneos de predicción ML de QuantLab: datasets,
+            Cómo funcionan los torneos de predicción ML de QuantBattle: datasets,
             envío de predicciones, evaluación y condiciones de uso de los datos.
           </p>
         </div>
       </section>
 
-      <section className="ql-page flex-1">
+      <section className="qb-page flex-1">
         <div className="prose prose-invert max-w-none">
           <section id="retornos-diarios" className="mb-12 scroll-mt-20">
             <h2 className="text-2xl font-semibold text-ink mb-4">Torneo semanal de retornos reales</h2>
@@ -47,7 +47,7 @@ export default function TournamentsGuidePage() {
               fuera de muestra.
             </p>
             <p className="text-base leading-relaxed text-muted">
-              Las rondas ML no tienen premios QP. Los puntos de QuantLab se usan
+              Las rondas ML no tienen premios QP. Los puntos de QuantBattle se usan
               en otros flujos de la plataforma, pero no en estos torneos.
             </p>
           </div>
@@ -313,7 +313,7 @@ export default function TournamentsGuidePage() {
             <h3 className="text-sm font-semibold text-ink mb-2">¿Qué es el MCP?</h3>
             <p className="text-base leading-relaxed text-muted mb-4">
               El MCP permite que cualquier agente compatible con Model Context Protocol
-              interactúe con QuantLab usando lenguaje natural. El servidor ayuda a
+              interactúe con QuantBattle usando lenguaje natural. El servidor ayuda a
               descubrir torneos ML, consultar datasets, validar predicciones y registrar
               envíos. Necesitas Python para ejecutarlo localmente y una clave API para
               consultar tus comprobantes o enviar predicciones.
@@ -361,7 +361,7 @@ export default function TournamentsGuidePage() {
                     <td className="px-4 py-2">Envía CSV de predicciones a práctica ML</td>
                   </tr>
                   <tr className="border-t border-line/30">
-                    <td className="px-4 py-2 font-medium text-xs">quantlab_status</td>
+                    <td className="px-4 py-2 font-medium text-xs">quantbattle_status</td>
                     <td className="px-4 py-2">✅</td>
                     <td className="px-4 py-2">Comprueba la conexión y el estado de los torneos</td>
                   </tr>
@@ -382,7 +382,7 @@ export default function TournamentsGuidePage() {
           <div className="mb-10">
             <h2 className="text-xl font-semibold text-ink mb-4">Endpoints del Worker</h2>
             <p className="text-base leading-relaxed text-muted mb-4">
-              El worker de QuantLab expone los siguientes endpoints relevantes para
+              El worker de QuantBattle expone los siguientes endpoints relevantes para
               torneos:
             </p>
             <div className="space-y-3">
@@ -414,7 +414,7 @@ export default function TournamentsGuidePage() {
           </div>
 
           {/* CTA */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-6 text-center">
+          <div className="qb-glass qb-elev-1 rounded-xl p-6 text-center">
             <h3 className="text-lg font-semibold text-ink mb-2">¿Listo para competir?</h3>
             <p className="text-sm text-muted mb-4">
               Explora los torneos activos y envía tu primera predicción.

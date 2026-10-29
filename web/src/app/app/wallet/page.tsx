@@ -20,25 +20,25 @@ function WalletSkeleton() {
     <div className="space-y-8">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 animate-fadeIn">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="ql-skeleton-card rounded-xl p-5 space-y-3">
-            <div className="ql-skeleton-line w-20" />
-            <div className="ql-skeleton-line w-32 h-8 mt-2" />
+          <div key={i} className="qb-skeleton-card rounded-xl p-5 space-y-3">
+            <div className="qb-skeleton-line w-20" />
+            <div className="qb-skeleton-line w-32 h-8 mt-2" />
           </div>
         ))}
       </div>
-      <div className="ql-skeleton-card rounded-xl p-5 space-y-4">
-        <div className="ql-skeleton-line w-32" />
+      <div className="qb-skeleton-card rounded-xl p-5 space-y-4">
+        <div className="qb-skeleton-line w-32" />
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="ql-skeleton h-32 rounded-lg" />
+            <div key={i} className="qb-skeleton h-32 rounded-lg" />
           ))}
         </div>
       </div>
-      <div className="ql-skeleton-card rounded-xl p-5 space-y-4">
-        <div className="ql-skeleton-line w-32" />
+      <div className="qb-skeleton-card rounded-xl p-5 space-y-4">
+        <div className="qb-skeleton-line w-32" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="ql-skeleton-line w-full h-8" />
+            <div key={i} className="qb-skeleton-line w-full h-8" />
           ))}
         </div>
       </div>
@@ -132,8 +132,8 @@ export default function WalletPage() {
     return (
       <main className="flex min-h-screen flex-col">
         <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-14">
-          <div className="ql-skeleton-line w-48 h-8" />
-          <div className="ql-skeleton-line w-72 h-4 mt-2" />
+          <div className="qb-skeleton-line w-48 h-8" />
+          <div className="qb-skeleton-line w-72 h-4 mt-2" />
           <div className="mt-8">
             <WalletSkeleton />
           </div>
@@ -160,19 +160,19 @@ export default function WalletPage() {
 
         {/* Balance */}
         <div className="mt-8 grid gap-4 grid-cols-1 sm:grid-cols-3 animate-fadeIn">
-          <div className="ql-glass ql-elev-2 ql-glass-hover rounded-xl p-5">
+          <div className="qb-glass qb-elev-2 qb-glass-hover rounded-xl p-5">
             <p className="text-xs uppercase tracking-wide text-muted">Balance</p>
-            <p className="mt-2 text-3xl font-semibold text-accent ql-glow-text">
+            <p className="mt-2 text-3xl font-semibold text-accent qb-glow-text">
               {balance?.balance ?? 0} QP
             </p>
           </div>
-          <div className="ql-glass ql-elev-1 ql-glass-hover rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 qb-glass-hover rounded-xl p-5">
             <p className="text-xs uppercase tracking-wide text-muted">Tier</p>
             <p className="mt-2 text-2xl font-semibold text-ink">
               {tierInfo.label}
             </p>
           </div>
-          <div className="ql-glass ql-elev-1 ql-glass-hover rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 qb-glass-hover rounded-xl p-5">
             <p className="text-xs uppercase tracking-wide text-muted">Ganados total</p>
             <p className="mt-2 text-2xl font-semibold text-long">
               {balance?.lifetime_earned ?? 0}
@@ -187,7 +187,7 @@ export default function WalletPage() {
         )}
         {/* Comprar QP */}
         {BILLING_ENABLED && (
-        <div className="mt-8 ql-glass ql-elev-1 ql-glass-hover rounded-xl p-5 animate-fadeIn">
+        <div className="mt-8 qb-glass qb-elev-1 qb-glass-hover rounded-xl p-5 animate-fadeIn">
           <h2 className="text-sm font-semibold text-ink">Comprar QP</h2>
 
           {/* Banner Stripe deshabilitado */}
@@ -228,7 +228,7 @@ export default function WalletPage() {
                   <button
                     onClick={() => handleSubscribe(p.amount)}
                     disabled={isSubscribing || stripeDisabled}
-                    className="mt-auto w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-bg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.96] ql-btn"
+                    className="mt-auto w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-bg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.96] qb-btn"
                   >
                     {isSubscribing ? "Procesando..." : "Suscribirse"}
                   </button>
@@ -245,7 +245,7 @@ export default function WalletPage() {
           {ledger.length === 0 ? (
             <EmptyLedgerState />
           ) : (
-            <div className="mt-3 ql-glass ql-elev-1 overflow-hidden rounded-xl">
+            <div className="mt-3 qb-glass qb-elev-1 overflow-hidden rounded-xl">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
@@ -277,7 +277,7 @@ export default function WalletPage() {
         {/* Aviso legal */}
         <p className="mt-8 text-[11px] text-muted">
           Los QuantPoints (QP) son puntos virtuales sin valor monetario. No se pueden retirar ni intercambiar por dinero.
-          Su utilidad es exclusivamente dentro de la plataforma QuantLab.
+          Su utilidad es exclusivamente dentro de la plataforma QuantBattle.
         </p>
       </div>
     </main>

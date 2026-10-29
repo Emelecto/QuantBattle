@@ -1,5 +1,5 @@
 /**
- * Cliente de torneos ML de predicciones (estilo Numerai) para QuantLab.
+ * Cliente de torneos ML de predicciones (estilo Numerai) para QuantBattle.
  *
  * Consume los endpoints `/ml/...` del Worker FastAPI (worker/ml_endpoints.py).
  * Reutiliza el helper `call` de `@/lib/tournaments`, que ya inyecta el Bearer
@@ -133,7 +133,7 @@ export async function submitPredictions(
 ): Promise<{ id: string; row_count: number; status: string; submission?: MlSubmission }> {
   return call<{ id: string; row_count: number; status: string; submission?: MlSubmission }>(
     `/ml/datasets/${datasetId}/predictions`,
-    { method: "POST", headers: { "Content-Type": "text/csv", ...(experiment ? {"X-QuantLab-Experiment": experimentHeader(experiment)} : {}) }, body: file },
+    { method: "POST", headers: { "Content-Type": "text/csv", ...(experiment ? {"X-QuantBattle-Experiment": experimentHeader(experiment)} : {}) }, body: file },
   );
 }
 

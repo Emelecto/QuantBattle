@@ -7,10 +7,10 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Blog de trading cuantitativo",
   description:
-    "Artículos sobre trading cuantitativo, backtesting walk-forward, machine learning y la comunidad QuantLab.",
+    "Artículos sobre trading cuantitativo, backtesting walk-forward, machine learning y la comunidad QuantBattle.",
   alternates: { canonical: "/blog" },
   openGraph: {
-    title: "Blog de QuantLab",
+    title: "Blog de QuantBattle",
     description:
       "Trading cuantitativo, backtesting walk-forward y machine learning, en español.",
     url: "/blog",
@@ -27,11 +27,11 @@ export default function BlogPage() {
       <section className="border-b border-line">
         <div className="mx-auto w-full max-w-4xl px-6 py-16">
           <h1 className="text-3xl font-semibold tracking-tight text-ink">
-            Blog de QuantLab
+            Blog de QuantBattle
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
             Artículos sobre trading cuantitativo, backtesting, machine learning y
-            la comunidad QuantLab.
+            la comunidad QuantBattle.
           </p>
         </div>
       </section>
@@ -42,7 +42,7 @@ export default function BlogPage() {
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="ql-glass ql-elev-1 rounded-xl p-5 hover:border-accent/30 transition-colors block"
+              className="qb-glass qb-elev-1 rounded-xl p-5 hover:border-accent/30 transition-colors block"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -72,7 +72,7 @@ export default function BlogPage() {
       <div className="border-t border-line">
         <div className="mx-auto w-full max-w-4xl px-6 py-4">
           <p className="text-[11px] text-muted">
-            QuantLab es una herramienta de investigación. No es asesoría
+            QuantBattle es una herramienta de investigación. No es asesoría
             financiera.
           </p>
         </div>

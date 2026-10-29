@@ -1,4 +1,4 @@
-// Cliente del motor de backtest (worker QuantLab).
+// Cliente del motor de backtest (worker QuantBattle).
 // El worker permite los orígenes configurados y exige una sesión Supabase.
 // La persistencia de resultados se gestiona en runs.ts, con caché por cuenta.
 //

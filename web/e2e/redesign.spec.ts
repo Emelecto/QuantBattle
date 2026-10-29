@@ -44,7 +44,7 @@ test("el dashboard comunica un fallo de datos sin inventar una ronda vacía", as
   const expiresAt = Math.floor(Date.now() / 1000) + 3600;
   const payload = Buffer.from(JSON.stringify({ sub: "00000000-0000-4000-8000-000000000001", role: "authenticated", aud: "authenticated", exp: expiresAt })).toString("base64url");
   const token = ["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", payload, "preview-signature"].join(".");
-  const user = { id: "00000000-0000-4000-8000-000000000001", aud: "authenticated", role: "authenticated", email: "preview@quantlab.example", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: { full_name: "Vista técnica" }, created_at: "2026-10-01T00:00:00Z" };
+  const user = { id: "00000000-0000-4000-8000-000000000001", aud: "authenticated", role: "authenticated", email: "preview@quantbattle.example", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: { full_name: "Vista técnica" }, created_at: "2026-10-01T00:00:00Z" };
   const session = { access_token: token, refresh_token: "preview-refresh", token_type: "bearer", expires_in: 3600, expires_at: expiresAt, user };
   await page.context().addCookies([{ name: `sb-${supabaseHost.split(".")[0]}-auth-token`, value: JSON.stringify(session), url: "http://localhost:3100" }]);
   await page.route("**/*", (route) => {
@@ -73,8 +73,8 @@ test("el dashboard comunica un fallo de datos sin inventar una ronda vacía", as
 test("acceso y registro usan el tema claro", async ({ page }) => {
   for (const path of ["/login", "/register"]) {
     await page.goto(path);
-    await expect(page.locator(".ql-auth-card")).toBeVisible();
-    await expect(page.locator(".ql-auth-card")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(page.locator(".qb-auth-card")).toBeVisible();
+    await expect(page.locator(".qb-auth-card")).toHaveCSS("background-color", "rgb(255, 255, 255)");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });

@@ -13,17 +13,17 @@ export function HeroChart() {
   const all = useMemo(() => heroDemoPoints(), []);
 
   return (
-    <div className="ql-perspective relative">
-      <div className="ql-glass ql-elev-2 relative overflow-hidden rounded-xl border border-line p-3 sm:p-4">
+    <div className="qb-perspective relative">
+      <div className="qb-glass qb-elev-2 relative overflow-hidden rounded-xl border border-line p-3 sm:p-4">
         {/* Chips flotantes sobre la gráfica */}
         <div className="pointer-events-none absolute inset-x-0 top-6 z-10 flex flex-wrap items-start justify-center gap-2 px-4">
-          <span className="ql-glass rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] font-medium text-accent shadow-lg">
+          <span className="qb-glass rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] font-medium text-accent shadow-lg">
             Sharpe 1.42
           </span>
-          <span className="ql-glass rounded-full border border-line bg-surface-solid/80 px-3 py-1 font-mono text-[11px] text-muted shadow-lg">
+          <span className="qb-glass rounded-full border border-line bg-surface-solid/80 px-3 py-1 font-mono text-[11px] text-muted shadow-lg">
             MaxDD −18%
           </span>
-          <span className="ql-glass rounded-full border border-long/30 bg-long/10 px-3 py-1 font-mono text-[11px] font-medium text-long shadow-lg">
+          <span className="qb-glass rounded-full border border-long/30 bg-long/10 px-3 py-1 font-mono text-[11px] font-medium text-long shadow-lg">
             ▲ +237% OOS
           </span>
         </div>

@@ -1,4 +1,4 @@
--- QuantLab migración 0024: crédito atómico de QuantPoints.
+-- QuantBattle migración 0024: crédito atómico de QuantPoints.
 -- Uso: Emilio la aplica MANUALMENTE en el SQL editor de Supabase.
 -- Actualiza balance + lifetime_earned/spent según el signo y registra en el ledger.
 

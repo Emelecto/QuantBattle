@@ -43,7 +43,7 @@ test("Academia guarda el quiz y continúa en la siguiente lección", async ({ pa
   }
   await page.getByRole("button", { name: "Revisar respuestas", exact: true }).click();
   await expect(page.locator(".academia-quiz-score")).toHaveText(`Aciertos: ${quiz.questions.length}/${quiz.questions.length}`);
-  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("quantlab.academia.v1") || "{}").completed)).toContain("c1-l1");
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("quantbattle.academia.v1") || "{}").completed)).toContain("c1-l1");
   await page.goto("/app/academia/fundamentos");
   await expect(page.locator(".academia-progress-text")).toContainText("1/7 lecciones");
   await page.reload();
@@ -60,7 +60,7 @@ test("Academia permite reintentar y no concede progreso por respuestas incorrect
   for (const [i, question] of quiz.questions.entries()) await page.locator(".academia-quiz-q").nth(i).getByRole("button").nth((question.answer + 1) % question.options.length).click();
   await page.getByRole("button", { name: "Revisar respuestas", exact: true }).click();
   await expect(page.getByRole("button", { name: "Reintentar", exact: true })).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem("quantlab.academia.v1"))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem("quantbattle.academia.v1"))).toBeNull();
   expect(awards).toBe(0);
   await page.getByRole("button", { name: "Reintentar", exact: true }).click();
   await expect(page.getByRole("button", { name: "Revisar respuestas", exact: true })).toBeDisabled();
@@ -68,7 +68,7 @@ test("Academia permite reintentar y no concede progreso por respuestas incorrect
 
 test("el progreso del curso excluye duplicados e identificadores desconocidos", async ({ page }) => {
   await session(page);
-  await page.addInitScript(() => localStorage.setItem("quantlab.academia.v1", JSON.stringify({ completed: ["c1-l1", "c1-l1", "unknown", "c2-l1"], perfect: ["c1-l1", "c1-l1", "unknown"] })));
+  await page.addInitScript(() => localStorage.setItem("quantbattle.academia.v1", JSON.stringify({ completed: ["c1-l1", "c1-l1", "unknown", "c2-l1"], perfect: ["c1-l1", "c1-l1", "unknown"] })));
   await page.goto("/app/academia/fundamentos");
   await expect(page.locator(".academia-progress-text")).toHaveText("1/7 lecciones · 1 QP ganados");
 });

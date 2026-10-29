@@ -19,7 +19,7 @@ await page.addInitScript(()=>localStorage.setItem('ql_onboarded','1'));
 const base=process.env.QL_UI_BASE_URL||'http://localhost:3100';const out='../artifacts/visual-redesign';await mkdir(out,{recursive:true});
 const productShots=process.env.QL_CAPTURE_PUBLIC_ASSETS==='true'?'public/research/product':out+'/product';await mkdir(productShots,{recursive:true});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
-await page.goto(base+'/login');await page.getByLabel('Correo electrónico').fill('technical-demo@quantlab.example');await page.getByLabel('Contraseña',{exact:true}).fill(password);await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click();await page.waitForURL(/\/app(?:\/|$)/);
+await page.goto(base+'/login');await page.getByLabel('Correo electrónico').fill('technical-demo@quantbattle.example');await page.getByLabel('Contraseña',{exact:true}).fill(password);await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click();await page.waitForURL(/\/app(?:\/|$)/);
 await expect(page.locator('#historial-ml ol')).toBeVisible({timeout:60000});
 const rows=page.locator('#historial-ml ol > li');await expect(rows).toHaveCount(3);
 await page.screenshot({path:out+'/dashboard-ready.png',fullPage:true});
@@ -33,7 +33,7 @@ await page.getByRole('button',{name:/Ver los .* experimentos de esta página/}).
 if(await rows.count()<=3)throw Error('History did not expand');await page.getByRole('button',{name:'Mostrar solo los tres más recientes'}).click();await expect(rows).toHaveCount(3);
 await page.goto(base+'/app/tournaments');await expect(page.getByRole('link',{name:'Ver ronda',exact:true}).first()).toBeVisible({timeout:60000});await page.screenshot({path:out+'/tournaments-ready.png',fullPage:true});
 await page.goto(base+'/app/tournaments/61079ded-94e1-4b5d-9434-28492234acc6');await expect(page.getByRole('tab',{name:'Datos',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:/Descargar/}).first()).toBeVisible({timeout:60000});await page.screenshot({path:out+'/datasets-ready.png',fullPage:true});
-await page.getByRole('button',{name:'Descargar train.parquet',exact:true}).locator('xpath=ancestor::div[contains(@class,"ql-glass")][1]').screenshot({path:productShots+'/dataset.png'});
+await page.getByRole('button',{name:'Descargar train.parquet',exact:true}).locator('xpath=ancestor::div[contains(@class,"qb-glass")][1]').screenshot({path:productShots+'/dataset.png'});
 const submit=page.getByRole('tab').filter({hasText:'Enviar'});await submit.click();await expect(page.getByText('Ficha del experimento',{exact:true})).toBeVisible();await page.screenshot({path:out+'/submission-ready.png',fullPage:true});
 await expect(page.getByText('Comprobante del envío seleccionado',{exact:true})).toBeVisible();
 await page.locator('fieldset').screenshot({path:productShots+'/experiment.png'});

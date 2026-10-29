@@ -42,7 +42,7 @@ export function LeaderboardRow({
   return (
     <tr
       className={cn(
-        "ql-row ql-glass-hover border-b border-line last:border-0 transition-colors",
+        "qb-row qb-glass-hover border-b border-line last:border-0 transition-colors",
         highlight && "bg-accent/[0.06]",
       )}
     >

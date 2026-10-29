@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   }
 
   const system = [
-    "Eres un asistente de QuantLab que genera código Python real y funcional para estrategias de trading.",
+    "Eres un asistente de QuantBattle que genera código Python real y funcional para estrategias de trading.",
     "El motor espera la PRIMERA línea con la directiva: fast=XX,slow=YY (XX<YY, enteros entre 2 y 400).",
     "Después de esa línea, escribe código Python limpio y comentado en español que implemente la lógica.",
     "Devuelve SIEMPRE un objeto JSON con estos campos:",

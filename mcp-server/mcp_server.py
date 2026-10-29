@@ -1,4 +1,4 @@
-"""QuantLab MCP: descubre torneos ML, prepara datasets y registra predicciones."""
+"""QuantBattle MCP: descubre torneos ML, prepara datasets y registra predicciones."""
 from __future__ import annotations
 
 import base64
@@ -15,27 +15,29 @@ import httpx
 from mcp.server.mcpserver import MCPServer
 
 
-WORKER = os.environ.get(
-    "QUANTLAB_WORKER_URL", "https://quantlab2.onrender.com"
+WORKER = (
+    os.environ.get("QUANTBATTLE_WORKER_URL")
+    or os.environ.get("QUANTLAB_WORKER_URL")
+    or "https://quantlab2.onrender.com"
 ).rstrip("/")
-TOKEN = os.environ.get("QUANTLAB_TOKEN", "").strip()
+TOKEN = (os.environ.get("QUANTBATTLE_TOKEN") or os.environ.get("QUANTLAB_TOKEN", "")).strip()
 TIMEOUT = httpx.Timeout(60.0, connect=15.0)
 MAX_CSV_BYTES = 10 * 1024 * 1024
 
 mcp = MCPServer(
-    name="quantlab",
+    name="quantbattle",
     instructions=(
-        "Ayudas a empezar y participar en los torneos de predicción ML de QuantLab. "
+        "Ayudas a empezar y participar en los torneos de predicción ML de QuantBattle. "
         "Hay dos protocolos distintos: la práctica ML usa Spearman por era y predicciones "
         "entre 0 y 1; el torneo semanal diario usa retornos decimales entre -1 y 10, cuatro "
         "rondas y puntuación MAE frente a cero. Primero descubre torneos y descarga sus "
         "datasets; live no contiene respuestas. Nunca inventes scores ni resultados. "
-        "Enviar predicciones o consultar envíos propios requiere QUANTLAB_TOKEN (clave qlk_)."
+        "Enviar predicciones o consultar envíos propios requiere QUANTBATTLE_TOKEN (clave qbt_)."
     ),
 )
 
 
-class QuantLabError(RuntimeError):
+class QuantBattleError(RuntimeError):
     pass
 
 
@@ -43,8 +45,8 @@ def _request(method: str, path: str, *, auth: bool = False, **kwargs: Any) -> An
     headers = dict(kwargs.pop("headers", {}))
     if auth:
         if not TOKEN:
-            raise QuantLabError(
-                "Falta QUANTLAB_TOKEN. Crea una clave API en QuantLab, en /app/api-keys, "
+            raise QuantBattleError(
+                "Falta QUANTBATTLE_TOKEN. Crea una clave API en QuantBattle, en /app/api-keys, "
                 "y configúrala como variable de entorno del servidor MCP."
             )
         headers["Authorization"] = f"Bearer {TOKEN}"
@@ -53,8 +55,8 @@ def _request(method: str, path: str, *, auth: bool = False, **kwargs: Any) -> An
             method, f"{WORKER}{path}", headers=headers, timeout=TIMEOUT, **kwargs
         )
     except httpx.HTTPError as exc:
-        raise QuantLabError(
-            f"No se pudo conectar al worker de QuantLab ({WORKER}): {exc}"
+        raise QuantBattleError(
+            f"No se pudo conectar al worker de QuantBattle ({WORKER}): {exc}"
         ) from exc
     if response.is_error:
         try:
@@ -63,8 +65,8 @@ def _request(method: str, path: str, *, auth: bool = False, **kwargs: Any) -> An
         except ValueError:
             detail = response.text[:500]
         if response.status_code == 401:
-            detail = "QUANTLAB_TOKEN inválido o revocado. Crea una clave nueva en /app/api-keys."
-        raise QuantLabError(f"QuantLab respondió HTTP {response.status_code}: {detail}")
+            detail = "QUANTBATTLE_TOKEN inválido o revocado. Crea una clave nueva en /app/api-keys."
+        raise QuantBattleError(f"QuantBattle respondió HTTP {response.status_code}: {detail}")
     if not response.content:
         return None
     return response.json()
@@ -80,14 +82,14 @@ def _experiment_header(experiment_json: str | None) -> str | None:
     try:
         value = json.loads(experiment_json)
     except json.JSONDecodeError as exc:
-        raise QuantLabError(f"experiment_json no es JSON válido: {exc}") from exc
+        raise QuantBattleError(f"experiment_json no es JSON válido: {exc}") from exc
     if not isinstance(value, dict):
-        raise QuantLabError("experiment_json debe ser un objeto JSON")
+        raise QuantBattleError("experiment_json debe ser un objeto JSON")
     encoded = base64.b64encode(
         json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     ).decode("ascii")
     if len(encoded) > 6000:
-        raise QuantLabError("La ficha experimental codificada supera el límite de 6000 caracteres")
+        raise QuantBattleError("La ficha experimental codificada supera el límite de 6000 caracteres")
     return encoded
 
 
@@ -96,41 +98,41 @@ def _read_csv(path: str) -> tuple[bytes, list[dict[str, str]]]:
     try:
         content = file_path.read_bytes()
     except OSError as exc:
-        raise QuantLabError(f"No se pudo leer el CSV {file_path}: {exc}") from exc
+        raise QuantBattleError(f"No se pudo leer el CSV {file_path}: {exc}") from exc
     if len(content) > MAX_CSV_BYTES:
-        raise QuantLabError("El CSV supera el límite de 10 MB de QuantLab")
+        raise QuantBattleError("El CSV supera el límite de 10 MB de QuantBattle")
     try:
         text = content.decode("utf-8-sig")
         reader = csv.DictReader(io.StringIO(text, newline=""))
         if reader.fieldnames != ["id", "prediction"]:
-            raise QuantLabError("La cabecera debe ser exactamente: id,prediction")
+            raise QuantBattleError("La cabecera debe ser exactamente: id,prediction")
         rows = list(reader)
     except UnicodeDecodeError as exc:
-        raise QuantLabError("El CSV debe estar codificado en UTF-8") from exc
+        raise QuantBattleError("El CSV debe estar codificado en UTF-8") from exc
     if not rows:
-        raise QuantLabError("El CSV debe contener al menos una predicción")
+        raise QuantBattleError("El CSV debe contener al menos una predicción")
     seen: set[str] = set()
     for number, row in enumerate(rows, start=2):
         identity = (row.get("id") or "").strip()
         raw = (row.get("prediction") or "").strip()
         if not identity:
-            raise QuantLabError(f"Fila {number}: id vacío")
+            raise QuantBattleError(f"Fila {number}: id vacío")
         if identity in seen:
-            raise QuantLabError(f"Fila {number}: id duplicado ({identity})")
+            raise QuantBattleError(f"Fila {number}: id duplicado ({identity})")
         seen.add(identity)
         try:
             number_value = float(raw)
         except ValueError as exc:
-            raise QuantLabError(f"Fila {number}: prediction no es numérico ({raw!r})") from exc
+            raise QuantBattleError(f"Fila {number}: prediction no es numérico ({raw!r})") from exc
         if not math.isfinite(number_value):
-            raise QuantLabError(f"Fila {number}: prediction debe ser finito")
+            raise QuantBattleError(f"Fila {number}: prediction debe ser finito")
         row["id"] = identity
         row["prediction"] = raw
     return content, rows
 
 
 @mcp.tool()
-def quantlab_status() -> str:
+def quantbattle_status() -> str:
     """Comprueba la conexión con el worker configurado y describe los módulos ML."""
     try:
         health = _request("GET", "/health")
@@ -146,7 +148,7 @@ def quantlab_status() -> str:
             "practice_ml_tournaments": len(practice),
             "authentication_configured": bool(TOKEN),
         })
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return _text({"connected": False, "worker": WORKER, "error": str(exc)})
 
 
@@ -215,7 +217,7 @@ def list_ml_tournaments(include_closed: bool = False) -> str:
                     "rules_text": tournament.get("rules_text"), "rounds": rounds,
                 })
         return _text({"weekly_return_tournaments": weekly, "practice_ml_tournaments": practice_items})
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al listar torneos ML: {exc}"
 
 
@@ -224,7 +226,7 @@ def get_weekly_tournament(week_id: str) -> str:
     """Obtiene reglas, calendario, datasets publicados y estado de resultados de una semana de retornos."""
     try:
         return _text(_request("GET", f"/ml/return-tournaments/{week_id}"))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al consultar la semana: {exc}"
 
 
@@ -238,7 +240,7 @@ def list_practice_datasets(tournament_id: str = "", round_number: int = 0) -> st
         params["round_number"] = round_number
     try:
         return _text(_request("GET", "/ml/datasets", params=params))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al consultar datasets: {exc}"
 
 
@@ -249,7 +251,7 @@ def get_practice_dataset_download(dataset_id: str, kind: str) -> str:
         return "kind debe ser train, validation o live"
     try:
         return _text(_request("GET", f"/ml/datasets/{dataset_id}/download", params={"kind": kind}))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al obtener el enlace: {exc}"
 
 
@@ -260,7 +262,7 @@ def get_weekly_dataset_download(round_id: str, kind: str) -> str:
         return "kind debe ser train, validation o live"
     try:
         return _text(_request("GET", f"/ml/return-rounds/{round_id}/download/{kind}"))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al obtener el enlace: {exc}"
 
 
@@ -270,7 +272,7 @@ def get_weekly_live_ids(round_id: str) -> str:
     try:
         result = _request("GET", f"/ml/return-rounds/{round_id}/rows")
         return _text({"round_id": result.get("round_id"), "version": result.get("version"), "ids": result.get("ids")})
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al obtener IDs live: {exc}"
 
 
@@ -321,13 +323,13 @@ def validate_prediction_csv(csv_path: str, protocol: str, dataset_id: str = "", 
         return _text({"valid": True, "protocol": protocol, "rows": len(rows), "version": version,
                       "prediction_min": min(values), "prediction_max": max(values),
                       "sha256": hashlib.sha256(Path(csv_path).expanduser().read_bytes()).hexdigest()})
-    except (QuantLabError, OSError) as exc:
+    except (QuantBattleError, OSError) as exc:
         return f"No se pudo validar el CSV: {exc}"
 
 
 @mcp.tool()
 def submit_practice_predictions(dataset_id: str, csv_path: str, experiment_json: str) -> str:
-    """Envía CSV id,prediction a una ronda de práctica ML. Requiere QUANTLAB_TOKEN y ficha JSON con model_name, parameters opcional, seed opcional y note opcional."""
+    """Envía CSV id,prediction a una ronda de práctica ML. Requiere QUANTBATTLE_TOKEN y ficha JSON con model_name, parameters opcional, seed opcional y note opcional."""
     try:
         content, _ = _read_csv(csv_path)
         encoded = _experiment_header(experiment_json)
@@ -335,15 +337,15 @@ def submit_practice_predictions(dataset_id: str, csv_path: str, experiment_json:
         if json.loads(validation).get("valid") is not True:
             return f"CSV no enviado porque no pasó la validación local: {validation}"
         response = _request("POST", f"/ml/datasets/{dataset_id}/predictions", auth=True,
-                            content=content, headers={"Content-Type": "text/csv", "X-QuantLab-Experiment": encoded or ""})
+                            content=content, headers={"Content-Type": "text/csv", "X-QuantBattle-Experiment": encoded or ""})
         return _text(response)
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"No se confirmó el envío de práctica: {exc}"
 
 
 @mcp.tool()
 def submit_weekly_predictions(round_id: str, csv_path: str, experiment_json: str) -> str:
-    """Envía CSV id,prediction a una ronda semanal abierta. Requiere QUANTLAB_TOKEN y ficha JSON con model_name, parameters opcional, seed opcional y note opcional."""
+    """Envía CSV id,prediction a una ronda semanal abierta. Requiere QUANTBATTLE_TOKEN y ficha JSON con model_name, parameters opcional, seed opcional y note opcional."""
     try:
         content, _ = _read_csv(csv_path)
         encoded = _experiment_header(experiment_json)
@@ -351,27 +353,27 @@ def submit_weekly_predictions(round_id: str, csv_path: str, experiment_json: str
         if json.loads(validation).get("valid") is not True:
             return f"CSV no enviado porque no pasó la validación local: {validation}"
         response = _request("POST", f"/ml/return-rounds/{round_id}/predictions", auth=True,
-                            content=content, headers={"Content-Type": "text/csv", "X-QuantLab-Experiment": encoded or ""})
+                            content=content, headers={"Content-Type": "text/csv", "X-QuantBattle-Experiment": encoded or ""})
         return _text(response)
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"No se confirmó el envío semanal: {exc}"
 
 
 @mcp.tool()
 def get_my_practice_submission(dataset_id: str) -> str:
-    """Consulta el comprobante seleccionado del usuario para un dataset de práctica ML. Requiere QUANTLAB_TOKEN."""
+    """Consulta el comprobante seleccionado del usuario para un dataset de práctica ML. Requiere QUANTBATTLE_TOKEN."""
     try:
         return _text(_request("GET", "/ml/predictions/mine", auth=True, params={"dataset_id": dataset_id}))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al consultar el envío: {exc}"
 
 
 @mcp.tool()
 def get_my_weekly_submissions(round_id: str) -> str:
-    """Consulta intentos y comprobantes propios de una ronda semanal. Requiere QUANTLAB_TOKEN."""
+    """Consulta intentos y comprobantes propios de una ronda semanal. Requiere QUANTBATTLE_TOKEN."""
     try:
         return _text(_request("GET", f"/ml/return-rounds/{round_id}/mine", auth=True))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al consultar comprobantes: {exc}"
 
 
@@ -380,16 +382,16 @@ def get_ml_leaderboard(dataset_id: str) -> str:
     """Consulta el leaderboard público de práctica cuando la ronda ya esté puntuada."""
     try:
         return _text(_request("GET", "/ml/leaderboard", params={"dataset_id": dataset_id}))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Error al consultar leaderboard: {exc}"
 
 
 @mcp.tool()
 def get_weekly_results(week_id: str) -> str:
-    """Consulta ranking y evidencia del torneo semanal; QuantLab mantiene los resultados ocultos hasta el cierre de las cuatro rondas."""
+    """Consulta ranking y evidencia del torneo semanal; QuantBattle mantiene los resultados ocultos hasta el cierre de las cuatro rondas."""
     try:
         return _text(_request("GET", f"/ml/return-tournaments/{week_id}/results"))
-    except QuantLabError as exc:
+    except QuantBattleError as exc:
         return f"Resultados no disponibles: {exc}"
 
 

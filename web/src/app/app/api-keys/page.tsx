@@ -29,12 +29,12 @@ export default function ApiKeysPage() {
 
   const mcpConfig = newKey
     ? client === "claude"
-      ? `claude mcp add quantlab -e QUANTLAB_TOKEN=${newKey} -- python C:/Users/ecard/QuantLab/mcp-server/mcp_server.py`
+      ? `claude mcp add quantbattle -e QUANTBATTLE_TOKEN=${newKey} -- python C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py`
       : client === "cursor"
-        ? JSON.stringify({ mcpServers: { quantlab: { command: "python", args: ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"], env: { QUANTLAB_TOKEN: newKey } } } }, null, 2)
+        ? JSON.stringify({ mcpServers: { quantbattle: { command: "python", args: ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"], env: { QUANTBATTLE_TOKEN: newKey } } } }, null, 2)
         : client === "codex"
-          ? `[mcp_servers.quantlab]\ncommand = "python"\nargs = ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"]\nenv = { QUANTLAB_TOKEN = "${newKey}" }`
-          : JSON.stringify({ mcpServers: { quantlab: { command: "python", args: ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"], env: { QUANTLAB_TOKEN: newKey } } } }, null, 2)
+          ? `[mcp_servers.quantbattle]\ncommand = "python"\nargs = ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"]\nenv = { QUANTBATTLE_TOKEN = "${newKey}" }`
+          : JSON.stringify({ mcpServers: { quantbattle: { command: "python", args: ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"], env: { QUANTBATTLE_TOKEN: newKey } } } }, null, 2)
     : "";
 
   const load = useCallback(async () => {
@@ -98,14 +98,14 @@ export default function ApiKeysPage() {
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
               Crea una clave para conectar cualquier agente compatible con MCP a
-              QuantLab. Necesitarás iniciar sesión para crear, consultar o revocar
+              QuantBattle. Necesitarás iniciar sesión para crear, consultar o revocar
               tus claves.
             </p>
           </div>
         </section>
 
         <section className="flex flex-1 items-center justify-center px-6 py-16">
-          <div className="ql-glass ql-elev-1 flex max-w-md flex-col items-center gap-5 rounded-xl p-8 text-center">
+          <div className="qb-glass qb-elev-1 flex max-w-md flex-col items-center gap-5 rounded-xl p-8 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10">
               <span className="text-2xl">🔑</span>
             </div>
@@ -114,7 +114,7 @@ export default function ApiKeysPage() {
             </h2>
             <p className="text-sm leading-relaxed text-muted">
               Las claves API son personales y te permiten conectar tu agente de IA
-              con QuantLab. Crea una cuenta gratuita o
+              con QuantBattle. Crea una cuenta gratuita o
               inicia sesión para empezar.
             </p>
             <div className="flex w-full flex-col gap-3 sm:flex-row">
@@ -139,16 +139,16 @@ export default function ApiKeysPage() {
 
   return (
     <main className="flex min-h-screen flex-col">
-      <section className="ql-page flex-1">
+      <section className="qb-page flex-1">
         <h1 className="text-3xl font-semibold tracking-tight text-ink">API y MCP</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           Administra tus claves API y conecta cualquier agente compatible con MCP
-          a los torneos ML de QuantLab. La clave se muestra una sola vez y puedes
+          a los torneos ML de QuantBattle. La clave se muestra una sola vez y puedes
           revocarla cuando quieras.
         </p>
 
         {/* Crear nueva clave */}
-        <div className="ql-glass ql-elev-1 mt-8 rounded-xl p-5">
+        <div className="qb-glass qb-elev-1 mt-8 rounded-xl p-5">
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               aria-label="Nombre de la clave"
@@ -156,7 +156,7 @@ export default function ApiKeysPage() {
               onChange={(e) => setKeyName(e.target.value)}
               placeholder="Nombre de la clave (ej: Mi agente de investigación)"
               maxLength={50}
-              className="ql-input flex-1 rounded-md px-3 py-2 text-sm text-ink"
+              className="qb-input flex-1 rounded-md px-3 py-2 text-sm text-ink"
             />
             <button
               onClick={createKey}
@@ -200,10 +200,10 @@ export default function ApiKeysPage() {
             <div className="mt-5 rounded-lg border border-line p-4">
               <p className="text-sm font-semibold text-ink">Configura tu agente MCP</p>
               <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                QuantLab usa MCP estándar por stdio. Elige un cliente para ver su configuración; otros agentes compatibles pueden usar el ejemplo JSON genérico.
+                QuantBattle usa MCP estándar por stdio. Elige un cliente para ver su configuración; otros agentes compatibles pueden usar el ejemplo JSON genérico.
               </p>
               <label className="mt-4 block text-xs font-medium text-muted" htmlFor="mcp-client">Cliente de IA</label>
-              <select id="mcp-client" value={client} onChange={(event) => setClient(event.target.value as typeof client)} className="ql-input mt-1 w-full rounded-md px-3 py-2 text-sm text-ink sm:max-w-xs">
+              <select id="mcp-client" value={client} onChange={(event) => setClient(event.target.value as typeof client)} className="qb-input mt-1 w-full rounded-md px-3 py-2 text-sm text-ink sm:max-w-xs">
                 <option value="generic">Otro agente MCP (JSON)</option>
                 <option value="claude">Claude Code</option>
                 <option value="cursor">Cursor</option>
@@ -217,7 +217,7 @@ export default function ApiKeysPage() {
                 >{copiedCmd ? "✓ Copiada" : "Copiar configuración"}</button>
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted">
-                Reemplaza la ruta de ejemplo por la ubicación de <code className="font-mono">mcp_server.py</code> en tu equipo. Guarda la clave como variable <code className="font-mono">QUANTLAB_TOKEN</code> y no la compartas.
+                Reemplaza la ruta de ejemplo por la ubicación de <code className="font-mono">mcp_server.py</code> en tu equipo. Guarda la clave como variable <code className="font-mono">QUANTBATTLE_TOKEN</code> y no la compartas.
               </p>
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function ApiKeysPage() {
         ) : error && keys === null ? (
           <div className="mt-4" role="alert"><p className="text-sm text-muted">No se pudieron consultar tus claves.</p><button type="button" onClick={() => void load()} className={buttonClasses("secondary", "sm") + " mt-3"}>Reintentar carga</button></div>
         ) : !keys || keys.length === 0 ? (
-          <div className="ql-glass ql-elev-1 mt-4 rounded-xl px-6 py-10 text-center">
+          <div className="qb-glass qb-elev-1 mt-4 rounded-xl px-6 py-10 text-center">
             <p className="text-sm text-muted">
               Aún no tienes claves. Crea una arriba para conectar tu agente de IA.
             </p>
@@ -241,7 +241,7 @@ export default function ApiKeysPage() {
         ) : (
           <div className="mt-4">
             {/* Últimas 3 claves */}
-            <div className="ql-glass overflow-hidden rounded-xl">
+            <div className="qb-glass overflow-hidden rounded-xl">
               <ul className="divide-y divide-line">
                 {keys.slice(0, 3).map((k) => (
                   <li key={k.id} className="flex items-center gap-4 px-5 py-4">
@@ -281,7 +281,7 @@ export default function ApiKeysPage() {
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </summary>
-                <div className="ql-glass mt-2 overflow-hidden rounded-xl">
+                <div className="qb-glass mt-2 overflow-hidden rounded-xl">
                   <ul className="divide-y divide-line">
                     {keys.slice(3).map((k) => (
                       <li key={k.id} className="flex items-center gap-4 px-5 py-4">
@@ -316,7 +316,7 @@ export default function ApiKeysPage() {
           </div>
         )}
 
-        <div className="ql-glass ql-elev-1 mt-10 rounded-xl p-5">
+        <div className="qb-glass qb-elev-1 mt-10 rounded-xl p-5">
           <h3 className="text-sm font-semibold text-ink">¿Qué puedes hacer con el MCP?</h3>
           <p className="mt-2 text-[13px] leading-relaxed text-muted">Descubrir torneos ML, consultar plazos y reglas, localizar datasets públicos, validar predicciones y enviar tu CSV con la ficha del modelo. Las acciones de cuenta usan esta clave API.</p>
           <p className="mt-3 text-sm text-muted">Consulta las <Link href="/app/api-keys/instructions" className="text-accent hover:underline">instrucciones de conexión</Link> para más ejemplos de clientes MCP.</p>

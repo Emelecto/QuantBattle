@@ -1,4 +1,4 @@
-# Motor de torneos + tokens + marketplace para QuantLab.
+# Motor de torneos + tokens + marketplace para QuantBattle.
 # Endpoints FastAPI que el frontend invoca vía NEXT_PUBLIC_WORKER_URL.
 
 from __future__ import annotations
@@ -1034,7 +1034,7 @@ def _unique_slug(sb, title: str, author_id: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# API KEYS (acceso programático / MCP — claves qlk_... sin expiración)
+# API KEYS (acceso programático / MCP — claves qbt_... sin expiración)
 # ---------------------------------------------------------------------------
 
 import hashlib
@@ -1065,7 +1065,7 @@ def create_api_key(request: Request, body: dict):
     if len(existing.data or []) >= 10:
         raise HTTPException(400, "Límite de 10 claves activas alcanzado. Revoca alguna primero.")
 
-    key = "qlk_" + secrets.token_hex(24)  # 48 hex chars
+    key = "qbt_" + secrets.token_hex(24)  # 48 hex chars
     sb.table("api_keys").insert(
         {"user_id": uid, "name": name, "key_hash": _hash_key(key)}
     ).execute()

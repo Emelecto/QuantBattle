@@ -1,4 +1,4 @@
-# Endpoints de notificaciones para el worker de QuantLab.
+# Endpoints de notificaciones para el worker de QuantBattle.
 # CRUD de notificaciones en-app para usuarios autenticados.
 
 from __future__ import annotations

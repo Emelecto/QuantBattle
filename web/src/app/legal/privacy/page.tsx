@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * /legal/privacy — Política de Privacidad de QuantLab.
+ * /legal/privacy — Política de Privacidad de QuantBattle.
  * Server component estático. Español colombiano.
  */
 
@@ -30,7 +30,7 @@ function Section({
 }
 
 export const metadata = {
-  title: "Política de Privacidad — QuantLab",
+  title: "Política de Privacidad — QuantBattle",
 };
 
 export default function PrivacyPage() {
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
         Última actualización: 25 de agosto de 2026
       </p>
       <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted">
-        Esta política explica qué datos recoge QuantLab, cómo los trata y qué
+        Esta política explica qué datos recoge QuantBattle, cómo los trata y qué
         derechos tienes. Tratamos los datos personales conforme a la Ley 1581
         de 2012 y sus decretos reglamentarios (régimen colombiano de protección
         de datos).
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
           <p>
             Las cotizaciones provienen de Binance, Bybit y Yahoo Finance como
             fuentes públicas de datos de mercado. Se consultan desde servidores
-            de QuantLab, sin asociarlas a tu identidad; cada plataforma aplica
+            de QuantBattle, sin asociarlas a tu identidad; cada plataforma aplica
             sus propias políticas de privacidad sobre sus servicios.
           </p>
         </Section>
@@ -129,7 +129,7 @@ export default function PrivacyPage() {
           <p>
             Puedes conocer, actualizar y rectificar tus datos personales, y
             solicitar la eliminación de tu cuenta, escribiendo al canal de
-            soporte de QuantLab. Atendemos las solicitudes dentro de los
+            soporte de QuantBattle. Atendemos las solicitudes dentro de los
             plazos previstos por la ley; luego de eliminar la cuenta solo se
             conservan los datos cuya retención exija la norma o datos
             anonimizados con fines estadísticos.

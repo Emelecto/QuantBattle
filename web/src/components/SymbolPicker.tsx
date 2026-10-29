@@ -71,7 +71,7 @@ export function SymbolPicker({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="ql-input flex h-10 w-full items-center justify-between rounded-md px-3 text-sm"
+        className="qb-input flex h-10 w-full items-center justify-between rounded-md px-3 text-sm"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -100,7 +100,7 @@ export function SymbolPicker({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar por ticker o nombre…"
-              className="ql-input w-full rounded-md px-3 py-1.5 text-[13px] text-ink"
+              className="qb-input w-full rounded-md px-3 py-1.5 text-[13px] text-ink"
             />
           </div>
           <ul className="max-h-64 overflow-y-auto">

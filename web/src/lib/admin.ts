@@ -1,5 +1,5 @@
 /**
- * Cliente de admin para QuantLab.
+ * Cliente de admin para QuantBattle.
  * Consume los endpoints `/admin/...` del Worker Fastapi.
  */
 import { call } from "@/lib/tournaments";

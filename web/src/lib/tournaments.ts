@@ -1,5 +1,5 @@
 /**
- * Cliente unificado de torneos + marketplace + QP para QuantLab.
+ * Cliente unificado de torneos + marketplace + QP para QuantBattle.
  * Fuente: Worker FastAPI (NEXT_PUBLIC_WORKER_URL).
  */
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";

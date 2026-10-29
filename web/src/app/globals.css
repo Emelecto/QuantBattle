@@ -1,47 +1,47 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
-/* QuantLab research system: shared light palette for every route. */
+/* QuantBattle research system: shared light palette for every route. */
 :root {
-  --ql-bg: #f5f8fb;
-  --ql-surface: #fff;
-  --ql-surface-solid: #f0f5fa;
-  --ql-line: #dce6ef;
-  --ql-line-muted: #e9eff5;
-  --ql-ink: #172840;
-  --ql-muted: #52677d;
-  --ql-highlight: #7389a2;
-  --ql-accent: #245ce5;
-  --ql-accent-2: #3d79d7;
-  --ql-tertiary: #245ce5;
-  --ql-long: #087951;
-  --ql-short: #af3f4f;
-  --ql-warning: #8d641a;
-  --ql-info: #245ce5;
-  --ql-glow: rgba(36, 92, 229, .13);
-  --ql-ease-out: cubic-bezier(.23, 1, .32, 1);
+  --qb-bg: #f5f8fb;
+  --qb-surface: #fff;
+  --qb-surface-solid: #f0f5fa;
+  --qb-line: #dce6ef;
+  --qb-line-muted: #e9eff5;
+  --qb-ink: #172840;
+  --qb-muted: #52677d;
+  --qb-highlight: #7389a2;
+  --qb-accent: #245ce5;
+  --qb-accent-2: #3d79d7;
+  --qb-tertiary: #245ce5;
+  --qb-long: #087951;
+  --qb-short: #af3f4f;
+  --qb-warning: #8d641a;
+  --qb-info: #245ce5;
+  --qb-glow: rgba(36, 92, 229, .13);
+  --qb-ease-out: cubic-bezier(.23, 1, .32, 1);
 }
 
 @theme inline {
-  --color-bg: var(--ql-bg);
-  --color-surface: var(--ql-surface);
-  --color-surface-solid: var(--ql-surface-solid);
-  --color-line: var(--ql-line);
-  --color-ink: var(--ql-ink);
-  --color-muted: var(--ql-muted);
-  --color-long: var(--ql-long);
-  --color-short: var(--ql-short);
-  --color-accent: var(--ql-accent);
-  --color-accent-2: var(--ql-accent-2);
-  --color-cyan: var(--ql-tertiary);
-  --color-glow: var(--ql-glow);
+  --color-bg: var(--qb-bg);
+  --color-surface: var(--qb-surface);
+  --color-surface-solid: var(--qb-surface-solid);
+  --color-line: var(--qb-line);
+  --color-ink: var(--qb-ink);
+  --color-muted: var(--qb-muted);
+  --color-long: var(--qb-long);
+  --color-short: var(--qb-short);
+  --color-accent: var(--qb-accent);
+  --color-accent-2: var(--qb-accent-2);
+  --color-cyan: var(--qb-tertiary);
+  --color-glow: var(--qb-glow);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 * {
-  border-color: var(--ql-line);
+  border-color: var(--qb-line);
 }
 
 html {
@@ -49,42 +49,42 @@ html {
 }
 
 body {
-  background: var(--ql-bg);
-  color: var(--ql-ink);
+  background: var(--qb-bg);
+  color: var(--qb-ink);
   font-family: "DM Sans", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
-.ql-public-header { background:#fff; border-color:#dce6ef; }
-.ql-public-header .ql-public-mark { display:grid; place-items:center; width:29px; height:29px; padding-right:3px; background:#245ce5; color:#fff; font-family:Manrope,sans-serif; font-size:17px; font-weight:800; letter-spacing:-.13em; }
-.ql-public-header .ql-public-brand { color:#172840; font-family:Manrope,sans-serif; font-size:18px; font-weight:800; letter-spacing:-.035em; }
-.ql-public-header .ql-public-nav > a:not(.ql-public-nav-cta):not(.ql-btn-primary) { color:#52677d; }
-.ql-public-header .ql-public-nav > a:not(.ql-public-nav-cta):not(.ql-btn-primary):hover { color:#245ce5; }
-.ql-public-header .ql-btn-primary { background:#245ce5; color:#fff; }
+.qb-public-header { background:#fff; border-color:#dce6ef; }
+.qb-public-header .qb-public-mark { display:grid; place-items:center; width:29px; height:29px; padding-right:3px; background:#245ce5; color:#fff; font-family:Manrope,sans-serif; font-size:17px; font-weight:800; letter-spacing:-.13em; }
+.qb-public-header .qb-public-brand { color:#172840; font-family:Manrope,sans-serif; font-size:18px; font-weight:800; letter-spacing:-.035em; }
+.qb-public-header .qb-public-nav > a:not(.qb-public-nav-cta):not(.qb-btn-primary) { color:#52677d; }
+.qb-public-header .qb-public-nav > a:not(.qb-public-nav-cta):not(.qb-btn-primary):hover { color:#245ce5; }
+.qb-public-header .qb-btn-primary { background:#245ce5; color:#fff; }
 
 /* ------------------------------------------------------------
    GLASS + ESCALA DE ELEVACIÓN
    ------------------------------------------------------------ */
-.ql-glass {
-  background: var(--ql-surface);
+.qb-glass {
+  background: var(--qb-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--ql-line);
+  border: 1px solid var(--qb-line);
   box-shadow:
     0 8px 30px rgba(31, 59, 96, .06);
   border-radius: 12px;
 }
 
-.ql-elev-1 {
+.qb-elev-1 {
   box-shadow: 0 4px 20px rgba(31, 59, 96, .06);
 }
-.ql-elev-2 {
+.qb-elev-2 {
   box-shadow:
     0 20px 50px rgba(31, 59, 96, .12);
 }
 
 /* tier destacado (Pro) — borde acento violeta + glow */
-.ql-tier-featured {
+.qb-tier-featured {
   border-color: hsla(224, 96%, 97%, 0.40);
   box-shadow:
     0 0 30px hsla(224, 90%, 50%, 0.09),
@@ -92,7 +92,7 @@ body {
 }
 
 /* glow suave de acento para superficies destacadas (login/register) */
-.ql-glow-soft {
+.qb-glow-soft {
   box-shadow:
     0 14px 44px rgba(31, 59, 96, .12);
 }
@@ -100,16 +100,16 @@ body {
 /* ------------------------------------------------------------
    TILT 3D EN HOVER
    ------------------------------------------------------------ */
-.ql-perspective {
+.qb-perspective {
   perspective: 1000px;
 }
-.ql-tilt {
+.qb-tilt {
   transition:
     transform 320ms cubic-bezier(0.25, 0.1, 0.25, 1),
     box-shadow 320ms cubic-bezier(0.25, 0.1, 0.25, 1);
   will-change: transform;
 }
-.ql-tilt:hover {
+.qb-tilt:hover {
   transform: translateY(-6px) rotateX(3deg) rotateY(-2deg) scale(1.008);
   box-shadow:
     0 0 0 1px hsla(224, 96%, 97%, 0.12),
@@ -120,16 +120,16 @@ body {
 /* ------------------------------------------------------------
    GLOW DE ACENTO
    ------------------------------------------------------------ */
-.ql-glow-text {
-  text-shadow: 0 0 18px var(--ql-glow);
+.qb-glow-text {
+  text-shadow: 0 0 18px var(--qb-glow);
 }
-.ql-glow-box {
-  box-shadow: 0 0 14px var(--ql-glow);
+.qb-glow-box {
+  box-shadow: 0 0 14px var(--qb-glow);
 }
 
 /* gradiente de acento para palabras clave */
-.ql-gradient-text {
-  background: var(--ql-accent);
+.qb-gradient-text {
+  background: var(--qb-accent);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -138,31 +138,31 @@ body {
 /* ------------------------------------------------------------
    INPUTS GLASS
    ------------------------------------------------------------ */
-.ql-input {
+.qb-input {
   background: #fff;
-  border: 1px solid var(--ql-line);
-  color: var(--ql-ink);
+  border: 1px solid var(--qb-line);
+  color: var(--qb-ink);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
     background 160ms ease;
 }
-.ql-input::placeholder {
-  color: var(--ql-muted);
+.qb-input::placeholder {
+  color: var(--qb-muted);
 }
-.ql-input:focus {
+.qb-input:focus {
   outline: none;
-  border-color: var(--ql-accent);
-  box-shadow: 0 0 0 3px var(--ql-glow);
+  border-color: var(--qb-accent);
+  box-shadow: 0 0 0 3px var(--qb-glow);
 }
 
 /* fila de tabla con hover glass sutil */
-.ql-row {
+.qb-row {
   transition:
     background 160ms ease,
     box-shadow 160ms ease;
 }
-.ql-row:hover {
+.qb-row:hover {
   background: #f1f6fc;
   box-shadow: inset 0 0 0 1px #dce6ef;
 }
@@ -170,32 +170,32 @@ body {
 /* ------------------------------------------------------------
    BOTONES
    ------------------------------------------------------------ */
-.ql-btn-primary {
-  background: var(--ql-accent);
+.qb-btn-primary {
+  background: var(--qb-accent);
   color: #fff;
-  border: 1px solid var(--ql-accent);
+  border: 1px solid var(--qb-accent);
   box-shadow: none;
   transition:
     transform 160ms ease,
     box-shadow 160ms ease;
 }
-.ql-btn-primary:hover {
+.qb-btn-primary:hover {
   background: #174cbf;
   box-shadow: none;
 }
 
-.ql-btn-secondary {
-  background: var(--ql-surface);
-  border: 1px solid var(--ql-line);
-  color: var(--ql-ink);
+.qb-btn-secondary {
+  background: var(--qb-surface);
+  border: 1px solid var(--qb-line);
+  color: var(--qb-ink);
   transition:
     border-color 160ms ease,
     color 160ms ease,
     box-shadow 160ms ease,
     transform 160ms ease;
 }
-.ql-btn-secondary:hover {
-  border-color: var(--ql-accent);
+.qb-btn-secondary:hover {
+  border-color: var(--qb-accent);
   transform: translateY(-1px);
 }
 
@@ -210,7 +210,7 @@ body {
 
 ::selection {
   background: hsla(224, 96%, 97%, 0.22);
-  color: var(--ql-ink);
+  color: var(--qb-ink);
 }
 
 /* Dropdowns nativos mantienen la misma paleta clara. */
@@ -218,7 +218,7 @@ select,
 select option,
 select optgroup {
   background-color: #fff;
-  color: var(--ql-ink);
+  color: var(--qb-ink);
 }
 select {
   color-scheme: light;
@@ -230,7 +230,7 @@ select {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--ql-bg);
+  background: var(--qb-bg);
 }
 ::-webkit-scrollbar-thumb {
   background: #b4c9df;
@@ -243,11 +243,11 @@ select {
 /* ------------------------------------------------------------
    ANIMACIONES SUTILES GLOBALES (no invasivas)
    ------------------------------------------------------------ */
-@keyframes ql-fade-in {
+@keyframes qb-fade-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes ql-pop {
+@keyframes qb-pop {
   0%   { opacity: 0; transform: scale(0.98); }
   100% { opacity: 1; transform: scale(1); }
 }
@@ -267,44 +267,44 @@ select {
 .animate-pulse-subtle { animation: pulse-subtle 2s ease-in-out infinite; }
 
 /* Spinner básico */
-.ql-spinner {
+.qb-spinner {
   width: 28px;
   height: 28px;
-  border: 2px solid var(--ql-line);
-  border-top-color: var(--ql-accent);
+  border: 2px solid var(--qb-line);
+  border-top-color: var(--qb-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 /* Skeleton con pulse-subtle */
-.ql-skeleton {
-  background: var(--ql-surface-solid);
+.qb-skeleton {
+  background: var(--qb-surface-solid);
   border-radius: 6px;
   animation: pulse-subtle 2s ease-in-out infinite;
 }
-.ql-skeleton-line {
+.qb-skeleton-line {
   height: 12px;
   border-radius: 4px;
   background: #e5edf5;
   animation: pulse-subtle 2s ease-in-out infinite;
 }
-.ql-skeleton-circle {
+.qb-skeleton-circle {
   border-radius: 50%;
   background: #e5edf5;
   animation: pulse-subtle 2s ease-in-out infinite;
 }
-.ql-skeleton-card {
-  background: var(--ql-surface-solid);
+.qb-skeleton-card {
+  background: var(--qb-surface-solid);
   border-radius: 12px;
-  border: 1px solid var(--ql-line);
+  border: 1px solid var(--qb-line);
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
 /* Hover border suave en cards */
-.ql-glass-hover {
+.qb-glass-hover {
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
-.ql-glass-hover:hover {
+.qb-glass-hover:hover {
   border-color: hsla(224, 96%, 97%, 0.45);
 }
 
@@ -316,7 +316,7 @@ a[role="button"]:active {
 }
 
 /* Badge QP transición de color */
-.ql-badge-qp {
+.qb-badge-qp {
   transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
@@ -345,7 +345,7 @@ a, button, input, select, textarea, [role="button"] {
 }
 
 /* ============================================================
-   QuantLab v4 — "Terminal de datos" (impeccable + Emil + taste)
+   QuantBattle v4 — "Terminal de datos" (impeccable + Emil + taste)
    Fondo: campo de profundidad sutil que evoca el libro de órdenes,
    sin patrones decorativos. Una sola pieza autoral de motion
    por vista. Números siempre estables (tabular).
@@ -395,50 +395,50 @@ p {
   text-wrap: pretty;
 }
 
-/* ===== QuantLab v3 — Glass Terminal ===== */
+/* ===== QuantBattle v3 — Glass Terminal ===== */
 
 /* Ticker tape: marquee infinito, pausa en hover */
-@keyframes ql-ticker-scroll {
+@keyframes qb-ticker-scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-.ql-ticker-track {
-  animation: ql-ticker-scroll 60s linear infinite;
+.qb-ticker-track {
+  animation: qb-ticker-scroll 60s linear infinite;
 }
-.ql-ticker:hover .ql-ticker-track {
+.qb-ticker:hover .qb-ticker-track {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ql-ticker-track { animation: none; }
+  .qb-ticker-track { animation: none; }
 }
 
 /* Aurora: blobs atmosféricos que derivan lentamente (Stripe/Linear) */
-@keyframes ql-aurora-drift {
+@keyframes qb-aurora-drift {
   0%   { transform: translate(0, 0) scale(1); }
   33%  { transform: translate(6%, -4%) scale(1.08); }
   66%  { transform: translate(-5%, 5%) scale(0.95); }
   100% { transform: translate(0, 0) scale(1); }
 }
-.ql-aurora-blob {
+.qb-aurora-blob {
   position: absolute;
   border-radius: 9999px;
   filter: blur(90px);
   will-change: transform;
   pointer-events: none;
 }
-.ql-aurora-1 { animation: ql-aurora-drift 26s ease-in-out infinite; }
-.ql-aurora-2 { animation: ql-aurora-drift 34s ease-in-out infinite reverse; }
-.ql-aurora-3 { animation: ql-aurora-drift 42s ease-in-out infinite; }
+.qb-aurora-1 { animation: qb-aurora-drift 26s ease-in-out infinite; }
+.qb-aurora-2 { animation: qb-aurora-drift 34s ease-in-out infinite reverse; }
+.qb-aurora-3 { animation: qb-aurora-drift 42s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .ql-aurora-1, .ql-aurora-2, .ql-aurora-3 { animation: none; }
+  .qb-aurora-1, .qb-aurora-2, .qb-aurora-3 { animation: none; }
 }
 
 /* Spotlight hover: la card se ilumina siguiendo el cursor (Linear/Vercel) */
-.ql-spotlight {
+.qb-spotlight {
   position: relative;
   overflow: hidden;
 }
-.ql-spotlight::before {
+.qb-spotlight::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -452,7 +452,7 @@ p {
   );
   pointer-events: none;
 }
-.ql-spotlight:hover::before {
+.qb-spotlight:hover::before {
   opacity: 1;
 }
 @keyframes qlv3-chart-reveal {
@@ -474,17 +474,17 @@ p {
   }
 }
 
-/* ===== QuantLab Hero — Glass Terminal v2 ===== */
+/* ===== QuantBattle Hero — Glass Terminal v2 ===== */
 
 .hero-scene {
   perspective: 1200px;
 }
 
-.hero-scene .ql-glass {
+.hero-scene .qb-glass {
   transition: transform 200ms ease;
 }
 
-.hero-scene .ql-elev-1:hover {
+.hero-scene .qb-elev-1:hover {
   transform: translateY(-2px);
 }
 
@@ -512,47 +512,47 @@ p {
 }
 
 /* Shared interaction and reading defaults. */
-html { scrollbar-color: var(--ql-highlight) var(--ql-bg); }
-body { caret-color: var(--ql-accent); }
-:focus-visible { outline: 2px solid var(--ql-accent); outline-offset: 4px; }
+html { scrollbar-color: var(--qb-highlight) var(--qb-bg); }
+body { caret-color: var(--qb-accent); }
+:focus-visible { outline: 2px solid var(--qb-accent); outline-offset: 4px; }
 a { text-underline-offset: 4px; }
-.ql-glass { background: var(--ql-surface); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
-.ql-elev-1 { box-shadow: none; }
-.ql-glow-soft { box-shadow: 0 16px 40px rgba(31,59,96,.1); }
-.ql-btn-primary { box-shadow: none; color: #fff; }
-.ql-btn-primary:hover { background: #174cbf; box-shadow: none; }
-.ql-btn-secondary { backdrop-filter: none; -webkit-backdrop-filter: none; }
-.ql-gradient-text { background: none; -webkit-text-fill-color: var(--ql-accent); color: var(--ql-accent); }
-.ql-research-workspace { background: var(--ql-surface); }
-.ql-research-workspace summary { padding-block: 6px; }
-.ql-research-workspace summary:hover { color: var(--ql-accent); }
+.qb-glass { background: var(--qb-surface); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+.qb-elev-1 { box-shadow: none; }
+.qb-glow-soft { box-shadow: 0 16px 40px rgba(31,59,96,.1); }
+.qb-btn-primary { box-shadow: none; color: #fff; }
+.qb-btn-primary:hover { background: #174cbf; box-shadow: none; }
+.qb-btn-secondary { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.qb-gradient-text { background: none; -webkit-text-fill-color: var(--qb-accent); color: var(--qb-accent); }
+.qb-research-workspace { background: var(--qb-surface); }
+.qb-research-workspace summary { padding-block: 6px; }
+.qb-research-workspace summary:hover { color: var(--qb-accent); }
 @media (prefers-reduced-motion: reduce) {
-  .ql-tilt, .ql-btn-primary, .ql-btn-secondary { transition: none; }
-  .ql-tilt:hover, .ql-btn-primary:hover, .ql-btn-secondary:hover { transform: none; }
+  .qb-tilt, .qb-btn-primary, .qb-btn-secondary { transition: none; }
+  .qb-tilt:hover, .qb-btn-primary:hover, .qb-btn-secondary:hover { transform: none; }
 }
 
 /* Page rhythm shared by research surfaces. */
-.ql-page { width: 100%; max-width: 1120px; margin-inline: auto; padding: 24px 16px 48px; }
-.ql-page-heading { margin-bottom: 32px; }
-.ql-page-heading h1 { font-size: 32px; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; }
-.ql-page-heading p { margin-top: 12px; max-width: 65ch; color: var(--ql-muted); font-size: 16px; line-height: 1.7; }
-.ql-dataset-entry { display: flex; justify-content: space-between; align-items: center; gap: 32px; background: var(--ql-surface-solid); border-radius: 12px; padding: 28px; }
-.ql-dataset-entry h2 { font-size: 22px; font-weight: 600; }
-.ql-dataset-entry p { max-width: 60ch; color: var(--ql-muted); line-height: 1.7; margin-top: 12px; }
-.ql-dataset-entry > a { flex-shrink: 0; }
-.ql-dataset-list { list-style: none; border-top: 1px solid var(--ql-line); }
-.ql-dataset-list li { border-bottom: 1px solid var(--ql-line); }
-.ql-dataset-list a { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 12px; transition: background 160ms ease; }
-.ql-dataset-list a:hover { background: var(--ql-surface); }
-.ql-dataset-list strong { display: block; font-size: 16px; font-weight: 500; }
-.ql-dataset-list a > span > span { display: block; color: var(--ql-muted); margin-top: 4px; font-size: 14px; }
-.ql-round-tabs button { min-height: 44px; }
+.qb-page { width: 100%; max-width: 1120px; margin-inline: auto; padding: 24px 16px 48px; }
+.qb-page-heading { margin-bottom: 32px; }
+.qb-page-heading h1 { font-size: 32px; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; }
+.qb-page-heading p { margin-top: 12px; max-width: 65ch; color: var(--qb-muted); font-size: 16px; line-height: 1.7; }
+.qb-dataset-entry { display: flex; justify-content: space-between; align-items: center; gap: 32px; background: var(--qb-surface-solid); border-radius: 12px; padding: 28px; }
+.qb-dataset-entry h2 { font-size: 22px; font-weight: 600; }
+.qb-dataset-entry p { max-width: 60ch; color: var(--qb-muted); line-height: 1.7; margin-top: 12px; }
+.qb-dataset-entry > a { flex-shrink: 0; }
+.qb-dataset-list { list-style: none; border-top: 1px solid var(--qb-line); }
+.qb-dataset-list li { border-bottom: 1px solid var(--qb-line); }
+.qb-dataset-list a { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 12px; transition: background 160ms ease; }
+.qb-dataset-list a:hover { background: var(--qb-surface); }
+.qb-dataset-list strong { display: block; font-size: 16px; font-weight: 500; }
+.qb-dataset-list a > span > span { display: block; color: var(--qb-muted); margin-top: 4px; font-size: 14px; }
+.qb-round-tabs button { min-height: 44px; }
 body::before, body::after { display: none; }
-@media (max-width: 900px) { .ql-dataset-entry { flex-direction: column; align-items: start; } }
+@media (max-width: 900px) { .qb-dataset-entry { flex-direction: column; align-items: start; } }
 @media (max-width: 640px) {
- .ql-page { padding: 16px 4px 32px; }
- .ql-page-heading h1 { font-size: 28px; }
- .ql-dataset-entry { padding: 20px; }
- .ql-dataset-entry > a { white-space: normal; height: auto; min-height: 44px; text-align: center; }
- .ql-round-tabs button { padding-inline: 6px; }
+ .qb-page { padding: 16px 4px 32px; }
+ .qb-page-heading h1 { font-size: 28px; }
+ .qb-dataset-entry { padding: 20px; }
+ .qb-dataset-entry > a { white-space: normal; height: auto; min-height: 44px; text-align: center; }
+ .qb-round-tabs button { padding-inline: 6px; }
 }

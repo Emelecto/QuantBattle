@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Wiring Colab para los notebooks de QuantLab (Emelecto/QuantLab, rama main).
+"""Wiring Colab para los notebooks de QuantBattle (Emelecto/QuantBattle, rama main).
 
 1) Reemplaza el placeholder de org (TU_ORG) por Emelecto en las celdas
    colab-first y verifica que la URL raw resultante apunte a un CSV existente.
@@ -19,7 +19,7 @@ import sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))  # web/content/cursos
 ORG = "Emelecto"
-REPO = "QuantLab"
+REPO = "QuantBattle"
 BRANCH = "main"
 
 CURSOS_NOMBRE = {
@@ -82,7 +82,7 @@ def main():
                 texto = texto.replace('ORG = "TU_ORG"', 'ORG = "Emelecto"')
                 texto = texto.replace(
                     "# <-- reemplazala por tu usuario u organizacion de GitHub",
-                    "# organizacion fija del repo Emelecto/QuantLab",
+                    "# organizacion fija del repo Emelecto/QuantBattle",
                 )
                 texto = texto.replace("TU_ORG", "Emelecto")
                 texto = texto.replace(
@@ -149,7 +149,7 @@ def main():
         if "TU_ORG" in blob:
             errores.append(f"{curso}/{nombre}: queda TU_ORG sin reemplazar")
         fuentes = "".join("".join(c.get("source", [])) for c in cells)
-        if "{ORG}/QuantLab" in fuentes and 'ORG = "Emelecto"' not in fuentes:
+        if "{ORG}/QuantBattle" in fuentes and 'ORG = "Emelecto"' not in fuentes:
             errores.append(f"{curso}/{nombre}: f-string con ORG sin definir")
 
     # 4) colab.md por curso

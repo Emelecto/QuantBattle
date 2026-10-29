@@ -5,9 +5,9 @@ export function getSiteUrl(): string {
   const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
   if (productionHost) return `https://${productionHost}`;
   return process.env.NODE_ENV === "production"
-    ? "https://quant-lab-nine.vercel.app"
+    ? "https://www.quantbattle.co"
     : "http://localhost:3000";
 }
 
-export const SITE_NAME = "QuantLab";
+export const SITE_NAME = "QuantBattle";
 export const SITE_LOCALE = "es_ES";

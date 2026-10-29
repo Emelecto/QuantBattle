@@ -22,7 +22,7 @@ def signal(fast, slow):
 `;
 
 /**
- * Editor Monaco con la paleta clara QuantLab.
+ * Editor Monaco con la paleta clara QuantBattle.
  * Se carga solo en el cliente (loader CDN de @monaco-editor/react).
  */
 export function StrategyEditor({
@@ -33,7 +33,7 @@ export function StrategyEditor({
   onChange: (value: string) => void;
 }) {
   const beforeMount: BeforeMount = (monaco) => {
-    monaco.editor.defineTheme("quantlab-light", {
+    monaco.editor.defineTheme("quantbattle-light", {
       base: "vs",
       inherit: true,
       rules: [],
@@ -57,7 +57,7 @@ export function StrategyEditor({
     <Editor
       height="480px"
       language="python"
-      theme="quantlab-light"
+      theme="quantbattle-light"
       value={value}
       beforeMount={beforeMount}
       onChange={handleChange}

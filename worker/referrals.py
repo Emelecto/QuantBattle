@@ -1,4 +1,4 @@
-# Endpoints de referidos para el worker de QuantLab.
+# Endpoints de referidos para el worker de QuantBattle.
 # Sistema de invitación: código único + tracking + recompensa de 5 QP.
 
 from __future__ import annotations

@@ -42,9 +42,9 @@ Los informes son artefactos de cada ejecución. Los informes locales indican si 
 Con Docker, Supabase CLI 2.120.0, Python y dependencias del worker:
 
 ```text
-python scripts/verify_database.py --workdir artifacts/quantlab-validation --start --bootstrap
-python scripts/verify_product_staging.py --workdir artifacts/quantlab-validation
-supabase stop --workdir artifacts/quantlab-validation
+python scripts/verify_database.py --workdir artifacts/quantbattle-validation --start --bootstrap
+python scripts/verify_product_staging.py --workdir artifacts/quantbattle-validation
+supabase stop --workdir artifacts/quantbattle-validation
 ```
 
-Usar una carpeta nueva para `--bootstrap`: la migración 0032 es aditiva y no se reaplica sobre un esquema ya creado. El proyecto debe llamarse `quantlab-validation` o `launch-staging` y usa los puertos 55321/55322. Los scripts rechazan proyectos remotos. No sustituyen ni detienen otros proyectos de Docker.
+Usar una carpeta nueva para `--bootstrap`: la migración 0032 es aditiva y no se reaplica sobre un esquema ya creado. El proyecto debe llamarse `quantbattle-validation` o `launch-staging` y usa los puertos 55321/55322. Los scripts rechazan proyectos remotos. No sustituyen ni detienen otros proyectos de Docker.

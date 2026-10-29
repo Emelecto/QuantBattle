@@ -1,9 +1,9 @@
 /**
- * QuantLab Logo — marca SVG minimalista.
+ * QuantBattle Logo — marca SVG minimalista.
  * Un cubo abierto con un haz de luz interno que evoca
  * datos/quant sin ser literal. Monocromo, funciona en dark.
  */
-export function QuantLabLogo({ size = 28 }: { size?: number }) {
+export function QuantBattleLogo({ size = 28 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -11,7 +11,7 @@ export function QuantLabLogo({ size = 28 }: { size?: number }) {
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="QuantLab"
+      aria-label="QuantBattle"
       role="img"
     >
       {/* Cubo base — wireframe */}

@@ -35,7 +35,7 @@ function timeAgo(iso: string): string {
 export function SignalsFeed({ signals }: { signals: Signal[] }) {
   if (signals.length === 0) {
     return (
-      <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center">
+      <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center">
         <p className="text-sm text-muted">Sin señals recientes</p>
         <p className="mt-1 text-[12px] text-muted">
           Las señales aparecerán aquí cuando la estrategia las genere.
@@ -45,7 +45,7 @@ export function SignalsFeed({ signals }: { signals: Signal[] }) {
   }
 
   return (
-    <div className="ql-glass ql-elev-1 rounded-xl overflow-hidden">
+    <div className="qb-glass qb-elev-1 rounded-xl overflow-hidden">
       <div className="border-b border-line px-5 py-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-ink">Señales recientes</h3>
         <span className="metric text-[11px] text-muted">{signals.length} señales</span>
@@ -54,7 +54,7 @@ export function SignalsFeed({ signals }: { signals: Signal[] }) {
         {signals.map((s) => {
           const cfg = actionConfig[s.action];
           return (
-            <li key={s.id} className="ql-row flex items-center gap-3 px-5 py-3">
+            <li key={s.id} className="qb-row flex items-center gap-3 px-5 py-3">
               <Badge tone={cfg.tone} mono className="shrink-0 w-14 justify-center">
                 {cfg.label}
               </Badge>

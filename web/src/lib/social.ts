@@ -1,5 +1,5 @@
 /**
- * Cliente social de QuantLab: follows y feed de actividad.
+ * Cliente social de QuantBattle: follows y feed de actividad.
  * Fuente: Worker FastAPI (NEXT_PUBLIC_WORKER_URL).
  *
  * Endpoints (worker):

@@ -1,4 +1,4 @@
-"""Capa de datos REALES para QuantLab worker.
+"""Capa de datos REALES para QuantBattle worker.
 
 Descarga series OHLCV reales desde fuentes públicas:
   - crypto: Binance public REST klines (sin API key).
@@ -387,7 +387,7 @@ def _binance_interval(timeframe: str) -> str:
 
 
 def _bybit_interval(timeframe: str) -> str:
-    """Mapea timeframes de QuantLab a los códigos de Bybit v5.
+    """Mapea timeframes de QuantBattle a los códigos de Bybit v5.
 
     Bybit usa: 1 3 5 15 30 60 120 240 360 720 D W M (sin prefijo '1').
     """

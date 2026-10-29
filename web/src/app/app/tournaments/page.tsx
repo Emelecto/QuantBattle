@@ -39,7 +39,7 @@ export default function TournamentsPage() {
   }, [load]);
 
   return (
-    <div className="ql-page">
+    <div className="qb-page">
       <h1 className="text-3xl font-semibold tracking-tight text-ink">Torneos de machine learning</h1>
       <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">Descarga los datos, entrena tu modelo y envía predicciones. La práctica usa mercados artificiales, es gratuita y no otorga premios QP.</p>
       <div className="mt-5 flex flex-wrap gap-5 text-sm">

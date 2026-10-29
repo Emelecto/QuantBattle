@@ -286,7 +286,7 @@ export function ProjectDetail({ id }: { id: string }) {
                 <p className="ml-muted">
                   Se eliminan salidas y metadatos de ejecución. Revisa el código
                   y el texto antes de compartirlos: pueden contener información
-                  privada. El notebook no se ejecuta en QuantLab.
+                  privada. El notebook no se ejecuta en QuantBattle.
                 </p>
                 <button className="ml-primary" disabled={busy}>
                   {busy ? "Guardando…" : "Guardar versión"}
@@ -362,7 +362,7 @@ export function ProjectDetail({ id }: { id: string }) {
                     </table>
                   </div>
                   <button
-                    onClick={() => downloadJSON(data, "quantlab-proyecto.json")}
+                    onClick={() => downloadJSON(data, "quantbattle-proyecto.json")}
                   >
                     Exportar fichas del proyecto
                   </button>

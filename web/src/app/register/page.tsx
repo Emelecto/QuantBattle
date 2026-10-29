@@ -231,7 +231,7 @@ function RegisterForm() {
         </button>
 
         <p className="text-[12px] leading-relaxed text-muted">
-          Al crear una cuenta aceptas que QuantLab es una herramienta de
+          Al crear una cuenta aceptas que QuantBattle es una herramienta de
           investigación y no asesoría financiera.
         </p>
       </form>

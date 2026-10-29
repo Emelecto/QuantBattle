@@ -22,7 +22,7 @@ function Metric({
   tone?: "long" | "short";
 }) {
   return (
-    <div className="ql-glass ql-elev-1 rounded-lg px-4 py-3">
+    <div className="qb-glass qb-elev-1 rounded-lg px-4 py-3">
       <div className="text-[11px] uppercase tracking-wide text-muted">{label}</div>
       <div
         className={`metric mt-1 text-xl font-semibold ${
@@ -160,7 +160,7 @@ function ResultsContent({ auth, id }: { auth: ReturnType<typeof useAuth>; id: st
     const blob = new Blob([txt], { type: "text/markdown" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `quantlab-${run!.config.symbol}-reporte.md`;
+    a.download = `quantbattle-${run!.config.symbol}-reporte.md`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -230,7 +230,7 @@ function ResultsContent({ auth, id }: { auth: ReturnType<typeof useAuth>; id: st
 
         {/* D14: reporte honesto destacado */}
         {run.report && (
-          <div className="ql-glass ql-elev-2 mt-6 rounded-xl border border-accent/20 bg-accent/[0.04] p-6">
+          <div className="qb-glass qb-elev-2 mt-6 rounded-xl border border-accent/20 bg-accent/[0.04] p-6">
             <div className="mb-2 flex items-center gap-2">
               <span className="text-sm font-semibold text-ink">Lectura honesta</span>
               <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] text-accent">
@@ -252,7 +252,7 @@ function ResultsContent({ auth, id }: { auth: ReturnType<typeof useAuth>; id: st
           <Metric label="Volatilidad" value={`${m.vol != null ? (m.vol * 100).toFixed(1) : "—"}%`} />
         </div>
 
-        <div className="ql-glass ql-elev-2 mt-8 rounded-xl p-6">
+        <div className="qb-glass qb-elev-2 mt-8 rounded-xl p-6">
           <h2 className="mb-4 text-sm font-semibold tracking-tight text-ink">Curva de equity</h2>
           <EquityChart curve={run.equity_curve} />
         </div>

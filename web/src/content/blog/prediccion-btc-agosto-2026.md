@@ -1,14 +1,14 @@
 ---
-title: "Backtest: Cómo el ensemble QuantLab predijo BTC/USDT en agosto 2026"
-description: "Análisis real de la predicción del ensemble comunitario de QuantLab para BTC/USDT durante agosto 2026. Datos, metodología y resultados."
+title: "Backtest: Cómo el ensemble QuantBattle predijo BTC/USDT en agosto 2026"
+description: "Análisis real de la predicción del ensemble comunitario de QuantBattle para BTC/USDT durante agosto 2026. Datos, metodología y resultados."
 slug: "prediccion-btc-agosto-2026"
 date: "2026-09-01"
 readTime: "6 min"
 ---
 
-# Backtest: Cómo el ensemble QuantLab predijo BTC/USDT en agosto 2026
+# Backtest: Cómo el ensemble QuantBattle predijo BTC/USDT en agosto 2026
 
-En QuantLab, las predicciones no las hace un solo modelo. Las hace un **ensemble comunitario**: la combinación ponderada de las mejores predicciones de todos los participantes. Así funcionó en agosto 2026.
+En QuantBattle, las predicciones no las hace un solo modelo. Las hace un **ensemble comunitario**: la combinación ponderada de las mejores predicciones de todos los participantes. Así funcionó en agosto 2026.
 
 ## ¿Qué es el ensemble comunitario?
 
@@ -47,6 +47,6 @@ La clave está en la **diversidad**. Cada participante usa modelos diferentes (X
 
 ## Participa
 
-Los torneos ML de QuantLab abren rondas semanales. Descarga el dataset, entrena tu modelo y envía tus predicciones. Si eres bueno, tu predicción recibe más peso en el ensemble.
+Los torneos ML de QuantBattle abren rondas semanales. Descarga el dataset, entrena tu modelo y envía tus predicciones. Si eres bueno, tu predicción recibe más peso en el ensemble.
 
 **El mercado no se puede predecir con certeza. Pero con un ensemble diverso y datos reales, puedes tener una ventaja estadística.**

@@ -42,19 +42,19 @@ def test_cors_no_env_reflects_origin_and_allows_credentials():
 
 def test_cors_with_env_only_allows_whitelist():
     """Con CORS_ORIGINS, solo los Origins en la lista blanca reciben CORS headers."""
-    app = _make_app_with_cors("https://app.quantlab.io,https://foo.vercel.app")
+    app = _make_app_with_cors("https://www.quantbattle.co,https://foo.vercel.app")
     client = TestClient(app)
 
     # Origin permitido
     resp = client.options(
         "/health",
         headers={
-            "Origin": "https://app.quantlab.io",
+            "Origin": "https://www.quantbattle.co",
             "Access-Control-Request-Method": "GET",
         },
     )
     assert resp.status_code == 200
-    assert resp.headers.get("access-control-allow-origin") == "https://app.quantlab.io"
+    assert resp.headers.get("access-control-allow-origin") == "https://www.quantbattle.co"
     assert resp.headers.get("access-control-allow-credentials") == "true"
 
     # Origin NO permitido → no debe recibir CORS headers específicos.
@@ -99,7 +99,7 @@ def test_cors_no_origin_header_gets_wildcard():
 
 def test_cors_allows_vercel_preview_deployments():
     """Preview deployments https://*.vercel.app se reflejan sin estar en la lista."""
-    app = _make_app_with_cors("https://quant-lab-nine.vercel.app,http://localhost:3000")
+    app = _make_app_with_cors("https://www.quantbattle.co,http://localhost:3000")
     client = TestClient(app)
 
     # Preview deployment NO listado explícitamente → permitido por sufijo.
@@ -118,11 +118,11 @@ def test_cors_allows_vercel_preview_deployments():
     resp_prod = client.options(
         "/health",
         headers={
-            "Origin": "https://quant-lab-nine.vercel.app",
+            "Origin": "https://www.quantbattle.co",
             "Access-Control-Request-Method": "GET",
         },
     )
-    assert resp_prod.headers.get("access-control-allow-origin") == "https://quant-lab-nine.vercel.app"
+    assert resp_prod.headers.get("access-control-allow-origin") == "https://www.quantbattle.co"
 
     # GET real (no preflight) con preview también refleja.
     resp_get = client.get(
@@ -136,7 +136,7 @@ def test_cors_allows_vercel_preview_deployments():
 
 def test_cors_rejects_spoofed_vercel_and_null():
     """Solo https://*.vercel.app: http, spoof de sufijo y 'null' quedan cerrados."""
-    app = _make_app_with_cors("https://quant-lab-nine.vercel.app,http://localhost:3000")
+    app = _make_app_with_cors("https://www.quantbattle.co,http://localhost:3000")
     client = TestClient(app)
 
     bad_origins = [

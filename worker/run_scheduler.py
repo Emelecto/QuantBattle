@@ -1,4 +1,4 @@
-"""Entry point CLI para ejecutar el scheduler de torneos QuantLab.
+"""Entry point CLI para ejecutar el scheduler de torneos QuantBattle.
 
 Uso:
     python run_scheduler.py              # Ejecuta --all por defecto
@@ -98,7 +98,7 @@ def run_all() -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Scheduler de torneos QuantLab",
+        description="Scheduler de torneos QuantBattle",
     )
     parser.add_argument(
         "--create-tournament",

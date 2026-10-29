@@ -87,7 +87,7 @@ function CodeTournamentDetail({
 
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="ql-page flex-1">
+      <div className="qb-page flex-1">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-ink">
@@ -109,7 +109,7 @@ function CodeTournamentDetail({
 
         {/* Reglas */}
         {tournament.rules_text && (
-          <div className="mt-6 ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="mt-6 qb-glass qb-elev-1 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-ink">Reglas</h2>
             <p className="mt-2 text-sm text-muted">{tournament.rules_text}</p>
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted">
@@ -122,7 +122,7 @@ function CodeTournamentDetail({
 
         {/* Mi submission */}
         {mySub && (
-          <div className="mt-6 ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="mt-6 qb-glass qb-elev-1 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-ink">Mi submission</h2>
             <div className="mt-2 flex flex-wrap gap-3 text-sm">
               <span className="text-muted">Estado: <strong className="text-ink">{mySub.status}</strong></span>
@@ -145,7 +145,7 @@ function CodeTournamentDetail({
           {leaderboard.length === 0 ? (
             <p className="mt-3 text-sm text-muted">Aún no hay submissions evaluadas.</p>
           ) : (
-            <div className="mt-3 ql-glass ql-elev-1 overflow-hidden rounded-xl">
+            <div className="mt-3 qb-glass qb-elev-1 overflow-hidden rounded-xl">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
@@ -186,7 +186,7 @@ function CodeTournamentDetail({
 
         {/* Disclaimer */}
         <p className="mt-8 text-sm text-muted">
-          QuantLab es una herramienta de investigación. No es asesoría financiera ni recomendación de inversión.
+          QuantBattle es una herramienta de investigación. No es asesoría financiera ni recomendación de inversión.
         </p>
       </div>
     </main>
@@ -305,7 +305,7 @@ function MlTournamentDetail({
 
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="ql-page flex-1">
+      <div className="qb-page flex-1">
         {/* Cabecera */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -335,7 +335,7 @@ function MlTournamentDetail({
 
         {/* Reglas */}
         {tournament.rules_text && (
-          <div className="mt-6 ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="mt-6 qb-glass qb-elev-1 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-ink">Reglas</h2>
             <p className="mt-2 text-sm text-muted">{tournament.rules_text}</p>
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted">
@@ -390,7 +390,7 @@ function MlTournamentDetail({
         <div
           role="tablist"
           aria-label="Secciones del torneo ML"
-          className="ql-round-tabs mt-8 grid grid-cols-3 gap-2 rounded-lg bg-surface p-1"
+          className="qb-round-tabs mt-8 grid grid-cols-3 gap-2 rounded-lg bg-surface p-1"
         >
           {TABS.map((t) => (
             <button
@@ -418,7 +418,7 @@ function MlTournamentDetail({
         {loading ? (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {[1, 2].map((i) => (
-              <div key={i} className="ql-skeleton-card h-40 rounded-xl" />
+              <div key={i} className="qb-skeleton-card h-40 rounded-xl" />
             ))}
           </div>
         ) : (
@@ -431,7 +431,7 @@ function MlTournamentDetail({
 
         {/* Disclaimer */}
         <p className="mt-10 text-sm text-muted">
-          QuantLab es una herramienta de investigación. No es asesoría financiera ni
+          QuantBattle es una herramienta de investigación. No es asesoría financiera ni
           recomendación de inversión.
         </p>
       </div>
@@ -472,7 +472,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
   return (
     <div className="flex flex-col gap-4">
       {datasets.length > 0 && (
-        <div className="ql-glass ql-elev-1 rounded-xl p-5 text-sm text-muted">
+        <div className="qb-glass qb-elev-1 rounded-xl p-5 text-sm text-muted">
           <p className="font-medium text-ink">{mlRoundTypeLabel(datasets[0].round_type)}</p>
           <p className="mt-1">
             Entrenamiento y validación incluyen el resultado conocido. El archivo de predicciones
@@ -499,13 +499,13 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
       )}
 
       {datasets.length === 0 ? (
-        <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
+        <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
           Todavía no hay datasets publicados para esta ronda.
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {datasets.map((ds) => (
-            <div key={ds.id} className="ql-glass ql-elev-1 flex flex-col rounded-xl p-5">
+            <div key={ds.id} className="qb-glass qb-elev-1 flex flex-col rounded-xl p-5">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <h3 className="text-[15px] font-semibold text-ink">
@@ -561,7 +561,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
       )}
 
       {/* Nota: cómo leer los .parquet */}
-      <div className="ql-glass ql-elev-1 rounded-xl p-5">
+      <div className="qb-glass qb-elev-1 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-ink">
           Los archivos <span className="font-mono text-[#c4b5fd]">.parquet</span> no se abren en un editor de texto
         </h3>
@@ -582,7 +582,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
       </div>
 
       {/* Punto 4: notebook de ejemplo */}
-      <div className="ql-glass ql-elev-1 rounded-xl p-5">
+      <div className="qb-glass qb-elev-1 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-ink">¿Primera vez?</h3>
         <p className="mt-2 text-sm text-muted">
           El notebook de ejemplo descarga train/validation/live, entrena un modelo pequeño sobre
@@ -591,7 +591,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <a
-            href="https://colab.research.google.com/github/Emelecto/QuantLab/blob/main/web/public/ml/ejemplo_quantlab.ipynb"
+            href="https://colab.research.google.com/github/Emelecto/QuantBattle/blob/main/web/public/ml/ejemplo_quantbattle.ipynb"
             target="_blank"
             rel="noopener noreferrer"
             className={buttonClasses("primary", "sm")}
@@ -599,7 +599,7 @@ function TabDatos({ datasets }: { datasets: MlDataset[] }) {
             Abrir en Colab
           </a>
           <a
-            href="/ml/ejemplo_quantlab.ipynb"
+            href="/ml/ejemplo_quantbattle.ipynb"
             download
             className={buttonClasses("secondary", "sm")}
           >
@@ -680,7 +680,7 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
 
   if (!datasetId) {
     return (
-      <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
+      <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
         Esta ronda todavía no tiene ranking.
       </div>
     );
@@ -688,13 +688,13 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
 
   if (dataset?.status !== "scored") {
     return (
-      <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
+      <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
         El ranking se publicará cuando cierre la recepción y termine la puntuación.
       </div>
     );
   }
 
-  if (loading) return <div className="ql-skeleton-card h-40 rounded-xl" />;
+  if (loading) return <div className="qb-skeleton-card h-40 rounded-xl" />;
 
   if (err) {
     return (
@@ -706,7 +706,7 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
 
   if (rows.length === 0) {
     return (
-      <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
+      <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center text-sm text-muted">
         Aún no hay envíos evaluados en esta ronda.
         {dataset?.benchmarks && Object.keys(dataset.benchmarks).length > 0 && (
           <p className="mt-3">
@@ -722,7 +722,7 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
   return (
     <div className="space-y-4">
       {dataset?.benchmarks && Object.keys(dataset.benchmarks).length > 0 && (
-        <div className="ql-glass ql-elev-1 rounded-xl p-5 text-sm text-muted">
+        <div className="qb-glass qb-elev-1 rounded-xl p-5 text-sm text-muted">
           <p className="font-medium text-ink">Referencias de esta ronda</p>
           <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
             {Object.entries(dataset.benchmarks).map(([name, score]) => (
@@ -732,7 +732,7 @@ function TabRanking({ dataset }: { dataset: MlDataset | null }) {
           <p className="mt-2 text-xs">Estas referencias ayudan a interpretar el score; no participan en el ranking.</p>
         </div>
       )}
-      <div className="ql-glass ql-elev-1 overflow-hidden rounded-xl">
+      <div className="qb-glass qb-elev-1 overflow-hidden rounded-xl">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

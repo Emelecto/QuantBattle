@@ -15,19 +15,19 @@ function MarketplaceSkeleton() {
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-fadeIn">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div key={i} className="ql-skeleton-card rounded-xl p-5 space-y-4">
+        <div key={i} className="qb-skeleton-card rounded-xl p-5 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="ql-skeleton-circle h-8 w-8" />
+            <div className="qb-skeleton-circle h-8 w-8" />
             <div className="flex-1 space-y-2">
-              <div className="ql-skeleton-line w-24" />
-              <div className="ql-skeleton-line w-16" />
+              <div className="qb-skeleton-line w-24" />
+              <div className="qb-skeleton-line w-16" />
             </div>
           </div>
-          <div className="ql-skeleton-line w-3/4" />
-          <div className="ql-skeleton-line w-full" />
+          <div className="qb-skeleton-line w-3/4" />
+          <div className="qb-skeleton-line w-full" />
           <div className="grid grid-cols-2 gap-2">
-            <div className="ql-skeleton h-14 rounded-md" />
-            <div className="ql-skeleton h-14 rounded-md" />
+            <div className="qb-skeleton h-14 rounded-md" />
+            <div className="qb-skeleton h-14 rounded-md" />
           </div>
         </div>
       ))}
@@ -37,7 +37,7 @@ function MarketplaceSkeleton() {
 
 function EmptyMarketplaceState() {
   return (
-    <div className="ql-glass ql-elev-1 flex flex-col items-center gap-4 rounded-xl px-6 py-16 text-center animate-fadeIn">
+    <div className="qb-glass qb-elev-1 flex flex-col items-center gap-4 rounded-xl px-6 py-16 text-center animate-fadeIn">
       <svg
         className="opacity-60"
         width="140"
@@ -144,7 +144,7 @@ export default function MarketplacePage() {
             <button
               type="button"
               onClick={() => router.push("/app/marketplace/my-subscriptions")}
-              className="ql-btn-secondary h-9 rounded-md px-3 text-[13px] active:scale-[0.96]"
+              className="qb-btn-secondary h-9 rounded-md px-3 text-[13px] active:scale-[0.96]"
             >
               Mis suscripciones
             </button>
@@ -159,7 +159,7 @@ export default function MarketplacePage() {
             aria-label="Filtrar por activo"
             value={assetFilter}
             onChange={(e) => setAssetFilter(e.target.value)}
-            className="ql-input h-9 rounded-md px-3 text-[13px]"
+            className="qb-input h-9 rounded-md px-3 text-[13px]"
           >
             <option value="all">Todos los activos</option>
             <option value="crypto">Cripto</option>
@@ -173,7 +173,7 @@ export default function MarketplacePage() {
               const [min, max] = e.target.value.split("-").map(Number);
               setPriceRange([min, max]);
             }}
-            className="ql-input h-9 rounded-md px-3 text-[13px]"
+            className="qb-input h-9 rounded-md px-3 text-[13px]"
           >
             <option value="0-10000">Cualquier precio</option>
             <option value="0-50">Hasta 50 QP/sem</option>
@@ -205,7 +205,7 @@ export default function MarketplacePage() {
             aria-label="Buscar estrategia"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="ql-input h-9 min-w-[160px] flex-1 rounded-md px-3 text-[13px]"
+            className="qb-input h-9 min-w-[160px] flex-1 rounded-md px-3 text-[13px]"
           />
 
           <span className="metric ml-auto text-[12px] text-muted">
@@ -229,7 +229,7 @@ export default function MarketplacePage() {
             strategies.length === 0 ? (
               <EmptyMarketplaceState />
             ) : (
-              <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center animate-fadeIn">
+              <div className="qb-glass qb-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center animate-fadeIn">
                 <p className="text-lg font-semibold text-ink">
                   Sin resultados
                 </p>

@@ -75,7 +75,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={t.id}
             role="status"
             className={
-              "ql-glass ql-elev-1 pointer-events-auto flex items-start gap-2.5 rounded-lg px-4 py-3 text-sm " +
+              "qb-glass qb-elev-1 pointer-events-auto flex items-start gap-2.5 rounded-lg px-4 py-3 text-sm " +
               (t.type === "success"
                 ? "border-long/40"
                 : "border-short/40")

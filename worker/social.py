@@ -1,4 +1,4 @@
-# Sistema social de QuantLab: follows entre usuarios y feed de actividad.
+# Sistema social de QuantBattle: follows entre usuarios y feed de actividad.
 # Endpoints FastAPI: seguir/dejar de seguir (auth), feed personalizado (auth)
 # y actividad global (público).
 

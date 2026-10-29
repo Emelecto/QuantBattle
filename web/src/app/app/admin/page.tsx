@@ -33,7 +33,7 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="ql-glass ql-elev-1 rounded-xl p-4">
+    <div className="qb-glass qb-elev-1 rounded-xl p-4">
       <p className="text-[11px] uppercase tracking-wider text-muted">{label}</p>
       <p className="metric text-2xl font-bold text-accent mt-1">{value}</p>
       {sub && <p className="text-xs text-muted mt-0.5">{sub}</p>}
@@ -108,7 +108,7 @@ export default function AdminPage() {
           Dashboard Admin
         </h1>
         <p className="text-sm text-muted mt-1">
-          Métricas, alertas y actividad de QuantLab.
+          Métricas, alertas y actividad de QuantBattle.
         </p>
       </div>
 
@@ -127,7 +127,7 @@ export default function AdminPage() {
       )}
 
       {/* Growth — cabinas de contenido (solo admin) */}
-      <div className="ql-glass ql-elev-1 rounded-xl p-5">
+      <div className="qb-glass qb-elev-1 rounded-xl p-5">
         <h2 className="text-lg font-semibold text-ink mb-1">
           📣 Growth — cabinas de contenido
         </h2>
@@ -208,7 +208,7 @@ export default function AdminPage() {
       {activity && (
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Nuevos usuarios */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 rounded-xl p-5">
             <h3 className="text-sm font-semibold text-ink mb-3">
               👤 Últimos registros
             </h3>
@@ -236,7 +236,7 @@ export default function AdminPage() {
           </div>
 
           {/* Últimas submissions */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 rounded-xl p-5">
             <h3 className="text-sm font-semibold text-ink mb-3">
               📈 Últimas submissions
             </h3>
@@ -270,7 +270,7 @@ export default function AdminPage() {
           </div>
 
           {/* Badges */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 rounded-xl p-5">
             <h3 className="text-sm font-semibold text-ink mb-3">
               🏅 Últimos badges
             </h3>
@@ -298,7 +298,7 @@ export default function AdminPage() {
           </div>
 
           {/* Referidos */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 rounded-xl p-5">
             <h3 className="text-sm font-semibold text-ink mb-3">
               👥 Últimos referidos
             </h3>

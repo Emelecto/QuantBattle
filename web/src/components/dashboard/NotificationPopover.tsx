@@ -110,7 +110,7 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="ql-nav-item w-full"
+        className="qb-nav-item w-full"
         title="Notificaciones"
         aria-label={`Notificaciones${unread > 0 ? ` (${unread} sin leer)` : ""}`}
         aria-expanded={open}
@@ -131,25 +131,25 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
             <path d="M13.73 21a2 2 0 01-3.46 0" />
           </svg>
         </span>
-        <span className="ql-nav-label">{!collapsed && "Notificaciones"}</span>
+        <span className="qb-nav-label">{!collapsed && "Notificaciones"}</span>
         {unread > 0 && (
-          <span className="ql-notif-badge">{unread > 9 ? "9+" : unread}</span>
+          <span className="qb-notif-badge">{unread > 9 ? "9+" : unread}</span>
         )}
       </button>
 
       {/* Popover */}
       {open && (
-        <div id="dashboard-notifications" className="ql-notif-popover">
+        <div id="dashboard-notifications" className="qb-notif-popover">
           {/* Header */}
-          <div className="ql-notif-popover-header">
-            <span className="ql-notif-popover-title">Notificaciones</span>
+          <div className="qb-notif-popover-header">
+            <span className="qb-notif-popover-title">Notificaciones</span>
             <div className="flex items-center gap-2">
               {unread > 0 && (
                 <button
                   type="button"
                   onClick={markAllRead}
                   disabled={loading}
-                  className="ql-notif-mark-all"
+                  className="qb-notif-mark-all"
                 >
                   Leer todas
                 </button>
@@ -157,7 +157,7 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="ql-notif-close"
+                className="qb-notif-close"
                 aria-label="Cerrar notificaciones"
               >
                 <svg
@@ -177,31 +177,31 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
           </div>
 
           {/* Lista */}
-          <div className="ql-notif-popover-body">
+          <div className="qb-notif-popover-body">
             {notifications.length === 0 ? (
-              <div className="ql-notif-empty">No hay alertas pendientes</div>
+              <div className="qb-notif-empty">No hay alertas pendientes</div>
             ) : (
               notifications.map((n) => {
                 const badge = categoryBadge(n.type);
                 const content = (
-                  <div className={`ql-notif-item${n.is_read ? " read" : ""}`}>
-                    <div className="ql-notif-item-top">
+                  <div className={`qb-notif-item${n.is_read ? " read" : ""}`}>
+                    <div className="qb-notif-item-top">
                       <span
-                        className={`ql-notif-badge-cat ${toneClass(badge.tone)}`}
+                        className={`qb-notif-badge-cat ${toneClass(badge.tone)}`}
                       >
                         {badge.label}
                       </span>
-                      <span className="ql-notif-time">
+                      <span className="qb-notif-time">
                         {new Date(n.created_at).toLocaleString("es", {
                           dateStyle: "short",
                           timeStyle: "short",
                         })}
                       </span>
                     </div>
-                    <p className="ql-notif-item-title">{n.title}</p>
-                    <p className="ql-notif-item-body">{n.body}</p>
+                    <p className="qb-notif-item-title">{n.title}</p>
+                    <p className="qb-notif-item-body">{n.body}</p>
                     {n.link && (
-                      <span className="ql-notif-item-cta">Ver más →</span>
+                      <span className="qb-notif-item-cta">Ver más →</span>
                     )}
                   </div>
                 );
@@ -215,7 +215,7 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
                         markOneRead(n.id);
                         setOpen(false);
                       }}
-                      className="ql-notif-item-link"
+                      className="qb-notif-item-link"
                     >
                       {content}
                     </Link>
@@ -227,7 +227,7 @@ export function NotificationPopover({ collapsed = false }: { collapsed?: boolean
                     key={n.id}
                     type="button"
                     onClick={() => markOneRead(n.id)}
-                    className="ql-notif-item-btn"
+                    className="qb-notif-item-btn"
                   >
                     {content}
                   </button>

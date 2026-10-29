@@ -1,6 +1,6 @@
 # Informe de implementación y lanzamiento de torneos de retornos diarios
 
-QuantLab · Emilio Cardona Lopez · DeepFin / Universidad EIA  
+QuantBattle · Emilio Cardona Lopez · DeepFin / Universidad EIA
 Fecha: 26 de octubre de 2026. Horarios de usuario: America/Bogota, UTC−5.
 
 ## Estado entregado
@@ -9,7 +9,7 @@ Se implementó y publicó una modalidad real independiente de la práctica sint�
 
 El primer torneo ya está creado y su ronda del lunes está abierta. La fecha de publicación real de esa ronda fue **26 de octubre, 18:41:40, hora de Colombia**. Es la excepción de lanzamiento autorizada; el cierre del lunes se conserva a las 23:59. Las aperturas posteriores se programan desde las 00:30, sin admitir pronósticos retroactivos.
 
-- [Abrir primer torneo](https://quant-lab-nine.vercel.app/app/tournaments/weekly/0c19132c-6cc1-5bb5-a804-3f5ac7b8823d)
+- [Abrir primer torneo](https://www.quantbattle.co/app/tournaments/weekly/0c19132c-6cc1-5bb5-a804-3f5ac7b8823d)
 - Identificador semanal: `0c19132c-6cc1-5bb5-a804-3f5ac7b8823d`.
 - Primera ronda: `18a179c3-7ca7-57a9-a587-c3b25d4e40dd`.
 - Versión del primer dataset: `dr1-a419cca7b0d8d07d0df0`.
@@ -106,7 +106,7 @@ No hay premios QP, pagos ni ejecución de operaciones en esta modalidad.
 
 ## Automatización y controles de acceso
 
-Se aplicó la migración `0030_weekly_return_tournaments.sql` en el proyecto Supabase de QuantLab. Añade semanas, rondas y envíos sin reinterpretar las rondas sintéticas anteriores. Las tres tablas nuevas tienen RLS y deniegan lecturas directas tanto a anon como a authenticated; el worker utiliza su credencial de servidor.
+Se aplicó la migración `0030_weekly_return_tournaments.sql` en el proyecto Supabase de QuantBattle. Añade semanas, rondas y envíos sin reinterpretar las rondas sintéticas anteriores. Las tres tablas nuevas tienen RLS y deniegan lecturas directas tanto a anon como a authenticated; el worker utiliza su credencial de servidor.
 
 También se aplicó `0031_return_submission_wall_clock.sql`, con la corrección del reloj de cierre comprobada en la base de datos real.
 
@@ -116,10 +116,10 @@ La nueva tarea `daily-return-tournaments.yml` se ejecuta cada media hora y tiene
 
 Se activó `ML_DAILY_TOURNAMENTS_ENABLED=true` en GitHub y se sincronizó la clave de cifrado mediante un secreto, sin imprimirla ni incluirla en el repositorio. Este control es independiente de los antiguos modos de mercado a cinco días. La práctica sintética se mantiene disponible.
 
-- [Primera generación manual correcta](https://github.com/Emelecto/QuantLab/actions/runs/40421219209).
-- [Segundo arbitraje correcto, sin duplicados](https://github.com/Emelecto/QuantLab/actions/runs/40422276629): creó 0 rondas, puntuó 0 y publicó 0 semanas, conservando la versión existente.
-- [Código del backend](https://github.com/Emelecto/QuantLab/commit/7343dfb583179f58500715815f6c68f361b313f9).
-- [Interfaz y recorrido del participante](https://github.com/Emelecto/QuantLab/commit/4a735ccde1671d67661a7b98ef1c6fe5f525f9bc).
+- [Primera generación manual correcta](https://github.com/Emelecto/QuantBattle/actions/runs/40421219209).
+- [Segundo arbitraje correcto, sin duplicados](https://github.com/Emelecto/QuantBattle/actions/runs/40422276629): creó 0 rondas, puntuó 0 y publicó 0 semanas, conservando la versión existente.
+- [Código del backend](https://github.com/Emelecto/QuantBattle/commit/7343dfb583179f58500715815f6c68f361b313f9).
+- [Interfaz y recorrido del participante](https://github.com/Emelecto/QuantBattle/commit/4a735ccde1671d67661a7b98ef1c6fe5f525f9bc).
 
 ## Interfaz y documentación
 
@@ -132,9 +132,9 @@ Se actualizaron README, documentación pública, guía de participación, reglas
 ## Verificación realizada
 
 - **Worker:** 197 pruebas locales sin servicios externos aprobadas; 17 pruebas marcadas external excluidas de ese comando. Siete pruebas nuevas cubren calendario, retornos firmados, cifrado autenticado, transformación, semana completa, reemplazo, cierre, embargo, ranking 4/4, idempotencia y fallo de la fuente. El ciclo prospectivo completo de esas pruebas usa un reloj y un mercado simulados.
-- **CI del backend:** [ejecución aprobada](https://github.com/Emelecto/QuantLab/actions/runs/40397157823), y [verificación del commit de interfaz](https://github.com/Emelecto/QuantLab/actions/runs/40422447377).
+- **CI del backend:** [ejecución aprobada](https://github.com/Emelecto/QuantBattle/actions/runs/40397157823), y [verificación del commit de interfaz](https://github.com/Emelecto/QuantBattle/actions/runs/40422447377).
 - **Web:** compilación de producción y tipos aprobados con la versión fijada Next.js 16.4.1. Se sincronizó la instalación local, que antes estaba en 16.3.8. Los archivos modificados pasan lint. La auditoría de dependencias de producción no reportó vulnerabilidades.
-- **CI de la web publicada:** [ejecución final aprobada](https://github.com/Emelecto/QuantLab/actions/runs/40423258250), incluyendo instalación limpia, auditoría de producción, tipos, compilación y pruebas de navegador. Vercel confirmó la publicación del mismo código `cb7aa09`; la corrección SQL posterior se aplicó directamente a Supabase.
+- **CI de la web publicada:** [ejecución final aprobada](https://github.com/Emelecto/QuantBattle/actions/runs/40423258250), incluyendo instalación limpia, auditoría de producción, tipos, compilación y pruebas de navegador. Vercel confirmó la publicación del mismo código `cb7aa09`; la corrección SQL posterior se aplicó directamente a Supabase.
 - **Navegador local:** 48 pruebas aprobadas sin casos omitidos; después de la corrección visual se aprobaron nuevamente los seis casos de la modalidad nueva, incluidos escritorio y móvil.
 - **Configuración de pruebas:** Playwright carga los mismos hosts públicos que la aplicación y la CI los define expresamente. Esto evita omitir las pruebas de autenticación y API por falta de variables.
 - **API/Storage/auth reales:** 18 controles aprobados, con descargas y hashes de los tres archivos, live sin respuesta, envío válido, CSV incorrecto rechazado, último válido preservado y reemplazado, resultados retenidos, envío anónimo rechazado, lecturas directas denegadas en las tres tablas y fuente privada no pública.

@@ -8,7 +8,7 @@ import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { getSiteUrl } from "@/lib/site";
 
 const SITE_URL = getSiteUrl();
-const SITE_TITLE = "QuantLab — Investigación cuantitativa y torneos de machine learning";
+const SITE_TITLE = "QuantBattle — Investigación cuantitativa y torneos de machine learning";
 const SITE_DESCRIPTION =
   "Prototipo de investigación en español: experimenta con modelos, participa en torneos de predicciones y compara resultados reproducibles.";
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_TITLE,
-    template: "%s · QuantLab",
+    template: "%s · QuantBattle",
   },
   description: SITE_DESCRIPTION,
   keywords: [
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
     "torneos de trading",
     "quant",
   ],
-  authors: [{ name: "QuantLab" }],
-  creator: "QuantLab",
+  authors: [{ name: "QuantBattle" }],
+  creator: "QuantBattle",
   alternates: {
     canonical: "/",
   },
@@ -42,10 +42,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_ES",
     url: "/",
-    siteName: "QuantLab",
+    siteName: "QuantBattle",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "QuantLab" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "QuantBattle" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -81,7 +81,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              name: "QuantLab",
+              name: "QuantBattle",
               url: SITE_URL,
               description: SITE_DESCRIPTION,
               inLanguage: "es",

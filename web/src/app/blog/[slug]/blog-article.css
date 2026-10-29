@@ -1,16 +1,16 @@
-.ql-blog-article { min-width:0; color:#52677d; font-size:16px; line-height:1.72; }
-.ql-blog-article h2,.ql-blog-article h3 { margin:2.1em 0 .65em; color:#172840; font-family:Manrope,var(--font-geist-sans),sans-serif; font-weight:800; letter-spacing:-.025em; line-height:1.3; }
-.ql-blog-article h2 { font-size:clamp(24px,3vw,31px); }
-.ql-blog-article h3 { font-size:20px; }
-.ql-blog-article p,.ql-blog-article ul,.ql-blog-article ol { margin:0 0 1.25em; }
-.ql-blog-article ul,.ql-blog-article ol { padding-left:1.5em; }
-.ql-blog-article li { margin:.35em 0; }
-.ql-blog-article strong { color:#172840; }
-.ql-blog-article a { color:#2455ae; text-decoration:underline; text-underline-offset:3px; }
-.ql-blog-article :not(pre) > code { padding:2px 5px; border:1px solid #dce6ef; border-radius:4px; background:#f0f5fa; color:#2455ae; overflow-wrap:anywhere; }
-.ql-blog-article pre { max-width:100%; margin:24px 0; padding:17px 18px; overflow-x:auto; border:1px solid #dce6ef; border-radius:5px; background:#f0f5fa; color:#172840; font-size:13px; line-height:1.6; }
-.ql-blog-article pre code { white-space:pre; }
-.ql-blog-article blockquote { margin:25px 0; padding:14px 18px; border-left:3px solid #9ab9e5; background:#f0f5fa; color:#52677d; }
-.ql-blog-article img,.ql-blog-article svg { max-width:100%; height:auto; }
-.ql-blog-article table { display:block; max-width:100%; overflow-x:auto; border-collapse:collapse; }
-.ql-blog-article th,.ql-blog-article td { padding:9px 12px; border:1px solid #dce6ef; text-align:left; }
+.qb-blog-article { min-width:0; color:#52677d; font-size:16px; line-height:1.72; }
+.qb-blog-article h2,.qb-blog-article h3 { margin:2.1em 0 .65em; color:#172840; font-family:Manrope,var(--font-geist-sans),sans-serif; font-weight:800; letter-spacing:-.025em; line-height:1.3; }
+.qb-blog-article h2 { font-size:clamp(24px,3vw,31px); }
+.qb-blog-article h3 { font-size:20px; }
+.qb-blog-article p,.qb-blog-article ul,.qb-blog-article ol { margin:0 0 1.25em; }
+.qb-blog-article ul,.qb-blog-article ol { padding-left:1.5em; }
+.qb-blog-article li { margin:.35em 0; }
+.qb-blog-article strong { color:#172840; }
+.qb-blog-article a { color:#2455ae; text-decoration:underline; text-underline-offset:3px; }
+.qb-blog-article :not(pre) > code { padding:2px 5px; border:1px solid #dce6ef; border-radius:4px; background:#f0f5fa; color:#2455ae; overflow-wrap:anywhere; }
+.qb-blog-article pre { max-width:100%; margin:24px 0; padding:17px 18px; overflow-x:auto; border:1px solid #dce6ef; border-radius:5px; background:#f0f5fa; color:#172840; font-size:13px; line-height:1.6; }
+.qb-blog-article pre code { white-space:pre; }
+.qb-blog-article blockquote { margin:25px 0; padding:14px 18px; border-left:3px solid #9ab9e5; background:#f0f5fa; color:#52677d; }
+.qb-blog-article img,.qb-blog-article svg { max-width:100%; height:auto; }
+.qb-blog-article table { display:block; max-width:100%; overflow-x:auto; border-collapse:collapse; }
+.qb-blog-article th,.qb-blog-article td { padding:9px 12px; border:1px solid #dce6ef; text-align:left; }

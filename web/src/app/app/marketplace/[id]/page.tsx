@@ -23,7 +23,7 @@ function Metric({
   tone?: "long" | "short";
 }) {
   return (
-    <div className="ql-glass ql-elev-1 rounded-lg px-4 py-3">
+    <div className="qb-glass qb-elev-1 rounded-lg px-4 py-3">
       <div className="metric text-[11px] uppercase tracking-wide text-muted">
         {label}
       </div>
@@ -83,7 +83,7 @@ function strengthPct(strength?: number): number | null {
 
 function SignalsEmptyState() {
   return (
-    <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-12 text-center animate-fadeIn">
+    <div className="qb-glass qb-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-12 text-center animate-fadeIn">
       <svg
         className="opacity-50"
         width="80"
@@ -116,7 +116,7 @@ function SignalRow({ signal }: { signal: Signal }) {
   const pct = strengthPct(signal.strength);
 
   return (
-    <li className="ql-row flex items-center gap-3 px-5 py-3">
+    <li className="qb-row flex items-center gap-3 px-5 py-3">
       {/* Dirección */}
       <span
         className={`metric flex w-[70px] shrink-0 items-center justify-center gap-1 rounded-md border border-line px-1.5 py-1 text-[11px] font-semibold ${dirColor}`}
@@ -313,11 +313,11 @@ export default function StrategyDetailPage() {
           </div>
 
           {/* Card de suscripción */}
-          <div className="ql-glass ql-tier-featured ql-elev-2 w-72 shrink-0 rounded-xl p-5">
+          <div className="qb-glass qb-tier-featured qb-elev-2 w-72 shrink-0 rounded-xl p-5">
             <p className="metric text-[10px] uppercase tracking-wider text-muted">
               Precio semanal
             </p>
-            <p className="metric text-accent ql-glow-text text-2xl font-bold mt-1">
+            <p className="metric text-accent qb-glow-text text-2xl font-bold mt-1">
               {strategy.price_qp} QP
               <span className="text-xs font-normal text-muted">/sem</span>
             </p>
@@ -372,7 +372,7 @@ export default function StrategyDetailPage() {
         </div>
 
         {/* Código fuente (solo si el autor lo hizo público) — colapsable */}
-        <div className="ql-glass ql-elev-1 mt-8 rounded-xl p-6">
+        <div className="qb-glass qb-elev-1 mt-8 rounded-xl p-6">
           {strategy.is_public_code ? (
             <>
               <button
@@ -434,7 +434,7 @@ export default function StrategyDetailPage() {
         </div>
 
         {/* Perfil del autor embebido */}
-        <div className="ql-glass ql-elev-1 mt-8 rounded-xl p-6">
+        <div className="qb-glass qb-elev-1 mt-8 rounded-xl p-6">
           <h2 className="mb-4 text-sm font-semibold tracking-tight text-ink">
             Autor
           </h2>
@@ -494,15 +494,15 @@ export default function StrategyDetailPage() {
                 en vivo.
               </p>
               {signals === null ? (
-                <div className="ql-glass ql-elev-1 space-y-3 rounded-xl p-5">
+                <div className="qb-glass qb-elev-1 space-y-3 rounded-xl p-5">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="ql-skeleton-line h-8 w-full" />
+                    <div key={i} className="qb-skeleton-line h-8 w-full" />
                   ))}
                 </div>
               ) : signals.length === 0 ? (
                 <SignalsEmptyState />
               ) : (
-                <div className="ql-glass ql-elev-1 overflow-hidden rounded-xl">
+                <div className="qb-glass qb-elev-1 overflow-hidden rounded-xl">
                   <ul className="max-h-[420px] divide-y divide-line overflow-y-auto">
                     {signals.slice(0, 3).map((s) => (
                       <SignalRow key={s.id} signal={s} />
@@ -531,7 +531,7 @@ export default function StrategyDetailPage() {
           ) : (
             <div className="animate-fadeIn space-y-4">
               {/* Gráfico equity IS / OOS */}
-              <div className="ql-glass ql-elev-2 rounded-xl p-6">
+              <div className="qb-glass qb-elev-2 rounded-xl p-6">
                 <h3 className="mb-4 text-sm font-semibold tracking-tight text-ink">
                   Curva de equity — IS / OOS
                 </h3>
@@ -539,7 +539,7 @@ export default function StrategyDetailPage() {
               </div>
 
               {/* Método + benchmarks */}
-              <div className="ql-glass ql-elev-1 rounded-xl p-6">
+              <div className="qb-glass qb-elev-1 rounded-xl p-6">
                 <h3 className="mb-4 text-sm font-semibold tracking-tight text-ink">
                   Metodología y benchmarks
                 </h3>
@@ -567,7 +567,7 @@ export default function StrategyDetailPage() {
               </div>
 
               {/* Sello ampliado */}
-              <div className="ql-glass ql-elev-1 rounded-xl p-6">
+              <div className="qb-glass qb-elev-1 rounded-xl p-6">
                 <h3 className="mb-4 text-sm font-semibold tracking-tight text-ink">
                   Sello de Integridad
                 </h3>

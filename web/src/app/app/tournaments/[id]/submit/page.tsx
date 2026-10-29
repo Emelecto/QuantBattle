@@ -62,7 +62,7 @@ export default function TournamentSubmitPage() {
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
           {/* Editor de código */}
-          <div className="ql-glass ql-elev-2 overflow-hidden rounded-xl">
+          <div className="qb-glass qb-elev-2 overflow-hidden rounded-xl">
             <div className="border-b border-line px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted">
               strategy.py
             </div>
@@ -70,7 +70,7 @@ export default function TournamentSubmitPage() {
           </div>
 
           {/* Configuración */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-ink">Configuración</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-1 text-xs text-muted">
@@ -78,7 +78,7 @@ export default function TournamentSubmitPage() {
                 <select
                   value={assetType}
                   onChange={(e) => setAssetType(e.target.value)}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 >
                   <option value="crypto">Crypto</option>
                   <option value="stock">Stock</option>
@@ -89,7 +89,7 @@ export default function TournamentSubmitPage() {
                 <input
                   value={symbol}
                   onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted">
@@ -97,7 +97,7 @@ export default function TournamentSubmitPage() {
                 <select
                   value={timeframe}
                   onChange={(e) => setTimeframe(e.target.value)}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 >
                   <option value="1h">1h</option>
                   <option value="4h">4h</option>
@@ -112,14 +112,14 @@ export default function TournamentSubmitPage() {
                   min={0}
                   value={qpStake}
                   onChange={(e) => setQpStake(Number(e.target.value))}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 />
               </label>
             </div>
           </div>
 
           {/* Parámetros */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-ink">Parámetros</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <label className="flex flex-col gap-1 text-xs text-muted">
@@ -130,7 +130,7 @@ export default function TournamentSubmitPage() {
                   max={200}
                   value={fast}
                   onChange={(e) => setFast(Number(e.target.value))}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted">
@@ -141,7 +141,7 @@ export default function TournamentSubmitPage() {
                   max={400}
                   value={slow}
                   onChange={(e) => setSlow(Number(e.target.value))}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted">
@@ -151,7 +151,7 @@ export default function TournamentSubmitPage() {
                   step="0.01"
                   value={commission}
                   onChange={(e) => setCommission(Number(e.target.value))}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted">
@@ -161,7 +161,7 @@ export default function TournamentSubmitPage() {
                   step="0.01"
                   value={slippage}
                   onChange={(e) => setSlippage(Number(e.target.value))}
-                  className="ql-input rounded-md px-3 py-2 text-sm text-ink"
+                  className="qb-input rounded-md px-3 py-2 text-sm text-ink"
                 />
               </label>
             </div>

@@ -27,7 +27,7 @@ function ModelRow({ model }: { model: ModelHistory }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <li className="ql-row">
+    <li className="qb-row">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -155,7 +155,7 @@ export function ModelsByStrategy({ userId }: { userId: string }) {
     return (
       <div data-tour="models-by-strategy">
         <h2 className="mb-4 text-lg font-semibold text-ink">{heading}</h2>
-        <div className="ql-glass space-y-3 rounded-xl p-5">
+        <div className="qb-glass space-y-3 rounded-xl p-5">
           <Skeleton variant="line" />
           <Skeleton variant="line" />
           <Skeleton variant="line" />
@@ -170,7 +170,7 @@ export function ModelsByStrategy({ userId }: { userId: string }) {
 
       {models.length === 0 ? (
         /* Empty state honesto */
-        <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center">
+        <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center">
           <p className="text-sm text-muted">
             {failed
               ? "No se pudo cargar el historial de torneos."
@@ -188,7 +188,7 @@ export function ModelsByStrategy({ userId }: { userId: string }) {
           )}
         </div>
       ) : (
-        <ul className="ql-glass divide-y divide-line overflow-hidden rounded-xl">
+        <ul className="qb-glass divide-y divide-line overflow-hidden rounded-xl">
           {models.map((m) => (
             <ModelRow key={m.key} model={m} />
           ))}

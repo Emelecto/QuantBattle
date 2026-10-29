@@ -48,7 +48,7 @@ export function BenchmarkComparator({
 
   if (!strategyEquity.length) {
     return (
-      <div className="ql-glass ql-elev-1 flex h-[240px] items-center justify-center rounded-xl p-4 text-center text-[13px] text-muted">
+      <div className="qb-glass qb-elev-1 flex h-[240px] items-center justify-center rounded-xl p-4 text-center text-[13px] text-muted">
         Corre un backtest para comparar tu estrategia contra el benchmark.
       </div>
     );
@@ -56,7 +56,7 @@ export function BenchmarkComparator({
 
   if (error) {
     return (
-      <div className="ql-glass ql-elev-1 flex h-[240px] items-center justify-center rounded-xl p-4 text-center text-[13px] text-short">
+      <div className="qb-glass qb-elev-1 flex h-[240px] items-center justify-center rounded-xl p-4 text-center text-[13px] text-short">
         {error}
       </div>
     );
@@ -87,7 +87,7 @@ export function BenchmarkComparator({
   };
 
   return (
-    <div className="ql-glass ql-elev-1 rounded-xl p-4">
+    <div className="qb-glass qb-elev-1 rounded-xl p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold tracking-tight text-ink">
           Tu estrategia vs. hacer nada
@@ -105,8 +105,8 @@ export function BenchmarkComparator({
       </div>
 
       <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 h-[200px] w-full" preserveAspectRatio="none">
-        <path d={toPath(bSlice)} fill="none" stroke="var(--ql-muted)" strokeWidth={1.5} opacity={0.6} />
-        <path d={toPath(sSlice)} fill="none" stroke="var(--ql-accent)" strokeWidth={2} />
+        <path d={toPath(bSlice)} fill="none" stroke="var(--qb-muted)" strokeWidth={1.5} opacity={0.6} />
+        <path d={toPath(sSlice)} fill="none" stroke="var(--qb-accent)" strokeWidth={2} />
       </svg>
 
       <div className="mt-2 flex items-center gap-4 text-[12px] text-muted">

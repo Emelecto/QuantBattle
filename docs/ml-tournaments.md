@@ -1,4 +1,4 @@
-# Torneos de predicción ML de QuantLab
+# Torneos de predicción ML de QuantBattle
 
 Este documento describe el protocolo anterior Spearman, incluida la práctica sintética. El nuevo torneo semanal de cuatro rondas con retornos reales tiene [su propio protocolo](daily-return-tournaments.md), calendario y puntuación; no usa el objetivo antiguo a cinco días.
 
@@ -36,12 +36,12 @@ Binance publica estos datos y sus derivados bajo
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), con las
 condiciones adicionales de los
 [términos de Binance Public Data](https://github.com/binance/binance-public-data/blob/master/TERMS_AND_CONDITIONS.md).
-QuantLab atribuye los datos a Binance Vision y declara esa licencia en los
+QuantBattle atribuye los datos a Binance Vision y declara esa licencia en los
 metadatos de cada dataset real. Los archivos derivados deben conservar la misma
 licencia y se ofrecen solo para investigación y educación no comercial. Por
 esta razón, los torneos ML no distribuyen QP ni premios; el worker también
 bloquea los créditos aunque una ronda antigua tenga un fondo distinto de cero.
-Si QuantLab se monetiza o distribuye señales con compensación, esta fuente no
+Si QuantBattle se monetiza o distribuye señales con compensación, esta fuente no
 debe seguir utilizándose sin permiso escrito de Binance.
 
 La cláusula 4.3 también restringe alojar datasets o feeds históricos derivados,

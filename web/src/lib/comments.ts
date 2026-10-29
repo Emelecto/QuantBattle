@@ -1,5 +1,5 @@
 /**
- * Cliente de comentarios de estrategias del marketplace para QuantLab.
+ * Cliente de comentarios de estrategias del marketplace para QuantBattle.
  * Fuente: Worker FastAPI (NEXT_PUBLIC_WORKER_URL).
  *
  * Endpoints (worker):

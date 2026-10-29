@@ -1,4 +1,4 @@
-"""Crea el primer torneo ML de QuantLab (modo sintetico) disparando create_ml_round.
+"""Crea el primer torneo ML de QuantBattle (modo sintetico) disparando create_ml_round.
 
 Esto es lo mismo que hace el cron /scheduler/run cada 2 dias, pero ejecutado
 una vez bajo demanda para sembrar el primer torneo + su ronda/dataset.

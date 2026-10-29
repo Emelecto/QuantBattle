@@ -152,7 +152,7 @@ function ContentCabinState({
           { label: "Hechas", value: done },
           { label: "Pendientes", value: ideas.length - done },
         ].map((s) => (
-          <div key={s.label} className="ql-glass px-4 py-3">
+          <div key={s.label} className="qb-glass px-4 py-3">
             <p className="metric text-2xl font-semibold text-ink">{s.value}</p>
             <p className="mt-1 text-xs uppercase tracking-wider text-muted">
               {s.label}
@@ -163,7 +163,7 @@ function ContentCabinState({
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         {/* Composer */}
-        <section className="ql-glass p-5">
+        <section className="qb-glass p-5">
           <h2 className="text-[15px] font-semibold text-ink">
             Nueva idea
           </h2>
@@ -179,7 +179,7 @@ function ContentCabinState({
             onChange={(e) => setText(e.target.value)}
             placeholder="Ej.: Reel explicando qué es el Sharpe OOS con un ejemplo real…"
             rows={3}
-            className="ql-input mt-2 w-full rounded-md px-3 py-2 text-sm"
+            className="qb-input mt-2 w-full rounded-md px-3 py-2 text-sm"
           />
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div>
@@ -193,7 +193,7 @@ function ContentCabinState({
                 id={`${storageKey}-pilar`}
                 value={pilar}
                 onChange={(e) => setPilar(e.target.value)}
-                className="ql-input mt-2 w-full rounded-md px-3 py-2 text-sm"
+                className="qb-input mt-2 w-full rounded-md px-3 py-2 text-sm"
               >
                 {pilares.map((p) => (
                   <option key={p} value={p}>
@@ -213,7 +213,7 @@ function ContentCabinState({
                 id={`${storageKey}-formato`}
                 value={formato}
                 onChange={(e) => setFormato(e.target.value)}
-                className="ql-input mt-2 w-full rounded-md px-3 py-2 text-sm"
+                className="qb-input mt-2 w-full rounded-md px-3 py-2 text-sm"
               >
                 {formatos.map((f) => (
                   <option key={f} value={f}>
@@ -246,7 +246,7 @@ function ContentCabinState({
         </section>
 
         {/* Generador de hooks */}
-        <section className="ql-glass p-5">
+        <section className="qb-glass p-5">
           <h2 className="text-[15px] font-semibold text-ink">
             Generador de hook
           </h2>
@@ -272,7 +272,7 @@ function ContentCabinState({
       </div>
 
       {/* Conteos */}
-      <section className="ql-glass mt-4 p-5">
+      <section className="qb-glass mt-4 p-5">
         <h2 className="text-[15px] font-semibold text-ink">Cola por pilar</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           {byPilar.length === 0 && (
@@ -311,7 +311,7 @@ function ContentCabinState({
       <section className="mt-4">
         <h2 className="text-[15px] font-semibold text-ink">Cola de ideas</h2>
         {ideas.length === 0 ? (
-          <div className="ql-glass mt-3 px-5 py-10 text-center">
+          <div className="qb-glass mt-3 px-5 py-10 text-center">
             <p className="text-sm text-muted">
               La cola está vacía. Carga el calendario de 30 días o añade tu
               primera idea arriba.
@@ -322,14 +322,14 @@ function ContentCabinState({
             {ideas.map((idea) => (
               <li
                 key={idea.id}
-                className="ql-glass ql-glass-hover flex items-start gap-3 px-4 py-3"
+                className="qb-glass qb-glass-hover flex items-start gap-3 px-4 py-3"
               >
                 <input
                   type="checkbox"
                   checked={idea.done}
                   onChange={() => toggleDone(idea.id)}
                   aria-label={idea.done ? "Marcar pendiente" : "Marcar hecha"}
-                  className="mt-1 h-4 w-4 shrink-0 accent-[var(--ql-accent)]"
+                  className="mt-1 h-4 w-4 shrink-0 accent-[var(--qb-accent)]"
                 />
                 <div className="min-w-0 flex-1">
                   <p

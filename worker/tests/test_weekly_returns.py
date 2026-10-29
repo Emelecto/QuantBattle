@@ -144,7 +144,7 @@ def backend(monkeypatch, market):
         return SimpleNamespace(execute=execute)
     db.rpc = rpc
     metadata = base64.b64encode(json.dumps({'model_name': 'Technical zero baseline', 'parameters': {}, 'seed': 42, 'note': 'Controlled test'}).encode()).decode()
-    return db, files, clock, TestClient(main.app, headers={'X-QuantLab-Experiment': metadata})
+    return db, files, clock, TestClient(main.app, headers={'X-QuantBattle-Experiment': metadata})
 
 
 def test_full_week_replacements_deadlines_embargo_and_four_round_ranking(backend):

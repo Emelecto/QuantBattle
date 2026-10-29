@@ -42,7 +42,7 @@ export const getReturnReceipts = (id: string) => call<{ attempts: ReturnReceipt[
 export const getReturnResults = (id: string) => call<ReturnResults>(`/ml/return-tournaments/${id}/results`);
 export const getReturnHistory = () => call<{ entries: (ReturnReceipt & { week_id: string; week_name: string; ordinal: number; target_day: string })[] }>('/ml/return-submissions/mine');
 export const submitReturnFile = (id: string, file: File, experiment: NonNullable<ReturnReceipt['experiment']>) => call<{ submission: ReturnReceipt }>(
-  `/ml/return-rounds/${id}/predictions`, { method: 'POST', headers: { 'Content-Type': 'text/csv', 'X-QuantLab-Experiment': experimentHeader(experiment) }, body: file },
+  `/ml/return-rounds/${id}/predictions`, { method: 'POST', headers: { 'Content-Type': 'text/csv', 'X-QuantBattle-Experiment': experimentHeader(experiment) }, body: file },
 );
 export function reviewReturnCsv(text: string, ids: string[]): string[] {
   const parsed = Papa.parse<string[]>(text.replace(/^\uFEFF/, ''), { delimiter: ',', skipEmptyLines: false });

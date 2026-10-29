@@ -79,12 +79,12 @@ export default function StatusPage() {
           Estado del sistema
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Conectividad y tiempo de respuesta de la API de QuantLab, medidos desde
+          Conectividad y tiempo de respuesta de la API de QuantBattle, medidos desde
           tu navegador. Esta consulta no verifica la base de datos, los archivos
           ni la evaluación de una ronda.
         </p>
 
-        <div className="ql-glass ql-elev-1 mt-8 p-6">
+        <div className="qb-glass qb-elev-1 mt-8 p-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${meta.dot}`} />
@@ -133,9 +133,9 @@ export default function StatusPage() {
         </p>
         <section className="mt-8 border-t border-line pt-6" aria-labelledby="pilot-stage">
           <h2 id="pilot-stage" className="text-lg font-semibold text-ink">Piloto controlado</h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted">QuantLab está en evaluación académica. La convocatoria abierta depende de completar la revisión del ciclo semanal real y recoger retroalimentación externa. Los pagos están desactivados.</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted">QuantBattle está en evaluación académica. La convocatoria abierta depende de completar la revisión del ciclo semanal real y recoger retroalimentación externa. Los pagos están desactivados.</p>
           <p className="mt-3 text-sm text-muted">Las rondas de práctica usan datos sintéticos; el torneo de retornos usa datos de mercado. Consulta en cada torneo su estado y fecha de cierre.</p>
-          <a href="https://github.com/Emelecto/QuantLab/issues/new?template=bug_report.yml" className="mt-3 inline-block text-sm text-accent underline">Reportar un problema del piloto</a>
+          <a href="https://github.com/Emelecto/QuantBattle/issues/new?template=bug_report.yml" className="mt-3 inline-block text-sm text-accent underline">Reportar un problema del piloto</a>
         </section>
         <Link href="/docs#evaluacion" className="mt-4 inline-block text-sm text-accent underline">Consultar evidencia técnica</Link>
       </section>

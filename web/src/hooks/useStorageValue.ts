@@ -2,7 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
-const CHANGE_EVENT = "quantlab:storage";
+const CHANGE_EVENT = "quantbattle:storage";
 
 export function notifyStorageChange(key: string): void {
   window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: key }));

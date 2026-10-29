@@ -99,7 +99,7 @@ export default function MySubscriptionsPage() {
             </div>
             <Link
               href="/app/marketplace/trading"
-              className="ql-btn-secondary h-9 rounded-md px-3 text-[13px]"
+              className="qb-btn-secondary h-9 rounded-md px-3 text-[13px]"
             >
               Explorar marketplace
             </Link>
@@ -111,7 +111,7 @@ export default function MySubscriptionsPage() {
       <section className="border-b border-line bg-surface/40">
         <div className="mx-auto w-full max-w-6xl px-6 py-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="ql-glass ql-elev-1 rounded-lg px-4 py-3">
+            <div className="qb-glass qb-elev-1 rounded-lg px-4 py-3">
               <p className="metric text-[10px] uppercase tracking-wider text-muted">
                 Suscripciones activas
               </p>
@@ -119,7 +119,7 @@ export default function MySubscriptionsPage() {
                 {subs.filter((s) => s.status === "active").length}
               </p>
             </div>
-            <div className="ql-glass ql-elev-1 rounded-lg px-4 py-3">
+            <div className="qb-glass qb-elev-1 rounded-lg px-4 py-3">
               <p className="metric text-[10px] uppercase tracking-wider text-muted">
                 Costo semanal
               </p>
@@ -127,7 +127,7 @@ export default function MySubscriptionsPage() {
                 {totalWeekly.toLocaleString()} QP
               </p>
             </div>
-            <div className="ql-glass ql-elev-1 rounded-lg px-4 py-3">
+            <div className="qb-glass qb-elev-1 rounded-lg px-4 py-3">
               <p className="metric text-[10px] uppercase tracking-wider text-muted">
                 P&L paper trading
               </p>
@@ -154,7 +154,7 @@ export default function MySubscriptionsPage() {
               {error}
             </div>
           ) : subs.length === 0 ? (
-            <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center">
+            <div className="qb-glass qb-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center">
               <p className="text-lg font-semibold text-ink">
                 Sin suscripciones
               </p>
@@ -170,7 +170,7 @@ export default function MySubscriptionsPage() {
               </Link>
             </div>
           ) : (
-            <div className="ql-glass overflow-hidden rounded-xl">
+            <div className="qb-glass overflow-hidden rounded-xl">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[700px] border-collapse text-left">
                   <thead>
@@ -201,7 +201,7 @@ export default function MySubscriptionsPage() {
                       return (
                         <tr
                           key={s.id}
-                          className="ql-row border-b border-line last:border-0"
+                          className="qb-row border-b border-line last:border-0"
                         >
                           <td className="px-4 py-3">
                             <div>
@@ -237,7 +237,7 @@ export default function MySubscriptionsPage() {
                                 type="button"
                                 onClick={() => handlePause(s)}
                                 disabled={busy === s.id || s.status === "cancelled"}
-                                className="ql-btn-secondary h-7 rounded px-2 text-[11px]"
+                                className="qb-btn-secondary h-7 rounded px-2 text-[11px]"
                               >
                                 {s.status === "paused" ? "Reanudar" : "Pausar"}
                               </button>

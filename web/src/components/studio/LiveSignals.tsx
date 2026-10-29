@@ -75,7 +75,7 @@ export function LiveSignals({
     PAD_T + (1 - (v - min) / range) * (H - PAD_T - PAD_B);
 
   return (
-    <section className="ql-glass ql-perspective" style={{ minHeight: 260 }}>
+    <section className="qb-glass qb-perspective" style={{ minHeight: 260 }}>
       <div className="flex items-center justify-between gap-3 px-4 pt-4">
         <div>
           <h3 className="text-sm font-semibold text-ink">Señales en vivo</h3>
@@ -120,7 +120,7 @@ export function LiveSignals({
             <path
               d={pricePath}
               fill="none"
-              stroke="var(--ql-accent)"
+              stroke="var(--qb-accent)"
               strokeWidth={1.6}
               strokeLinejoin="round"
               strokeLinecap="round"
@@ -131,7 +131,7 @@ export function LiveSignals({
                 cx={xOf(sig.index)}
                 cy={yOf(sig.price)}
                 r={4}
-                fill={sig.type === "buy" ? "var(--ql-long)" : "var(--ql-short)"}
+                fill={sig.type === "buy" ? "var(--qb-long)" : "var(--qb-short)"}
                 stroke="#04110d"
                 strokeWidth={1}
               >

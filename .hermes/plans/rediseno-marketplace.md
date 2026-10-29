@@ -1,4 +1,4 @@
-# Plan: Rediseño del Marketplace de QuantLab
+# Plan: Rediseño del Marketplace de QuantBattle
 
 Fecha: 2026-08-27 | Autor: Orchestrator (con Emilio)
 

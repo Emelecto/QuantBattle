@@ -83,8 +83,8 @@ export function TickerTape() {
         </div>
 
         {/* Marquee */}
-        <div className="ql-ticker relative min-w-0 flex-1 overflow-hidden">
-          <div className="ql-ticker-track flex w-max items-center gap-8 pl-6">
+        <div className="qb-ticker relative min-w-0 flex-1 overflow-hidden">
+          <div className="qb-ticker-track flex w-max items-center gap-8 pl-6">
             {doubled.map((t, i) => (
               <span key={`${t.symbol}-${i}`} className="flex items-center gap-2 whitespace-nowrap">
                 <span className="metric text-[11px] font-semibold text-ink">{t.symbol}</span>

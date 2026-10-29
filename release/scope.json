@@ -1,7 +1,7 @@
 {
   "stage": "controlled-pilot",
-  "repository": "Emelecto/QuantLab",
-  "site_url": "https://quant-lab-nine.vercel.app",
+  "repository": "Emelecto/QuantBattle",
+  "site_url": "https://www.quantbattle.co",
   "worker_url": "https://quantlab2.onrender.com",
   "render_service_id": "srv-da6dervavr4c73es6ir0",
   "required_workflows": ["web-ci", "backend-ci", "database-ci", "Daily return tournament referee", "operations-monitor"],

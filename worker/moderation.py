@@ -1,4 +1,4 @@
-"""Moderación UGC de QuantLab.
+"""Moderación UGC de QuantBattle.
 
 Endpoints:
  POST /moderation/report                      → reportar comentario o estrategia (auth)

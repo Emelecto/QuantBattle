@@ -128,7 +128,7 @@ export function ActivityFeed() {
         </div>
       </div>
 
-      <div className="ql-glass ql-elev-1 mt-4 rounded-xl">
+      <div className="qb-glass qb-elev-1 mt-4 rounded-xl">
         {error != null ? (
           <p className="px-5 py-6 text-sm text-muted">{error}</p>
         ) : events == null ? (
@@ -156,7 +156,7 @@ export function ActivityFeed() {
         ) : (
           <ul className="divide-y divide-line">
             {events.slice(0, 8).map((ev) => (
-              <li key={String(ev.id)} className="ql-row flex items-center gap-3 px-5 py-3">
+              <li key={String(ev.id)} className="qb-row flex items-center gap-3 px-5 py-3">
                 <ActionIcon action={ev.action} />
                 <p className="min-w-0 flex-1 truncate text-[13px] text-muted">
                   <Link

@@ -57,7 +57,7 @@ export function StrategyExplainer({ code }: { code: string }) {
   return (
     <section
       aria-label="Explicación de la estrategia"
-      className="ql-glass ql-elev-1 rounded-xl p-4"
+      className="qb-glass qb-elev-1 rounded-xl p-4"
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 shrink-0 text-accent">

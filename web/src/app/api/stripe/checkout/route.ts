@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `QuantLab ${plan.label}`,
+              name: `QuantBattle ${plan.label}`,
               description: `${plan.amount} QuantPoints (QP) por mes`,
               metadata: {
                 qp_amount: String(plan.amount),

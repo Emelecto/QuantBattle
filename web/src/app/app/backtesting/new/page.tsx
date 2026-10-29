@@ -151,7 +151,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
   // ------------------------------------------------------------------
   function exportStrategy() {
     const payload = {
-      quantlab_strategy: true,
+      quantbattle_strategy: true,
       version: 1,
       exported_at: new Date().toISOString(),
       config,
@@ -162,7 +162,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `quantlab-${config.symbol.toLowerCase()}-${new Date()
+    a.download = `quantbattle-${config.symbol.toLowerCase()}-${new Date()
       .toISOString()
       .slice(0, 10)}.json`;
     a.click();
@@ -176,7 +176,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
     reader.onload = () => {
       try {
         const raw = JSON.parse(String(reader.result));
-        // Acepta el formato exportado por QuantLab o un config plano.
+        // Acepta el formato exportado por QuantBattle o un config plano.
         const cfg = raw?.config ?? raw;
         if (typeof cfg.code !== "string" || !cfg.code.trim()) {
           throw new Error("El archivo no contiene código de estrategia ('code').");
@@ -220,7 +220,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
         return;
       }
       if (validation.warnings.length) {
-        console.warn("[QuantLab warnings]", validation.warnings);
+        console.warn("[QuantBattle warnings]", validation.warnings);
       }
 
       const result: BacktestResult = await runBacktest(config, (attempt, max) => {
@@ -333,7 +333,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
             </p>
           )}
 
-          <div className="ql-glass ql-elev-2 overflow-hidden rounded-xl">
+          <div className="qb-glass qb-elev-2 overflow-hidden rounded-xl">
             <div className="flex items-center justify-between border-b border-line px-4 py-2">
               <span className="text-xs font-medium uppercase tracking-wide text-muted">
                 strategy.py
@@ -344,7 +344,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
           </div>
 
           {/* Chat IA */}
-          <div className="ql-glass ql-elev-1 rounded-xl p-4">
+          <div className="qb-glass qb-elev-1 rounded-xl p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink">
               <span className="inline-block h-2 w-2 rounded-full bg-accent" />
               Asistente IA
@@ -393,7 +393,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                 name="ai-prompt"
                 rows={2}
                 placeholder="Ej: comprar cuando la media de 10 cruza sobre la de 30"
-                className="ql-input resize-y rounded-md px-3 py-2 text-sm text-ink"
+                className="qb-input resize-y rounded-md px-3 py-2 text-sm text-ink"
               />
               <button
                 type="submit"
@@ -418,7 +418,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
 
         {/* Panel lateral: configuración + riesgo + explicador */}
         <aside className="flex flex-col gap-4">
-          <div className="ql-glass ql-elev-1 rounded-xl p-5">
+          <div className="qb-glass qb-elev-1 rounded-xl p-5">
             <h2 className="text-sm font-semibold tracking-tight text-ink">Configuración</h2>
             <div className="mt-4 flex flex-col gap-3.5">
               {/* Tipo de activo */}
@@ -473,7 +473,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                   onChange={(e) =>
                     update("timeframe", e.target.value as StrategyConfig["timeframe"])
                   }
-                  className="ql-input h-10 w-full rounded-md px-3 text-sm text-ink"
+                  className="qb-input h-10 w-full rounded-md px-3 text-sm text-ink"
                 >
                   {tfs.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -494,7 +494,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                     value={config.start}
                     max={config.end || undefined}
                     onChange={(e) => update("start", e.target.value)}
-                    className="ql-input h-10 w-full rounded-md px-3 text-sm text-ink"
+                    className="qb-input h-10 w-full rounded-md px-3 text-sm text-ink"
                   />
                 </label>
                 <label className="block">
@@ -506,7 +506,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                     value={config.end}
                     min={config.start || undefined}
                     onChange={(e) => update("end", e.target.value)}
-                    className="ql-input h-10 w-full rounded-md px-3 text-sm text-ink"
+                    className="qb-input h-10 w-full rounded-md px-3 text-sm text-ink"
                   />
                 </label>
               </div>
@@ -527,7 +527,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                   step={100}
                   value={config.capital}
                   onChange={(e) => update("capital", Number(e.target.value))}
-                  className="ql-input h-10 w-full rounded-md px-3 text-sm text-ink"
+                  className="qb-input h-10 w-full rounded-md px-3 text-sm text-ink"
                 />
               </label>
 
@@ -543,7 +543,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                     step={0.01}
                     value={config.commission}
                     onChange={(e) => update("commission", Number(e.target.value))}
-                    className="ql-input h-10 w-full rounded-md px-3 text-sm text-ink"
+                    className="qb-input h-10 w-full rounded-md px-3 text-sm text-ink"
                   />
                 </label>
                 <label className="block">
@@ -556,7 +556,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                     step={0.01}
                     value={config.slippage}
                     onChange={(e) => update("slippage", Number(e.target.value))}
-                    className="ql-input h-10 w-full rounded-md px-3 text-sm text-ink"
+                    className="qb-input h-10 w-full rounded-md px-3 text-sm text-ink"
                   />
                 </label>
               </div>
@@ -616,7 +616,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                       min={0}
                       value={publishPrice}
                       onChange={(e) => setPublishPrice(Number(e.target.value))}
-                      className="ql-input h-9 w-full rounded-md px-3 text-sm text-ink"
+                      className="qb-input h-9 w-full rounded-md px-3 text-sm text-ink"
                     />
                   </label>
                   <textarea
@@ -624,7 +624,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                     value={publishDesc}
                     onChange={(e) => setPublishDesc(e.target.value)}
                     placeholder="Descripción corta para el marketplace…"
-                    className="ql-input resize-y rounded-md px-3 py-2 text-[13px] text-ink"
+                    className="qb-input resize-y rounded-md px-3 py-2 text-[13px] text-ink"
                   />
                   <button
                     type="button"
@@ -663,7 +663,7 @@ function NewStrategyPageInner({ demo, clone }: { demo: boolean; clone: string | 
                     <select
                       value={tournamentId}
                       onChange={(e) => setTournamentId(e.target.value)}
-                      className="ql-input h-9 w-full rounded-md px-3 text-[13px] text-ink"
+                      className="qb-input h-9 w-full rounded-md px-3 text-[13px] text-ink"
                     >
                       <option value="">Elige un torneo abierto…</option>
                       {tournaments.map((t) => (

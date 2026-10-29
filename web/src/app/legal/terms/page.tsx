@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * /legal/terms — Términos de Servicio de QuantLab.
+ * /legal/terms — Términos de Servicio de QuantBattle.
  * Server component estático. Español colombiano.
  */
 
@@ -30,7 +30,7 @@ function Section({
 }
 
 export const metadata = {
-  title: "Términos de Servicio — QuantLab",
+  title: "Términos de Servicio — QuantBattle",
 };
 
 export default function TermsPage() {
@@ -43,7 +43,7 @@ export default function TermsPage() {
         Última actualización: 25 de agosto de 2026
       </p>
       <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted">
-        Estos términos regulan el uso de QuantLab, una plataforma de
+        Estos términos regulan el uso de QuantBattle, una plataforma de
         investigación cuantitativa. Al crear una cuenta o usar el servicio,
         aceptas este documento.
       </p>
@@ -51,13 +51,13 @@ export default function TermsPage() {
       <div className="mt-10 space-y-10">
         <Section n="01" title="Naturaleza del servicio">
           <p>
-            QuantLab es una herramienta de investigación. Permite diseñar,
+            QuantBattle es una herramienta de investigación. Permite diseñar,
             probar y publicar estrategias de trading con validación fuera de
             muestra, y consultar reportes generados a partir de datos
             históricos.
           </p>
           <p>
-            QuantLab{" "}
+            QuantBattle{" "}
             <strong className="text-ink">no presta asesoría financiera</strong>,
             bursátil ni de inversión, no recomienda comprar, vender o mantener
             instrumento alguno, no custodia fondos de los usuarios y no ejecuta
@@ -90,7 +90,7 @@ export default function TermsPage() {
             </li>
             <li>
               Los saldos, los costes internos en QP y las reglas para obtenerlos
-              son parte del servicio; QuantLab puede ajustarlos para preservar
+              son parte del servicio; QuantBattle puede ajustarlos para preservar
               la integridad de la plataforma, anunciando dentro de ella los
               cambios sustanciales.
             </li>
@@ -101,8 +101,8 @@ export default function TermsPage() {
           <p>
             Para usar el servicio se requiere una cuenta registrada con un
             correo electrónico válido. Eres responsable de mantener la
-            confidencialidad de tu contraseña y de tus claves API de QuantLab
-            (las credenciales con prefijo <code className="metric rounded border border-line bg-surface-solid px-1 py-0.5 text-[12px] text-ink">qlk_</code>).
+            confidencialidad de tu contraseña y de tus claves API de QuantBattle
+            (las credenciales con prefijo <code className="metric rounded border border-line bg-surface-solid px-1 py-0.5 text-[12px] text-ink">qbt_</code>).
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
@@ -119,7 +119,7 @@ export default function TermsPage() {
             </li>
           </ul>
           <p>
-            QuantLab puede suspender cuentas o revocar claves comprometidas, o
+            QuantBattle puede suspender cuentas o revocar claves comprometidas, o
             que se usen para abusar del servicio.
           </p>
         </Section>
@@ -128,12 +128,12 @@ export default function TermsPage() {
           <p>
             Los comentarios, estrategias, código, descripciones y demás
             contenido que publiques conservan tu autoría. Al publicarlos,
-            otorgas a QuantLab una licencia no exclusiva, mundial y gratuita
+            otorgas a QuantBattle una licencia no exclusiva, mundial y gratuita
             para alojarlos, reproducirlos y mostrarlos dentro de la plataforma,
             con el único fin de operar y mejorar el servicio.
           </p>
           <p>
-            QuantLab puede revisar, editar, limitar o retirar cualquier
+            QuantBattle puede revisar, editar, limitar o retirar cualquier
             publicación que incumpla estos términos o afecte la convivencia de
             la comunidad. La moderación es{" "}
             <strong className="text-ink">discrecional</strong> y puede aplicarse
@@ -160,23 +160,23 @@ export default function TermsPage() {
 
         <Section n="05" title="Fuentes de datos de terceros">
           <p>
-            Las cotizaciones e información de mercado procesadas por QuantLab
+            Las cotizaciones e información de mercado procesadas por QuantBattle
             provienen de fuentes públicas como Binance, Bybit y Yahoo Finance.
-            QuantLab no controla esas fuentes y{" "}
+            QuantBattle no controla esas fuentes y{" "}
             <strong className="text-ink">
               no garantiza su disponibilidad, exactitud, integridad ni
               oportunidad
             </strong>
             . Interrupciones, cambios o errores en ellas pueden afectar
             backtests, métricas y reportes. Dichas marcas pertenecen a sus
-            respectivos titulares y no patrocinan ni se asocian con QuantLab.
+            respectivos titulares y no patrocinan ni se asocian con QuantBattle.
           </p>
         </Section>
 
         <Section n="06" title="Limitación de responsabilidad">
           <p>
             El servicio se ofrece «tal cual» y «según disponibilidad». En la
-            máxima medida permitida por la ley aplicable, QuantLab no responde
+            máxima medida permitida por la ley aplicable, QuantBattle no responde
             por daños indirectos, incidentales, especiales o lucro cesante, ni
             por pérdidas de trading derivadas del uso de la plataforma, de sus
             métricas o del contenido publicado por otros usuarios.
@@ -199,7 +199,7 @@ export default function TermsPage() {
 
         <Section n="08" title="Cambios a estos términos">
           <p>
-            QuantLab puede actualizar estos términos. La versión vigente se
+            QuantBattle puede actualizar estos términos. La versión vigente se
             publica siempre en esta página con su fecha de actualización, y los
             cambios sustanciales se anunciarán dentro de la plataforma con una
             antelación razonable.

@@ -16,4 +16,4 @@ web/playwright-report/
 worker/.return-pilot-*.json
 worker/test-results/
 artifacts/launch-staging/
-artifacts/quantlab-validation/
+artifacts/quantbattle-validation/

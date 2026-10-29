@@ -77,7 +77,7 @@ export function CommandPalette() {
       aria-label="Navegación rápida"
     >
       <div
-        className="ql-glass w-full max-w-md overflow-hidden"
+        className="qb-glass w-full max-w-md overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <input
@@ -97,7 +97,7 @@ export function CommandPalette() {
           }}
           placeholder="Ir a… (filtra por nombre o grupo)"
           aria-label="Buscar destino"
-          className="ql-input w-full border-0 bg-transparent px-4 py-3 text-sm"
+          className="qb-input w-full border-0 bg-transparent px-4 py-3 text-sm"
         />
         <ul className="max-h-72 overflow-y-auto border-t border-line py-1">
           {results.length === 0 && (

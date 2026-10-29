@@ -1,18 +1,18 @@
-# Plan de Marketing y Creación de Contenido — QuantLab
+# Plan de Marketing y Creación de Contenido — QuantBattle
 
 > **Versión:** 1.0 · **Fecha:** 2026-09 · **Dueño:** Emilio (EIA)
 > **Audiencia:** (1) quants/ML que construyen, (2) retail curioso que copia en paper, (3) inversores/jurados EIA y sponsors de torneos.
 > **Restricción:** Presupuesto $0 (solo tiempo). Canales núcleo: TikTok + Instagram + YouTube Shorts, con LinkedIn/GitHub/foros como credibilidad.
-> **Disclaimer obligatorio:** QuantLab es educativo y experimental. QP son puntos virtuales, nunca dinero real. No es asesoría financiera.
+> **Disclaimer obligatorio:** QuantBattle es educativo y experimental. QP son puntos virtuales, nunca dinero real. No es asesoría financiera.
 
 ---
 
 ## 0. Resumen ejecutivo + elevator pitch
 
-**Resumen ejecutivo.** QuantLab es una comunidad de trading cuantitativo en español donde cualquiera puede probar ideas de trading con backtest walk-forward out-of-sample honesto (datos reales de Binance, Bybit y Yahoo Finance), publicar estrategias en un marketplace de copy-trading en paper con QP virtuales, competir en torneos semanales y subir en un ranking global ordenado por Sharpe desinflado OOS. El wedge es claro: ser el «Numerai en español para LATAM» — técnico y honesto como QuantConnect/Numerai, pero accesible, en español y con onboarding de cero instalación (editor Monaco en la web, plantillas SMA/RSI, demo sin registro). El blog ya siembra autoridad con dos piezas reales: el explicador de walk-forward OOS y el backtest del ensemble comunitario BTC/USDT de agosto 2026. El plan a 30 días convierte esas piezas en 28 contenidos accionables (regla 5x: 1 grabación → 5 cortes) para llenar el funnel descubrimiento → landing/demo → registro → primera estrategia publicada → torneo.
+**Resumen ejecutivo.** QuantBattle es una comunidad de trading cuantitativo en español donde cualquiera puede probar ideas de trading con backtest walk-forward out-of-sample honesto (datos reales de Binance, Bybit y Yahoo Finance), publicar estrategias en un marketplace de copy-trading en paper con QP virtuales, competir en torneos semanales y subir en un ranking global ordenado por Sharpe desinflado OOS. El wedge es claro: ser el «Numerai en español para LATAM» — técnico y honesto como QuantConnect/Numerai, pero accesible, en español y con onboarding de cero instalación (editor Monaco en la web, plantillas SMA/RSI, demo sin registro). El blog ya siembra autoridad con dos piezas reales: el explicador de walk-forward OOS y el backtest del ensemble comunitario BTC/USDT de agosto 2026. El plan a 30 días convierte esas piezas en 28 contenidos accionables (regla 5x: 1 grabación → 5 cortes) para llenar el funnel descubrimiento → landing/demo → registro → primera estrategia publicada → torneo.
 
 **Elevator pitch (30 segundos).**
-> «QuantLab es la comunidad donde los quants de habla hispana demuestran quién tiene edge real. Subes tu estrategia desde el navegador, la validamos con walk-forward out-of-sample sobre datos reales, compites en torneos semanales por QP virtuales y tu reputación se mide con Sharpe desinflado, no con capturas de pantalla. Sin humo, sin dinero real, sin promesas de retornos: puro método. Es Numerai en español, construido en público desde la EIA.»
+> «QuantBattle es la comunidad donde los quants de habla hispana demuestran quién tiene edge real. Subes tu estrategia desde el navegador, la validamos con walk-forward out-of-sample sobre datos reales, compites en torneos semanales por QP virtuales y tu reputación se mide con Sharpe desinflado, no con capturas de pantalla. Sin humo, sin dinero real, sin promesas de retornos: puro método. Es Numerai en español, construido en público desde la EIA.»
 
 ---
 
@@ -27,7 +27,7 @@
 4. Torneos semanales con rounds, deadline fijo, evaluación automática, premios en QP virtuales y leaderboard público.
 5. Ranking global por Sharpe desinflado OOS (métrica anti-humo).
 6. Ensemble comunitario tipo Numerai: predicciones ponderadas por score histórico, evaluación por correlación de Spearman (blog `prediccion-btc-agosto-2026.md`).
-7. Cero instalación: editor Monaco en la web, plantillas SMA/RSI, ruta `/demo` sin registro, API con claves `qlk_` + server MCP para integrar LLMs.
+7. Cero instalación: editor Monaco en la web, plantillas SMA/RSI, ruta `/demo` sin registro, API con claves `qbt_` + server MCP para integrar LLMs.
 
 **Competencia y cómo nos diferenciamos:**
 | Competidor | Ellos | Nosotros |
@@ -57,7 +57,7 @@
 2. **Datos reales, fuente visible.** Binance/Bybit para crypto, Yahoo Finance para acciones. El worker falla explícitamente si no hay red en vez de inventar datos (`worker/README.md`). Mensaje: «si no hay datos, decimos que no hay datos».
 3. **Comunidad que compite y copia en paper.** Marketplace (publicar, suscribirse, comentar, clonar) + torneos semanales con QP virtuales + ranking por Sharpe desinflado. Nunca dinero real.
 4. **Ensemble comunitario.** La combinación ponderada de predicciones diversas supera en consistencia a la mayoría de individuos (blog agosto 2026: metodología Spearman, ponderación softmax, limitaciones declaradas). Mensaje: «la diversidad cancela errores».
-5. **Construir sin fricción.** Editor web Monaco, plantillas SMA/RSI, demo sin registro, API `qlk_` + MCP para LLMs. Mensaje: «de la idea al backtest en minutos, sin instalar nada».
+5. **Construir sin fricción.** Editor web Monaco, plantillas SMA/RSI, demo sin registro, API `qbt_` + MCP para LLMs. Mensaje: «de la idea al backtest en minutos, sin instalar nada».
 6. **Building in public desde la EIA.** Estudiante construyendo en abierto, mostrando código, errores y decisiones. Sin hype vacío.
 
 ---
@@ -101,17 +101,17 @@ Convención: cada idea trae **hook real en español** + pilar + formato + CTA. T
 10. `SEED` «Datos reales o nada: Binance + Bybit + Yahoo, fuente visible» — datos reales — Short 60s — CTA blog.
 11. `SEED` «Si se cae la red, el worker dice la verdad: sin datos no hay backtest» — datos reales — TikTok story — CTA GitHub/worker README.
 12. «Carrusel: anatomía de un resultado (equity, drawdown, integridad)» — honestidad — carrusel IG — CTA guardar.
-13. «API con claves `qlk_` + MCP: conecta tu LLM a tu investigación» — fricción cero/builders — Reel técnico — CTA docs.
+13. «API con claves `qbt_` + MCP: conecta tu LLM a tu investigación» — fricción cero/builders — Reel técnico — CTA docs.
 14. LinkedIn: «Demo sin registro: la decisión que más activaciones nos dio» — producto — texto + métrica real de activación (solo si se mide) — CTA feedback.
 
 ### Semana 3 — Versus + ensemble (comunidad y método)
 
-15. `SEED` «QuantLab vs grupo de señales: aquí el ranking castiga el humo» — comunidad — TikTok comparativa — CTA torneo.
+15. `SEED` «QuantBattle vs grupo de señales: aquí el ranking castiga el humo» — comunidad — TikTok comparativa — CTA torneo.
 16. `SEED` «Numerai en español: así funciona nuestro ensemble comunitario» — ensemble — Short 60s — CTA blog agosto 2026.
 17. `SEED` «El ensemble no siempre gana, pero casi siempre queda top 30%: por qué la diversidad cancela errores» — ensemble — carrusel IG — CTA blog (con limitaciones declaradas).
 18. `SEED` «Marketplace en paper: publica, te copian con QP virtuales, recibes comentarios» — comunidad — Reel demo — CTA publicar estrategia.
 19. «Cómo se pondera el ensemble: softmax de scores + Spearman (sin magia)» — ensemble — Short técnico — CTA torneo ML.
-20. «Tabla honesta: QuantLab vs QuantConnect vs TradingView vs curso de trading» — versus — carrusel IG — CTA guardar.
+20. «Tabla honesta: QuantBattle vs QuantConnect vs TradingView vs curso de trading» — versus — carrusel IG — CTA guardar.
 21. Foros quant + HN borrador: «Cómo validamos OOS con 5 folds (código, limitaciones y qué no prometemos)» — credibilidad — post largo — CTA blog + repo.
 
 ### Semana 4 — Torneos + sponsors + inversores (comunidad viva)
@@ -135,12 +135,12 @@ export const SEED_IDEAS_TIKTOK = [
   { text: "Tour del editor Monaco: plantilla SMA/RSI y autocompletado", pilar: "producto", formato: "reel" },
   { text: "Datos reales o nada: Binance + Bybit + Yahoo, fuente visible", pilar: "datos", formato: "reel" },
   { text: "Si se cae la red, el worker dice la verdad: sin datos no hay backtest", pilar: "datos", formato: "story" },
-  { text: "QuantLab vs grupo de señales: aquí el ranking castiga el humo", pilar: "comunidad", formato: "comparativa" },
+  { text: "QuantBattle vs grupo de señales: aquí el ranking castiga el humo", pilar: "comunidad", formato: "comparativa" },
   { text: "Numerai en español: así funciona nuestro ensemble comunitario", pilar: "ensemble", formato: "tutorial" },
   { text: "Así es un torneo semanal: deadline, evaluación automática y QP virtuales", pilar: "comunidad", formato: "dayinlife" },
   { text: "Ranking por Sharpe desinflado: aquí no gana quien más grita", pilar: "comunidad", formato: "reel" },
   { text: "Copy-trading en paper: sigue una estrategia sin arriesgar un peso", pilar: "comunidad", formato: "reel" },
-  { text: "API con claves qlk_ + MCP: conecta tu LLM a tu investigación", pilar: "producto", formato: "tutorial" },
+  { text: "API con claves qbt_ + MCP: conecta tu LLM a tu investigación", pilar: "producto", formato: "tutorial" },
 ];
 
 // SEED_IDEAS_INSTAGRAM (12) — pilar incluido
@@ -153,7 +153,7 @@ export const SEED_IDEAS_INSTAGRAM = [
   { text: "Cómo se pondera el ensemble: softmax de scores + Spearman (sin magia)", pilar: "ensemble" },
   { text: "Lo que aprendimos del ensemble BTC/USDT de agosto (con limitaciones)", pilar: "ensemble" },
   { text: "Marketplace en paper: publica, te copian con QP virtuales, recibes comentarios", pilar: "comunidad" },
-  { text: "Tabla honesta: QuantLab vs QuantConnect vs TradingView vs curso de trading", pilar: "versus" },
+  { text: "Tabla honesta: QuantBattle vs QuantConnect vs TradingView vs curso de trading", pilar: "versus" },
   { text: "Datos reales o nada: Binance + Bybit + Yahoo, fuente visible", pilar: "datos" },
   { text: "De la idea al backtest en minutos, sin instalar nada", pilar: "producto" },
   { text: "Encuesta: ¿qué torneo quieres la próxima semana? (BTC, ETH, acciones)", pilar: "comunidad" },
@@ -193,7 +193,7 @@ export const SEED_IDEAS_INSTAGRAM = [
 ### Inversores / jurados EIA (emprendimiento + innovación)
 1. **Moat comunitario + método:** el foso no es un modelo, es el loop torneos → ranking OOS → ensemble → retención. Cada envío mejora el ensemble y la reputación.
 2. **Ciencia antes que humo:** métricas deflatidas, integridad in-sample/OOS y limitaciones declaradas en el blog. Moat de confianza en un mercado lleno de humo.
-3. **Wedge LATAM en español:** Numerai/QuantConnect no hablan español ni hacen onboarding sin instalación; QuantLab sí.
+3. **Wedge LATAM en español:** Numerai/QuantConnect no hablan español ni hacen onboarding sin instalación; QuantBattle sí.
 4. **Modelo freemium → B2B:** comunidad gratis; monetización futura en datos agregados anonimizados, hiring/torneos patrocinados y API/MCP pro — sin tocar dinero de usuarios.
 5. **Historia founder relatable:** estudiante EIA construyendo en público, con demo funcional (landing + worker + blog + API/MCP), no slides.
 6. **Foso de datos propio:** cada backtest y envío genera datos de comportamiento y scores que mejoran el ensemble y la detección de overfitting.
@@ -208,7 +208,7 @@ export const SEED_IDEAS_INSTAGRAM = [
 - [x] Blog con 2 piezas semilla: walk-forward OOS + ensemble BTC agosto 2026 (`web/src/content/blog/`).
 - [x] Worker FastAPI con `/health`, `/backtest`, `/backtest/validate` y errores honestos (`worker/README.md`).
 - [x] Editor Monaco + plantillas SMA/RSI + ruta `/demo` sin registro.
-- [x] Marketplace paper con QP/semana + torneos semanales + ranking Sharpe desinflado + API `qlk_` + MCP.
+- [x] Marketplace paper con QP/semana + torneos semanales + ranking Sharpe desinflado + API `qbt_` + MCP.
 - [ ] UTM en bio/links (`?utm_source=tiktok|instagram|youtube|linkedin`) y eventos: backtest válido, registro, publicación, envío a torneo.
 - [ ] Cuentas TikTok/IG/YouTube con bio tagline B + link a `/demo`; LinkedIn founder con tagline C.
 - [ ] Sembrar `SEED_IDEAS_TIKTOK` + `SEED_IDEAS_INSTAGRAM` en planners (cuando existan páginas `/tiktok`, `/instagram`).

@@ -1,4 +1,4 @@
-# Endpoints de admin para el worker de QuantLab.
+# Endpoints de admin para el worker de QuantBattle.
 # Métricas, alertas y actividad para el dashboard de administración.
 # Protegido: solo service_role o user_id específico.
 

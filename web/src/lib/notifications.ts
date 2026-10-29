@@ -1,5 +1,5 @@
 /**
- * Cliente de notificaciones para QuantLab.
+ * Cliente de notificaciones para QuantBattle.
  * Consume los endpoints `/notifications/...` del Worker FastAPI.
  */
 import { call } from "@/lib/tournaments";

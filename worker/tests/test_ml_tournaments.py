@@ -193,7 +193,7 @@ def test_research_receipt_history_is_private_and_bound_to_csv(backend):
     live, public = make_round(backend)
     content = public[["id", "feature_01"]].rename(columns={"feature_01": "prediction"}).to_csv(index=False).encode()
     metadata = {"model_name": "Modelo técnico", "parameters": {"depth": 4}, "seed": 42, "note": "Solo train y validation"}
-    headers = {"Authorization": "Bearer x", "Content-Type": "text/csv", "X-QuantLab-Experiment": base64.b64encode(json.dumps(metadata).encode()).decode()}
+    headers = {"Authorization": "Bearer x", "Content-Type": "text/csv", "X-QuantBattle-Experiment": base64.b64encode(json.dumps(metadata).encode()).decode()}
     response = client.post(f"/ml/datasets/{live['id']}/predictions", content=content, headers=headers)
     assert response.status_code == 200, response.text
     receipt = response.json()["submission"]
@@ -228,7 +228,7 @@ def test_invalid_experiment_never_replaces_selected_submission(backend):
     headers = {"Authorization": "Bearer x", "Content-Type": "text/csv"}
     first = client.post(path, content=content, headers=headers)
     assert first.status_code == 200
-    assert client.post(path, content=content, headers={**headers, "X-QuantLab-Experiment": "not-base64"}).status_code == 422
+    assert client.post(path, content=content, headers={**headers, "X-QuantBattle-Experiment": "not-base64"}).status_code == 422
     assert len(db.rows["prediction_submissions"]) == 1 and db.rows["prediction_submissions"][0]["is_selected"] is True
 
 

@@ -257,14 +257,14 @@ function LoadingChart() {
       className="mt-4 overflow-hidden rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.055),rgba(255,255,255,0.015))] p-4"
     >
       <div className="flex items-center justify-between gap-4">
-        <div className="ql-skeleton h-3 w-28" />
-        <div className="ql-skeleton h-3 w-16" />
+        <div className="qb-skeleton h-3 w-28" />
+        <div className="qb-skeleton h-3 w-16" />
       </div>
       <div className="relative mt-5 h-[210px] overflow-hidden">
         <div className="absolute inset-x-0 top-[25%] h-px bg-surface-solid" />
         <div className="absolute inset-x-0 top-1/2 h-px bg-surface-solid" />
         <div className="absolute inset-x-0 top-[75%] h-px bg-surface-solid" />
-        <div className="ql-skeleton absolute bottom-7 left-0 h-24 w-full rounded-[40%] opacity-70" />
+        <div className="qb-skeleton absolute bottom-7 left-0 h-24 w-full rounded-[40%] opacity-70" />
       </div>
       <p className="mt-2 text-[11px] text-muted">Cargando velas diarias desde Binance…</p>
     </div>
@@ -560,7 +560,7 @@ export function HeroMarketDemo() {
 
   return (
     <div className="relative w-full min-w-0">
-      <article className="ql-glass ql-elev-2 relative overflow-hidden rounded-2xl p-4 sm:p-5" aria-labelledby="hero-market-title">
+      <article className="qb-glass qb-elev-2 relative overflow-hidden rounded-2xl p-4 sm:p-5" aria-labelledby="hero-market-title">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-80"

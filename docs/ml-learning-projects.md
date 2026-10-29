@@ -53,7 +53,7 @@ Los archivos se escriben antes de registrar su versión; un fallo posterior de b
 `worker/tests/test_ml_learning.py` cubre privacidad, limpieza e integridad de notebooks, versiones inmutables, compatibilidad de dataset, moderación, retirada, fork, misiones y embargo semanal. Las pruebas de contrato no sustituyen la comprobación de RLS con PostgreSQL real.
 `supabase/tests/ml_learning_privacy.sql` comprueba aislamiento y denegación de escrituras directas en PostgreSQL dentro de una transacción con rollback. Debe ejecutarse después de aplicar la migración; no es una prueba de servicios ejecutada automáticamente por pytest.
 
-`web/e2e/ml-learning.spec.ts` recorre proyectos, misiones, glosario y biblioteca con servicios simulados en escritorio y móvil. La configuración usa los mismos hosts públicos que el resto de pruebas de QuantLab.
+`web/e2e/ml-learning.spec.ts` recorre proyectos, misiones, glosario y biblioteca con servicios simulados en escritorio y móvil. La configuración usa los mismos hosts públicos que el resto de pruebas de QuantBattle.
 
 ## Resultado de verificación local · 27 de octubre de 2026
 
@@ -70,4 +70,4 @@ La revisión de navegador encontró una redirección histórica `/app/learn/* �
 La revisión visual independiente pidió tres correcciones: diferenciar disponibilidad desconocida de ausencia confirmada, retirar prefijos internos de los errores y repetir la operación fallida, y preservar el tamaño de etiquetas temporales en móvil. Se aplicaron en una tanda y se recapturaron las mismas pantallas; la cronología ahora tiene desplazamiento local, leyenda HTML y texto oscuro sobre la celda de purga.
 El pase de veredicto independiente marcó las tres correcciones como resueltas, con disposición `ship` limitada a esas correcciones; no constituye una certificación del resto de la plataforma ni de servicios reales.
 
-La migración 0032 se aplicó mediante la API de administración al proyecto Supabase de QuantLab. El guion SQL de privacidad pasó contra PostgreSQL real y revirtió sus registros temporales. La publicación se realiza mediante push a `main`, con comprobación posterior de los despliegues de Render/Vercel y de las rutas públicas y autenticadas. Los servicios del torneo anterior mantienen sus datos y reglas.
+La migración 0032 se aplicó mediante la API de administración al proyecto Supabase de QuantBattle. El guion SQL de privacidad pasó contra PostgreSQL real y revirtió sus registros temporales. La publicación se realiza mediante push a `main`, con comprobación posterior de los despliegues de Render/Vercel y de las rutas públicas y autenticadas. Los servicios del torneo anterior mantienen sus datos y reglas.

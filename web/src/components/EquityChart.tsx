@@ -81,7 +81,7 @@ export function EquityChart({
             y1={y}
             x2="100"
             y2={y}
-            stroke="var(--ql-line)"
+            stroke="var(--qb-line)"
             strokeWidth="0.3"
             strokeDasharray="2,2"
           />
@@ -92,7 +92,7 @@ export function EquityChart({
           y1="50"
           x2="100"
           y2="50"
-          stroke="var(--ql-muted)"
+          stroke="var(--qb-muted)"
           strokeWidth="0.2"
           strokeDasharray="1,1"
         />
@@ -101,7 +101,7 @@ export function EquityChart({
           <path
             d={isPath}
             fill="none"
-            stroke="var(--ql-muted)"
+            stroke="var(--qb-muted)"
             strokeWidth="0.6"
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -112,7 +112,7 @@ export function EquityChart({
         <path
           d={oosPath}
           fill="none"
-          stroke="var(--ql-accent)"
+          stroke="var(--qb-accent)"
           strokeWidth="0.8"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -178,14 +178,14 @@ export function DrawdownChart({
           y1="0"
           x2="100"
           y2="0"
-          stroke="var(--ql-line)"
+          stroke="var(--qb-line)"
           strokeWidth="0.3"
         />
         <path
           d={path}
-          fill="var(--ql-short)"
+          fill="var(--qb-short)"
           fillOpacity="0.15"
-          stroke="var(--ql-short)"
+          stroke="var(--qb-short)"
           strokeWidth="0.6"
           strokeLinejoin="round"
         />

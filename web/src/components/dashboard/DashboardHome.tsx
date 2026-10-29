@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useDashboardData, type DashboardTournament } from "./useDashboardData";
 import { LESSONS } from "@/lib/academia/catalog";
 import { loadAcademiaProgress } from "@/components/academia/progress-store";
+import { protocolLabel } from "@/lib/ml-learning";
 import {
   getQPRanking,
   getTournamentRanking,
@@ -52,31 +53,31 @@ function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
   return (
     <Link
       href={`/app/tournaments/${tournament.id}`}
-      className="ql-competencia-mini"
+      className="qb-competencia-mini"
     >
-      <div className="ql-competencia-mini-header">
-        <div className="ql-competencia-mini-top">
-          <span className="ql-competencia-mini-type">
+      <div className="qb-competencia-mini-header">
+        <div className="qb-competencia-mini-top">
+          <span className="qb-competencia-mini-type">
             {tournament.type === "ml" ? "ML" : "Estrategias"}
           </span>
           {tournament.submission && (
-            <span className={`ql-competencia-mini-status${tournament.submission.status === "pending" || tournament.submission.status === "running" ? " pending" : ""}`}>
+            <span className={`qb-competencia-mini-status${tournament.submission.status === "pending" || tournament.submission.status === "running" ? " pending" : ""}`}>
               {tournament.submission.status === "done" || tournament.submission.status === "scored" ? "Evaluada" : tournament.submission.status === "validated" ? "Validado; esperando cierre" : "Pendiente"}
             </span>
           )}
         </div>
-        <h4 className="ql-competencia-mini-name">{tournament.name}</h4>
+        <h4 className="qb-competencia-mini-name">{tournament.name}</h4>
       </div>
-      <div className="ql-competencia-mini-body">
-        {tournament.symbol && <span className="ql-competencia-mini-badge">{tournament.symbol}</span>}
-        <span className="ql-competencia-mini-badge">{tournament.asset_type === "synthetic" ? "Datos sintéticos" : tournament.asset_type}</span>
+      <div className="qb-competencia-mini-body">
+        {tournament.symbol && <span className="qb-competencia-mini-badge">{tournament.symbol}</span>}
+        <span className="qb-competencia-mini-badge">{tournament.asset_type === "synthetic" ? "Datos sintéticos" : tournament.asset_type}</span>
       </div>
-      <div className="ql-competencia-mini-footer">
-        <div className="ql-competencia-mini-prize">
-          <span className="ql-competencia-mini-prize-label">Modalidad</span>
-          <span className="ql-competencia-mini-prize-value">Práctica sin premios QP</span>
+      <div className="qb-competencia-mini-footer">
+        <div className="qb-competencia-mini-prize">
+          <span className="qb-competencia-mini-prize-label">Modalidad</span>
+          <span className="qb-competencia-mini-prize-value">Práctica sin premios QP</span>
         </div>
-        <span className={`ql-competencia-mini-countdown${countdown ? " is-live" : ""}`}>
+        <span className={`qb-competencia-mini-countdown${countdown ? " is-live" : ""}`}>
           {countdown ? (
             <>Cierra en {countdown}</>
           ) : (
@@ -122,7 +123,7 @@ function Card({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <article className={`ql-bento-card ql-glass ql-elev-1 ${className}`}>{children}</article>;
+  return <article className={`qb-bento-card qb-glass qb-elev-1 ${className}`}>{children}</article>;
 }
 
 function CardHeaderWithIcon({
@@ -139,16 +140,16 @@ function CardHeaderWithIcon({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="ql-bento-card-header">
-      <div className="ql-bento-card-header-title">
-        <span className="ql-bento-card-icon">{icon}</span>
-        <div className="ql-bento-card-title">
+    <div className="qb-bento-card-header">
+      <div className="qb-bento-card-header-title">
+        <span className="qb-bento-card-icon">{icon}</span>
+        <div className="qb-bento-card-title">
           <h3>{title}</h3>
-          {subtitle && <p className="ql-bento-card-subtitle">{subtitle}</p>}
+          {subtitle && <p className="qb-bento-card-subtitle">{subtitle}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {badge && <span className="ql-bento-card-badge">{badge}</span>}
+        {badge && <span className="qb-bento-card-badge">{badge}</span>}
         {action}
       </div>
     </div>
@@ -157,7 +158,7 @@ function CardHeaderWithIcon({
 
 function SectionLink({ href, label }: { href: string; label: string }) {
   return (
-    <Link href={href} className="ql-section-link">
+    <Link href={href} className="qb-section-link">
       {label}
       <svg
         width="12"
@@ -177,10 +178,10 @@ function SectionLink({ href, label }: { href: string; label: string }) {
 
 function SkeletonBlock({ rows = 2 }: { rows?: number }) {
   return (
-    <div className="ql-skel-block" aria-hidden="true">
-      <span className="ql-skeleton-line" style={{ width: "45%" }} />
+    <div className="qb-skel-block" aria-hidden="true">
+      <span className="qb-skeleton-line" style={{ width: "45%" }} />
       {Array.from({ length: rows }).map((_, i) => (
-        <span key={i} className="ql-skeleton-line" />
+        <span key={i} className="qb-skeleton-line" />
       ))}
     </div>
   );
@@ -188,8 +189,8 @@ function SkeletonBlock({ rows = 2 }: { rows?: number }) {
 
 function SkeletonCompetencias() {
   return (
-    <div className="ql-skeletons" aria-busy="true" aria-label="Cargando competencias">
-      <div className="ql-skel-grid">
+    <div className="qb-skeletons" aria-busy="true" aria-label="Cargando competencias">
+      <div className="qb-skel-grid">
         <SkeletonBlock rows={3} />
         <SkeletonBlock rows={3} />
         <SkeletonBlock rows={3} />
@@ -200,26 +201,26 @@ function SkeletonCompetencias() {
 
 function SkeletonRanking() {
   return (
-    <div className="ql-skel-list" aria-busy="true" aria-label="Cargando ranking">
+    <div className="qb-skel-list" aria-busy="true" aria-label="Cargando ranking">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="ql-skel-row">
-          <span className="ql-skeleton-line" style={{ width: "24px" }} />
-          <span className="ql-skeleton-circle" style={{ width: 20, height: 20 }} />
-          <span className="ql-skeleton-line" style={{ flex: 1 }} />
+        <div key={i} className="qb-skel-row">
+          <span className="qb-skeleton-line" style={{ width: "24px" }} />
+          <span className="qb-skeleton-circle" style={{ width: 20, height: 20 }} />
+          <span className="qb-skeleton-line" style={{ flex: 1 }} />
         </div>
       ))}
     </div>
   );
 }
 
-function SkeletonEstrategias() {
+function SkeletonProjects() {
   return (
-    <div className="ql-skel-list" aria-busy="true" aria-label="Cargando estrategias">
+    <div className="qb-skel-list" aria-busy="true" aria-label="Cargando proyectos ML">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="ql-skel-row">
-          <span className="ql-skeleton-line" style={{ width: "32%" }} />
-          <span className="ql-skeleton-line" style={{ flex: 1 }} />
-          <span className="ql-skeleton-line" style={{ width: "16%" }} />
+        <div key={i} className="qb-skel-row">
+          <span className="qb-skeleton-line" style={{ width: "32%" }} />
+          <span className="qb-skeleton-line" style={{ flex: 1 }} />
+          <span className="qb-skeleton-line" style={{ width: "16%" }} />
         </div>
       ))}
     </div>
@@ -227,7 +228,7 @@ function SkeletonEstrategias() {
 }
 
 function DashboardHome() {
-  const { strategies, tournaments, loading, error, retry, sources, authRequired } =
+  const { projects, tournaments, loading, error, retry, sources, authRequired } =
     useDashboardData();
 
   const [rankingTab, setRankingTab] = useState<RankingTab>("qp");
@@ -267,17 +268,7 @@ function DashboardHome() {
   const rankingEntries = rankingTab === "qp" ? qpRanking : tournamentRanking;
     const myTournaments = tournaments.slice(0, 6);
     const hasMoreTournaments = tournaments.length > 6;
-    const myStrategies = [...strategies]
-      .sort((a, b) => {
-        const sa = a.last_sharpe_oos;
-        const sb = b.last_sharpe_oos;
-        // Nulos al final; resto descendente por sharpe OOS.
-        if (sa == null && sb == null) return 0;
-        if (sa == null) return 1;
-        if (sb == null) return -1;
-        return sb - sa;
-      })
-      .slice(0, 6);
+    const myProjects = projects.slice(0, 6);
 
   useEffect(() => {
     let active = true;
@@ -292,25 +283,25 @@ function DashboardHome() {
   }, [rankingTab, period, rankingRetry]);
 
   return (
-    <div className="ql-dash-content" aria-busy={loading}>
+    <div className="qb-dash-content" aria-busy={loading}>
       {error && (
-        <div className="ql-dashboard-notice ql-dashboard-notice--error" role="alert">
+        <div className="qb-dashboard-notice qb-dashboard-notice--error" role="alert">
           <span>{error}</span>
           <div className="flex items-center gap-2">
             {authRequired && (
-              <Link href="/login" className="ql-btn-primary">
+              <Link href="/login" className="qb-btn-primary">
                 Iniciar sesión
               </Link>
             )}
-            <button type="button" className="ql-btn-secondary" onClick={retry}>
+            <button type="button" className="qb-btn-secondary" onClick={retry}>
               Reintentar
             </button>
           </div>
         </div>
       )}
 
-      <header className="ql-home-intro">
-        <span className="ql-home-intro-kicker">QUANTLAB / INICIO</span>
+      <header className="qb-home-intro">
+        <span className="qb-home-intro-kicker">QUANTBATTLE / INICIO</span>
         <h1 className="text-2xl font-semibold text-ink">Tu espacio de investigación</h1>
         <p className="mt-2 max-w-2xl text-base text-muted">Continúa desde tus datos, envíos y resultados de torneos ML.</p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
@@ -321,9 +312,9 @@ function DashboardHome() {
       <ReturnTournamentList compact />
       <ReturnSubmissionHistory />
       <MlWorkspace nextRound={tournaments.find((t) => t.type === "ml")} roundsLoading={sources.tournaments === "loading"} roundsError={sources.tournaments === "error"} />
-      <div className="ql-bento-grid">
+      <div className="qb-bento-grid">
         {/* Competencias — fila 1 izquierda */}
-        <Card className="ql-bento-competencias">
+        <Card className="qb-bento-competencias">
           <CardHeaderWithIcon
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -336,20 +327,20 @@ function DashboardHome() {
             badge={myTournaments.length > 0 ? `${myTournaments.length} activas` : undefined}
             action={<SectionLink href="/app/tournaments" label="Ver todas" />}
           />
-          <div className="ql-bento-competencias-body">
+          <div className="qb-bento-competencias-body">
             {sources.tournaments === "loading" ? (
               <SkeletonCompetencias />
             ) : sources.tournaments === "error" ? (
-              <div className="ql-bento-empty">No se pudieron cargar las rondas. Usa Reintentar para volver a consultarlas.</div>
+              <div className="qb-bento-empty">No se pudieron cargar las rondas. Usa Reintentar para volver a consultarlas.</div>
             ) : myTournaments.length === 0 ? (
-              <div className="ql-bento-empty">
+              <div className="qb-bento-empty">
                 <p>No hay rondas abiertas en este momento. Puedes consultar resultados y la guía.</p>
-                <Link href="/app/tournaments" className="ql-btn-primary">
+                <Link href="/app/tournaments" className="qb-btn-primary">
                   Explorar competencias
                 </Link>
               </div>
             ) : (
-              <div className="ql-competencias-grid">
+              <div className="qb-competencias-grid">
                 {myTournaments.map((t) => (
                   <TournamentMini key={t.id} tournament={t} />
                 ))}
@@ -357,8 +348,8 @@ function DashboardHome() {
             )}
           </div>
           {hasMoreTournaments && (
-            <div className="ql-bento-competencias-footer">
-              <Link href="/app/tournaments" className="ql-btn-secondary">
+            <div className="qb-bento-competencias-footer">
+              <Link href="/app/tournaments" className="qb-btn-secondary">
                 Ir a competencias
               </Link>
             </div>
@@ -366,8 +357,8 @@ function DashboardHome() {
         </Card>
 
         {/* Ranking — columna derecha, ambas filas */}
-        <Card className={`ql-bento-ranking${!rankingLoading && !rankingError && rankingEntries.length === 0 ? " is-empty" : ""}`}>
-          <div className="ql-ranking-header">
+        <Card className={`qb-bento-ranking${!rankingLoading && !rankingError && rankingEntries.length === 0 ? " is-empty" : ""}`}>
+          <div className="qb-ranking-header">
             <CardHeaderWithIcon
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -377,24 +368,24 @@ function DashboardHome() {
               title="Ranking en la comunidad"
               subtitle={rankingTab === "tournaments" ? "Victorias acumuladas; participación filtrada por período" : `QP ganados en el último ${period === "week" ? "período de 7 días" : period === "month" ? "mes" : "período de 3 meses"}`}
             />
-            <div className="ql-ranking-filters">
-              <div className="ql-ranking-tabs">
+            <div className="qb-ranking-filters">
+              <div className="qb-ranking-tabs">
                 <button
                   type="button"
-                  className={`ql-ranking-tab${rankingTab === "qp" ? " active" : ""}`}
+                  className={`qb-ranking-tab${rankingTab === "qp" ? " active" : ""}`}
                   onClick={() => handleTabChange("qp")}
                 >
                   QP
                 </button>
                 <button
                   type="button"
-                  className={`ql-ranking-tab${rankingTab === "tournaments" ? " active" : ""}`}
+                  className={`qb-ranking-tab${rankingTab === "tournaments" ? " active" : ""}`}
                   onClick={() => handleTabChange("tournaments")}
                 >
                   Torneos
                 </button>
               </div>
-              <div className="ql-ranking-period">
+              <div className="qb-ranking-period">
                 <select
                   value={period}
                   onChange={(e) => handlePeriodChange(e.target.value as RankingPeriod)}
@@ -409,29 +400,29 @@ function DashboardHome() {
               </div>
             </div>
           </div>
-          <div className="ql-ranking-body">
+          <div className="qb-ranking-body">
             {rankingLoading ? (
               <SkeletonRanking />
             ) : rankingError ? (
-              <div className="ql-bento-empty" role="alert">
+              <div className="qb-bento-empty" role="alert">
                 <p>No se pudo cargar el ranking.</p>
-                <button type="button" className="ql-btn-secondary" onClick={() => { setRankingLoading(true); setRankingError(false); setRankingRetry((n) => n + 1); }}>Reintentar ranking</button>
+                <button type="button" className="qb-btn-secondary" onClick={() => { setRankingLoading(true); setRankingError(false); setRankingRetry((n) => n + 1); }}>Reintentar ranking</button>
               </div>
             ) : rankingEntries.length === 0 ? (
-              <div className="ql-bento-empty">
+              <div className="qb-bento-empty">
                 No hay datos para este período.
               </div>
             ) : (
-              <ol className="ql-ranking-list">
+              <ol className="qb-ranking-list">
                 {rankingEntries.map((entry) => (
                   <li
                     key={entry.user_id}
-                    className={`ql-ranking-item${entry.is_me ? " is-me" : ""}`}
+                    className={`qb-ranking-item${entry.is_me ? " is-me" : ""}`}
                   >
-                    <span className={`ql-ranking-pos${entry.rank <= 3 ? " top" : ""}`}>
+                    <span className={`qb-ranking-pos${entry.rank <= 3 ? " top" : ""}`}>
                       #{entry.rank}
                     </span>
-                    <div className="ql-ranking-avatar">
+                    <div className="qb-ranking-avatar">
                       {(entry as QPRankingEntry).avatar_url ? (
                         // Avatar externo y dinámico (Supabase/Google): <img> directo,
                         // next/image exigiría remotePatterns abierto.
@@ -443,21 +434,21 @@ function DashboardHome() {
                           height={20}
                         />
                       ) : (
-                        <span className="ql-ranking-avatar-fallback">
+                        <span className="qb-ranking-avatar-fallback">
                           {entry.username.slice(0, 2).toUpperCase()}
                         </span>
                       )}
                     </div>
-                    <div className="ql-ranking-info">
-                      <span className="ql-ranking-name">
+                    <div className="qb-ranking-info">
+                      <span className="qb-ranking-name">
                         {entry.username}
-                        {entry.is_me && <span className="ql-ranking-me">Tú</span>}
+                        {entry.is_me && <span className="qb-ranking-me">Tú</span>}
                       </span>
-                      <span className="ql-ranking-stat">
+                      <span className="qb-ranking-stat">
                         {rankingTab === "qp" ? (
                           <>
                             {formatNumber((entry as QPRankingEntry).qp)}{" "}
-                            <span className="ql-ranking-qp">QP</span>
+                            <span className="qb-ranking-qp">QP</span>
                           </>
                         ) : (
                           <>
@@ -476,55 +467,47 @@ function DashboardHome() {
           </div>
         </Card>
 
-        {/* Estrategias + Aprendizaje — fila 2 */}
-        <div className="ql-bento-bottom-left">
-          <Card className="ql-bento-estrategias">
+        {/* Proyectos ML + Aprendizaje — fila 2 */}
+        <div className="qb-bento-bottom-left">
+          <Card className="qb-bento-proyectos-ml">
             <CardHeaderWithIcon
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                 </svg>
               }
-              title="Estrategias"
-              subtitle="Tus estrategias en backtesting"
-              badge={`${strategies.length} activas`}
+              title="Proyectos ML"
+              subtitle="Tus hipótesis y experimentos de machine learning"
+              action={<SectionLink href="/app/strategies" label="Ver todos" />}
             />
-            <div className="ql-estrategias-body">
-              {sources.strategies === "loading" ? (
-                <SkeletonEstrategias />
-              ) : sources.strategies === "error" ? (
-                <div className="ql-bento-empty">No se pudieron cargar tus estrategias.</div>
-              ) : myStrategies.length === 0 ? (
-                <div className="ql-bento-empty">
-                  <p>Todavía no has guardado estrategias de backtesting.</p>
-                  <Link href="/app/strategies/new?demo=1" className="ql-btn-primary">
-                    Crear mi primer backtest
+            <div className="qb-proyectos-ml-body">
+              {sources.projects === "loading" ? (
+                <SkeletonProjects />
+              ) : sources.projects === "error" ? (
+                <div className="qb-bento-empty" role="alert">
+                  No se pudieron cargar tus proyectos ML. Usa Reintentar para volver a consultarlos.
+                </div>
+              ) : myProjects.length === 0 ? (
+                <div className="qb-bento-empty">
+                  <p>
+                    Aún no tienes proyectos ML. Registra una hipótesis y el protocolo que quieres evaluar.
+                  </p>
+                  <Link href="/app/strategies/new" className="qb-btn-primary">
+                    Crear proyecto ML
                   </Link>
                 </div>
               ) : (
-                <div className="ql-estrategias-grid">
-                  {myStrategies.map((s) => (
+                <div className="qb-proyectos-ml-grid">
+                  {myProjects.map((project) => (
                     <Link
-                      key={s.id}
-                      href={`/app/strategies/${s.id}/results`}
-                      className="ql-estrategia-item"
+                      key={project.id}
+                      href={`/app/strategies/${project.id}`}
+                      className="qb-proyecto-ml-item"
                     >
-                      <span className="ql-estrategia-symbol">{s.symbol}</span>
-                      <div className="ql-estrategia-info">
-                        <h4>{s.title}</h4>
-                        <span className="ql-estrategia-meta">
-                          {s.asset_type} · {s.timeframe}
-                        </span>
-                      </div>
-                      {s.last_sharpe_oos != null && (
-                        <span
-                          className={`ql-estrategia-metric${
-                            s.last_sharpe_oos < 0 ? " is-neg" : ""
-                          }`}
-                        >
-                          {s.last_sharpe_oos.toFixed(2)}
-                        </span>
-                      )}
+                      <span className="qb-proyecto-ml-protocol">
+                        {protocolLabel(project.protocol)}
+                      </span>
+                      <h4 className="qb-proyecto-ml-title">{project.title}</h4>
                     </Link>
                   ))}
                 </div>
@@ -532,7 +515,7 @@ function DashboardHome() {
             </div>
           </Card>
 
-          <Card className="ql-bento-aprendizaje">
+          <Card className="qb-bento-aprendizaje">
             <CardHeaderWithIcon
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -543,16 +526,16 @@ function DashboardHome() {
               title="Academia"
               subtitle="Cursos abiertos · progreso guardado en este navegador"
             />
-            <div className="ql-aprendizaje-body">
-              <div className="ql-aprendizaje-progress">
-                <div className="ql-aprendizaje-ring">
+            <div className="qb-aprendizaje-body">
+              <div className="qb-aprendizaje-progress">
+                <div className="qb-aprendizaje-ring">
                   <svg viewBox="0 0 100 100" width="60" height="60">
                     <circle
                       cx="50"
                       cy="50"
                       r="42"
                       fill="none"
-                      stroke="var(--ql-line)"
+                      stroke="var(--qb-line)"
                       strokeWidth="8"
                     />
                     <circle
@@ -560,23 +543,23 @@ function DashboardHome() {
                       cy="50"
                       r="42"
                       fill="none"
-                      stroke="var(--ql-accent)"
+                      stroke="var(--qb-accent)"
                       strokeWidth="8"
                       strokeLinecap="round"
                       strokeDasharray={`${(coursePct / 100) * 264} 264`}
                       transform="rotate(-90 50 50)"
                     />
                   </svg>
-                  <span className="ql-aprendizaje-percent">{coursePct}%</span>
+                  <span className="qb-aprendizaje-percent">{coursePct}%</span>
                 </div>
-                <div className="ql-aprendizaje-text">
-                  <p className="ql-aprendizaje-label">Progreso en Academia</p>
-                  <p className="ql-aprendizaje-detail">
+                <div className="qb-aprendizaje-text">
+                  <p className="qb-aprendizaje-label">Progreso en Academia</p>
+                  <p className="qb-aprendizaje-detail">
                     {completedCount} de {totalModules} lecciones
                   </p>
                 </div>
               </div>
-              <Link href="/app/academia" className="ql-btn-secondary ql-aprendizaje-cta">
+              <Link href="/app/academia" className="qb-btn-secondary qb-aprendizaje-cta">
                 Continuar en la Academia
               </Link>
             </div>

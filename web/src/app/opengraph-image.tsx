@@ -24,7 +24,7 @@ export default function OgImage() {
         }}
       >
         <div style={{ display: "flex", fontSize: 28, color: "#245ce5", letterSpacing: 4 }}>
-          QUANTLAB
+          QUANTBATTLE
         </div>
         <div style={{ display: "flex", flexDirection: "column", fontSize: 64, fontWeight: 700, marginTop: 16, lineHeight: 1.1 }}>
           Del dataset a una

@@ -21,7 +21,7 @@ async function mockedSession(page: Page, published = false) {
   test.skip(!supabaseUrl || !workerUrl, 'Requires public hosts for API contract mocks');
   const host = new URL(supabaseUrl!).hostname, worker = new URL(workerUrl!).hostname;
   const expires = Math.floor(Date.now() / 1000) + 3600;
-  const user = { id: '00000000-0000-4000-8000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'contract@quantlab.example', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: { full_name: 'Prueba técnica' }, created_at: '2026-10-01T00:00:00Z' };
+  const user = { id: '00000000-0000-4000-8000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'contract@quantbattle.example', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: { full_name: 'Prueba técnica' }, created_at: '2026-10-01T00:00:00Z' };
   const token = ['eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9', Buffer.from(JSON.stringify({ sub: user.id, role: 'authenticated', aud: 'authenticated', exp: expires })).toString('base64url'), 'test-signature'].join('.');
   await page.context().addCookies([{ name: `sb-${host.split('.')[0]}-auth-token`, value: JSON.stringify({ access_token: token, refresh_token: 'test-refresh', expires_in: 3600, expires_at: expires, token_type: 'bearer', user }), url: 'http://localhost:3100' }]);
   let attempts: Record<string, unknown>[] = [];

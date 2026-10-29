@@ -6,7 +6,7 @@ Storage como Parquet (si pyarrow está disponible) o JSON. Así los backtests en
 producción leen desde Storage en lugar de golpear la API en cada request.
 
 Uso:
-    cd C:/Users/ecard/QuantLab/worker
+    cd C:/Users/ecard/QuantBattle/worker
     . .venv/Scripts/activate
     python scripts/precache.py            # ejecuta la precarga completa
     python -c "from scripts.precache import build_jobs, cache_object_path"

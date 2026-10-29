@@ -6,22 +6,20 @@ import {
   getMyCourseProgress,
   getMyMlTournamentSubmissions,
   getMyQpRanking,
-  getMyStrategies,
   getMyTournamentSubmissions,
 } from "@/lib/db";
 import type {
   MlTournamentSubmissionLookup,
   MyCourseProgress,
   MyQpRanking,
-  MyStrategy,
   TournamentSubmissionSnapshot,
 } from "@/lib/db";
+import { projectList, type MLProject } from "@/lib/ml-learning";
 import { listTournaments, isAuthError, isCorsLikeError } from "@/lib/tournaments";
 import { listDatasets, type MlDataset } from "@/lib/mlTournaments";
 import type { Tournament } from "@/lib/tournaments";
 
 export type DashboardSourceState = "loading" | "ready" | "error";
-export type DashboardStrategy = MyStrategy;
 export type SubmissionLoadState =
   | "loading"
   | "ready"
@@ -48,7 +46,7 @@ export type DashboardData = {
   qp: number | null;
   course: MyCourseProgress | null;
   ranking: MyQpRanking | null;
-  strategies: MyStrategy[];
+  projects: MLProject[];
   tournaments: DashboardTournament[];
   loading: boolean;
   error: string | null;
@@ -62,7 +60,7 @@ export type DashboardData = {
     qp: DashboardSourceState;
     course: DashboardSourceState;
     ranking: DashboardSourceState;
-    strategies: DashboardSourceState;
+    projects: DashboardSourceState;
     tournaments: DashboardSourceState;
     submissions: DashboardSourceState;
   };
@@ -72,7 +70,7 @@ const INITIAL_DATA: DashboardData = {
   qp: null,
   course: null,
   ranking: null,
-  strategies: [],
+  projects: [],
   tournaments: [],
   loading: true,
   error: null,
@@ -83,7 +81,7 @@ const INITIAL_DATA: DashboardData = {
     qp: "loading",
     course: "loading",
     ranking: "loading",
-    strategies: "loading",
+    projects: "loading",
     tournaments: "loading",
     submissions: "loading",
   },
@@ -165,10 +163,10 @@ export function useDashboardData(): DashboardData {
     let active = true;
 
     async function load() {
-      const [balanceResult, strategiesResult, tournamentsResult, courseResult, rankingResult] =
+      const [balanceResult, projectsResult, tournamentsResult, courseResult, rankingResult] =
         await Promise.allSettled([
           getBalance(),
-          getMyStrategies(),
+          projectList(0),
           loadOpenMlRounds(),
           getMyCourseProgress(),
           getMyQpRanking(),
@@ -184,7 +182,7 @@ export function useDashboardData(): DashboardData {
       // del allSettled y la UI solo mostraba "No se pudo cargar los QP".
       const rejectedReasons: Record<string, unknown> = {};
       if (balanceResult.status === "rejected") rejectedReasons.qp = balanceResult.reason;
-      if (strategiesResult.status === "rejected") rejectedReasons.strategies = strategiesResult.reason;
+      if (projectsResult.status === "rejected") rejectedReasons.projects = projectsResult.reason;
       if (tournamentsResult.status === "rejected") rejectedReasons.tournaments = tournamentsResult.reason;
       if (courseResult.status === "rejected") rejectedReasons.course = courseResult.reason;
       if (rankingResult.status === "rejected") rejectedReasons.ranking = rankingResult.reason;
@@ -205,9 +203,9 @@ export function useDashboardData(): DashboardData {
               })
               .join(" | ")
           : null;
-      const strategies =
-        strategiesResult.status === "fulfilled" && Array.isArray(strategiesResult.value)
-          ? strategiesResult.value
+      const projects =
+        projectsResult.status === "fulfilled" && Array.isArray(projectsResult.value.entries)
+          ? projectsResult.value.entries
           : [];
       const rawTournaments =
         tournamentsResult.status === "fulfilled" && Array.isArray(tournamentsResult.value)
@@ -221,8 +219,8 @@ export function useDashboardData(): DashboardData {
         qp: qp != null ? "ready" : "error",
         course: courseResult.status === "fulfilled" ? "ready" : "error",
         ranking: rankingResult.status === "fulfilled" ? "ready" : "error",
-        strategies:
-          strategiesResult.status === "fulfilled" && Array.isArray(strategiesResult.value)
+        projects:
+          projectsResult.status === "fulfilled" && Array.isArray(projectsResult.value.entries)
             ? "ready"
             : "error",
         tournaments:
@@ -244,7 +242,7 @@ export function useDashboardData(): DashboardData {
         !qpAuthFailed && sourceStates.qp === "error" ? "los QP" : null,
         sourceStates.course === "error" ? "el progreso del curso" : null,
         sourceStates.ranking === "error" ? "el ranking" : null,
-        sourceStates.strategies === "error" ? "las estrategias" : null,
+        sourceStates.projects === "error" ? "tus proyectos ML" : null,
         sourceStates.tournaments === "error"
           ? tournamentsCorsFailed
             ? "los torneos (puede ser CORS o bloqueador del navegador)"
@@ -263,7 +261,7 @@ export function useDashboardData(): DashboardData {
         qp,
         course,
         ranking,
-        strategies,
+        projects,
         tournaments,
         loading: false,
         error,
@@ -365,7 +363,7 @@ export function useDashboardData(): DashboardData {
           qp: "error",
           course: "error",
           ranking: "error",
-          strategies: "error",
+          projects: "error",
           tournaments: "error",
           submissions: "error",
         },

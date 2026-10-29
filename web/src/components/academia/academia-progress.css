@@ -1,7 +1,7 @@
-.academia-progress { color:var(--ql-ink); }
+.academia-progress { color:var(--qb-ink); }
 .academia-progress-top { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; }
 .academia-progress-label { color:#3368bf; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
-.academia-progress-text { color:var(--ql-muted); font-size:13px; font-variant-numeric:tabular-nums; }
+.academia-progress-text { color:var(--qb-muted); font-size:13px; font-variant-numeric:tabular-nums; }
 .academia-progress-track { height:8px; border:1px solid #dce6ef; border-radius:999px; background:#e1eaf4; overflow:hidden; }
 .academia-progress-fill { height:100%; border-radius:999px; background:#245ce5; transition:width 400ms ease; }
 .academia-journey { display:flex; flex-direction:column; margin:20px 0 0; padding:0; list-style:none; }

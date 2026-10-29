@@ -1,4 +1,4 @@
--- QuantLab migración 0025: update/delete propios en el bucket de avatares.
+-- QuantBattle migración 0025: update/delete propios en el bucket de avatares.
 -- Uso: Emilio la aplica MANUALMENTE en el SQL editor de Supabase.
 -- Solo el dueño de la carpeta (user_id) puede actualizar o borrar sus archivos.
 

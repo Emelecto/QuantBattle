@@ -1,4 +1,4 @@
-# Scheduler de torneos QuantLab.
+# Scheduler de torneos QuantBattle.
 # Se ejecuta periódicamente (cron job) para crear, evaluar y cerrar torneos.
 
 from __future__ import annotations

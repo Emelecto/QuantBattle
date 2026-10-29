@@ -9,7 +9,7 @@ import { FUNNEL_STEPS } from "@/lib/analytics-events";
 export async function GET() {
   const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN?.trim() ?? null;
   return NextResponse.json({
-    name: "Activación QuantLab",
+    name: "Activación QuantBattle",
     steps: FUNNEL_STEPS,
     dashboard: domain
       ? `https://plausible.io/${domain}/funnels (pasos: ${FUNNEL_STEPS.map((s: { event: string }) => s.event).join(" → ")})`

@@ -1,9 +1,9 @@
-# QuantLab · aplicación web
+# QuantBattle · aplicación web
 
-Interfaz de investigación de QuantLab para el semillero DeepFin de la Universidad EIA. La entrega evaluada se concentra en torneos de predicción ML con datos sintéticos: descarga de `train`, `validation` y `live`, envío de `id,prediction`, validación del CSV, comprobante y puntuación posterior al cierre.
+Interfaz de investigación de QuantBattle para el semillero DeepFin de la Universidad EIA. La entrega evaluada se concentra en torneos de predicción ML con datos sintéticos: descarga de `train`, `validation` y `live`, envío de `id,prediction`, validación del CSV, comprobante y puntuación posterior al cierre.
 
-- [Plataforma publicada](https://quant-lab-nine.vercel.app/)
-- [Protocolo y evidencia del piloto](https://quant-lab-nine.vercel.app/docs#evaluacion)
+- [Plataforma publicada](https://www.quantbattle.co/)
+- [Protocolo y evidencia del piloto](https://www.quantbattle.co/docs#evaluacion)
 - [Guía para evaluadores](../docs/evaluation-guide.md)
 - [Protocolo técnico ML](../docs/ml-tournaments.md)
 

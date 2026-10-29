@@ -52,7 +52,7 @@ export default function ReferralsPanel() {
       </div>
 
       {/* Link de referido */}
-      <div className="ql-glass ql-elev-1 rounded-xl p-5">
+      <div className="qb-glass qb-elev-1 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-ink mb-3">Tu enlace de referido</h3>
         <div className="flex gap-2">
           <input
@@ -77,19 +77,19 @@ export default function ReferralsPanel() {
 
       {/* Estadísticas */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="ql-glass ql-elev-1 rounded-xl p-4">
+        <div className="qb-glass qb-elev-1 rounded-xl p-4">
           <p className="text-xs uppercase tracking-wider text-muted">Referidos</p>
           <p className="metric text-2xl font-bold text-accent mt-1">
             {stats?.total_referidos ?? 0}
           </p>
         </div>
-        <div className="ql-glass ql-elev-1 rounded-xl p-4">
+        <div className="qb-glass qb-elev-1 rounded-xl p-4">
           <p className="text-xs uppercase tracking-wider text-muted">Recompensados</p>
           <p className="metric text-2xl font-bold text-long mt-1">
             {stats?.rewarded ?? 0}
           </p>
         </div>
-        <div className="ql-glass ql-elev-1 rounded-xl p-4">
+        <div className="qb-glass qb-elev-1 rounded-xl p-4">
           <p className="text-xs uppercase tracking-wider text-muted">QP Ganado</p>
           <p className="metric text-2xl font-bold text-accent mt-1">
             {stats?.qp_earned ?? 0}
@@ -98,7 +98,7 @@ export default function ReferralsPanel() {
       </div>
 
       {/* Cómo funciona */}
-      <div className="ql-glass ql-elev-1 rounded-xl p-5">
+      <div className="qb-glass qb-elev-1 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-ink mb-3">¿Cómo funciona?</h3>
         <ol className="text-sm text-muted space-y-2">
           <li className="flex gap-2">

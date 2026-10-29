@@ -28,9 +28,9 @@ function relativeDate(iso: string): string {
 
 function CommentSkeleton() {
   return (
-    <div className="ql-glass ql-elev-1 space-y-3 rounded-xl p-5">
+    <div className="qb-glass qb-elev-1 space-y-3 rounded-xl p-5">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="ql-skeleton-line h-10 w-full" />
+        <div key={i} className="qb-skeleton-line h-10 w-full" />
       ))}
     </div>
   );
@@ -74,7 +74,7 @@ function CommentRow({
   }
 
   return (
-    <li className="ql-row flex items-start gap-3 px-5 py-4">
+    <li className="qb-row flex items-start gap-3 px-5 py-4">
       {/* Avatar con inicial */}
       <span
         aria-hidden="true"
@@ -144,7 +144,7 @@ function CommentRow({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="¿Por qué lo reportas? (máx. 500 caracteres)"
-            className="ql-input w-full resize-y rounded-md px-3 py-2 text-[12px] text-ink"
+            className="qb-input w-full resize-y rounded-md px-3 py-2 text-[12px] text-ink"
           />
           <div className="mt-1.5 flex items-center gap-2">
             <button
@@ -255,7 +255,7 @@ function CommentsContent({ strategyId }: { strategyId: string }) {
       {comments === null ? (
         <CommentSkeleton />
       ) : comments.length === 0 ? (
-        <div className="ql-glass ql-elev-1 rounded-xl px-6 py-8 text-center">
+        <div className="qb-glass qb-elev-1 rounded-xl px-6 py-8 text-center">
           {loadError ? (
             <>
               <p className="text-sm text-muted">{loadError}</p>
@@ -272,7 +272,7 @@ function CommentsContent({ strategyId }: { strategyId: string }) {
           )}
         </div>
       ) : (
-        <div className="ql-glass ql-elev-1 overflow-hidden rounded-xl">
+        <div className="qb-glass qb-elev-1 overflow-hidden rounded-xl">
           <ul className="divide-y divide-line">
             {comments.map((c) => (
               <CommentRow
@@ -291,7 +291,7 @@ function CommentsContent({ strategyId }: { strategyId: string }) {
       )}
 
       {/* Compositor */}
-      <div className="ql-glass ql-elev-1 mt-4 rounded-xl p-4">
+      <div className="qb-glass qb-elev-1 mt-4 rounded-xl p-4">
         {!authLoading && !user ? (
           <p className="metric text-xs text-muted">Inicia sesión para comentar.</p>
         ) : (

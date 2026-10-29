@@ -65,7 +65,7 @@ def main():
     use_zero = zero_error <= best_error
     prediction = np.zeros(len(parts['live'])) if use_zero else model.predict(parts['live'][features])
     csv = pd.DataFrame({'id': parts['live'].id, 'prediction': np.clip(prediction, -1, 10)}).to_csv(index=False).encode()
-    email, password = 'returns-technical@quantlab.example', secrets.token_urlsafe(32)
+    email, password = 'returns-technical@quantbattle.example', secrets.token_urlsafe(32)
     user = next((u for u in sb.auth.admin.list_users(page=1, per_page=1000) if u.email == email), None)
     if user is None:
         user = sb.auth.admin.create_user({'email': email, 'password': password, 'email_confirm': True,
@@ -77,7 +77,7 @@ def main():
         'parameters': {} if use_zero else {'loss': 'absolute_error', 'max_iter': 100, 'max_leaf_nodes': leaves, 'learning_rate': .05},
         'seed': 20261026, 'note': 'Cuenta técnica de verificación. Selección con validation; no representa adopción externa ni score futuro.'}
     headers = {'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'text/csv',
-               'X-QuantLab-Experiment': base64.b64encode(p.canonical(metadata)).decode()}
+               'X-QuantBattle-Experiment': base64.b64encode(p.canonical(metadata)).decode()}
     endpoint = f'{worker}/ml/return-rounds/{row["id"]}'
     response = requests.post(endpoint + '/predictions', headers=headers, data=csv, timeout=90)
     response.raise_for_status()

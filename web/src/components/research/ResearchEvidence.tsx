@@ -45,7 +45,7 @@ export function ResearchEvidence() {
       <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
         <a href="/research/judge-pilot.json" download className="text-accent underline underline-offset-4">Descargar evidencia completa (JSON)</a>
         <Link href={`/app/tournaments/${pilot.tournament_id}`} className="text-accent underline underline-offset-4">Abrir torneo de demostración</Link>
-        <a href="https://github.com/Emelecto/QuantLab/blob/main/docs/evaluation-guide.md" className="text-accent underline underline-offset-4">Guía para evaluadores</a>
+        <a href="https://github.com/Emelecto/QuantBattle/blob/main/docs/evaluation-guide.md" className="text-accent underline underline-offset-4">Guía para evaluadores</a>
       </div>
       <p className="border-t border-line pt-4 text-sm">
         El autor reporta el uso de Hermes Agent, subagentes y memoria persistente durante el desarrollo. Esta versión de evaluación también recibió cambios y pruebas asistidos por Codex. Estudiar la contribución de cada herramienta requiere analizar sus sesiones y el historial del código por separado.

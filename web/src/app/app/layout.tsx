@@ -6,9 +6,9 @@ import { AccountBoundary } from "@/components/dashboard/AccountBoundary";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AccountBoundary><div className="ql-app-shell">
+    <AccountBoundary><div className="qb-app-shell">
       <Sidebar />
-      <div className="ql-dash-main">
+      <div className="qb-dash-main">
         <DashboardTopbar />
         {children}
         <MobileBottomNav />

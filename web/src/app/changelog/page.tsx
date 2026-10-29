@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * /changelog — historial público de cambios de QuantLab.
+ * /changelog — historial público de cambios de QuantBattle.
  * Entradas más recientes primero. Añadir nuevas versiones al inicio del array.
  */
 
@@ -42,8 +42,8 @@ const ENTRIES: {
     date: "Agosto 2026",
     tag: "Plataforma abierta",
     items: [
-      "Claves API qlk_ para acceso programático: crea y revoca claves desde tu cuenta.",
-      "Servidor MCP (Model Context Protocol): conecta QuantLab con Claude y otros asistentes.",
+      "Claves API qbt_ para acceso programático: crea y revoca claves desde tu cuenta.",
+      "Servidor MCP (Model Context Protocol): conecta QuantBattle con Claude y otros asistentes.",
       "'Agregar al mercado' directo desde los resultados de una estrategia ya creada.",
       "Envío a torneos desde la creación de estrategias.",
       "Nuevo tema Glass Terminal con acento blanco: sobrio, legible, profesional.",

@@ -1,6 +1,6 @@
 # Operación del piloto y contingencias
 
-Responsable técnico del piloto: Emilio Cardona López, mantenedor del repositorio. Canal público de incidencias: https://github.com/Emelecto/QuantLab/issues/new?template=bug_report.yml. La plantilla pide ruta, momento, pasos y resultado esperado, e indica que no deben compartirse credenciales ni archivos privados. No existe un tiempo de respuesta garantizado.
+Responsable técnico del piloto: Emilio Cardona López, mantenedor del repositorio. Canal público de incidencias: https://github.com/Emelecto/QuantBattle/issues/new?template=bug_report.yml. La plantilla pide ruta, momento, pasos y resultado esperado, e indica que no deben compartirse credenciales ni archivos privados. No existe un tiempo de respuesta garantizado.
 
 ## Antes de una convocatoria
 

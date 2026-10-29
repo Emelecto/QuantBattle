@@ -1,4 +1,4 @@
-# QuantLab visual system
+# QuantBattle visual system
 
 ## Purpose
 Help Spanish-speaking researchers understand and complete a prediction tournament. Public pages introduce the research workflow; authenticated screens prioritize the next action, readable records and explicit states. Functionality and scientific accuracy govern visual decisions.

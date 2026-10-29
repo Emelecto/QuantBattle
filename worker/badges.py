@@ -1,4 +1,4 @@
-# Endpoints y lógica de badges de logros para el worker de QuantLab.
+# Endpoints y lógica de badges de logros para el worker de QuantBattle.
 # Sistema de gamificación: badges por primera submission, top 10, estrategia replicable, etc.
 
 from __future__ import annotations

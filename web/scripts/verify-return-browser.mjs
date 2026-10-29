@@ -9,7 +9,7 @@ const { loadEnvConfig } = nextEnv;
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 loadEnvConfig(path.join(root, 'web'));
-const base = 'https://quant-lab-nine.vercel.app';
+const base = 'https://www.quantbattle.co';
 const worker = process.env.NEXT_PUBLIC_WORKER_URL;
 const project = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname.split('.')[0];
 const session = JSON.parse(await fs.readFile(path.join(root, 'worker/.return-pilot-session.json'), 'utf8'));

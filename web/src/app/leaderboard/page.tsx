@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
               {fetchError}
             </div>
           ) : rows.length === 0 ? (
-            <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center">
+            <div className="qb-glass qb-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center">
               <p className="text-lg font-semibold text-ink">
                 Sé el primero en compartir
               </p>
@@ -80,7 +80,7 @@ export default function LeaderboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="ql-glass overflow-x-auto">
+            <div className="qb-glass overflow-x-auto">
               <table className="w-full min-w-[900px] border-collapse text-left">
                 <thead>
                   <tr className="border-b border-line">
@@ -120,7 +120,7 @@ export default function LeaderboardPage() {
                   {rows.map((row, i) => (
                     <tr
                       key={row.strategy_id}
-                      className="ql-row border-b border-line last:border-0 transition-colors"
+                      className="qb-row border-b border-line last:border-0 transition-colors"
                     >
                       <td className="metric px-4 py-3 text-[13px] text-muted">
                         {i + 1}

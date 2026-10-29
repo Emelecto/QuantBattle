@@ -51,7 +51,7 @@ const SEEDS: SeedIdea[] = [
   { text: "Día 22 · Video: ranking y reputación envío a envío", pilar: "Torneos y QP", formato: "Video corto" },
   { text: "Día 23 · Dúo: stitch a gurú de señales, responde con OOS", pilar: "Overfitting", formato: "Dúo / Stitch" },
   { text: "Día 24 · Video: límites honestos, direccional no es señal de entrada", pilar: "Ensemble", formato: "Video corto" },
-  { text: "Día 25 · Video: API qlk_ y MCP para tu flujo con IA", pilar: "Motor y datos", formato: "Video corto" },
+  { text: "Día 25 · Video: API qbt_ y MCP para tu flujo con IA", pilar: "Motor y datos", formato: "Video corto" },
   { text: "Día 26 · Video: guía del torneo, deadline y evaluación automática", pilar: "Torneos y QP", formato: "Video corto" },
   { text: "Día 27 · Video: leer la curva de equity OOS en 20 segundos", pilar: "Métricas", formato: "Video corto" },
   { text: "Día 28 · En vivo: cerramos el mes, qué aprendió la comunidad", pilar: "Torneos y QP", formato: "En vivo" },

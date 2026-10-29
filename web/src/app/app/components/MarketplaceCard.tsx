@@ -68,8 +68,8 @@ export function MarketplaceCard({ strategy }: { strategy: MarketplaceStrategy })
   }
 
   return (
-    <div className="ql-perspective">
-      <article className="ql-glass ql-tilt flex flex-col h-full">
+    <div className="qb-perspective">
+      <article className="qb-glass qb-tilt flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center gap-2.5 px-5 pt-5">
           <span
@@ -105,7 +105,7 @@ export function MarketplaceCard({ strategy }: { strategy: MarketplaceStrategy })
           </div>
           <div className="text-right shrink-0">
             <p className="metric text-[10px] uppercase tracking-wider text-muted">Precio</p>
-            <p className="metric text-accent ql-glow-text text-sm font-semibold whitespace-nowrap">
+            <p className="metric text-accent qb-glow-text text-sm font-semibold whitespace-nowrap">
               {strategy.price_qp}/sem
             </p>
           </div>

@@ -176,10 +176,10 @@ export default async function DatasetDetailPage({
 
   if (!meta) {
     return (
-      <div className="ql-learn-wrap">
-        <div className="ql-glass" style={{ padding: 32, marginTop: 40, textAlign: "center" }}>
-          <h2 style={{ color: "var(--ql-ink)" }}>Dataset no encontrado</h2>
-          <p style={{ color: "var(--ql-muted)" }}>Id desconocido: {id}</p>
+      <div className="qb-learn-wrap">
+        <div className="qb-glass" style={{ padding: 32, marginTop: 40, textAlign: "center" }}>
+          <h2 style={{ color: "var(--qb-ink)" }}>Dataset no encontrado</h2>
+          <p style={{ color: "var(--qb-muted)" }}>Id desconocido: {id}</p>
           <Link href="/app/library" className="btn-primary" style={{ display: "inline-block", marginTop: 16, textDecoration: "none" }}>Volver a Biblioteca</Link>
         </div>
       </div>
@@ -195,17 +195,17 @@ export default async function DatasetDetailPage({
   const currentUrl = `/app/library/${id}`;
 
   return (
-    <div className="ql-learn-wrap">
+    <div className="qb-learn-wrap">
       <div style={{ marginBottom: 16 }}>
         <Link href="/app/library" className="link-back">← Volver a Biblioteca</Link>
       </div>
 
-      <div className="ql-glass" style={{ padding: 24, marginBottom: 20 }}>
+      <div className="qb-glass" style={{ padding: 24, marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
             <span className="lesson-kicker">{meta.assetClass} · {meta.level === "beginner" ? "Principiante" : "Avanzado"}</span>
-            <h1 style={{ margin: "6px 0 4px", fontSize: 28, color: "var(--ql-ink)" }}>{meta.name}</h1>
-            <p style={{ color: "var(--ql-muted)", margin: 0 }}>{meta.blurb}</p>
+            <h1 style={{ margin: "6px 0 4px", fontSize: 28, color: "var(--qb-ink)" }}>{meta.name}</h1>
+            <p style={{ color: "var(--qb-muted)", margin: 0 }}>{meta.blurb}</p>
             <div className="lib-meta" style={{ marginTop: 8 }}>
               Fuente: <strong>{meta.source === "binance" ? "Binance" : "Yahoo Finance"}</strong> · Simbolo: <strong>{meta.symbol}</strong> · Intervalo: <strong>{interval}</strong> · Velas: <strong>{rows.length}</strong>
             </div>
@@ -225,7 +225,7 @@ export default async function DatasetDetailPage({
         </div>
 
         <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <label style={{ color: "var(--ql-muted)", fontSize: 13 }}>Limite:</label>
+          <label style={{ color: "var(--qb-muted)", fontSize: 13 }}>Limite:</label>
           <div style={{ display: "flex", gap: 6 }}>
             {LIMITS.map((l) => (
               <Link
@@ -246,17 +246,17 @@ export default async function DatasetDetailPage({
       </div>
 
       {error && (
-        <div className="ql-glass" style={{ padding: 20, marginBottom: 20, color: "var(--ql-short)" }}>
+        <div className="qb-glass" style={{ padding: 20, marginBottom: 20, color: "var(--qb-short)" }}>
           <strong>Error al obtener datos:</strong> {error}
         </div>
       )}
 
       {rows.length === 0 && !error ? (
-        <div className="ql-glass" style={{ padding: 40, textAlign: "center", color: "var(--ql-muted)" }}>
+        <div className="qb-glass" style={{ padding: 40, textAlign: "center", color: "var(--qb-muted)" }}>
           No hay datos disponibles para estos parametros.
         </div>
       ) : (
-        <div className="ql-glass" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="qb-glass" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{ maxHeight: 560, overflowY: "auto" }}>
             <table className="ohclv">
               <thead>
@@ -287,7 +287,7 @@ export default async function DatasetDetailPage({
       )}
 
       <p className="read-hint" style={{ marginTop: 12 }}>
-        Datos reales en formato OHLCV. Mismos datos que usan los torneos y ejercicios de QuantLab.
+        Datos reales en formato OHLCV. Mismos datos que usan los torneos y ejercicios de QuantBattle.
       </p>
     </div>
   );

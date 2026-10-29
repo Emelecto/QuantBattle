@@ -20,7 +20,7 @@ export function SpotlightCard({
   }, []);
 
   return (
-    <div className={`ql-spotlight ${className}`} onMouseMove={onMove}>
+    <div className={`qb-spotlight ${className}`} onMouseMove={onMove}>
       {children}
     </div>
   );

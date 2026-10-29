@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Disclaimer — QuantLab",
+  title: "Disclaimer — QuantBattle",
 };
 
 export default function DisclaimerPage() {
@@ -10,7 +10,7 @@ export default function DisclaimerPage() {
       </h1>
       <div className="mt-6 flex flex-col gap-4 text-sm leading-relaxed text-muted">
         <p className="rounded-lg border border-short/25 bg-short/[0.06] px-4 py-3 text-ink">
-          QuantLab es una herramienta de investigación. No es asesoría
+          QuantBattle es una herramienta de investigación. No es asesoría
           financiera ni recomendación de inversión.
         </p>
         <p>

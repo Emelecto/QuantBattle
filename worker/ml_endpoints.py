@@ -182,7 +182,9 @@ async def submit_predictions(
         import csv
         import io
         user_id = require_user(request)
-        experiment = research.parse_experiment_header(request.headers.get("x-quantlab-experiment"))
+        experiment = research.parse_experiment_header(
+            request.headers.get("x-quantbattle-experiment") or request.headers.get("x-quantlab-experiment")
+        )
         from tournaments import get_supabase
         sb = get_supabase()
 

@@ -38,6 +38,7 @@ def week_key(week_id: str) -> bytes:
     secret = os.environ.get('DATASET_SALT', '')
     if len(secret) < 24:
         raise ValueError('DATASET_SALT debe tener al menos 24 caracteres para el torneo real')
+    # Persisted namespace: keep stable so previously encrypted weekly objects remain readable.
     return hmac.digest(secret.encode(), f'quantlab-return-week-v1|{week_id}'.encode(), 'sha256')
 
 
@@ -63,6 +64,7 @@ def local_midnight(day: date) -> datetime:
 def schedule(monday: date) -> tuple[dict, list[dict]]:
     if monday.weekday() != 0:
         raise ValueError('La semana debe empezar un lunes')
+    # Persisted namespace: changing this would create new IDs for already published weeks.
     week_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f'quantlab:{PROTOCOL}:{monday}'))
     release = local_midnight(monday + timedelta(days=5)) + timedelta(minutes=30)
     week = {'id': week_id, 'week_start': str(monday), 'name': f'Retornos diarios · semana del {monday}',

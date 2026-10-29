@@ -1,17 +1,17 @@
-/* Academia QuantLab: superficies claras y lectura prolongada. */
+/* Academia QuantBattle: superficies claras y lectura prolongada. */
 
 .academia-scope {
-  --ac-bg: var(--ql-bg, #f5f8fb);
-  --ac-ink: var(--ql-ink, #172840);
-  --ac-body: var(--ql-muted, #52677d);
-  --ac-muted: var(--ql-muted, #52677d);
-  --ac-accent: var(--ql-accent, #245ce5);
-  --ac-long: var(--ql-long, #087951);
-  --ac-short: var(--ql-short, #af3f4f);
-  --ac-warning: var(--ql-warning, #8d641a);
-  --ac-line: var(--ql-line, #dce6ef);
-  --ac-card: var(--ql-surface, #fff);
-  --ac-surface-solid: var(--ql-surface-solid, #f0f5fa);
+  --ac-bg: var(--qb-bg, #f5f8fb);
+  --ac-ink: var(--qb-ink, #172840);
+  --ac-body: var(--qb-muted, #52677d);
+  --ac-muted: var(--qb-muted, #52677d);
+  --ac-accent: var(--qb-accent, #245ce5);
+  --ac-long: var(--qb-long, #087951);
+  --ac-short: var(--qb-short, #af3f4f);
+  --ac-warning: var(--qb-warning, #8d641a);
+  --ac-line: var(--qb-line, #dce6ef);
+  --ac-card: var(--qb-surface, #fff);
+  --ac-surface-solid: var(--qb-surface-solid, #f0f5fa);
   --ac-radius: 10px;
   background: var(--ac-bg);
   color: var(--ac-body);
@@ -158,7 +158,7 @@
   border: 1px solid transparent;
   transition: filter 0.15s ease, border-color 0.15s ease;
 }
-.academia-btn-primary { background: var(--ql-accent); border-color: var(--ql-accent); color: #fff; }
+.academia-btn-primary { background: var(--qb-accent); border-color: var(--qb-accent); color: #fff; }
 .academia-btn-primary:hover { background: #174cbf; border-color: #174cbf; color: #fff; }
 .academia-btn-primary:focus-visible,
 .academia-btn-secondary:focus-visible { outline: 3px solid #79a3ff; outline-offset: 2px; }
@@ -482,7 +482,7 @@
   font-weight: 600;
   cursor: pointer;
 }
-.academia-pill-activa { background: var(--ql-accent); border-color: var(--ql-accent); color: #fff; }
+.academia-pill-activa { background: var(--qb-accent); border-color: var(--qb-accent); color: #fff; }
 .academia-simulador-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
 .academia-control label { display: block; color: var(--ac-body); font-size: 13px; margin-bottom: 6px; }
 .academia-deslizador { width: 100%; accent-color: var(--ac-accent); cursor: pointer; }

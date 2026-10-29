@@ -1,28 +1,28 @@
-# QuantLab MCP
+# QuantBattle MCP
 
-Conecta Claude Code, Cursor, Codex u otro cliente MCP con los torneos de predicción ML de QuantLab. El servidor es un proceso local por `stdio`: el agente llama las herramientas y estas consultan el worker oficial. No hay código de estrategia ni operaciones QP en este flujo.
+Conecta Claude Code, Cursor, Codex u otro cliente MCP con los torneos de predicción ML de QuantBattle. El servidor es un proceso local por `stdio`: el agente llama las herramientas y estas consultan el worker oficial. No hay código de estrategia ni operaciones QP en este flujo.
 
 ## Requisitos
 
 - Python 3.10 o superior.
-- Una clave API personal de QuantLab (`qlk_…`) para enviar predicciones y consultar tus comprobantes. Créala en `https://quant-lab-nine.vercel.app/app/api-keys`; se muestra una sola vez y puedes revocarla desde la app.
+- Una clave API personal de QuantBattle (`qbt_…`) para enviar predicciones y consultar tus comprobantes. Créala en `https://www.quantbattle.co/app/api-keys`; se muestra una sola vez y puedes revocarla desde la app.
 - Los enlaces y datasets públicos se pueden consultar sin clave.
 
 ## Instalación
 
 ```powershell
-cd C:\Users\ecard\QuantLab\mcp-server
+cd C:\Users\ecard\QuantBattle\mcp-server
 python -m pip install -r requirements.txt
 ```
 
-Worker predeterminado: `https://quantlab2.onrender.com` (configurado también como worker del frontend y comprobado en producción). Para un entorno alternativo, establece `QUANTLAB_WORKER_URL`.
+Worker predeterminado: `https://quantlab2.onrender.com` (configurado también como worker del frontend y comprobado en producción). Para un entorno alternativo, establece `QUANTBATTLE_WORKER_URL`.
 
 ## Configurar el cliente
 
 ### Claude Code
 
 ```powershell
-claude mcp add quantlab -e QUANTLAB_TOKEN=qlk_tu_clave -- python C:/Users/ecard/QuantLab/mcp-server/mcp_server.py
+claude mcp add quantbattle -e QUANTBATTLE_TOKEN=qbt_tu_clave -- python C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py
 ```
 
 ### Cursor
@@ -32,11 +32,11 @@ En `.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "quantlab": {
+    "quantbattle": {
       "command": "python",
-      "args": ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"],
+      "args": ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"],
       "env": {
-        "QUANTLAB_TOKEN": "qlk_tu_clave"
+        "QUANTBATTLE_TOKEN": "qbt_tu_clave"
       }
     }
   }
@@ -48,10 +48,10 @@ En `.cursor/mcp.json`:
 En `~/.codex/config.toml`:
 
 ```toml
-[mcp_servers.quantlab]
+[mcp_servers.quantbattle]
 command = "python"
-args = ["C:/Users/ecard/QuantLab/mcp-server/mcp_server.py"]
-env = { QUANTLAB_TOKEN = "qlk_tu_clave" }
+args = ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"]
+env = { QUANTBATTLE_TOKEN = "qbt_tu_clave" }
 ```
 
 Reinicia o vuelve a cargar el cliente después de registrar el servidor.
@@ -76,7 +76,7 @@ Ambos requieren exactamente todos los IDs live, sin duplicados, y columnas exact
 
 ## Herramientas
 
-- `quantlab_status`: worker, conteo de datasets/torneos y estado de configuración de credencial.
+- `quantbattle_status`: worker, conteo de datasets/torneos y estado de configuración de credencial.
 - `list_ml_tournaments`, `get_weekly_tournament`: descubrimiento y detalle de semanas y rondas.
 - `list_practice_datasets`, `get_practice_dataset_download`, `get_weekly_dataset_download`, `get_weekly_live_ids`: preparación de datos públicos.
 - `validate_prediction_csv`: validación local de formato/rango y cobertura exacta de IDs.
@@ -90,4 +90,4 @@ Ficha de envío (`experiment_json`), por ejemplo:
 {"model_name":"Ridge","parameters":{"alpha":1.0},"seed":42,"note":"Seleccionado en validation"}
 ```
 
-La clave `qlk_` concede acceso a la cuenta: no la pegues en conversaciones ni código compartido. Se guarda en la configuración local del cliente y se transmite solo al worker configurado.
+La clave `qbt_` concede acceso a la cuenta: no la pegues en conversaciones ni código compartido. Se guarda en la configuración local del cliente y se transmite solo al worker configurado.

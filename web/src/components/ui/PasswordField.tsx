@@ -6,12 +6,12 @@ import { cn } from "@/lib/cn";
 /**
  * Clases del input de contraseña.
  *
- * Mismo look que `inputClasses` (.ql-input del tema v2) pero con hueco a la
+ * Mismo look que `inputClasses` (.qb-input del tema v2) pero con hueco a la
  * derecha para el botón del ojo. Se declara `pl-3 pr-11` en vez de `px-3` para
  * no depender del orden de conflictos de Tailwind.
  */
 const passwordInputClasses = cn(
-  "ql-input h-11 w-full rounded-md pl-3 pr-11 text-base",
+  "qb-input h-11 w-full rounded-md pl-3 pr-11 text-base",
   "outline-none",
 );
 

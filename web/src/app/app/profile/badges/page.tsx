@@ -58,7 +58,7 @@ export default function BadgesPage() {
             {badges.map((badge) => (
               <div
                 key={badge.id}
-                className="ql-glass ql-elev-1 rounded-xl p-4 flex items-start gap-3"
+                className="qb-glass qb-elev-1 rounded-xl p-4 flex items-start gap-3"
               >
                 <span className="text-2xl">{badge.icon}</span>
                 <div>
@@ -85,7 +85,7 @@ export default function BadgesPage() {
             return (
               <div
                 key={type}
-                className={`ql-glass ql-elev-1 rounded-xl p-4 flex items-start gap-3 transition-opacity ${
+                className={`qb-glass qb-elev-1 rounded-xl p-4 flex items-start gap-3 transition-opacity ${
                   earned ? "opacity-100" : "opacity-40"
                 }`}
               >

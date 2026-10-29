@@ -29,7 +29,7 @@ export default function AcademiaPage() {
     <div className="academia-scope">
       <div>
         <header className="academia-hero">
-          <span className="academia-kicker">Academia QuantLab</span>
+          <span className="academia-kicker">Academia QuantBattle</span>
           <h1>Aprende midiendo</h1>
           <p>Los seis cursos están abiertos. Avanza a tu ritmo, lección a lección.</p>
         </header>

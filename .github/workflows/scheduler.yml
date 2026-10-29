@@ -1,4 +1,4 @@
-name: QuantLab Weekly Tournament Scheduler
+name: QuantBattle Weekly Tournament Scheduler
 
 on:
   schedule:

@@ -78,7 +78,7 @@ export default async function BlogPostPage({
         </header>
 
         <div
-          className="ql-blog-article prose prose-headings:text-ink prose-p:text-muted prose-strong:text-ink prose-a:text-accent prose-li:text-muted max-w-none"
+          className="qb-blog-article prose prose-headings:text-ink prose-p:text-muted prose-strong:text-ink prose-a:text-accent prose-li:text-muted max-w-none"
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       </article>
@@ -86,7 +86,7 @@ export default async function BlogPostPage({
       <div className="border-t border-line">
         <div className="mx-auto w-full max-w-3xl px-6 py-4">
           <p className="text-[11px] text-muted">
-            QuantLab es una herramienta de investigación. No es asesoría
+            QuantBattle es una herramienta de investigación. No es asesoría
             financiera.
           </p>
         </div>

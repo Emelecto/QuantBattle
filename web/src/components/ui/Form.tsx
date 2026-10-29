@@ -4,7 +4,7 @@ import "./auth-shell.css";
 
 /** Clases compartidas para inputs de formularios. */
 export const inputClasses = cn(
-  "ql-input h-11 w-full rounded-md px-3 text-base",
+  "qb-input h-11 w-full rounded-md px-3 text-base",
   "outline-none",
 );
 
@@ -40,21 +40,21 @@ export function AuthShell({
   footer: React.ReactNode;
 }) {
   return (
-    <div className="ql-auth-page">
-      <div className="ql-auth-layout">
-        <section className="ql-auth-card" aria-labelledby="auth-title">
-          <span className="ql-auth-kicker">TU ESPACIO DE INVESTIGACIÓN</span>
+    <div className="qb-auth-page">
+      <div className="qb-auth-layout">
+        <section className="qb-auth-card" aria-labelledby="auth-title">
+          <span className="qb-auth-kicker">TU ESPACIO DE INVESTIGACIÓN</span>
           <h1 id="auth-title" className="text-2xl font-semibold tracking-tight text-ink">
             {title}
           </h1>
-          <p className="ql-auth-subtitle mt-3 text-base leading-relaxed text-muted">
+          <p className="qb-auth-subtitle mt-3 text-base leading-relaxed text-muted">
             {subtitle}
           </p>
-          <div className="ql-auth-form mt-6">{children}</div>
-          <p className="ql-auth-footer text-sm text-muted">{footer}</p>
+          <div className="qb-auth-form mt-6">{children}</div>
+          <p className="qb-auth-footer text-sm text-muted">{footer}</p>
         </section>
-        <aside className="ql-auth-aside" aria-label="Cómo funciona QuantLab">
-          <span className="ql-auth-aside-kicker">QUANTLAB / DEEPFIN</span>
+        <aside className="qb-auth-aside" aria-label="Cómo funciona QuantBattle">
+          <span className="qb-auth-aside-kicker">QUANTBATTLE / DEEPFIN</span>
           <h2>De los datos a una predicción verificable.</h2>
           <p>Explora una ronda, entrena con datos versionados y registra tus predicciones. La evaluación se publica después del cierre.</p>
           <ol>

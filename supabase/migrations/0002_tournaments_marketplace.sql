@@ -1,4 +1,4 @@
--- QuantLab v2 — Torneos + Marketplace + QP (QuantPoints)
+-- QuantBattle v2 — Torneos + Marketplace + QP (QuantPoints)
 -- Aplicar DESPUÉS del schema base existente (profiles, strategies, backtest_runs, shares)
 
 -- ---------------------------------------------------------

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ResearchEvidence } from "@/components/research/ResearchEvidence";
 
 /**
- * /docs — Documentación técnica de QuantLab.
+ * /docs — Documentación técnica de QuantBattle.
  * Server component: solo contenido real del producto. Nada inventado.
  */
 
@@ -59,7 +59,7 @@ export default function DocsPage() {
         </h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
           Protocolo de los torneos ML, evidencia de la evaluación técnica y
-          herramientas para reproducir experimentos. QuantLab es un prototipo
+          herramientas para reproducir experimentos. QuantBattle es un prototipo
           de investigación del semillero DeepFin de la Universidad EIA.
         </p>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
@@ -94,20 +94,20 @@ export default function DocsPage() {
             <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. Este protocolo de práctica se conserva separado del torneo semanal de retornos reales.</p>
             <div className="flex flex-wrap gap-4">
               <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía del participante</Link>
-              <a href="/ml/ejemplo_quantlab.ipynb" download className="text-accent underline underline-offset-4">Descargar notebook reproducible</a>
+              <a href="/ml/ejemplo_quantbattle.ipynb" download className="text-accent underline underline-offset-4">Descargar notebook reproducible</a>
             </div>
           </Section>
           {/* ---------------------------------------------------------- */}
           <Section id="walk-forward" title="Walk-forward out-of-sample">
             <p>
               Un backtest clásico entrena y evalúa sobre los mismos datos: eso
-              premia estrategias sobreajustadas. QuantLab separa{" "}
+              premia estrategias sobreajustadas. QuantBattle separa{" "}
               <strong className="text-ink">entrenamiento (IS)</strong> y{" "}
               <strong className="text-ink">evaluación (OOS)</strong> en cada
               fold, con ventanas rodantes: la estrategia se ajusta solo con el
               pasado y se mide sobre datos que nunca vio.
             </p>
-            <div className="ql-glass space-y-2.5 p-5">
+            <div className="qb-glass space-y-2.5 p-5">
               {FOLDS.map((f, i) => (
                 <div key={i} className="flex items-center gap-2 text-[12px]">
                   <span className="metric w-10 shrink-0 text-muted">
@@ -168,7 +168,7 @@ export default function DocsPage() {
               </div>
             </dl>
             <p className="border-l-2 border-accent/40 pl-4 text-[13px]">
-              Ninguna métrica garantiza rendimiento futuro. QuantLab mide
+              Ninguna métrica garantiza rendimiento futuro. QuantBattle mide
               integridad metodológica, no predice mercados.
             </p>
           </Section>
@@ -179,7 +179,7 @@ export default function DocsPage() {
               Base URL del worker:{" "}
               <Code>{process.env.NEXT_PUBLIC_WORKER_URL ?? "https://quantlab2.onrender.com"}</Code>{" "}
               — autenticación opcional con JWT de Supabase o clave API{" "}
-              <Code>qlk_…</Code> (créala en{" "}
+              <Code>qbt_…</Code> (créala en{" "}
               <a href="/app/api-keys" className="text-accent hover:underline">Tu cuenta → Claves API</a>).
               Los endpoints públicos de lectura no requieren clave.
             </p>
@@ -191,9 +191,9 @@ curl https://quantlab2.onrender.com/marketplace
 
 # Torneos activos
 curl https://quantlab2.onrender.com/tournament/list`}</Pre>
-            <Pre>{`# Con clave API qlk_: publicar una estrategia
+            <Pre>{`# Con clave API qbt_: publicar una estrategia
 curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
-  -H "Authorization: Bearer qlk_TU_CLAVE" \\
+  -H "Authorization: Bearer qbt_TU_CLAVE" \\
   -H "Content-Type: application/json" \\
   -d '{
     "title": "SMA BTC diaria",
@@ -217,16 +217,16 @@ curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
                   {[
                     ["GET /health", "—", "Estado del worker"],
                     ["GET /ml/datasets", "—", "Particiones y metadatos públicos"],
-                    ["POST /ml/datasets/{id}/predictions", "JWT/qlk_", "Validar y seleccionar un CSV"],
+                    ["POST /ml/datasets/{id}/predictions", "JWT/qbt_", "Validar y seleccionar un CSV"],
                     ["GET /ml/leaderboard?dataset_id=…", "—", "Resultados tras el cierre"],
                     ["POST /backtest", "JWT", "Ejecuta backtest walk-forward"],
                     ["GET /marketplace", "—", "Lista estrategias publicadas"],
-                    ["POST /marketplace/publish", "JWT/qlk_", "Publica estrategia"],
+                    ["POST /marketplace/publish", "JWT/qbt_", "Publica estrategia"],
                     ["GET /marketplace/{id}/comments", "—", "Comentarios de una estrategia"],
-                    ["POST /tournament/submit", "JWT/qlk_", "Envía estrategia a torneo"],
+                    ["POST /tournament/submit", "JWT/qbt_", "Envía estrategia a torneo"],
                     ["GET /tournament/{id}/leaderboard", "—", "Ranking + reputation_score"],
                     ["GET /social/activity", "—", "Feed global de actividad"],
-                    ["GET|POST|DELETE /account/api-keys", "JWT", "Gestión de claves qlk_"],
+                    ["GET|POST|DELETE /account/api-keys", "JWT", "Gestión de claves qbt_"],
                   ].map(([ep, auth, desc]) => (
                     <tr key={ep}>
                       <td className="py-2 pr-4 text-ink">{ep}</td>
@@ -240,19 +240,19 @@ curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
           </Section>
 
           {/* ---------------------------------------------------------- */}
-          <Section id="mcp" title="MCP — QuantLab desde tu asistente IA">
+          <Section id="mcp" title="MCP — QuantBattle desde tu asistente IA">
             <p>
-              QuantLab ofrece un servidor MCP local compatible con cualquier agente
+              QuantBattle ofrece un servidor MCP local compatible con cualquier agente
               que admita herramientas MCP por stdio. Sirve para descubrir torneos ML,
               consultar datasets, validar CSV y enviar predicciones.
             </p>
-            <Pre>{`[mcp_servers.quantlab]
+            <Pre>{`[mcp_servers.quantbattle]
 command = "python"
-args = ["/ruta/a/QuantLab/mcp-server/mcp_server.py"]
-env = { QUANTLAB_TOKEN = "qlk_tu_clave" }`}</Pre>
+args = ["/ruta/a/QuantBattle/mcp-server/mcp_server.py"]
+env = { QUANTBATTLE_TOKEN = "qbt_tu_clave" }`}</Pre>
             <p>
-              El servidor usa tu clave <Code>qlk_</Code> vía variable de entorno{" "}
-              <Code>QUANTLAB_TOKEN</Code>. Ejemplos de uso natural:
+              El servidor usa tu clave <Code>qbt_</Code> vía variable de entorno{" "}
+              <Code>QUANTBATTLE_TOKEN</Code>. Ejemplos de uso natural:
             </p>
             <ul className="list-disc space-y-1.5 pl-5 marker:text-line">
               <li>&ldquo;¿Qué torneos ML y rondas están abiertos?&rdquo;</li>

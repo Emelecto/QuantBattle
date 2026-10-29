@@ -76,22 +76,22 @@ function RankingsSkeleton() {
       {/* Podium skeleton */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="ql-skeleton-card rounded-xl p-6 flex flex-col items-center gap-3">
-            <div className="ql-skeleton-circle h-10 w-10" />
-            <div className="ql-skeleton-circle h-14 w-14" />
-            <div className="ql-skeleton-line w-24" />
-            <div className="ql-skeleton-line w-16" />
+          <div key={i} className="qb-skeleton-card rounded-xl p-6 flex flex-col items-center gap-3">
+            <div className="qb-skeleton-circle h-10 w-10" />
+            <div className="qb-skeleton-circle h-14 w-14" />
+            <div className="qb-skeleton-line w-24" />
+            <div className="qb-skeleton-line w-16" />
           </div>
         ))}
       </div>
       {/* Table skeleton */}
-      <div className="ql-skeleton-card rounded-xl p-4 space-y-3">
+      <div className="qb-skeleton-card rounded-xl p-4 space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="ql-skeleton-circle h-7 w-7" />
-            <div className="ql-skeleton-circle h-8 w-8" />
-            <div className="flex-1 ql-skeleton-line h-4" />
-            <div className="ql-skeleton-line w-16 h-4" />
+            <div className="qb-skeleton-circle h-7 w-7" />
+            <div className="qb-skeleton-circle h-8 w-8" />
+            <div className="flex-1 qb-skeleton-line h-4" />
+            <div className="qb-skeleton-line w-16 h-4" />
           </div>
         ))}
       </div>
@@ -107,7 +107,7 @@ function RankingCard({ entry, tab, highlight }: { entry: PublicLeaderboardEntry;
   };
 
   return (
-    <div className={`ql-glass ql-elev-1 ql-glass-hover rounded-xl p-4 flex items-center gap-3 ${highlight ? "bg-accent/[0.06]" : ""} animate-fadeIn`}>
+    <div className={`qb-glass qb-elev-1 qb-glass-hover rounded-xl p-4 flex items-center gap-3 ${highlight ? "bg-accent/[0.06]" : ""} animate-fadeIn`}>
       {/* Rank */}
       <span
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${
@@ -148,7 +148,7 @@ function RankingCard({ entry, tab, highlight }: { entry: PublicLeaderboardEntry;
 
       {/* QP */}
       <div className="text-right shrink-0">
-        <p className="metric text-accent ql-glow-text text-sm font-semibold">
+        <p className="metric text-accent qb-glow-text text-sm font-semibold">
           {entry.qp_earned.toLocaleString()}
         </p>
         <p className="metric text-[10px] text-muted">{entry.tournaments_won} torneos</p>
@@ -312,7 +312,7 @@ export default function RankingsPage() {
               <button type="button" className="ml-3 underline" onClick={()=>{setLoading(true);setRetry(value=>value+1);}}>Reintentar ranking</button>
             </div>
           ) : displayRows.length === 0 ? (
-            <div className="ql-glass ql-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center animate-fadeIn">
+            <div className="qb-glass qb-elev-1 flex flex-col items-center gap-3 rounded-xl px-6 py-16 text-center animate-fadeIn">
               <p className="text-lg font-semibold text-ink">
                 Sin actividad en esta clasificación
               </p>
@@ -331,9 +331,9 @@ export default function RankingsPage() {
                     return (
                       <div
                         key={entry.user_id}
-                        className={`ql-glass ql-elev-${isFirst ? "2" : "1"} ${
-                          isFirst ? "ql-tier-featured -mt-4" : ""
-                        } ql-glass-hover flex flex-col items-center rounded-xl p-6 text-center`}
+                        className={`qb-glass qb-elev-${isFirst ? "2" : "1"} ${
+                          isFirst ? "qb-tier-featured -mt-4" : ""
+                        } qb-glass-hover flex flex-col items-center rounded-xl p-6 text-center`}
                       >
                         {/* Rank badge */}
                         <span
@@ -378,7 +378,7 @@ export default function RankingsPage() {
                           </span>
                         )}
 
-                        <p className="metric text-accent ql-glow-text text-xl font-bold mt-2">
+                        <p className="metric text-accent qb-glow-text text-xl font-bold mt-2">
                           {entry.qp_earned.toLocaleString()}
                           <span className="text-xs font-normal text-muted">
                             {" "}
@@ -410,7 +410,7 @@ export default function RankingsPage() {
 
               {/* Desktop: table */}
               {rest.length > 0 && (
-                <div className="hidden md:block ql-glass overflow-hidden rounded-xl animate-fadeIn">
+                <div className="hidden md:block qb-glass overflow-hidden rounded-xl animate-fadeIn">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[600px] border-collapse text-left">
                       <thead>

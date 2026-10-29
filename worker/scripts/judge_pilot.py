@@ -63,7 +63,7 @@ def prepare(args):
     from research_benchmark import train_reference
 
     # Cuenta identificada como técnica; admin.create_user con email_confirm no envía correo.
-    email, password = "technical-demo@quantlab.example", secrets.token_urlsafe(32)
+    email, password = "technical-demo@quantbattle.example", secrets.token_urlsafe(32)
     user = next((u for u in sb.auth.admin.list_users(page=1, per_page=1000) if u.email == email), None)
     if user is None:
         user = sb.auth.admin.create_user({
@@ -182,7 +182,7 @@ def finalize(args):
     from supabase import create_client
     password = secrets.token_urlsafe(32)
     sb.auth.admin.update_user_by_id(manifest["user_id"], {"password": password})
-    session = create_client(auth_url, public_key).auth.sign_in_with_password({"email": "technical-demo@quantlab.example", "password": password})
+    session = create_client(auth_url, public_key).auth.sign_in_with_password({"email": "technical-demo@quantbattle.example", "password": password})
     closed = requests.post(f"{worker}/ml/datasets/{ds['id']}/predictions", headers={"Content-Type": "text/csv", "Authorization": f"Bearer {session.session.access_token}"}, data=payload, timeout=60)
     assert closed.status_code == 409, closed.status_code
     fresh = sb.table("ml_datasets").select("*").eq("id", ds["id"]).execute().data[0]

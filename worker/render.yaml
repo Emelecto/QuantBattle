@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: quantlab-worker
+    name: quantbattle-worker
     runtime: docker
     rootDirectory: worker
     dockerfilePath: ./Dockerfile
@@ -11,7 +11,7 @@ services:
       - key: PORT
         value: 8000
       - key: CORS_ORIGINS
-        value: https://quant-lab-nine.vercel.app,http://localhost:3000
+        value: https://www.quantbattle.co,https://quantbattle.co,https://www.quantbattle.co,http://localhost:3000
       - key: SUPABASE_URL
         sync: false        # pon tu valor real en el dashboard de Render
       - key: SUPABASE_SERVICE_ROLE_KEY

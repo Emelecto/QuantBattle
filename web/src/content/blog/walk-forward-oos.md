@@ -45,8 +45,8 @@ La clave: el **test siempre ocurre después del train**. Nunca usas datos del fu
 
 Si tu estrategia tiene un Sharpe in-sample de 2.5 pero un Sharpe OOS de 0.3, **no sirve**. La integridad es baja. Una estrategia con integridad "Alta" mantiene al menos el 70% de su rendimiento cuando enfrenta datos nuevos.
 
-## En QuantLab
+## En QuantBattle
 
-Cada backtest en QuantLab usa walk-forward con 5 folds por defecto. Puedes ajustar los parámetros (número de folds, porcentaje de split) y ver cómo cambia la curva de equity out-of-sample. Si sobrevive al OOS, tu estrategia tiene edge real.
+Cada backtest en QuantBattle usa walk-forward con 5 folds por defecto. Puedes ajustar los parámetros (número de folds, porcentaje de split) y ver cómo cambia la curva de equity out-of-sample. Si sobrevive al OOS, tu estrategia tiene edge real.
 
 **Recuerda:** el pasado no garantiza el futuro. Pero un buen walk-forward es la mejor herramienta que tenemos para no mentirnos a nosotros mismos.

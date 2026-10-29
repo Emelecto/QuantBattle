@@ -34,7 +34,7 @@ test("la documentación se lee sin desbordamiento y el notebook se descarga", as
   await expect(page.getByRole("link", { name: "Descargar notebook reproducible" })).toBeAttached();
   const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
   expect(fits).toBe(true);
-  const notebook = await request.get("/ml/ejemplo_quantlab.ipynb");
+  const notebook = await request.get("/ml/ejemplo_quantbattle.ipynb");
   expect(notebook.ok()).toBe(true);
   expect((await notebook.json()).nbformat).toBe(4);
   await page.locator("#evaluacion").screenshot({ path: `../artifacts/judge-ui/${testInfo.project.name}.png` });

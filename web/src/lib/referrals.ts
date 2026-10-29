@@ -1,5 +1,5 @@
 /**
- * Cliente de referidos para QuantLab.
+ * Cliente de referidos para QuantBattle.
  * Consume los endpoints `/referrals/...` del Worker FastAPI.
  */
 import { call } from "@/lib/tournaments";

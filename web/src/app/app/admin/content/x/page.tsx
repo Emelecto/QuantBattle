@@ -54,7 +54,7 @@ const SEEDS: SeedIdea[] = [
   { text: "Día 23 · Hilo: integridad baja no sirve aunque brille en papel", pilar: "Métricas", formato: "Hilo" },
   { text: "Día 24 · Post: límites honestos, direccional no es entrada", pilar: "Ensemble", formato: "Post" },
   { text: "Día 25 · Encuesta: ¿qué activo backtesteas esta semana?", pilar: "Torneos y QP", formato: "Encuesta" },
-  { text: "Día 26 · Post: API con claves qlk_ y servidor MCP para IA", pilar: "Motor y datos", formato: "Post" },
+  { text: "Día 26 · Post: API con claves qbt_ y servidor MCP para IA", pilar: "Motor y datos", formato: "Post" },
   { text: "Día 27 · Hilo: pasado ≠ futuro, pero el walk-forward evita mentirte", pilar: "Overfitting", formato: "Hilo" },
   { text: "Día 28 · Post: guía del torneo, deadline y evaluación automática", pilar: "Torneos y QP", formato: "Post" },
   { text: "Día 29 · Post: lee la curva de equity OOS en 20 segundos", pilar: "Métricas", formato: "Post" },

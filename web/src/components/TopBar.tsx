@@ -21,21 +21,21 @@ export function TopBar() {
   const isLanding = pathname === "/";
 
   return (
-    <header className={`ql-public-header sticky top-0 z-50 border-b border-line bg-bg${isLanding ? " ql-public-header--landing" : ""}`}>
-      <div className="ql-public-header-inner mx-auto flex h-14 w-full max-w-6xl items-center gap-6 px-6">
+    <header className={`qb-public-header sticky top-0 z-50 border-b border-line bg-bg${isLanding ? " qb-public-header--landing" : ""}`}>
+      <div className="qb-public-header-inner mx-auto flex h-14 w-full max-w-6xl items-center gap-6 px-6">
         <Link
           href="/"
-          className="ql-public-brand flex items-center gap-2 text-[15px] font-semibold tracking-tight text-ink"
+          className="qb-public-brand flex items-center gap-2 text-[15px] font-semibold tracking-tight text-ink"
         >
-          <span aria-hidden className="ql-public-mark">Q</span>
-          QuantLab
-          {isLanding && <span className="ql-public-brand-origin">Semillero DeepFin<br />Universidad EIA</span>}
+          <span aria-hidden className="qb-public-mark">Q</span>
+          QuantBattle
+          {isLanding && <span className="qb-public-brand-origin">Semillero DeepFin<br />Universidad EIA</span>}
         </Link>
 
-        <div className="ql-public-nav ml-auto flex items-center gap-3">
-          {isLanding && <Link href="/app/tournaments" className="ql-public-nav-secondary hidden md:inline">Torneos</Link>}
-          <Link href="/docs#evaluacion" className="ql-public-nav-secondary hidden text-sm text-muted transition-colors hover:text-ink md:inline">{isLanding ? "Metodología" : "Investigación"}</Link>
-          {isLanding && <a href="/research/judge-pilot.json" className="ql-public-nav-secondary hidden md:inline">Evidencia</a>}
+        <div className="qb-public-nav ml-auto flex items-center gap-3">
+          {isLanding && <Link href="/app/tournaments" className="qb-public-nav-secondary hidden md:inline">Torneos</Link>}
+          <Link href="/docs#evaluacion" className="qb-public-nav-secondary hidden text-sm text-muted transition-colors hover:text-ink md:inline">{isLanding ? "Metodología" : "Investigación"}</Link>
+          {isLanding && <a href="/research/judge-pilot.json" className="qb-public-nav-secondary hidden md:inline">Evidencia</a>}
           {user && inApp ? (
             <button
               onClick={handleSignOut}
@@ -47,7 +47,7 @@ export function TopBar() {
             <>
               <Link
                 href="/app"
-                className={isLanding ? "ql-public-nav-cta" : buttonClasses("primary", "sm")}
+                className={isLanding ? "qb-public-nav-cta" : buttonClasses("primary", "sm")}
               >
                 {isLanding ? "Entrar a la plataforma ↗" : "Acceder"}
               </Link>
@@ -61,7 +61,7 @@ export function TopBar() {
           ) : (
             <>
               {!isLanding && <Link href="/login" className="text-sm text-muted transition-colors hover:text-ink">Iniciar sesión</Link>}
-              <Link href={isLanding ? "/app/tournaments" : "/register"} className={isLanding ? "ql-public-nav-cta" : buttonClasses("primary", "sm")}>
+              <Link href={isLanding ? "/app/tournaments" : "/register"} className={isLanding ? "qb-public-nav-cta" : buttonClasses("primary", "sm")}>
                 {isLanding ? "Entrar a la plataforma ↗" : "Empieza gratis"}
               </Link>
             </>

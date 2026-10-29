@@ -201,7 +201,7 @@ export async function downloadNotebook(path: string) {
   const url = URL.createObjectURL(await response.blob());
   const link = document.createElement("a");
   link.href = url;
-  link.download = "quantlab-metodo.ipynb";
+  link.download = "quantbattle-metodo.ipynb";
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

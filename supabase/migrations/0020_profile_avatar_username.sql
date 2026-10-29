@@ -1,4 +1,4 @@
--- QuantLab: foto de perfil + username con cooldown de 7 días.
+-- QuantBattle: foto de perfil + username con cooldown de 7 días.
 -- Aplicar en el SQL editor (NO ejecuta DDL sobre prod el agente).
 
 -- 1. Columna para rastrear cuándo se cambió el username por última vez.

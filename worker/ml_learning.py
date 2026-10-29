@@ -191,7 +191,7 @@ def add_version(project_id: uuid.UUID, body: VersionBody, request: Request):
 def notebook_response(path, digest):
     payload = storage.download_bytes(path, private=True, expected_sha256=digest)
     return Response(payload, media_type='application/x-ipynb+json', headers={
-        'Content-Disposition': 'attachment; filename="quantlab-metodo.ipynb"', 'X-Content-Type-Options': 'nosniff',
+        'Content-Disposition': 'attachment; filename="quantbattle-metodo.ipynb"', 'X-Content-Type-Options': 'nosniff',
         'Cache-Control': 'private, no-store'})
 
 
@@ -268,7 +268,7 @@ def publish(project_id: uuid.UUID, body: PublishBody, request: Request):
     snapshot = {k: version['snapshot'].get(k) for k in ('model_name', 'parameters', 'seed', 'dependencies', 'protocol', 'hypothesis')}
     profiles = rows('profiles', id=uid).execute().data or []
     author = (profiles[0].get('display_name') or profiles[0].get('username')) if profiles else None
-    record = {'id': str(uuid.uuid4()), 'author_id': uid, 'author_name': author or 'Participante de QuantLab', 'version_id': str(body.version_id), 'title': project['title'],
+    record = {'id': str(uuid.uuid4()), 'author_id': uid, 'author_name': author or 'Participante de QuantBattle', 'version_id': str(body.version_id), 'title': project['title'],
               **body.model_dump(exclude={'version_id'}), 'protocol': project['protocol'], 'snapshot': snapshot,
               'notebook_path': version['notebook_path'], 'notebook_sha256': version['notebook_sha256'],
               'status': 'pending_review', 'created_at': now()}
@@ -415,7 +415,7 @@ def mission_notebook(mission_id: str):
         {'cell_type': 'markdown', 'source': f'# {mission["title"]}\n\nDatos sintéticos educativos · versión {mission["version"]}.\n\n{mission["prompt"]}\n\nEjecuta en tu entorno con Python, pandas y scikit-learn. No utiliza datos de un torneo real.'},
         {'cell_type': 'code', 'source': code}]})
     return Response(payload, media_type='application/x-ipynb+json', headers={
-        'Content-Disposition': f'attachment; filename="quantlab-mision-{mission_id}.ipynb"',
+        'Content-Disposition': f'attachment; filename="quantbattle-mision-{mission_id}.ipynb"',
         'X-Content-Type-Options': 'nosniff'})
 
 

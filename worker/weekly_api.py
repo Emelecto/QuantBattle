@@ -170,9 +170,11 @@ async def submit(round_id: str, request: Request):
         content.extend(chunk)
         if len(content) > p.MAX_BYTES:
             raise HTTPException(413, 'El CSV supera 10 MB')
-    experiment = ml_research.parse_experiment_header(request.headers.get('x-quantlab-experiment'))
+    experiment = ml_research.parse_experiment_header(
+        request.headers.get('x-quantbattle-experiment') or request.headers.get('x-quantlab-experiment')
+    )
     if experiment is None:
-        raise HTTPException(422, 'Registra la ficha del modelo en X-QuantLab-Experiment antes de enviar')
+        raise HTTPException(422, 'Registra la ficha del modelo en X-QuantBattle-Experiment antes de enviar')
     index = live_rows(round_id)
     try:
         checked = p.validate_csv(bytes(content), index['ids'])

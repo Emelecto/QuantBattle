@@ -260,7 +260,7 @@ export default function ProfilePage() {
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href).catch(() => {});
                 }}
-                className="ql-glass-hover flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-xs font-medium text-muted transition-colors hover:border-accent/40 hover:text-ink"
+                className="qb-glass-hover flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-xs font-medium text-muted transition-colors hover:border-accent/40 hover:text-ink"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
                   <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" strokeLinecap="round" />
@@ -301,7 +301,7 @@ export default function ProfilePage() {
             <h2 className="text-lg font-semibold text-ink mb-4">
               Estrategias publicadas
             </h2>
-            <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center">
+            <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center">
               <p className="text-sm text-muted">
                 {profile.strategies_count > 0
                   ? `${profile.strategies_count} estrategias públicas`
@@ -316,10 +316,10 @@ export default function ProfilePage() {
               Historial de torneos
             </h2>
             {tournaments && tournaments.length > 0 ? (
-              <div className="ql-glass overflow-hidden rounded-xl">
+              <div className="qb-glass overflow-hidden rounded-xl">
                 <ul className="divide-y divide-line max-h-[400px] overflow-y-auto">
                   {tournaments.map((t) => (
-                    <li key={t.id} className="ql-row flex items-center gap-3 px-5 py-3">
+                    <li key={t.id} className="qb-row flex items-center gap-3 px-5 py-3">
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] font-medium text-ink truncate">
                           {t.name}
@@ -344,7 +344,7 @@ export default function ProfilePage() {
                 </ul>
               </div>
             ) : (
-              <div className="ql-glass ql-elev-1 rounded-xl px-6 py-10 text-center">
+              <div className="qb-glass qb-elev-1 rounded-xl px-6 py-10 text-center">
                 <p className="text-sm text-muted">
                   Sin participaciones en torneos.
                 </p>
@@ -382,7 +382,7 @@ function StatTile({
       </>
     );
   return (
-    <div className="ql-glass ql-elev-1 rounded-xl px-4 py-4 text-center">
+    <div className="qb-glass qb-elev-1 rounded-xl px-4 py-4 text-center">
       <div className="metric text-[11px] uppercase tracking-wide text-muted">{label}</div>
       <div
         className={`metric mt-1.5 text-2xl font-semibold ${

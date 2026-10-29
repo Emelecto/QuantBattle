@@ -62,7 +62,7 @@ export function RiskAdvisor({
   return (
     <section
       aria-label="Asistente de riesgo"
-      className="ql-glass ql-elev-1 rounded-xl p-4"
+      className="qb-glass qb-elev-1 rounded-xl p-4"
     >
       <header className="flex flex-col gap-1">
         <h3 className="text-sm font-semibold tracking-tight text-ink">
@@ -88,7 +88,7 @@ export function RiskAdvisor({
               aria-checked={active}
               onClick={() => choose(p)}
               className={cn(
-                active ? "ql-btn-primary" : "ql-btn-secondary",
+                active ? "qb-btn-primary" : "qb-btn-secondary",
                 "flex h-auto flex-col items-start gap-1 rounded-md px-3 py-3 text-left",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
               )}

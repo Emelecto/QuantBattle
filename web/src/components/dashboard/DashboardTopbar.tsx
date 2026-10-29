@@ -23,9 +23,9 @@ export function DashboardTopbar() {
   const section = labels[pathname] ?? labels[Object.keys(labels).find((path) => path !== "/app" && pathname.startsWith(path)) ?? ""] ?? "Investigación";
   const initial = (user?.user_metadata?.full_name || user?.email || "Q").trim().slice(0, 1).toUpperCase();
 
-  return <header className="ql-light-topbar">
-    <div className="ql-light-topbar-brand"><Link href="/app" className="ql-light-topbar-mark" aria-label="QuantLab, inicio">Q</Link><strong>QuantLab</strong></div>
-    <div className="ql-light-topbar-breadcrumb"><span>Espacio de investigación</span><span aria-hidden="true">/</span><strong>{section}</strong></div>
-    <div className="ql-light-topbar-actions"><Link href="/docs#evaluacion">Ayuda y método</Link><Link href="/app/profile" className="ql-light-topbar-avatar" aria-label="Abrir perfil">{initial}</Link></div>
+  return <header className="qb-light-topbar">
+    <div className="qb-light-topbar-brand"><Link href="/app" className="qb-light-topbar-mark" aria-label="QuantBattle, inicio">Q</Link><strong>QuantBattle</strong></div>
+    <div className="qb-light-topbar-breadcrumb"><span>Espacio de investigación</span><span aria-hidden="true">/</span><strong>{section}</strong></div>
+    <div className="qb-light-topbar-actions"><Link href="/docs#evaluacion">Ayuda y método</Link><Link href="/app/profile" className="qb-light-topbar-avatar" aria-label="Abrir perfil">{initial}</Link></div>
   </header>;
 }

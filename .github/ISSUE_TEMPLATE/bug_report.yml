@@ -1,5 +1,5 @@
 name: Problema en el piloto
-description: Reporta un problema de QuantLab sin compartir credenciales ni datos privados.
+description: Reporta un problema de QuantBattle sin compartir credenciales ni datos privados.
 title: "[Piloto] "
 body:
   - type: markdown

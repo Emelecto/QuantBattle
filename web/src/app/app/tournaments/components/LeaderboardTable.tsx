@@ -26,14 +26,14 @@ export function LeaderboardTable({
   className,
 }: LeaderboardTableProps) {
   const badge = (rank: number) => {
-    if (rank === 1) return "text-accent ql-glow-text";
+    if (rank === 1) return "text-accent qb-glow-text";
     if (rank === 2) return "text-cyan";
     if (rank === 3) return "text-ink";
     return "text-muted";
   };
 
   return (
-    <div className={cn("overflow-hidden rounded-lg ql-glass", className)}>
+    <div className={cn("overflow-hidden rounded-lg qb-glass", className)}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-line text-left text-[11px] uppercase tracking-wider text-muted">
@@ -53,7 +53,7 @@ export function LeaderboardTable({
             <tr
               key={entry.rank}
               className={cn(
-                "ql-row border-b border-line/40 last:border-0",
+                "qb-row border-b border-line/40 last:border-0",
                 entry.isMe && "bg-accent/5 ring-1 ring-inset ring-accent/20"
               )}
             >

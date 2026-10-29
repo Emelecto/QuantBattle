@@ -1,5 +1,5 @@
 /**
- * Helper de Stripe para QuantLab.
+ * Helper de Stripe para QuantBattle.
  *
  * - `getStripe()` devuelve la instancia de Stripe o null si no hay key configurada.
  * - `PLANS` define los planes de suscripción (QP, precio en USD, intervalo).

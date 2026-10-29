@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { notifyStorageChange, useStorageValue } from "@/hooks/useStorageValue";
 
 // Progreso local de Academia (multi-curso C1–C6). Clave propia, separada del
@@ -13,10 +13,22 @@ export interface AcademiaProgressState {
   perfect: string[]; // ids con N/N en lecciones (C1 otorgó 1 QP, C2–C6 otorgan 2 QP) o examen aprobado
 }
 
-const STORAGE_KEY = "quantlab.academia.v1";
+const STORAGE_KEY = "quantbattle.academia.v1";
+const LEGACY_STORAGE_KEY = "quantlab.academia.v1";
 
 export function useAcademiaProgress(): AcademiaProgressState {
   const raw = useStorageValue(STORAGE_KEY);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(STORAGE_KEY) !== null) return;
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy === null) return;
+      localStorage.setItem(STORAGE_KEY, legacy);
+      notifyStorageChange(STORAGE_KEY);
+    } catch {
+      /* storage may be disabled by the browser */
+    }
+  }, []);
   return useMemo(() => {
     try {
       const parsed = JSON.parse(raw || "{}") as Partial<AcademiaProgressState>;
@@ -31,7 +43,14 @@ export function useAcademiaProgress(): AcademiaProgressState {
 export function loadAcademiaProgress(): AcademiaProgressState {
   if (typeof window === "undefined") return { completed: [], perfect: [] };
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (raw === null) {
+      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (raw !== null) {
+        localStorage.setItem(STORAGE_KEY, raw);
+        notifyStorageChange(STORAGE_KEY);
+      }
+    }
     if (!raw) return { completed: [], perfect: [] };
     const parsed = JSON.parse(raw) as Partial<AcademiaProgressState>;
     return {

@@ -1,4 +1,4 @@
--- QuantLab schema (Supabase / Postgres)
+-- QuantBattle schema (Supabase / Postgres)
 -- Aplicar en el SQL editor del proyecto Supabase o vía CLI `supabase db push`.
 
 create extension if not exists "uuid-ossp";

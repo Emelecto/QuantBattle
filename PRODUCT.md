@@ -1,6 +1,6 @@
-# QuantLab
+# QuantBattle
 
-QuantLab is an experimental Spanish-language quantitative research community built by Emilio Cardona Lopez during the DeepFin research group at Universidad EIA. The current product priority is machine learning tournaments: download a versioned dataset, train externally, submit predictions, validate the file, and evaluate after a fixed deadline. Strategy backtesting remains available as a secondary area.
+QuantBattle is an experimental Spanish-language quantitative research community built by Emilio Cardona Lopez during the DeepFin research group at Universidad EIA. The current product priority is machine learning tournaments: download a versioned dataset, train externally, submit predictions, validate the file, and evaluate after a fixed deadline. Strategy backtesting remains available as a secondary area.
 
 ## Audience and success
 Spanish-speaking students and researchers, including academic judges, need to understand and complete the tournament workflow. Functionality, accessibility and truthful scientific communication take priority over decoration. There is no demonstrated external user adoption or financial profitability. Synthetic practice rounds must be identified; real-data provenance belongs to the individual dataset.

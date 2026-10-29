@@ -1,4 +1,4 @@
-# QuantLab Worker API
+# QuantBattle Worker API
 
 Worker de backtesting OOS con datos reales (Binance para crypto, yfinance para
 acciones). Expone el motor validado `engine.run_backtest` vía FastAPI.
@@ -21,7 +21,7 @@ acciones). Expone el motor validado `engine.run_backtest` vía FastAPI.
 
 ### CORS
 Cerrado por defecto. Define `CORS_ORIGINS` con una lista separada por comas:
-`CORS_ORIGINS="http://localhost:3000,https://app.quantlab.io"`.
+`CORS_ORIGINS="http://localhost:3000,https://www.quantbattle.co"`.
 La configuración actual también reconoce previews HTTPS de Vercel; todos los
 endpoints de escritura mantienen su autenticación propia.
 

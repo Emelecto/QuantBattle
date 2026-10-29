@@ -401,7 +401,7 @@ premium por suscripción, tiers con más submissions o features extra.
 - `/app/tournaments/[id]`: pestaña **Datos** (descargar train/validation),
   **Enviar** (drag & drop del CSV con validación en cliente), **Ranking**
   (corr, FNC, consistencia).
-- Notebook de ejemplo (`ejemplo_quantlab.ipynb`) — clave para que alguien
+- Notebook de ejemplo (`ejemplo_quantbattle.ipynb`) — clave para que alguien
   participe sin leer documentación.
 - **Retirar el flujo de subir código** (decisión de Emilio).
 - Etiquetar claramente qué torneos son sintéticos y cuáles con datos reales.

@@ -1,4 +1,4 @@
--- QuantLab migración 0023: bucket privado para submissions de torneos.
+-- QuantBattle migración 0023: bucket privado para submissions de torneos.
 -- Uso: Emilio la aplica MANUALMENTE en el SQL editor de Supabase.
 -- Solo el dueño lee sus archivos (prefijo de name = auth.uid());
 -- solo service_role escribe (el worker sube con la service key).

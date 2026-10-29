@@ -65,7 +65,7 @@ export function StrategyTemplates({
         {TEMPLATES.map((tpl) => (
           <article
             key={tpl.id}
-            className={cn("ql-glass ql-elev-1 flex flex-col gap-3 rounded-xl p-4")}
+            className={cn("qb-glass qb-elev-1 flex flex-col gap-3 rounded-xl p-4")}
           >
             <div className="flex flex-col gap-1">
               <h3 className="text-[15px] font-semibold text-ink">{tpl.label}</h3>
@@ -78,7 +78,7 @@ export function StrategyTemplates({
               onClick={() => onSelect(tpl.code, tpl.label)}
               aria-label={`Usar plantilla ${tpl.label}`}
               className={cn(
-                "ql-btn-secondary mt-auto inline-flex h-9 items-center justify-center rounded-md px-3 text-[13px] font-medium",
+                "qb-btn-secondary mt-auto inline-flex h-9 items-center justify-center rounded-md px-3 text-[13px] font-medium",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
               )}
             >

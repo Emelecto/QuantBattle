@@ -28,7 +28,7 @@ export function StrategyStudio({
   ] as const;
 
   return (
-    <section className="ql-glass ql-elev-2 rounded-xl p-4">
+    <section className="qb-glass qb-elev-2 rounded-xl p-4">
       <div role="tablist" aria-label="Modo de edición" className="flex gap-2">
         {tabs.map((t) => {
           const active = tab === t.id;
@@ -40,7 +40,7 @@ export function StrategyStudio({
               aria-selected={active}
               onClick={() => setTab(t.id)}
               className={cn(
-                active ? "ql-btn-primary" : "ql-btn-secondary",
+                active ? "qb-btn-primary" : "qb-btn-secondary",
                 "h-9 rounded-md px-3 text-[13px] font-medium",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
               )}

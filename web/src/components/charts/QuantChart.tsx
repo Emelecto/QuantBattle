@@ -190,7 +190,7 @@ export function QuantChart({
   if (series.strat.length === 0) {
     return (
       <div
-        className="ql-glass flex items-center justify-center rounded-xl text-sm text-muted"
+        className="qb-glass flex items-center justify-center rounded-xl text-sm text-muted"
         style={{ height }}
       >
         Sin datos suficientes para graficar.

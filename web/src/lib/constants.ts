@@ -7,10 +7,10 @@ export const QP_PRICES = [
 ] as const;
 
 export const TIER = {
-  free: { label: "Free", color: "--ql-muted", minQp: 0 },
-  plus: { label: "Plus", color: "--ql-accent", minQp: 100 },
-  pro: { label: "Pro", color: "--ql-long", minQp: 300 },
-  legend: { label: "Legend", color: "--ql-accent", minQp: 1000 },
+  free: { label: "Free", color: "--qb-muted", minQp: 0 },
+  plus: { label: "Plus", color: "--qb-accent", minQp: 100 },
+  pro: { label: "Pro", color: "--qb-long", minQp: 300 },
+  legend: { label: "Legend", color: "--qb-accent", minQp: 1000 },
 } as const;
 
 export const BADGES = {
@@ -34,7 +34,7 @@ export const QP_EARNING = {
 } as const;
 
 export const FALLBACK_AVATAR =
-  "https://api.dicebear.com/7.x/identicon/svg?seed=quantlab";
+  "https://api.dicebear.com/7.x/identicon/svg?seed=QuantBattle";
 
 export const SPONSOR_PLACEHOLDER = [
   {

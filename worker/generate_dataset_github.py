@@ -1,4 +1,4 @@
-"""Genera y sube la ronda ML de QuantLab FUERA de Render.
+"""Genera y sube la ronda ML de QuantBattle FUERA de Render.
 
 Pensado para correr en GitHub Actions (ubuntu-latest, ~7 GB RAM, no se duerme).
 Evita que el worker de Render (plan free, limitado de RAM) genere el dataset

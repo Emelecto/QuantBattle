@@ -83,7 +83,7 @@ export function NotebookLibrary({
       </div>
       {!mine && !review && (
         <section className="ml-section">
-          <h2>Plantillas de QuantLab</h2>
+          <h2>Plantillas de QuantBattle</h2>
           <p>
             Para empezar sin esperar publicaciones de la comunidad. Son ejemplos
             del proyecto, no contribuciones de usuarios externos.
@@ -92,7 +92,7 @@ export function NotebookLibrary({
             <a href="/ml/ejemplo_retornos_diarios.ipynb" download>
               Notebook de retornos · MAE
             </a>
-            <a href="/ml/ejemplo_quantlab.ipynb" download>
+            <a href="/ml/ejemplo_quantbattle.ipynb" download>
               Notebook de práctica · Spearman
             </a>
           </div>
