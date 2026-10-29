@@ -39,7 +39,7 @@ export function InteractiveProductPreview() {
   const [step, setStep] = useState(0);
   return (
     <div className="research-product-preview" data-ui data-preview-step={step}>
-      <aside className="research-preview-side"><div className="research-preview-brand">Quant<span>Lab</span></div><p>Recorrido del piloto</p><nav aria-label="Explorar vista del producto">{steps.map((label, index) => <button type="button" key={label} className={step === index ? "selected" : ""} aria-pressed={step === index} aria-controls="research-preview-panel" onClick={() => setStep(index)}>{label}</button>)}</nav><small>DeepFin · Universidad EIA</small></aside>
+      <aside className="research-preview-side"><div className="research-preview-brand">Quant<span>Battle</span></div><p>Recorrido del piloto</p><nav aria-label="Explorar vista del producto">{steps.map((label, index) => <button type="button" key={label} className={step === index ? "selected" : ""} aria-pressed={step === index} aria-controls="research-preview-panel" onClick={() => setStep(index)}>{label}</button>)}</nav><small>DeepFin · Universidad EIA</small></aside>
       <div className="research-preview-content">
         <div className="research-preview-top">Vista guiada &nbsp; / &nbsp; <strong>Piloto sintético</strong><span>{step + 1} de {steps.length}</span></div>
         <div className="research-preview-heading"><div><span>Piloto técnico · datos sintéticos</span><h3>{step === 0 ? "Ronda de práctica" : steps[step]}</h3><p>Versión {pilot.version} · Ronda {pilot.round_number} · experimento documentado</p></div><b>Finalizada</b></div>
