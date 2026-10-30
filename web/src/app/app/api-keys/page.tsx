@@ -14,8 +14,6 @@ const MCP_CLIENTS = {
   claude: { label: "Claude Code", instruction: "Ejecuta esta línea en tu terminal. Si necesitas autenticarte, abre /mcp en Claude Code:", value: `claude mcp add --transport http quantbattle ${MCP_URL}` },
   cursor: { label: "Cursor", instruction: "Añade esta configuración a .cursor/mcp.json en tu proyecto o a ~/.cursor/mcp.json para tu usuario:", value: JSON.stringify({ mcpServers: { quantbattle: { url: MCP_URL } } }, null, 2) },
   vscode: { label: "VS Code / Copilot", instruction: "Añade esta configuración a .vscode/mcp.json en tu proyecto:", value: JSON.stringify({ servers: { quantbattle: { type: "http", url: MCP_URL } } }, null, 2) },
-  claudeapp: { label: "Claude", instruction: "En Claude, abre Configuración → Conectores y añade un conector personalizado con esta URL:", value: MCP_URL },
-  chatgpt: { label: "ChatGPT", instruction: "En ChatGPT web, crea una app MCP personalizada desde Configuración → Apps usando esta URL. La disponibilidad y las acciones dependen de tu plan y permisos:", value: MCP_URL },
   other: { label: "Otro agente MCP", instruction: "Añade esta URL como servidor MCP remoto con transporte HTTP en tu cliente:", value: MCP_URL },
 } as const;
 type McpClient = keyof typeof MCP_CLIENTS;
