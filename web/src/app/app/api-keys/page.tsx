@@ -6,6 +6,15 @@ import { buttonClasses } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/useAuth";
 import { call } from "@/lib/tournaments";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+
+const MCP_URL = "https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp";
+
+type OAuthGrant = {
+  client: { id: string; name: string; uri: string; logo_uri: string };
+  scopes: string[];
+  granted_at: string;
+};
 
 type ApiKeyRow = {
   id: string;
@@ -25,17 +34,10 @@ export default function ApiKeysPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
-  const [client, setClient] = useState<"generic" | "claude" | "cursor" | "codex">("generic");
-
-  const mcpConfig = newKey
-    ? client === "claude"
-      ? `claude mcp add quantbattle -e QUANTBATTLE_TOKEN=${newKey} -- python C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py`
-      : client === "cursor"
-        ? JSON.stringify({ mcpServers: { quantbattle: { command: "python", args: ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"], env: { QUANTBATTLE_TOKEN: newKey } } } }, null, 2)
-        : client === "codex"
-          ? `[mcp_servers.quantbattle]\ncommand = "python"\nargs = ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"]\nenv = { QUANTBATTLE_TOKEN = "${newKey}" }`
-          : JSON.stringify({ mcpServers: { quantbattle: { command: "python", args: ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"], env: { QUANTBATTLE_TOKEN: newKey } } } }, null, 2)
-    : "";
+  const [grants, setGrants] = useState<OAuthGrant[] | null>(null);
+  const [grantsLoading, setGrantsLoading] = useState(true);
+  const [grantsError, setGrantsError] = useState(false);
+  const [revokingGrant, setRevokingGrant] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -57,8 +59,35 @@ export default function ApiKeysPage() {
       .then((data) => { if (active) { setKeys(data); setError(null); } })
       .catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "Error al cargar claves"); })
       .finally(() => { if (active) setLoading(false); });
+    createBrowserSupabaseClient().auth.oauth.listGrants()
+      .then(({ data, error: grantsError }) => {
+        if (!active) return;
+        if (grantsError) throw grantsError;
+        setGrants(data);
+        setGrantsError(false);
+      })
+      .catch(() => { if (active) { setGrants(null); setGrantsError(true); } })
+      .finally(() => { if (active) setGrantsLoading(false); });
     return () => { active = false; };
   }, [user]);
+
+  async function revokeGrant(clientId: string) {
+    setRevokingGrant(clientId);
+    setError(null);
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const { error: revokeError } = await supabase.auth.oauth.revokeGrant({ clientId });
+      if (revokeError) throw revokeError;
+      const { data, error: listError } = await supabase.auth.oauth.listGrants();
+      if (listError) throw listError;
+      setGrants(data);
+      setGrantsError(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo revocar el acceso del agente.");
+    } finally {
+      setRevokingGrant(null);
+    }
+  }
 
   async function createKey() {
     setCreating(true);
@@ -97,9 +126,7 @@ export default function ApiKeysPage() {
               API y MCP
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-              Crea una clave para conectar cualquier agente compatible con MCP a
-              QuantBattle. Necesitarás iniciar sesión para crear, consultar o revocar
-              tus claves.
+              Conecta tu agente al servidor MCP remoto de QuantBattle. Para enviar predicciones no necesitas crear ni copiar una clave API.
             </p>
           </div>
         </section>
@@ -107,15 +134,13 @@ export default function ApiKeysPage() {
         <section className="flex flex-1 items-center justify-center px-6 py-16">
           <div className="qb-glass qb-elev-1 flex max-w-md flex-col items-center gap-5 rounded-xl p-8 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10">
-              <span className="text-2xl">🔑</span>
+              <span className="text-2xl">🔗</span>
             </div>
             <h2 className="text-xl font-semibold text-ink">
               Necesitas una cuenta para acceder
             </h2>
             <p className="text-sm leading-relaxed text-muted">
-              Las claves API son personales y te permiten conectar tu agente de IA
-              con QuantBattle. Crea una cuenta gratuita o
-              inicia sesión para empezar.
+              Inicia sesión para conectar tu agente y autorizarlo de forma segura con tu cuenta.
             </p>
             <div className="flex w-full flex-col gap-3 sm:flex-row">
               <Link
@@ -142,19 +167,50 @@ export default function ApiKeysPage() {
       <section className="qb-page flex-1">
         <h1 className="text-3xl font-semibold tracking-tight text-ink">API y MCP</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Administra tus claves API y conecta cualquier agente compatible con MCP
-          a los torneos ML de QuantBattle. La clave se muestra una sola vez y puedes
-          revocarla cuando quieras.
+          Conecta tu agente de IA a los torneos ML de QuantBattle. El servidor remoto inicia sesión mediante OAuth; no tienes que copiar claves API ni instalar Python.
         </p>
 
+        <div className="qb-glass qb-elev-1 mt-8 rounded-xl p-5">
+          <h2 className="text-base font-semibold text-ink">Conecta tu agente MCP</h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted">Añade el servidor una sola vez. Puedes consultar torneos y datasets públicos sin iniciar sesión; QuantBattle pedirá autorización al enviar predicciones o consultar tus comprobantes.</p>
+          <div className="mt-4 rounded-lg border border-line bg-surface-solid p-4">
+            <p className="text-xs font-medium text-muted">Codex CLI</p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+              <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-md bg-bg p-3 font-mono text-xs leading-relaxed text-ink">{`codex mcp add quantbattle --url ${MCP_URL}`}</pre>
+              <button type="button" onClick={() => navigator.clipboard.writeText(`codex mcp add quantbattle --url ${MCP_URL}`).then(() => { setCopiedCmd(true); setTimeout(() => setCopiedCmd(false), 2000); }).catch(() => setError("No se pudo copiar. Selecciona el comando y cópialo manualmente."))} className={buttonClasses("secondary", "sm") + " shrink-0"}>{copiedCmd ? "✓ Copiado" : "Copiar línea"}</button>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-muted">Claude Code: <code className="font-mono">claude mcp add --transport http quantbattle {MCP_URL}</code>. En Cursor y otros clientes, pega la misma URL como servidor MCP remoto e inicia sesión.</p>
+          </div>
+        </div>
+
+        <div className="qb-glass mt-4 rounded-xl p-5">
+          <h2 className="text-base font-semibold text-ink">Agentes autorizados</h2>
+          <p className="mt-1 text-sm text-muted">Puedes retirar el acceso de cualquier cliente desde aquí.</p>
+          {grantsLoading ? <p className="mt-4 text-sm text-muted">Cargando autorizaciones…</p> : grantsError ? <p className="mt-4 text-sm text-muted">No se pudieron cargar las autorizaciones. Comprueba que OAuth esté habilitado en QuantBattle.</p> : grants?.length === 0 ? <p className="mt-4 text-sm text-muted">Todavía no has autorizado agentes externos.</p> : grants ? (
+            <ul className="mt-4 divide-y divide-line">
+              {grants.map((grant) => (
+                <li key={grant.client.id} className="flex flex-wrap items-center gap-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-ink">{grant.client.name}</p>
+                    <p className="mt-1 text-xs text-muted">Autorizado {new Date(grant.granted_at).toLocaleDateString("es-CO")}</p>
+                  </div>
+                  <button type="button" onClick={() => void revokeGrant(grant.client.id)} disabled={revokingGrant !== null} className="rounded-md border border-short/30 px-3 py-1.5 text-xs font-medium text-short transition-colors hover:bg-short/10 disabled:opacity-50">{revokingGrant === grant.client.id ? "Revocando…" : "Revocar acceso"}</button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+
         {/* Crear nueva clave */}
+        <h2 className="mt-10 text-lg font-semibold text-ink">API para integraciones directas</h2>
+        <p className="mt-1 text-sm text-muted">Opcional. No la necesitas para conectar un agente MCP.</p>
         <div className="qb-glass qb-elev-1 mt-8 rounded-xl p-5">
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               aria-label="Nombre de la clave"
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
-              placeholder="Nombre de la clave (ej: Mi agente de investigación)"
+              placeholder="Nombre de la clave API"
               maxLength={50}
               className="qb-input flex-1 rounded-md px-3 py-2 text-sm text-ink"
             />
@@ -197,34 +253,12 @@ export default function ApiKeysPage() {
               </button>
             </div>
 
-            <div className="mt-5 rounded-lg border border-line p-4">
-              <p className="text-sm font-semibold text-ink">Configura tu agente MCP</p>
-              <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                QuantBattle usa MCP estándar por stdio. Elige un cliente para ver su configuración; otros agentes compatibles pueden usar el ejemplo JSON genérico.
-              </p>
-              <label className="mt-4 block text-xs font-medium text-muted" htmlFor="mcp-client">Cliente de IA</label>
-              <select id="mcp-client" value={client} onChange={(event) => setClient(event.target.value as typeof client)} className="qb-input mt-1 w-full rounded-md px-3 py-2 text-sm text-ink sm:max-w-xs">
-                <option value="generic">Otro agente MCP (JSON)</option>
-                <option value="claude">Claude Code</option>
-                <option value="cursor">Cursor</option>
-                <option value="codex">Codex CLI</option>
-              </select>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-md border border-line bg-surface-solid p-3 font-mono text-xs leading-relaxed text-muted">{mcpConfig}</pre>
-                <button
-                  onClick={() => navigator.clipboard.writeText(mcpConfig).then(() => { setCopiedCmd(true); setTimeout(() => setCopiedCmd(false), 2000); }).catch(() => setError("No se pudo copiar. Selecciona la configuración y cópiala manualmente."))}
-                  className={buttonClasses("secondary", "sm") + " shrink-0 self-start"}
-                >{copiedCmd ? "✓ Copiada" : "Copiar configuración"}</button>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                Reemplaza la ruta de ejemplo por la ubicación de <code className="font-mono">mcp_server.py</code> en tu equipo. Guarda la clave como variable <code className="font-mono">QUANTBATTLE_TOKEN</code> y no la compartas.
-              </p>
-            </div>
+            <p className="mt-4 text-xs text-muted">Esta clave sirve para llamadas directas a la API. El MCP remoto usa el inicio de sesión seguro de arriba.</p>
           </div>
         )}
 
         {/* Listado */}
-        <h2 className="mt-10 text-lg font-semibold text-ink">Tus claves</h2>
+        <h2 className="mt-10 text-lg font-semibold text-ink">Claves para integraciones API directas</h2>
         {loading ? (
           <div className="mt-4 space-y-3">
             <Skeleton variant="line" />
@@ -235,7 +269,7 @@ export default function ApiKeysPage() {
         ) : !keys || keys.length === 0 ? (
           <div className="qb-glass qb-elev-1 mt-4 rounded-xl px-6 py-10 text-center">
             <p className="text-sm text-muted">
-              Aún no tienes claves. Crea una arriba para conectar tu agente de IA.
+              Aún no tienes claves API directas. El MCP remoto funciona sin ellas.
             </p>
           </div>
         ) : (
@@ -317,9 +351,9 @@ export default function ApiKeysPage() {
         )}
 
         <div className="qb-glass qb-elev-1 mt-10 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-ink">¿Qué puedes hacer con el MCP?</h3>
-          <p className="mt-2 text-[13px] leading-relaxed text-muted">Descubrir torneos ML, consultar plazos y reglas, localizar datasets públicos, validar predicciones y enviar tu CSV con la ficha del modelo. Las acciones de cuenta usan esta clave API.</p>
-          <p className="mt-3 text-sm text-muted">Consulta las <Link href="/app/api-keys/instructions" className="text-accent hover:underline">instrucciones de conexión</Link> para más ejemplos de clientes MCP.</p>
+          <h3 className="text-sm font-semibold text-ink">¿Para qué sirven estas claves?</h3>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted">Estas claves se reservan para integraciones directas con la API. Para conectar un agente mediante MCP, usa la línea de conexión de arriba y autoriza el acceso desde tu cuenta.</p>
+          <p className="mt-3 text-sm text-muted">Consulta la <Link href="/docs#mcp" className="text-accent hover:underline">documentación MCP</Link>.</p>
         </div>
       </section>
     </main>

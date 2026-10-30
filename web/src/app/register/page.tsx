@@ -20,6 +20,8 @@ function RegisterForm() {
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const referralCode = searchParams.get("ref");
+  const requestedNext = searchParams.get("next");
+  const nextPath = requestedNext?.startsWith("/oauth/consent?") ? requestedNext : "/app";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -48,12 +50,13 @@ function RegisterForm() {
 
     try {
       const supabase = createBrowserSupabaseClient();
-      const redirectTo = `${window.location.origin}/auth/callback`;
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      if (nextPath !== "/app") callbackUrl.searchParams.set("next", nextPath);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectTo,
+          emailRedirectTo: callbackUrl.toString(),
           data: { username: cleanUser, display_name: cleanUser },
         },
       });
@@ -95,7 +98,7 @@ function RegisterForm() {
             console.warn("No se pudo trackear referido:", e);
           }
         }
-        router.push("/app");
+        router.push(nextPath);
         router.refresh();
         return;
       }
@@ -118,8 +121,9 @@ function RegisterForm() {
     setLoading(true);
     try {
       const supabase = createBrowserSupabaseClient();
-      const redirectTo = `${window.location.origin}/auth/callback`;
-      const { error } = await supabase.auth.resend({ type: "signup", email: email.trim(), options: { emailRedirectTo: redirectTo } });
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      if (nextPath !== "/app") callbackUrl.searchParams.set("next", nextPath);
+      const { error } = await supabase.auth.resend({ type: "signup", email: email.trim(), options: { emailRedirectTo: callbackUrl.toString() } });
       if (error) throw error;
       setInfo("Enlace reenviado. Revisa tu correo (también la bandeja de spam).");
     } catch {
@@ -137,7 +141,7 @@ function RegisterForm() {
         <>
           ¿Ya tienes cuenta?{" "}
           <Link
-            href="/login"
+            href={nextPath !== "/app" ? `/login?next=${encodeURIComponent(nextPath)}` : "/login"}
             className="font-medium text-cyan transition-colors hover:text-ink"
           >
             Iniciar sesión

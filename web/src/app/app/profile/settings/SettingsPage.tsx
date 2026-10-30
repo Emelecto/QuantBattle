@@ -258,7 +258,7 @@ export function SettingsPage() {
                     y flujos de predicción de QuantBattle.
                   </p>
                   <pre className="overflow-x-auto rounded-md border border-line bg-surface-solid p-3 font-mono text-sm text-muted">
-{`[mcp_servers.quantbattle]\ncommand = "python"\nargs = ["/ruta/a/QuantBattle/mcp-server/mcp_server.py"]\nenv = { QUANTBATTLE_TOKEN = "qbt_tu_clave" }`}
+{`codex mcp add quantbattle --url https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp`}
                   </pre>
                   <p className="mt-2 text-[13px] text-muted">
                     Guía completa en{" "}

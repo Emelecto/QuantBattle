@@ -242,26 +242,27 @@ curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
           {/* ---------------------------------------------------------- */}
           <Section id="mcp" title="MCP — QuantBattle desde tu asistente IA">
             <p>
-              QuantBattle ofrece un servidor MCP local compatible con cualquier agente
-              que admita herramientas MCP por stdio. Sirve para descubrir torneos ML,
-              consultar datasets, validar CSV y enviar predicciones.
+              Conecta el servidor MCP remoto de QuantBattle. No necesitas instalar Python,
+              clonar el repositorio ni crear una clave API. Las consultas públicas funcionan
+              sin iniciar sesión. Para enviar predicciones o consultar tus comprobantes,
+              el agente abre QuantBattle y solicita tu autorización OAuth.
             </p>
-            <Pre>{`[mcp_servers.quantbattle]
-command = "python"
-args = ["/ruta/a/QuantBattle/mcp-server/mcp_server.py"]
-env = { QUANTBATTLE_TOKEN = "qbt_tu_clave" }`}</Pre>
+            <Pre>{`codex mcp add quantbattle --url https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp`}</Pre>
             <p>
-              El servidor usa tu clave <Code>qbt_</Code> vía variable de entorno{" "}
-              <Code>QUANTBATTLE_TOKEN</Code>. Ejemplos de uso natural:
+              En Claude Code usa{" "}
+              <Code>claude mcp add --transport http quantbattle https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp</Code>.
+              En Cursor u otro cliente, pega esa URL como servidor MCP remoto. Puedes revocar
+              el permiso después desde API y MCP. Ejemplos:
             </p>
             <ul className="list-disc space-y-1.5 pl-5 marker:text-line">
               <li>&ldquo;¿Qué torneos ML y rondas están abiertos?&rdquo;</li>
               <li>&ldquo;Dame los enlaces de train, validation y live de esta ronda&rdquo;</li>
-              <li>&ldquo;Valida y envía mi CSV de predicciones&rdquo;</li>
+              <li>&ldquo;Valida este CSV de predicciones y explícame los problemas antes de enviarlo&rdquo;</li>
             </ul>
             <p>
-              Detalles completos en{" "}
-              <Code>mcp-server/README.md</Code> del repositorio.
+              Para validar o enviar, el agente debe leer el archivo local y pasar su contenido
+              al servidor; el servicio remoto no puede abrir rutas del computador del usuario.
+              Los CSV se revisan contra los IDs publicados antes del envío.
             </p>
           </Section>
         </div>

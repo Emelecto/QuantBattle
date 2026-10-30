@@ -55,7 +55,11 @@ function LoginInner() {
         return;
       }
 
-      router.push("/app");
+      const requestedNext = searchParams.get("next");
+      const next = requestedNext?.startsWith("/oauth/consent?")
+        ? requestedNext
+        : "/app";
+      router.push(next);
       router.refresh();
     } catch {
       setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
@@ -125,7 +129,9 @@ function LoginInner() {
         <>
           ¿No tienes cuenta?{" "}
           <Link
-            href="/register"
+            href={searchParams.get("next")?.startsWith("/oauth/consent?")
+              ? `/register?next=${encodeURIComponent(searchParams.get("next")!)}`
+              : "/register"}
             className="font-medium text-cyan transition-colors hover:text-ink"
           >
             Crear cuenta

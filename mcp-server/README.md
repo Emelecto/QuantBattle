@@ -1,93 +1,59 @@
 # QuantBattle MCP
 
-Conecta Claude Code, Cursor, Codex u otro cliente MCP con los torneos de predicción ML de QuantBattle. El servidor es un proceso local por `stdio`: el agente llama las herramientas y estas consultan el worker oficial. No hay código de estrategia ni operaciones QP en este flujo.
+El servidor recomendado es remoto y usa Streamable HTTP. Las consultas públicas funcionan sin iniciar sesión. Al enviar predicciones o consultar comprobantes propios, el agente inicia el flujo OAuth 2.1 de Supabase y el usuario autoriza desde QuantBattle. No se instala Python ni se crea o copia una clave API.
 
-## Requisitos
+## Conectar un agente
 
-- Python 3.10 o superior.
-- Una clave API personal de QuantBattle (`qbt_…`) para enviar predicciones y consultar tus comprobantes. Créala en `https://www.quantbattle.co/app/api-keys`; se muestra una sola vez y puedes revocarla desde la app.
-- Los enlaces y datasets públicos se pueden consultar sin clave.
+URL del servidor:
 
-## Instalación
-
-```powershell
-cd C:\Users\ecard\QuantBattle\mcp-server
-python -m pip install -r requirements.txt
+```text
+https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp
 ```
 
-Worker predeterminado: `https://quantlab2.onrender.com` (configurado también como worker del frontend y comprobado en producción). Para un entorno alternativo, establece `QUANTBATTLE_WORKER_URL`.
+Codex CLI:
 
-## Configurar el cliente
-
-### Claude Code
-
-```powershell
-claude mcp add quantbattle -e QUANTBATTLE_TOKEN=qbt_tu_clave -- python C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py
+```bash
+codex mcp add quantbattle --url https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp
 ```
 
-### Cursor
+Claude Code:
 
-En `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "quantbattle": {
-      "command": "python",
-      "args": ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"],
-      "env": {
-        "QUANTBATTLE_TOKEN": "qbt_tu_clave"
-      }
-    }
-  }
-}
+```bash
+claude mcp add --transport http quantbattle https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp
 ```
 
-### Codex CLI
+En Cursor, pega la URL como servidor MCP remoto. Las consultas públicas quedan disponibles de inmediato; para operaciones propias, el cliente abre el sitio de QuantBattle y permite aprobar o rechazar el acceso. Los clientes compatibles renuevan sus credenciales OAuth; el usuario puede revocar permisos en **App → API y MCP → Agentes autorizados**.
 
-En `~/.codex/config.toml`:
+## Envío de predicciones
 
-```toml
-[mcp_servers.quantbattle]
-command = "python"
-args = ["C:/Users/ecard/QuantBattle/mcp-server/mcp_server.py"]
-env = { QUANTBATTLE_TOKEN = "qbt_tu_clave" }
-```
+El servicio remoto no puede acceder a una ruta local como `C:/.../predicciones.csv`. Para validar o enviar un archivo, el agente debe leerlo desde su entorno y pasar el contenido CSV como argumento `csv_content`. El servidor comprueba el encabezado, duplicados, rango, cobertura de IDs live y variación por era antes de permitir el envío. Nunca recibe targets ocultos.
 
-Reinicia o vuelve a cargar el cliente después de registrar el servidor.
-
-## Flujo para empezar
-
-1. Pregunta **“¿Qué torneos ML y rondas están abiertos?”**. `list_ml_tournaments` distingue práctica y retornos diarios, y muestra identificadores, plazos y datasets publicados.
-2. Para una ronda semanal, descarga `train`, `validation` y `live` con `get_weekly_dataset_download`. Para la práctica, usa `list_practice_datasets` y `get_practice_dataset_download`.
-3. Entrena/selecciona el modelo con train y validation. Genera UTF-8 `id,prediction` con cada ID de live una sola vez. `validate_prediction_csv` compara la cobertura contra el índice live publicado; `get_weekly_live_ids` también permite recuperar los IDs para la ronda semanal.
-4. Registra el envío con `submit_weekly_predictions` o `submit_practice_predictions`. Incluye la ficha experimental JSON y la clave API se envía en Bearer al worker. Consulta después `get_my_weekly_submissions` o `get_my_practice_submission` para verificar el comprobante.
-
-La IA puede ayudar a escribir o explicar el código de entrenamiento en el entorno del usuario, pero el servidor MCP no ejecuta notebooks, no ve los targets de live ni inventa predicciones. El usuario genera el CSV y lo entrega al agente mediante la ruta local.
-
-## Protocolos
-
-| Flujo | Predicción | Métrica / reglas |
-|---|---|---|
-| Práctica ML | `0` a `1` | `spearman_era_v1`; cada era necesita variación; datasets sintéticos/históricos según ronda |
-| Retornos diarios semanal | `-1` a `10` en retorno decimal (`0.025` = +2,5 %) | `daily_return_mae_v1`; permite predicciones constantes; el ranking general necesita cuatro rondas |
-
-Ambos requieren exactamente todos los IDs live, sin duplicados, y columnas exactas `id,prediction`. Los resultados se mantienen ocultos según el protocolo; no compares sus scores.
-
-## Herramientas
-
-- `quantbattle_status`: worker, conteo de datasets/torneos y estado de configuración de credencial.
-- `list_ml_tournaments`, `get_weekly_tournament`: descubrimiento y detalle de semanas y rondas.
-- `list_practice_datasets`, `get_practice_dataset_download`, `get_weekly_dataset_download`, `get_weekly_live_ids`: preparación de datos públicos.
-- `validate_prediction_csv`: validación local de formato/rango y cobertura exacta de IDs.
-- `submit_practice_predictions`, `submit_weekly_predictions`: envío autenticado con ficha experimental.
-- `get_my_practice_submission`, `get_my_weekly_submissions`: comprobantes autenticados.
-- `get_ml_leaderboard`, `get_weekly_results`: rankings/resultados públicos cuando estén liberados.
-
-Ficha de envío (`experiment_json`), por ejemplo:
+La ficha de experimento es un objeto JSON, por ejemplo:
 
 ```json
 {"model_name":"Ridge","parameters":{"alpha":1.0},"seed":42,"note":"Seleccionado en validation"}
 ```
 
-La clave `qbt_` concede acceso a la cuenta: no la pegues en conversaciones ni código compartido. Se guarda en la configuración local del cliente y se transmite solo al worker configurado.
+Los protocolos siguen siendo distintos:
+
+| Flujo | Predicción | Métrica / reglas |
+|---|---|---|
+| Práctica ML | `0` a `1` | `spearman_era_v1`; cada era necesita variación |
+| Retornos diarios semanal | `-1` a `10` en retorno decimal (`0.025` = +2,5 %) | `daily_return_mae_v1`; permite predicciones constantes; el ranking general necesita cuatro rondas |
+
+## Despliegue
+
+El endpoint vive en `supabase/functions/quantbattle-mcp`. La autenticación se compone de Supabase OAuth 2.1 y una pantalla de consentimiento en `web/src/app/oauth/consent`. Configuración del proyecto: `supabase/config.toml`.
+
+Requisitos de activación en Supabase Auth:
+
+- OAuth 2.1 Server activo.
+- Dynamic Client Registration activo para clientes MCP.
+- URL de sitio `https://quantbattle.co` y ruta de autorización `/oauth/consent`.
+- El proyecto debe firmar JWT con clave asimétrica ES256 o RS256.
+
+La función debe mantener `verify_jwt = false`: primero necesita responder con el desafío OAuth MCP; luego `withSupabase({ auth: "user" })` valida la credencial de cada llamada. La función reenvía el JWT de usuario al worker oficial, que valida la firma y deriva el `user_id` de la sesión.
+
+## Servidor local heredado
+
+`mcp_server.py` sigue disponible como alternativa para entornos que solo admiten MCP por stdio. Esa ruta local aún requiere instalar dependencias y configurar `QUANTBATTLE_TOKEN`; no es la integración recomendada para nuevos usuarios.
