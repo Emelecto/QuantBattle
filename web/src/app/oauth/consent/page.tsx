@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { buttonClasses } from "@/components/ui/Button";
+import { QuantBattleLogo } from "@/components/dashboard/QuantBattleLogo";
 
 type AuthorizationDetails = {
   authorization_id: string;
@@ -72,7 +73,7 @@ function ConsentContent() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-bg px-5 py-12">
       <section className="qb-glass qb-elev-1 w-full max-w-lg rounded-2xl border border-line p-7 sm:p-9">
-        <Link href="/" className="text-sm font-semibold tracking-tight text-ink">QuantBattle</Link>
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-ink"><QuantBattleLogo size={28} />QuantBattle</Link>
         <p className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-accent">Conexión con agente de IA</p>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Autoriza el acceso a tu cuenta</h1>
         {!details && !error && <p className="mt-4 text-sm text-muted">Cargando solicitud…</p>}

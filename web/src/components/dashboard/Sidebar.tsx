@@ -7,6 +7,7 @@ import { getBalance } from "@/lib/tokens";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/ui/Avatar";
 import { NotificationPopover } from "@/components/dashboard/NotificationPopover";
+import { QuantBattleLogo } from "./QuantBattleLogo";
 import "./dashboard.css";
 import "./dashboard-light.css";
 
@@ -356,7 +357,7 @@ export function Sidebar() {
       <div className="qb-sidebar-glow" />
 
       <Link href="/app" className="qb-side-brand" title="QuantBattle · Inicio">
-        <span aria-hidden="true">Q</span>{!collapsed && <strong>QuantBattle</strong>}
+        <QuantBattleLogo />{!collapsed && <strong>QuantBattle</strong>}
       </Link>
 
       {/* Top row: Avatar + Usuario (izquierda) | QP (derecha) */}

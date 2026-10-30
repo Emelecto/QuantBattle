@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { buttonClasses } from "@/components/ui/Button";
 import { useAuth } from "@/lib/useAuth";
+import { QuantBattleLogo } from "@/components/dashboard/QuantBattleLogo";
 
 export function TopBar() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export function TopBar() {
           href="/"
           className="qb-public-brand flex items-center gap-2 text-[15px] font-semibold tracking-tight text-ink"
         >
-          <span aria-hidden className="qb-public-mark">Q</span>
+          <QuantBattleLogo className="qb-public-mark" />
           QuantBattle
           {isLanding && <span className="qb-public-brand-origin">Semillero DeepFin<br />Universidad EIA</span>}
         </Link>
