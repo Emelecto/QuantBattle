@@ -12,6 +12,21 @@ type AuthState = {
   signOut: () => Promise<void>;
 };
 
+// Several dashboard components mount together and share the browser client.
+// Reuse the same verification while it is in flight to avoid competing auth locks.
+let pendingUserVerification: ReturnType<SupabaseClient["auth"]["getUser"]> | null = null;
+
+function verifyUser(client: SupabaseClient) {
+  if (!pendingUserVerification) {
+    const request = client.auth.getUser();
+    pendingUserVerification = request;
+    void request.finally(() => {
+      if (pendingUserVerification === request) pendingUserVerification = null;
+    }).catch(() => {});
+  }
+  return pendingUserVerification;
+}
+
 /**
  * Hook mínimo de sesión.
  *
@@ -30,7 +45,7 @@ export function useAuth(): AuthState {
     let active = true;
     let authChanged = false;
 
-    client.auth.getUser().then(({ data }) => {
+    verifyUser(client).then(({ data }) => {
       if (!active) return;
       setSupabase(client);
       if (!authChanged) setUser(data.user ?? null);

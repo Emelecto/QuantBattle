@@ -1,5 +1,24 @@
 import { test, expect } from "@playwright/test";
 
+test("login allows retry when the authentication request does not respond", async ({ page }) => {
+  let releaseRequest: (() => void) | undefined;
+  await page.route("**/auth/v1/token?grant_type=password", async (route) => {
+    await new Promise<void>((resolve) => { releaseRequest = resolve; });
+    await route.abort().catch(() => {});
+  });
+  await page.clock.install();
+  await page.goto("/login");
+  await page.locator("#email").fill("timeout-test@example.invalid");
+  await page.locator("#password").fill("test-password");
+  const request = page.waitForRequest("**/auth/v1/token?grant_type=password");
+  await page.getByRole("button", { name: "Iniciar sesión", exact: true }).click();
+  await request;
+  await page.clock.fastForward(21_000);
+  await expect(page.getByRole("alert").filter({ hasText: "inicio de sesión está tardando demasiado" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Iniciar sesión", exact: true })).toBeEnabled();
+  releaseRequest?.();
+});
+
 test("auth callback keeps destinations on this site and preserves recovery form", async ({ request }) => {
   for (const next of ["@evil.example", "//evil.example", "/\\evil.example", "https://evil.example"]) {
     const response = await request.get(`/auth/callback?next=${encodeURIComponent(next)}`, {maxRedirects:0});

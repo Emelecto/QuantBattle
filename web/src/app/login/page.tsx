@@ -2,7 +2,7 @@
 
 import { FormEvent, useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { buttonClasses } from "@/components/ui/Button";
 import { AuthShell, Field, inputClasses } from "@/components/ui/Form";
@@ -13,7 +13,6 @@ const RESET_SENT_MESSAGE =
   "Te enviamos un enlace para restablecer tu contraseña. Revisa tu correo.";
 
 function LoginInner() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +33,14 @@ function LoginInner() {
 
     try {
       const supabase = createBrowserSupabaseClient();
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      const timeout = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error("AUTH_TIMEOUT")), 20_000);
+      });
+      const { data, error } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeout,
+      ]).finally(() => clearTimeout(timeoutId));
 
       if (error) {
         if (error.code === "invalid_credentials" || error.message.toLowerCase().includes("invalid")) {
@@ -59,10 +65,12 @@ function LoginInner() {
       const next = requestedNext?.startsWith("/oauth/consent?")
         ? requestedNext
         : "/app";
-      router.push(next);
-      router.refresh();
-    } catch {
-      setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
+      // Start a fresh request after the session cookies have been stored.
+      window.location.assign(next);
+    } catch (cause) {
+      setError(cause instanceof Error && cause.message === "AUTH_TIMEOUT"
+        ? "El inicio de sesión está tardando demasiado. Revisa tu conexión e inténtalo de nuevo."
+        : "No pudimos iniciar sesión. Revisa tu conexión e inténtalo de nuevo.");
       setLoading(false);
     }
   }
