@@ -2,7 +2,7 @@ name: Daily return tournament referee
 on:
   schedule:
     # 05:30 UTC = 00:30 Colombia. Other ticks recover delays and settle data.
-    - cron: '0,30 * * * *'
+    - cron: '7,37 * * * *'
   workflow_dispatch:
     inputs:
       check_only:
