@@ -26,4 +26,5 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STOCK_DAILY_ENABLED: ${{ vars.STOCK_DAILY_ENABLED }}
         run: python check_operations.py

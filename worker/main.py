@@ -197,6 +197,8 @@ app.include_router(moderation_router)
 app.include_router(ml_router)
 from weekly_api import router as weekly_router
 app.include_router(weekly_router)
+from stock_api import router as stock_router
+app.include_router(stock_router)
 from ml_workspace import router as ml_workspace_router
 app.include_router(ml_workspace_router)
 from ml_learning import router as ml_learning_router

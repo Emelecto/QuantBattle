@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 import os
+from zoneinfo import ZoneInfo
 
 from weekly_engine import all_rows, parse_time
 
@@ -54,4 +55,28 @@ def readiness_report(sb, now=None):
     runs = sb.table("operation_runs").select("*").eq("job", JOB).order("started_at", desc=True).limit(10).execute().data or []
     weeks = all_rows(sb, "ml_return_weeks", status="open")
     rounds = [row for week in weeks for row in all_rows(sb, "ml_return_rounds", week_id=week["id"])]
-    return assess_state(runs, weeks, rounds, now)
+    report = assess_state(runs, weeks, rounds, now)
+    health = sb.rpc('render_health_report').execute().data
+    report['render'] = health
+    report['checks'].append({'name': 'render_availability', 'passed': bool(health and health.get('passed'))})
+    if os.environ.get('STOCK_DAILY_ENABLED', '').lower() == 'true':
+        stock_runs = sb.table('operation_runs').select('*').eq('job', 'stock_return_referee').order('started_at', desc=True).limit(1).execute().data or []
+        stock_rounds = all_rows(sb, 'stock_return_rounds', status='open')
+        report['checks'].extend(assess_stocks(stock_runs, stock_rounds, now))
+    report['status'] = 'ok' if all(c['passed'] for c in report['checks']) else 'attention'
+    return report
+
+
+def assess_stocks(runs, rounds, now):
+    local = (now - timedelta(hours=2)).astimezone(ZoneInfo('America/New_York'))
+    expected = local.replace(hour=13, minute=37, second=0, microsecond=0)
+    if local < expected:
+        expected -= timedelta(days=1)
+    while expected.weekday() >= 5:
+        expected -= timedelta(days=1)
+    latest = max(runs, key=lambda r: parse_time(r['started_at']), default=None)
+    recent = bool(latest and latest['status'] == 'success' and latest.get('finished_at')
+                  and expected <= parse_time(latest['finished_at']) <= now)
+    overdue = [r['id'] for r in rounds if now > parse_time(r['target_close']) + timedelta(hours=2)]
+    return [{'name': 'stock_referee_recent_success', 'passed': recent},
+            {'name': 'stock_no_overdue_settlements', 'passed': not overdue, 'round_ids': overdue}]

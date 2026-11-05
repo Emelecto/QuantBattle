@@ -4,7 +4,7 @@ services:
     runtime: docker
     rootDirectory: worker
     dockerfilePath: ./Dockerfile
-    plan: starter
+    plan: free
     region: oregon        # cámbialo a sao-paulo si Render lo soporta para menos latencia
     healthCheckPath: /health
     envVars:

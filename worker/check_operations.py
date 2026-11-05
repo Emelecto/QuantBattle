@@ -20,6 +20,10 @@ def main():
         print('::error title=Settlement overdue::At least one closed round still needs settlement.')
     if 'no_overdue_publication' in failed:
         print('::error title=Results publication overdue::At least one tournament needs publication.')
+    if 'render_availability' in failed:
+        print('::error title=Render availability check failed::The independent Supabase probe did not confirm a recent HTTP 200. Inspect Render separately from the evaluator.')
+    if any(name.startswith('stock_') for name in failed):
+        print('::error title=Stock tournament requires attention::Inspect Stock daily datasets for delayed execution or settlement.')
     expected_sha = os.environ.get('GITHUB_SHA')
     if expected_sha:
         current = (report.get('latest_run') or {}).get('commit_sha') == expected_sha

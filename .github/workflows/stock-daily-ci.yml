@@ -1,0 +1,34 @@
+name: Stock dataset generator tests
+
+on:
+  pull_request:
+    paths:
+      - 'worker/stocks_history/**'
+      - 'worker/stocks_daily/**'
+      - 'worker/requirements-stocks.txt'
+      - '.github/workflows/stock-daily*.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worker/stocks_history/**'
+      - 'worker/stocks_daily/**'
+      - 'worker/requirements-stocks.txt'
+      - '.github/workflows/stock-daily*.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+          cache-dependency-path: worker/requirements-stocks.txt
+      - run: python -m pip install -r worker/requirements-stocks.txt
+      - run: python -m pytest worker/stocks_history/test_pipeline.py worker/stocks_daily/test_daily.py worker/stocks_daily/test_tournament.py -q

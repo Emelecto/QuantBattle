@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from operations import assess_state, validate_configuration
+from operations import assess_state, assess_stocks, validate_configuration
 import weekly_engine as engine
 
 NOW = datetime(2026, 10, 28, 12, tzinfo=timezone.utc)
@@ -78,3 +78,18 @@ def test_monitor_rejects_a_successful_heartbeat_from_another_commit(monkeypatch)
     with patch('tournaments.get_supabase'), patch('operations.readiness_report', return_value={
         'status': 'ok', 'checks': [], 'latest_run': {'commit_sha': 'older-revision'}}):
         assert check_operations.main() == 1
+
+
+def test_stock_monitor_accepts_friday_on_weekend_but_requires_new_weekday_tick():
+    friday = datetime(2026, 11, 6, 23, tzinfo=timezone.utc)
+    runs = [{'status': 'success', 'started_at': friday.isoformat(), 'finished_at': friday.isoformat()}]
+    sunday = datetime(2026, 11, 8, 23, tzinfo=timezone.utc)
+    monday = datetime(2026, 11, 9, 21, tzinfo=timezone.utc)
+    assert assess_stocks(runs, [], sunday)[0]['passed']
+    assert not assess_stocks(runs, [], monday)[0]['passed']
+
+
+def test_stock_monitor_detects_failed_run_and_overdue_actual_return():
+    runs = [{'status': 'failed', 'started_at': NOW.isoformat()}]
+    rounds = [{'id': 'stock-round', 'target_close': (NOW-timedelta(hours=3)).isoformat()}]
+    assert not any(c['passed'] for c in assess_stocks(runs, rounds, NOW))

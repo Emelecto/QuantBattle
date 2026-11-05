@@ -1,0 +1,43 @@
+name: Stock daily datasets
+
+on:
+  schedule:
+    # Settlement retries; generation skips until the evening publication window.
+    - cron: '37 13,16,17,18 * * 1-5'
+      timezone: America/New_York
+    - cron: '37 20 * * 1-5'
+      timezone: America/New_York
+    - cron: '7,37 21 * * 1-5'
+      timezone: America/New_York
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stock-daily-datasets
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    if: vars.STOCK_DAILY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+          cache-dependency-path: worker/requirements-stocks.txt
+      - run: python -m pip install -r worker/requirements-stocks.txt
+      - name: Settle previous rounds and publish the next daily dataset
+        env:
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STOCK_DAILY_BUCKET: ${{ vars.STOCK_DAILY_BUCKET || 'stock-datasets-private' }}
+        run: |
+          python -m worker.stocks_daily.tournament
+          python -m worker.stocks_daily.run --cloud --due-only

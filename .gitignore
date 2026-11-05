@@ -4,6 +4,9 @@ dist
 dist/
 venv
 .venv
+.venv-stocks/
+artifacts/stock-dataset-v1/
+artifacts/stock-daily-v1/
 __pycache__
 *.pyc
 .env
