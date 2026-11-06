@@ -15,8 +15,9 @@ test("account verification and anonymous access are separate", async ({ page, co
   const message = await page.evaluate(() => navigator.clipboard.readText());
   expect(message).toContain("--auth oauth");
   expect(message).toContain("hermes mcp add quantbattle");
-  expect(message).toContain("OAuth");
-  expect(message.length).toBeLessThan(360);
+  expect(message).toContain("Open in browser");
+  expect(message).toContain("vista previa de Hermes");
+  expect(message.length).toBeLessThan(440);
   await section.getByText("Configurar manualmente o copiar la URL", { exact: true }).click();
   await expect(section.getByText(/Para verificar la conexión/)).toContainText("get_connection_status");
   await section.getByText("Descargar el histórico de Alpaca sin cuenta", { exact: true }).click();

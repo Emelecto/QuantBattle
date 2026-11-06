@@ -6,7 +6,7 @@ import { buttonClasses } from "@/components/ui/Button";
 const MCP_URL = "https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp";
 const clients = {
   generic: { label: "Otro agente / conexión por URL", instruction: "Añade un servidor MCP remoto con transporte HTTP y esta URL.", configuration: MCP_URL },
-  hermes: { label: "Hermes Agent", instruction: "Ejecuta el comando en la terminal de Hermes. El parámetro --auth oauth evita que te pida una API key. Si necesitas iniciar la autorización, ejecuta hermes mcp login quantbattle.", configuration: `hermes mcp add quantbattle --url "${MCP_URL}" --auth oauth --connect-timeout 60` },
+  hermes: { label: "Hermes Agent", instruction: "En Hermes Desktop, autoriza con «Open in browser» para abrir el navegador predeterminado. Desde terminal, ejecuta este comando; Hermes abrirá el navegador disponible y esperará el retorno OAuth. No uses la vista previa integrada.", configuration: `hermes mcp add quantbattle --url "${MCP_URL}" --auth oauth --connect-timeout 60` },
   cursor: { label: "Cursor", instruction: "Añade esta configuración a .cursor/mcp.json en tu proyecto o a ~/.cursor/mcp.json para tu usuario.", configuration: JSON.stringify({ mcpServers: { quantbattle: { url: MCP_URL } } }, null, 2) },
   vscode: { label: "VS Code / Copilot", instruction: "Añade esta configuración a .vscode/mcp.json en tu proyecto.", configuration: JSON.stringify({ servers: { quantbattle: { type: "http", url: MCP_URL } } }, null, 2) },
   codex: { label: "Codex CLI", instruction: "Ejecuta este comando en tu terminal.", configuration: `codex mcp add quantbattle --url ${MCP_URL}` },
@@ -20,12 +20,17 @@ export function McpConnection() {
   const [copied, setCopied] = useState<string | null>(null);
   const [copyError, setCopyError] = useState(false);
   const selected = clients[client];
-  const message = [
-    client === "generic"
-      ? `Conecta QuantBattle por MCP usando esta URL:\n${MCP_URL}`
-      : `Conecta QuantBattle con esta configuración:\n${selected.configuration}`,
-    "Abre el inicio de sesión con OAuth y verifica la conexión.",
-  ].join("\n\n");
+  const message = client === "hermes"
+    ? [
+        `Conecta QuantBattle por MCP con esta configuración:\n${selected.configuration}`,
+        "En Hermes Desktop, usa «Open in browser» para autorizar en tu navegador predeterminado. No abras el enlace en la vista previa de Hermes. Después, confirma la conexión con get_connection_status.",
+      ].join("\n\n")
+    : [
+        client === "generic"
+          ? `Conecta QuantBattle por MCP usando esta URL:\n${MCP_URL}`
+          : `Conecta QuantBattle con esta configuración:\n${selected.configuration}`,
+        "Abre el inicio de sesión con OAuth y verifica la conexión.",
+      ].join("\n\n");
 
   async function copy(value: string, key: string) {
     try {
