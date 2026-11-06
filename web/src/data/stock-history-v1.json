@@ -1,0 +1,61 @@
+{
+  "version": "stocks-oc-v1.0.0",
+  "release_url": "https://github.com/Emelecto/QuantBattle/releases/tag/stocks-history-v1",
+  "train": {
+    "rows": 83563,
+    "columns": 38,
+    "symbols": 50,
+    "target_start": "2017-01-04",
+    "target_end": "2023-12-29"
+  },
+  "validation": {
+    "rows": 34962,
+    "columns": 38,
+    "symbols": 50,
+    "target_start": "2024-01-02",
+    "target_end": "2026-10-30"
+  },
+  "files": {
+    "train.parquet": {
+      "sha256": "d815cfa89106129251960bc3407315008115ab3edeece208bdbdc8661468a70f",
+      "bytes": 24150396,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/train.parquet"
+    },
+    "validation.parquet": {
+      "sha256": "5071b9930aef7d40cdb910c44d566be8397dd4224759a794be091bda8b3ee9b5",
+      "bytes": 10131883,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/validation.parquet"
+    },
+    "README.md": {
+      "sha256": "f7ff9b99d278a72eb0d5d2f3af24189d392495619c33a6e0a978ae61243146ad",
+      "bytes": 5880,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/README.md"
+    },
+    "feature_definitions.json": {
+      "sha256": "f0deb3b683380624750ee7e7656375804ffb494676cc7a668cce3fbb07ecb7ed",
+      "bytes": 11910,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/feature_definitions.json"
+    },
+    "universe.csv": {
+      "sha256": "06b0cbfc82215d5697fd9b71b80d36a9b140d22e909899482244ead30bc3cd34",
+      "bytes": 6235,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/universe.csv"
+    },
+    "quality_report.json": {
+      "sha256": "a11dedaae63a5affc6752a431fb193a99c19cd3a7d82eac501c8512c6dfe39cb",
+      "bytes": 245807,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/quality_report.json"
+    },
+    "manifest.json": {
+      "sha256": "c6f4814b4803f7822ee808dcfdee35c93f5d628048eeb6443cd6259277bb95ad",
+      "bytes": 7041,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/manifest.json"
+    },
+    "quantbattle-stock-history-v1.zip": {
+      "sha256": "79d6283396673b2eaac0715032eb9ec1f7bbacdaf947cc3b49a7313e56a9f223",
+      "bytes": 33988141,
+      "url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/quantbattle-stock-history-v1.zip"
+    }
+  },
+  "checksums_url": "https://github.com/Emelecto/QuantBattle/releases/download/stocks-history-v1/SHA256SUMS.txt"
+}
