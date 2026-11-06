@@ -182,7 +182,7 @@ def test_round_publishes_features_but_seals_targets(backend):
     assert public["id"].tolist() != files[live["target_path"]]["row_id"].tolist()
     assert all(row["status"] == "ready" for row in db.rows["ml_datasets"])
     result = client.get("/ml/datasets", params={"tournament_id": "tournament-1"})
-    assert result.status_code == 200 and len(result.json()["datasets"]) == 3
+    assert result.status_code == 200 and result.json()["datasets"] == []
     assert "target_path" not in result.text
 
 
@@ -211,8 +211,7 @@ def test_research_receipt_history_is_private_and_bound_to_csv(backend):
     assert entries[0]["score"] is None and entries[0]["round"]["benchmarks"] is None
     assert "file_path" not in history.text and "user_id" not in history.text
     index = client.get(f"/ml/datasets/{live['id']}/rows")
-    assert index.status_code == 200 and index.json()["columns"] == ["id", "era"]
-    assert len(index.json()["rows"]) == len(public) and "target" not in index.text
+    assert index.status_code == 410
     assert client.get("/ml/experiments?limit=500", headers={"Authorization": "Bearer x"}).status_code == 422
     assert client.get("/ml/experiments?snapshot=invalid", headers={"Authorization": "Bearer x"}).status_code == 422
     files[stored["file_path"] + ".experiment.json"]["file_sha256"] = "tampered"
@@ -452,13 +451,9 @@ def test_prospective_target_starts_after_submission_deadline(backend, monkeypatc
     assert live["mapping_path"] in files
     assert "target" not in files[live["bucket_path"]].columns
     listing = client.get("/ml/datasets", params={"tournament_id": "prospective-tournament"})
-    live_public = next(item for item in listing.json()["datasets"] if item["kind"] == "live")
-    assert live_public["data_attribution"] == "Binance Vision"
-    assert live_public["derived_data_license"] == "CC BY-NC-SA 4.0"
-    assert "params" not in live_public and "COIN00USDT" not in listing.text
+    assert listing.status_code == 200 and listing.json()["datasets"] == []
     download = client.get(f"/ml/datasets/{live['id']}/download", params={"kind": "live"})
-    assert download.json()["data_license"] == "CC BY-NC-SA 4.0"
-    assert download.json()["data_attribution"] == "Binance Vision"
+    assert download.status_code == 410
 
     base_date = pd.Timestamp(deadline.date(), tz="UTC")
     before = (base_date + pd.Timedelta(days=5)).to_pydatetime()
