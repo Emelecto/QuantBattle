@@ -25,6 +25,7 @@ export function McpConnection() {
     client !== "generic" ? `Cliente: ${selected.label}. Configuración:\n${selected.configuration}` : "Usa transporte HTTP.",
     "Para acciones de mi cuenta, usa OAuth y muéstrame el enlace para que yo inicie sesión y autorice el acceso. No me pidas una API key ni un token manual.",
     client === "hermes" ? "Si hace falta, inicia la autorización con hermes mcp login quantbattle." : "",
+    "Refresca el catálogo de herramientas. Para datos usa get_historical_dataset_download (un train y un validation de Alpaca) y list_ml_tournaments. Descarga archivos diarios con get_daily_dataset_download para la ronda elegida. No reutilices herramientas ni datasets del protocolo anterior.",
     "Ejecuta get_connection_status y confirma mi user_id para verificar la autorización de mi cuenta. Si OAuth no se completa, informa el error exacto sin cambiar a API key.",
   ].filter(Boolean).join("\n\n");
 
@@ -76,8 +77,8 @@ export function McpConnection() {
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Si el navegador está en otro computador, el regreso a localhost debe llegar al computador donde corre el agente. Usa el mecanismo de retorno remoto que admita tu cliente; no compartas contraseñas ni tokens. Si el enlace venció o rechazaste el permiso, inicia una nueva autorización desde el agente.</p>
       </details>
       <details className="mt-4 border-t border-line pt-4">
-        <summary className="cursor-pointer text-sm font-medium text-ink">Solo consultar torneos y datasets sin cuenta</summary>
-        <p className="mt-3 text-sm leading-relaxed text-muted">Este endpoint no permite enviar predicciones ni consultar información privada. Configúralo sin autenticación.</p>
+        <summary className="cursor-pointer text-sm font-medium text-ink">Descargar el histórico de Alpaca sin cuenta</summary>
+        <p className="mt-3 text-sm leading-relaxed text-muted">Permite obtener train y validation de Alpaca con sus sumas de verificación. Para consultar rondas y archivos diarios o enviar predicciones, autoriza el endpoint principal. Configura este endpoint público sin autenticación.</p>
         <pre className="mt-3 overflow-auto whitespace-pre-wrap break-words rounded-md border border-line p-3 text-xs" tabIndex={0}>{MCP_URL}/public</pre>
         <button type="button" onClick={() => void copy(`${MCP_URL}/public`, "public")} className={buttonClasses("secondary", "sm") + " mt-3"}>{copied === "public" ? "URL pública copiada" : "Copiar URL pública"}</button>
       </details>

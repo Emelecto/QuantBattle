@@ -1,8 +1,2 @@
-"use client";
-import { useParams } from 'next/navigation';
-import { ReturnTournament } from '@/components/research/ReturnTournament';
-
-export default function WeeklyReturnPage() {
-  const { id } = useParams<{ id: string }>();
-  return <ReturnTournament id={id} />;
-}
+import { redirect } from "next/navigation";
+export default function RetiredWeeklyTournament() { redirect("/app/tournaments"); }

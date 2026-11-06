@@ -79,22 +79,23 @@ export default function DocsPage() {
         </nav>
 
         <div className="mt-10 space-y-10">
-          <Section id="retornos-diarios" title="Torneos semanales con retornos reales">
-            <p>Cuatro rondas, de lunes a jueves, publicadas a partir de las 00:30 de Colombia con datos hasta el día anterior. El plazo termina a las 23:59 y se predice el retorno completo del día siguiente. Todos los scores, símbolos y precios se retienen hasta terminar el torneo completo, desde el sábado a las 00:30 y solo tras verificar la fuente.</p>
-            <p>El CSV <Code>id,prediction</Code> contiene retornos decimales, incluidos negativos: 0.025 equivale a +2,5 %. La puntuación compara el error absoluto con predecir cero y el ranking requiere cuatro rondas válidas. Esta modalidad tiene protocolo independiente <Code>daily_return_mae_v1</Code>; su score no se compara con Spearman.</p>
-            <p>Las variables públicas están ofuscadas, los retornos históricos redondeados y los originales cifrados. No se garantiza anonimato criptográfico de los datos derivados. Los precios reales y la fuente verificable se revelan al cierre general. Una semana real solo puede acreditarse después de observar los días objetivo; el piloto sintético de abajo conserva su alcance original.</p>
-            <Link href="/app/tournaments/guide#retornos-diarios" className="text-accent underline underline-offset-4">Reglas y notebook de retornos diarios</Link>
+          <Section id="retornos-diarios" title="Datos de Alpaca y rondas diarias de acciones">
+            <p>Descarga una sola vez <Code>train.parquet</Code> y <Code>validation.parquet</Code>: 50 acciones estadounidenses, 32 variables y objetivo de retorno de apertura a cierre. Entrenamiento cubre objetivos de 2017 a 2023; validación, de 2024 a octubre de 2026. La fuente es Alpaca SIP.</p>
+            <p>Cada ronda diaria publicada añade <Code>live.csv</Code> y <Code>live.parquet</Code>, dos formatos alternativos del mismo conjunto sin objetivo, junto con una plantilla de envío. Consulta su fecha objetivo y plazo: no se garantiza una ronda abierta cada día del calendario.</p>
+            <p>El CSV <Code>id,prediction</Code> debe incluir todos los IDs de la ronda una vez, con retornos decimales entre −1 y 10 y un máximo de 1 MB. Sólo el último envío válido antes del cierre queda seleccionado. El protocolo <Code>stocks_open_close_mae_v1</Code> compara el MAE del modelo con predecir cero: (MAE cero − MAE modelo) / max(MAE cero, 0.005).</p>
+            <p>Los archivos diarios se verifican mediante SHA-256 de sus bytes. El histórico publica su manifiesto y sumas de verificación. Los resultados diarios sólo están disponibles tras el cierre y la verificación de la sesión objetivo.</p>
+            <Link href="/app/tournaments" className="text-accent underline underline-offset-4">Descargar histórico y consultar rondas diarias</Link>
           </Section>
           <Section id="evaluacion" title="Evaluación técnica con datos sintéticos">
             <ResearchEvidence />
           </Section>
-          <Section id="torneos-ml" title="Cómo funciona una ronda ML">
-            <p>Abre <Link href="/app/tournaments" className="text-accent underline underline-offset-4">Torneos</Link> para consultar el estado y la fecha de cierre de la ronda vigente. La demostración técnica es una ronda cerrada distinta de la práctica semanal; sus resultados no representan usuarios externos.</p>
+          <Section id="torneos-ml" title="Protocolo del piloto sintético documentado">
+            <p>Abre <Link href="/app/tournaments" className="text-accent underline underline-offset-4">Torneos</Link> para consultar el estado y la fecha de cierre de la ronda vigente. La demostración técnica es una ronda sintética cerrada; sus resultados no representan usuarios externos.</p>
             <p>Descarga train y validation con target, y live sin target. Cada envío debe incluir exactamente las columnas <Code>id,prediction</Code>, todos los IDs de live una sola vez y números finitos entre 0 y 1. Cada era debe tener predicciones con variación.</p>
             <p>El servidor valida y guarda el archivo con un recibo SHA-256. Solo el último envío válido antes del cierre queda seleccionado. La puntuación y el ranking se publican después del plazo; la métrica oficial es la media de Spearman por era, versión <Code>spearman_era_v1</Code>.</p>
-            <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. Este protocolo de práctica se conserva separado del torneo semanal de retornos reales.</p>
+            <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. Esta evidencia histórica se conserva separada de las rondas de acciones de Alpaca.</p>
             <div className="flex flex-wrap gap-4">
-              <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía del participante</Link>
+              <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía actual de Alpaca</Link>
               <a href="/ml/ejemplo_quantbattle.ipynb" download className="text-accent underline underline-offset-4">Descargar notebook reproducible</a>
             </div>
           </Section>
@@ -244,8 +245,8 @@ curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
           <Section id="mcp" title="MCP — QuantBattle desde tu asistente IA">
             <McpConnection />
             <ul className="list-disc space-y-1.5 pl-5 marker:text-line">
-              <li>&ldquo;¿Qué torneos ML y rondas están abiertos?&rdquo;</li>
-              <li>&ldquo;Dame los enlaces de train, validation y live de esta ronda&rdquo;</li>
+              <li>&ldquo;¿Qué rondas diarias de acciones de Alpaca aceptan predicciones?&rdquo;</li>
+              <li>&ldquo;Descarga train y validation de Alpaca una sola vez y el live de la ronda diaria elegida&rdquo;</li>
               <li>&ldquo;Valida este CSV de predicciones y explícame los problemas antes de enviarlo&rdquo;</li>
             </ul>
             <p>

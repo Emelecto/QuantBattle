@@ -1,5 +1,4 @@
 import "jsr:@supabase/functions-js@2.119.0/edge-runtime.d.ts";
-
 import { pipeline } from "npm:@supabase/middleware@1.0.0";
 import {
   withOAuthProtectedResource,
@@ -10,331 +9,347 @@ import {
   McpServer,
 } from "npm:@modelcontextprotocol/server@2.4.0";
 import { z } from "npm:zod@4.6.7";
+import history from "../../../web/src/data/stock-history-v1.json" with { type: "json" };
 
 const WORKER_URL = (
   Deno.env.get("QUANTBATTLE_WORKER_URL") ?? "https://quantlab2.onrender.com"
 ).replace(/\/$/, "");
-const MAX_CSV_BYTES = 10 * 1024 * 1024;
-
-type CsvRow = { id: string; prediction: string };
-type ValidationResult = {
-  valid: boolean;
-  reason?: string;
-  rows?: number;
-  expected_rows?: number;
-  missing_count?: number;
-  extra_count?: number;
-  missing_ids?: string[];
-  extra_ids?: string[];
-  version?: string;
-  prediction_min?: number;
-  prediction_max?: number;
-};
-
-function json(value: unknown) {
-  return JSON.stringify(value, null, 2);
-}
-
+const PROTOCOL = "stocks_open_close_mae_v1";
+const MAX_BYTES = 1024 * 1024;
+const dailyFile = z.enum([
+  "live.csv",
+  "live.parquet",
+  "submission_template.csv",
+  "manifest.json",
+  "README.md",
+  "quality_report.json",
+]);
+const roundId = z.string().regex(/^stocks-oc-\d{4}-\d{2}-\d{2}$/);
+const result = (value: unknown) => ({
+  content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
+});
 function bearerToken(request: Request) {
-  const value = request.headers.get("authorization") ?? "";
-  if (!value.startsWith("Bearer ")) throw new Error("No se recibió una sesión válida de QuantBattle.");
-  return value.slice(7).trim();
+  return request.headers.get("authorization")!.slice(7).trim();
 }
-
 async function worker(path: string, token: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  const response = await fetch(`${WORKER_URL}${path}`, {
+  const response = await fetch(WORKER_URL + path, {
     ...init,
     headers,
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(30_000),
+    cache: "no-store",
   });
   const body = await response.text();
-  if (!response.ok) {
-    throw new Error(`El servicio de QuantBattle respondió HTTP ${response.status}: ${body.slice(0, 600)}`);
-  }
-  if (!body) return null;
-  try {
-    return JSON.parse(body);
-  } catch {
-    return body;
-  }
+  if (!response.ok)
+    throw new Error(
+      `QuantBattle HTTP ${response.status}: ${body.slice(0, 400)}`,
+    );
+  return JSON.parse(body);
 }
-
-function parseCsv(content: string): CsvRow[] {
-  const bytes = new TextEncoder().encode(content);
-  if (bytes.byteLength > MAX_CSV_BYTES) throw new Error("El CSV supera el límite de 10 MB.");
-  const lines = content.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").split("\n");
-  while (lines.length && lines.at(-1)?.trim() === "") lines.pop();
-  if (lines.shift()?.trim() !== "id,prediction") throw new Error("La cabecera debe ser exactamente: id,prediction");
-  if (!lines.length) throw new Error("El CSV debe contener al menos una predicción.");
-  const seen = new Set<string>();
-  return lines.map((line, index) => {
-    const cells = line.split(",");
-    if (cells.length !== 2) throw new Error(`Fila ${index + 2}: se esperaban exactamente dos columnas.`);
-    const id = cells[0].trim();
-    const prediction = cells[1].trim();
-    const value = Number(prediction);
-    if (!id) throw new Error(`Fila ${index + 2}: id vacío.`);
-    if (seen.has(id)) throw new Error(`Fila ${index + 2}: id duplicado (${id}).`);
-    if (!prediction || !Number.isFinite(value)) throw new Error(`Fila ${index + 2}: prediction debe ser un número finito.`);
-    seen.add(id);
-    return { id, prediction };
-  });
-}
-
-async function validateCsv(
-  token: string,
-  csv: string,
-  protocol: "practice_spearman" | "daily_return_mae",
-  datasetId: string,
-  roundId: string,
-): Promise<ValidationResult> {
-  try {
-    const rows = parseCsv(csv);
-    const values = rows.map((row) => Number(row.prediction));
-    const [minimum, maximum] = protocol === "practice_spearman" ? [0, 1] : [-1, 10];
-    if (values.some((value) => value < minimum || value > maximum)) {
-      return { valid: false, reason: `prediction debe estar entre ${minimum} y ${maximum}.` };
-    }
-
-    const isPractice = protocol === "practice_spearman";
-    if (isPractice && !datasetId) return { valid: false, reason: "Falta dataset_id." };
-    if (!isPractice && !roundId) return { valid: false, reason: "Falta round_id." };
-    const index = isPractice
-      ? await worker(`/ml/datasets/${encodeURIComponent(datasetId)}/rows`, token)
-      : await worker(`/ml/return-rounds/${encodeURIComponent(roundId)}/rows`, token);
-    const expectedRows: Array<[string, string?]> = isPractice
-      ? (index?.rows ?? []).map((row: unknown[]) => [String(row[0]), String(row[1])])
-      : (index?.ids ?? []).map((id: string) => [String(id)]);
-    const expected = new Set(expectedRows.map(([id]) => id));
-    const actual = new Set(rows.map((row) => row.id));
-    const missing = [...expected].filter((id) => !actual.has(id));
-    const extra = [...actual].filter((id) => !expected.has(id));
-    if (missing.length || extra.length || rows.length !== expected.size) {
-      return {
-        valid: false,
-        reason: "El CSV debe incluir todos los IDs publicados exactamente una vez.",
-        rows: rows.length,
-        expected_rows: expected.size,
-        missing_count: missing.length,
-        extra_count: extra.length,
-        missing_ids: missing.slice(0, 20),
-        extra_ids: extra.slice(0, 20),
-      };
-    }
-    if (isPractice) {
-      const byId = new Map(rows.map((row) => [row.id, Number(row.prediction)]));
-      const eras = new Map<string, Set<number>>();
-      for (const [id, era] of expectedRows) {
-        const valuesByEra = eras.get(era ?? "") ?? new Set<number>();
-        valuesByEra.add(byId.get(id)!);
-        eras.set(era ?? "", valuesByEra);
-      }
-      const flatEras = [...eras.entries()].filter(([, predictions]) => predictions.size < 2).map(([era]) => era);
-      if (flatEras.length) {
-        return { valid: false, reason: "Cada era necesita al menos dos valores de predicción distintos.", missing_count: 0, extra_count: 0 };
-      }
-    }
-    return {
-      valid: true,
-      rows: rows.length,
-      version: index?.version,
-      prediction_min: values.reduce((minimum, value) => Math.min(minimum, value), Number.POSITIVE_INFINITY),
-      prediction_max: values.reduce((maximum, value) => Math.max(maximum, value), Number.NEGATIVE_INFINITY),
-    };
-  } catch (error) {
-    return { valid: false, reason: error instanceof Error ? error.message : "No se pudo validar el CSV." };
-  }
-}
-
-function encodeExperiment(value: string) {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(value);
-  } catch {
-    throw new Error("experiment_json debe ser JSON válido.");
-  }
-  if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
-    throw new Error("experiment_json debe ser un objeto JSON.");
-  }
-  const bytes = new TextEncoder().encode(JSON.stringify(parsed));
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  const encoded = btoa(binary);
-  if (encoded.length > 6000) throw new Error("La ficha experimental supera el límite permitido.");
-  return encoded;
-}
-
-export function createServer(token: string, userId?: string, publicOnly = false) {
-  const server = new McpServer({
-    name: "quantbattle",
-    version: "3.0.0",
-  }, {
+function historyInfo() {
+  return {
+    source: "Alpaca",
+    feed: "SIP",
+    protocol: PROTOCOL,
+    ...history,
     instructions:
-      "Ayudas a participar en torneos de predicción ML de QuantBattle. La práctica ML usa Spearman por era con predicciones entre 0 y 1; retornos diarios usa valores entre -1 y 10 y MAE frente a cero. Consulta reglas y datasets antes de entrenar. El archivo live no contiene respuestas. No inventes scores ni resultados. Para enviar predicciones valida primero el CSV completo.",
+      "Descarga train.parquet y validation.parquet una sola vez. No descargues una copia por ronda. Las rondas diarias usan live.csv o live.parquet (mismo contenido), sin target. Verifica el SHA-256 de los bytes descargados usando files[nombre].sha256.",
+  };
+}
+function parsePredictions(csv: string) {
+  if (new TextEncoder().encode(csv).length > MAX_BYTES)
+    throw new Error("CSV mayor de 1 MB.");
+  const lines = csv
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n?/g, "\n")
+    .trimEnd()
+    .split("\n");
+  if (lines.shift() !== "id,prediction" || !lines.length)
+    throw new Error("Usa la cabecera id,prediction y al menos una predicción.");
+  const ids = new Set<string>();
+  for (const line of lines) {
+    const parts = line.split(",");
+    const value = Number(parts[1]);
+    if (
+      parts.length !== 2 ||
+      !parts[0] ||
+      ids.has(parts[0]) ||
+      !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(parts[1].trim()) ||
+      !Number.isFinite(value) ||
+      value < -1 ||
+      value > 10
+    )
+      throw new Error(
+        "CSV inválido: incluye cada ID una vez y retornos decimales entre -1 y 10.",
+      );
+    ids.add(parts[0]);
+  }
+  return ids;
+}
+async function validatePredictions(token: string, id: string, csv: string) {
+  const ids = parsePredictions(csv);
+  const file = await worker(
+    `/ml/stock-rounds/${id}/download/submission_template.csv`,
+    token,
+  );
+  const response = await fetch(file.url, {
+    signal: AbortSignal.timeout(30_000),
+    cache: "no-store",
   });
-
-  if (!publicOnly) {
-    server.registerTool("get_connection_status", {
-      description: "Confirma la cuenta autenticada en QuantBattle. Usa esta herramienta al terminar la conexión OAuth; no requiere que Render esté disponible.",
-      inputSchema: z.object({}),
+  if (!response.ok)
+    throw new Error("No se pudo verificar la plantilla de esta ronda.");
+  const bytes = await response.arrayBuffer();
+  const sha = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
+    .map((n) => n.toString(16).padStart(2, "0"))
+    .join("");
+  if (sha !== file.sha256)
+    throw new Error(
+      "La plantilla no coincide con su SHA-256. No se enviaron predicciones.",
+    );
+  const expected = new TextDecoder()
+    .decode(bytes)
+    .replace(/^\uFEFF/, "")
+    .trim()
+    .split(/\r?\n/)
+    .slice(1)
+    .map((line) => line.split(",")[0]);
+  if (expected.length !== ids.size || expected.some((id) => !ids.has(id)))
+    throw new Error(
+      `Incluye exactamente los ${expected.length} IDs de esta ronda.`,
+    );
+  return { valid: true, rows: ids.size, protocol: PROTOCOL, round_id: id };
+}
+export function createServer(
+  token: string,
+  userId?: string,
+  publicOnly = false,
+) {
+  const server = new McpServer(
+    { name: "quantbattle", version: "4.0.0" },
+    {
+      instructions:
+        "QuantBattle usa exclusivamente el histórico y las rondas diarias de acciones de Alpaca para este recorrido. Empieza con get_historical_dataset_download: un train y un validation, sin multiplicarlos por ronda. Consulta list_ml_tournaments para las rondas diarias publicadas. No uses datasets de protocolos retirados. Nunca presentes una ronda cerrada como disponible para enviar. Descarga live y plantilla sólo para la ronda elegida y verifica hashes de bytes. No inventes datasets si no hay rondas. Para verificar tu cuenta ejecuta get_connection_status.",
+    },
+  );
+  server.registerTool(
+    "get_historical_dataset_download",
+    {
+      description:
+        "Histórico Alpaca de 50 acciones: un train (83.563 filas) y un validation (34.962), documentación y SHA-256 exactos. Se descargan una sola vez.",
+      inputSchema: z.object({
+        filename: z
+          .enum([
+            "train.parquet",
+            "validation.parquet",
+            "manifest.json",
+            "README.md",
+            "feature_definitions.json",
+            "quality_report.json",
+            "universe.csv",
+            "quantbattle-stock-history-v1.zip",
+          ])
+          .optional(),
+      }),
       annotations: { readOnlyHint: true },
-    }, async () => ({ content: [{ type: "text", text: json({
-      connected: true,
-      authenticated: true,
-      user_id: userId,
-      authentication: "oauth_bearer",
-      capabilities: ["public_datasets", "own_submissions", "submit_predictions"],
-      note: "La sesión es válida para esta solicitud. Los plazos y reglas de cada torneo se verifican al enviar.",
-    }) }] }));
-  }
-
-  server.registerTool("quantbattle_status", {
-    description: "Comprueba la conexión y resume el estado de los módulos ML de QuantBattle.",
-    inputSchema: z.object({}),
-    annotations: { readOnlyHint: true },
-  }, async () => {
-    const [health, weeks, datasets, practice] = await Promise.all([
-      worker("/health", token),
-      worker("/ml/return-tournaments", token),
-      worker("/ml/datasets", token),
-      worker("/tournament/ml", token),
-    ]);
-    return { content: [{ type: "text", text: json({ connected: true, worker: WORKER_URL, health, weekly_return_tournaments: weeks?.tournaments?.length ?? 0, published_practice_ml_datasets: datasets?.datasets?.length ?? 0, practice_ml_tournaments: Array.isArray(practice) ? practice.length : 0 }) }] };
-  });
-
-  server.registerTool("list_ml_tournaments", {
-    description: "Lista torneos semanales de retornos y rondas de práctica ML, sus estados, plazos y datasets.",
-    inputSchema: z.object({ include_closed: z.boolean().default(false) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ include_closed }) => {
-    const [weeksData, practice, datasets] = await Promise.all([
-      worker("/ml/return-tournaments", token),
-      worker("/tournament/ml", token),
-      worker("/ml/datasets", token),
-    ]);
-    const live = new Map<string, Record<string, unknown>>();
-    for (const dataset of datasets?.datasets ?? []) {
-      if (dataset.kind === "live") live.set(`${dataset.tournament_id}:${dataset.round_number}`, dataset);
-    }
-    const weekly = (weeksData?.tournaments ?? []).map((week: Record<string, any>) => ({
-      ...Object.fromEntries(["id", "name", "protocol", "week_start", "timezone", "asset_count", "status", "release_at", "results_released", "rules"].map((key) => [key, week[key]])),
-      rounds: (week.rounds ?? []).map((round: Record<string, any>) => ({ ordinal: round.ordinal, round_id: round.id, status: round.status, submission_day: round.submission_day, target_day: round.target_day, opens_at: round.opens_at, closes_at: round.closes_at, version: round.version, files: round.dataset?.files })),
-    }));
-    const practiceItems = (practice ?? []).map((item: Record<string, any>) => {
-      const rounds = [...live.entries()].filter(([key]) => key.startsWith(`${item.id}:`)).map(([, ds]) => ({ round_number: ds.round_number, live_dataset_id: ds.id, status: ds.status, round_type: ds.round_type, closes_at: ds.closes_at, version: ds.version, rows: ds.row_count, features: ds.feature_cols }));
-      const active = rounds.filter((round: Record<string, any>) => round.status === "ready");
-      return { id: item.id, name: item.name, status: active.length ? "open" : "closed", active_rounds: active, database_status: item.status, round_type: item.round_type, submission_deadline: item.submission_deadline, primary_metric: item.primary_metric, rules_text: item.rules_text, rounds };
-    }).filter((item: Record<string, any>) => include_closed || item.active_rounds.length);
-    return { content: [{ type: "text", text: json({ weekly_return_tournaments: weekly, practice_ml_tournaments: practiceItems }) }] };
-  });
-
-  server.registerTool("get_weekly_tournament", {
-    description: "Consulta reglas, calendario y datasets publicados de una semana de retornos.",
-    inputSchema: z.object({ week_id: z.string().min(1) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ week_id }) => ({ content: [{ type: "text", text: json(await worker(`/ml/return-tournaments/${encodeURIComponent(week_id)}`, token)) }] }));
-
-  server.registerTool("list_practice_datasets", {
-    description: "Lista datasets públicos del torneo ML de práctica.",
-    inputSchema: z.object({ tournament_id: z.string().default(""), round_number: z.number().int().min(0).default(0) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ tournament_id, round_number }) => {
-    const params = new URLSearchParams();
-    if (tournament_id) params.set("tournament_id", tournament_id);
-    if (round_number > 0) params.set("round_number", String(round_number));
-    return { content: [{ type: "text", text: json(await worker(`/ml/datasets${params.size ? `?${params}` : ""}`, token)) }] };
-  });
-
-  server.registerTool("get_practice_dataset_download", {
-    description: "Obtiene el enlace público de train, validation o live para una ronda de práctica.",
-    inputSchema: z.object({ dataset_id: z.string().min(1), kind: z.enum(["train", "validation", "live"]) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ dataset_id, kind }) => ({ content: [{ type: "text", text: json(await worker(`/ml/datasets/${encodeURIComponent(dataset_id)}/download?kind=${kind}`, token)) }] }));
-
-  server.registerTool("get_weekly_dataset_download", {
-    description: "Obtiene el enlace público de train, validation o live para una ronda semanal.",
-    inputSchema: z.object({ round_id: z.string().min(1), kind: z.enum(["train", "validation", "live"]) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ round_id, kind }) => ({ content: [{ type: "text", text: json(await worker(`/ml/return-rounds/${encodeURIComponent(round_id)}/download/${kind}`, token)) }] }));
-
-  server.registerTool("get_weekly_live_ids", {
-    description: "Recupera IDs públicos del dataset live semanal, sin respuestas objetivo.",
-    inputSchema: z.object({ round_id: z.string().min(1) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ round_id }) => {
-    const result = await worker(`/ml/return-rounds/${encodeURIComponent(round_id)}/rows`, token);
-    return { content: [{ type: "text", text: json({ round_id: result?.round_id, version: result?.version, ids: result?.ids }) }] };
-  });
-
-  server.registerTool("validate_prediction_csv", {
-    description: "Valida el contenido de un CSV id,prediction antes del envío, incluyendo rango y cobertura exacta de IDs live.",
-    inputSchema: z.object({ csv_content: z.string().min(1).max(MAX_CSV_BYTES), protocol: z.enum(["practice_spearman", "daily_return_mae"]), dataset_id: z.string().default(""), round_id: z.string().default("") }),
-    annotations: { readOnlyHint: true },
-  }, async ({ csv_content, protocol, dataset_id, round_id }) => ({ content: [{ type: "text", text: json(await validateCsv(token, csv_content, protocol, dataset_id, round_id)) }] }));
-
-  if (!publicOnly) {
-    server.registerTool("submit_practice_predictions", {
-      description: "Envía CSV id,prediction a una ronda de práctica. Valida cobertura y límites antes del envío.",
-      inputSchema: z.object({ dataset_id: z.string().min(1), csv_content: z.string().min(1).max(MAX_CSV_BYTES), experiment_json: z.string().min(2).max(12000) }),
-      annotations: { readOnlyHint: false, destructiveHint: false },
-    }, async ({ dataset_id, csv_content, experiment_json }) => {
-      const validation = await validateCsv(token, csv_content, "practice_spearman", dataset_id, "");
-      if (!validation.valid) throw new Error(`CSV no enviado: ${validation.reason}`);
-      const response = await worker(`/ml/datasets/${encodeURIComponent(dataset_id)}/predictions`, token, { method: "POST", headers: { "Content-Type": "text/csv", "X-QuantBattle-Experiment": encodeExperiment(experiment_json) }, body: csv_content });
-      return { content: [{ type: "text", text: json(response) }] };
-    });
-  }
-
-  if (!publicOnly) {
-    server.registerTool("submit_weekly_predictions", {
-      description: "Envía CSV id,prediction a una ronda semanal abierta. Valida cobertura y límites antes del envío.",
-      inputSchema: z.object({ round_id: z.string().min(1), csv_content: z.string().min(1).max(MAX_CSV_BYTES), experiment_json: z.string().min(2).max(12000) }),
-      annotations: { readOnlyHint: false, destructiveHint: false },
-    }, async ({ round_id, csv_content, experiment_json }) => {
-      const validation = await validateCsv(token, csv_content, "daily_return_mae", "", round_id);
-      if (!validation.valid) throw new Error(`CSV no enviado: ${validation.reason}`);
-      const response = await worker(`/ml/return-rounds/${encodeURIComponent(round_id)}/predictions`, token, { method: "POST", headers: { "Content-Type": "text/csv", "X-QuantBattle-Experiment": encodeExperiment(experiment_json) }, body: csv_content });
-      return { content: [{ type: "text", text: json(response) }] };
-    });
-  }
-
-  if (!publicOnly) {
-    server.registerTool("get_my_practice_submission", {
-      description: "Consulta el comprobante del usuario para una ronda de práctica.",
-      inputSchema: z.object({ dataset_id: z.string().min(1) }),
+    },
+    async ({ filename }) =>
+      result(
+        filename
+          ? {
+              source: "Alpaca",
+              version: history.version,
+              protocol: PROTOCOL,
+              filename,
+              ...history.files[filename],
+              checksum_algorithm: "sha256",
+              checksum_scope: "downloaded_file_bytes",
+              checksums_url: history.checksums_url,
+            }
+          : historyInfo(),
+      ),
+  );
+  server.registerTool(
+    "list_ml_tournaments",
+    {
+      description:
+        "Lista exclusivamente rondas diarias de acciones de Alpaca. Incluye el histórico de entrenamiento y validación. No hay torneo disponible si no hay rondas abiertas.",
+      inputSchema: z.object({ include_closed: z.boolean().default(false) }),
       annotations: { readOnlyHint: true },
-    }, async ({ dataset_id }) => ({ content: [{ type: "text", text: json(await worker(`/ml/predictions/mine?dataset_id=${encodeURIComponent(dataset_id)}`, token)) }] }));
-  }
-
+    },
+    async ({ include_closed }) => {
+      if (publicOnly)
+        return result({
+          historical_dataset: historyInfo(),
+          daily_rounds: [],
+          daily_rounds_require_login: true,
+          message:
+            "Autoriza el endpoint principal para consultar datos diarios privados. Esta respuesta no consulta el calendario.",
+        });
+      const data = await worker("/ml/stock-rounds", token);
+      const rounds = data.rounds.map((round: Record<string, unknown>) => ({
+        ...round,
+        source: "Alpaca",
+        accepts_submissions:
+          round.status === "open" &&
+          Date.parse(String(round.deadline)) > Date.now(),
+      }));
+      return result({
+        source: "Alpaca",
+        protocol: PROTOCOL,
+        historical_dataset: historyInfo(),
+        daily_rounds: rounds.filter(
+          (r: { accepts_submissions: boolean }) =>
+            include_closed || r.accepts_submissions,
+        ),
+        published_round_count: rounds.length,
+        message: rounds.length
+          ? "Elige una ronda y consulta su plazo antes de enviar."
+          : "Todavía no hay rondas diarias publicadas. Puedes preparar tu modelo con el histórico.",
+      });
+    },
+  );
   if (!publicOnly) {
-    server.registerTool("get_my_weekly_submissions", {
-      description: "Consulta intentos y comprobantes propios para una ronda semanal.",
-      inputSchema: z.object({ round_id: z.string().min(1) }),
-      annotations: { readOnlyHint: true },
-    }, async ({ round_id }) => ({ content: [{ type: "text", text: json(await worker(`/ml/return-rounds/${encodeURIComponent(round_id)}/mine`, token)) }] }));
+    server.registerTool(
+      "get_connection_status",
+      {
+        description:
+          "Confirma la identidad autenticada sin depender de Render.",
+        inputSchema: z.object({}),
+        annotations: { readOnlyHint: true },
+      },
+      async () =>
+        result({
+          connected: true,
+          authenticated: true,
+          user_id: userId,
+          source: "Alpaca",
+          protocol: PROTOCOL,
+          capabilities: [
+            "historical_datasets",
+            "daily_datasets",
+            "own_stock_submissions",
+            "submit_stock_predictions",
+          ],
+        }),
+    );
+    server.registerTool(
+      "get_stock_round",
+      {
+        description:
+          "Consulta el plazo, estado, archivos y reglas de una ronda diaria de acciones.",
+        inputSchema: z.object({ round_id: roundId }),
+        annotations: { readOnlyHint: true },
+      },
+      async ({ round_id }) => {
+        const data = await worker("/ml/stock-rounds", token);
+        const round = data.rounds.find(
+          (r: { id: string }) => r.id === round_id,
+        );
+        if (!round)
+          throw new Error("La ronda no está publicada en el catálogo actual.");
+        return result({
+          source: "Alpaca",
+          ...round,
+          accepts_submissions:
+            round.status === "open" && Date.parse(round.deadline) > Date.now(),
+        });
+      },
+    );
+    server.registerTool(
+      "get_daily_dataset_download",
+      {
+        description:
+          "Obtiene enlace temporal y SHA-256 de un archivo diario de Alpaca. Live CSV y Parquet son formatos alternativos. No incluye train/validation por ronda.",
+        inputSchema: z.object({ round_id: roundId, filename: dailyFile }),
+        annotations: { readOnlyHint: true },
+      },
+      async ({ round_id, filename }) =>
+        result({
+          source: "Alpaca",
+          protocol: PROTOCOL,
+          round_id,
+          filename,
+          checksum_algorithm: "sha256",
+          checksum_scope: "downloaded_file_bytes",
+          ...(await worker(
+            `/ml/stock-rounds/${round_id}/download/${filename}`,
+            token,
+          )),
+        }),
+    );
+    server.registerTool(
+      "validate_stock_prediction_csv",
+      {
+        description:
+          "Valida formato, tamaño, rango e IDs completos usando la plantilla verificada de la ronda. No realiza envíos.",
+        inputSchema: z.object({
+          round_id: roundId,
+          csv_content: z.string().min(1).max(MAX_BYTES),
+        }),
+        annotations: { readOnlyHint: true },
+      },
+      async ({ round_id, csv_content }) =>
+        result(await validatePredictions(token, round_id, csv_content)),
+    );
+    server.registerTool(
+      "submit_stock_predictions",
+      {
+        description:
+          "Envía predicciones de acciones de Alpaca. Verifica IDs y plantilla; el servidor comprueba cierre y selecciona el último CSV válido. No ejecuta operaciones financieras.",
+        inputSchema: z.object({
+          round_id: roundId,
+          csv_content: z.string().min(1).max(MAX_BYTES),
+        }),
+        annotations: { readOnlyHint: false, destructiveHint: false },
+      },
+      async ({ round_id, csv_content }) => {
+        await validatePredictions(token, round_id, csv_content);
+        return result(
+          await worker(`/ml/stock-rounds/${round_id}/predictions`, token, {
+            method: "POST",
+            headers: { "Content-Type": "text/csv" },
+            body: csv_content,
+          }),
+        );
+      },
+    );
+    server.registerTool(
+      "get_my_stock_submissions",
+      {
+        description:
+          "Consulta únicamente tus comprobantes y el envío seleccionado de la ronda diaria.",
+        inputSchema: z.object({ round_id: roundId }),
+        annotations: { readOnlyHint: true },
+      },
+      async ({ round_id }) =>
+        result(await worker(`/ml/stock-rounds/${round_id}/mine`, token)),
+    );
+    server.registerTool(
+      "get_stock_results",
+      {
+        description:
+          "Consulta resultados verificados de una ronda diaria ya evaluada. Un resultado pendiente devuelve error, nunca una puntuación inventada.",
+        inputSchema: z.object({ round_id: roundId }),
+        annotations: { readOnlyHint: true },
+      },
+      async ({ round_id }) =>
+        result(await worker(`/ml/stock-rounds/${round_id}/results`, token)),
+    );
   }
-
-  server.registerTool("get_ml_leaderboard", {
-    description: "Consulta el ranking público de práctica ML cuando esté puntuado.",
-    inputSchema: z.object({ dataset_id: z.string().min(1) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ dataset_id }) => ({ content: [{ type: "text", text: json(await worker(`/ml/leaderboard?dataset_id=${encodeURIComponent(dataset_id)}`, token)) }] }));
-
-  server.registerTool("get_weekly_results", {
-    description: "Consulta resultados semanales públicos una vez liberados.",
-    inputSchema: z.object({ week_id: z.string().min(1) }),
-    annotations: { readOnlyHint: true },
-  }, async ({ week_id }) => ({ content: [{ type: "text", text: json(await worker(`/ml/return-tournaments/${encodeURIComponent(week_id)}/results`, token)) }] }));
-
   return server;
 }
 
 // Discovery remains accessible; every other request on the main endpoint is authenticated.
 // Public access is deliberately opt-in and never registers account or write tools.
 const authenticated = pipeline(
-  [withOAuthProtectedResource({ resourceServer: () => `${(Deno.env.get("SUPABASE_PUBLIC_URL") ?? Deno.env.get("SUPABASE_URL") ?? "https://ejwusgwgezvyylepagpz.supabase.co").replace(/\/$/, "")}/functions/v1/quantbattle-mcp` }), withSupabase({ auth: "user" })],
+  [
+    withOAuthProtectedResource({
+      resourceServer: () =>
+        `${(Deno.env.get("SUPABASE_PUBLIC_URL") ?? Deno.env.get("SUPABASE_URL") ?? "https://ejwusgwgezvyylepagpz.supabase.co").replace(/\/$/, "")}/functions/v1/quantbattle-mcp`,
+    }),
+    withSupabase({ auth: "user" }),
+  ],
   async (request, { supabase }) => {
     const token = bearerToken(request);
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -342,35 +357,64 @@ const authenticated = pipeline(
     try {
       verified = await Promise.race([
         supabase.auth.getUser(token),
-        new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error("auth_timeout")), 10_000); }),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error("auth_timeout")), 10_000);
+        }),
       ]);
     } catch {
-      return Response.json({ error: "temporarily_unavailable", error_description: "No pudimos comprobar la sesión. Vuelve a intentar la conexión; no necesitas crear una API key." }, { status: 503, headers: { "Retry-After": "10" } });
+      return Response.json(
+        {
+          error: "temporarily_unavailable",
+          error_description:
+            "No pudimos comprobar la sesión. Vuelve a intentar la conexión; no necesitas crear una API key.",
+        },
+        { status: 503, headers: { "Retry-After": "10" } },
+      );
     } finally {
       clearTimeout(timer);
     }
     const { data, error } = verified;
     if (error && (!error.status || error.status >= 500)) {
-      return Response.json({ error: "temporarily_unavailable", error_description: "El servicio de autorización no está disponible. Reintenta la conexión." }, { status: 503, headers: { "Retry-After": "10" } });
+      return Response.json(
+        {
+          error: "temporarily_unavailable",
+          error_description:
+            "El servicio de autorización no está disponible. Reintenta la conexión.",
+        },
+        { status: 503, headers: { "Retry-After": "10" } },
+      );
     }
     if (error || !data.user) {
-      return Response.json({ error: "invalid_token", error_description: "La sesión no es válida. Vuelve a autorizar QuantBattle desde tu agente." }, { status: 401 });
+      return Response.json(
+        {
+          error: "invalid_token",
+          error_description:
+            "La sesión no es válida. Vuelve a autorizar QuantBattle desde tu agente.",
+        },
+        { status: 401 },
+      );
     }
-    return createMcpHandler(() => createServer(token, data.user.id)).fetch(request);
+    return createMcpHandler(() => createServer(token, data.user.id)).fetch(
+      request,
+    );
   },
 );
 
 export async function handleMcpRequest(request: Request): Promise<Response> {
   const path = new URL(request.url).pathname;
   let response: Response;
-  if (path.replace(/^\/functions\/v1(?=\/)/, "") === "/quantbattle-mcp/public") {
+  if (
+    path.replace(/^\/functions\/v1(?=\/)/, "") === "/quantbattle-mcp/public"
+  ) {
     if (request.method === "OPTIONS") {
       response = new Response(null, { status: 204 });
     } else {
       // Ignore credentials on the public endpoint. It can never act as a user.
       const headers = new Headers(request.headers);
       headers.delete("authorization");
-      response = await createMcpHandler(() => createServer("", undefined, true)).fetch(new Request(request, { headers }));
+      response = await createMcpHandler(() =>
+        createServer("", undefined, true),
+      ).fetch(new Request(request, { headers }));
     }
   } else {
     response = await authenticated(request);
@@ -378,8 +422,14 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
   const headers = new Headers(response.headers);
   headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
-  headers.set("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, MCP-Protocol-Version, MCP-Session-Id, Last-Event-ID");
-  headers.set("Access-Control-Expose-Headers", "WWW-Authenticate, MCP-Session-Id, MCP-Protocol-Version");
+  headers.set(
+    "Access-Control-Allow-Headers",
+    "Authorization, Content-Type, Accept, MCP-Protocol-Version, MCP-Session-Id, Last-Event-ID",
+  );
+  headers.set(
+    "Access-Control-Expose-Headers",
+    "WWW-Authenticate, MCP-Session-Id, MCP-Protocol-Version",
+  );
   headers.set("Cache-Control", "no-store");
   return new Response(response.body, { status: response.status, headers });
 }

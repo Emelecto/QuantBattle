@@ -19,6 +19,10 @@ not whether the client used a particular UI or whether a tournament accepts entr
 JWT validation and the Supabase user endpoint are checked on each account request.
 A rejection by either returns a new OAuth challenge.
 
+## Active data catalog
+
+MCP 4.0 serves Alpaca historical train/validation and authenticated daily stock rounds. See [the dataset contract](alpaca-datasets.md). Refresh tools after upgrading: weekly Binance and synthetic prediction tools have been removed. The public endpoint exposes the historical catalog only; querying the daily calendar requires authorization.
+
 ## OAuth contract
 
 Supabase remains the authorization server; do not introduce a second token issuer.

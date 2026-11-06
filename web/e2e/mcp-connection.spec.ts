@@ -8,7 +8,7 @@ test("account verification and anonymous access are separate", async ({ page, co
   const message = await page.evaluate(() => navigator.clipboard.readText());
   expect(message).toContain("--auth oauth");
   expect(message).toContain("get_connection_status");
-  await section.getByText("Solo consultar torneos y datasets sin cuenta", { exact: true }).click();
+  await section.getByText("Descargar el histórico de Alpaca sin cuenta", { exact: true }).click();
   await section.getByRole("button", { name: "Copiar URL pública" }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/quantbattle-mcp\/public$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

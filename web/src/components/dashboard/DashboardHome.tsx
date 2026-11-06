@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { MlWorkspace } from "@/components/research/MlWorkspace";
-import { ReturnTournamentList, ReturnSubmissionHistory } from "@/components/research/ReturnTournament";
+import { StockHistoryDownloads } from "@/components/research/StockHistoryDownloads";
+import { StockRoundList } from "@/components/research/StockRounds";
 import { useEffect, useState } from "react";
 import { useDashboardData, type DashboardTournament } from "./useDashboardData";
 import { LESSONS } from "@/lib/academia/catalog";
@@ -52,13 +52,13 @@ function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
 
   return (
     <Link
-      href={`/app/tournaments/${tournament.id}`}
+      href={tournament.type === "stock" ? "/app/tournaments#rondas-diarias" : `/app/tournaments/${tournament.id}`}
       className="qb-competencia-mini"
     >
       <div className="qb-competencia-mini-header">
         <div className="qb-competencia-mini-top">
           <span className="qb-competencia-mini-type">
-            {tournament.type === "ml" ? "ML" : "Estrategias"}
+            {tournament.type === "code" ? "Estrategias" : "ML"}
           </span>
           {tournament.submission && (
             <span className={`qb-competencia-mini-status${tournament.submission.status === "pending" || tournament.submission.status === "running" ? " pending" : ""}`}>
@@ -309,9 +309,9 @@ function DashboardHome() {
         </div>
       </header>
 
-      <ReturnTournamentList compact />
-      <ReturnSubmissionHistory />
-      <MlWorkspace nextRound={tournaments.find((t) => t.type === "ml")} roundsLoading={sources.tournaments === "loading"} roundsError={sources.tournaments === "error"} />
+      <StockHistoryDownloads />
+      <StockRoundList compact />
+
       <div className="qb-bento-grid">
         {/* Competencias — fila 1 izquierda */}
         <Card className="qb-bento-competencias">

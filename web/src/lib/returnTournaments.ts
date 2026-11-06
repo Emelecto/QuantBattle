@@ -1,6 +1,4 @@
 import Papa from 'papaparse';
-import { call } from '@/lib/tournaments';
-import { experimentHeader } from '@/lib/prediction-review';
 
 export type ReturnReceipt = {
   id: string; round_id: string; file_sha256: string; dataset_version: string; row_count: number;
@@ -35,15 +33,8 @@ export type ReturnResults = {
     rounds: { ordinal: number; score: number; mae: number; baseline_mae: number }[];
   }[];
 };
-export const listReturnWeeks = () => call<{ tournaments: ReturnWeek[] }>('/ml/return-tournaments');
-export const getReturnWeek = (id: string) => call<ReturnWeek>(`/ml/return-tournaments/${id}`);
-export const getReturnRows = (id: string) => call<{ round_id: string; version: string; ids: string[] }>(`/ml/return-rounds/${id}/rows`);
-export const getReturnReceipts = (id: string) => call<{ attempts: ReturnReceipt[] }>(`/ml/return-rounds/${id}/mine`);
-export const getReturnResults = (id: string) => call<ReturnResults>(`/ml/return-tournaments/${id}/results`);
-export const getReturnHistory = () => call<{ entries: (ReturnReceipt & { week_id: string; week_name: string; ordinal: number; target_day: string })[] }>('/ml/return-submissions/mine');
-export const submitReturnFile = (id: string, file: File, experiment: NonNullable<ReturnReceipt['experiment']>) => call<{ submission: ReturnReceipt }>(
-  `/ml/return-rounds/${id}/predictions`, { method: 'POST', headers: { 'Content-Type': 'text/csv', 'X-QuantBattle-Experiment': experimentHeader(experiment) }, body: file },
-);
+export const listReturnWeeks = async (): Promise<{ tournaments: ReturnWeek[] }> => ({ tournaments: [] });
+export const getReturnHistory = async (): Promise<{ entries: (ReturnReceipt & { week_id: string; week_name: string; ordinal: number; target_day: string })[] }> => ({ entries: [] });
 export function reviewReturnCsv(text: string, ids: string[]): string[] {
   const parsed = Papa.parse<string[]>(text.replace(/^\uFEFF/, ''), { delimiter: ',', skipEmptyLines: false });
   const rows = parsed.data;

@@ -15,9 +15,8 @@ import type {
   TournamentSubmissionSnapshot,
 } from "@/lib/db";
 import { projectList, type MLProject } from "@/lib/ml-learning";
-import { listTournaments, isAuthError, isCorsLikeError } from "@/lib/tournaments";
-import { listDatasets, type MlDataset } from "@/lib/mlTournaments";
-import type { Tournament } from "@/lib/tournaments";
+import { isAuthError, isCorsLikeError } from "@/lib/tournaments";
+import { listStockRounds } from "@/lib/stockTournaments";
 
 export type DashboardSourceState = "loading" | "ready" | "error";
 export type SubmissionLoadState =
@@ -31,7 +30,7 @@ export type DashboardTournament = {
   datasetVersion: string | null;
   id: string;
   name: string;
-  type: "code" | "ml";
+  type: "code" | "ml" | "stock";
   asset_type: "crypto" | "stock" | "any" | "synthetic";
   symbol: string | null;
   qp_prize: number | null;
@@ -91,52 +90,14 @@ function numberOrNull(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function stringOrNull(value: unknown): string | null {
-  return typeof value === "string" && value.trim() ? value : null;
-}
-
-function toAssetType(assetType: unknown): DashboardTournament["asset_type"] {
-  const value = String(assetType ?? "").toLowerCase();
-  if (value === "crypto") return "crypto";
-  if (value === "stock" || value === "stocks" || value === "equities") return "stock";
-  return "any";
-}
-
-function toDashboardTournament(tournament: Tournament, dataset: MlDataset): DashboardTournament {
-  const symbols = Array.isArray(tournament.symbols)
-    ? tournament.symbols.map(stringOrNull).filter((symbol): symbol is string => Boolean(symbol))
-    : [];
-
-  return {
-    datasetId: dataset.id,
-    datasetVersion: dataset.version,
-    id: tournament.id,
-    name: stringOrNull(tournament.name) ?? "Nombre no disponible",
-    type: tournament.type === "ml" ? "ml" : "code",
-    asset_type: dataset.mode === "sintetico" ? "synthetic" : toAssetType(tournament.asset_type),
-    symbol: symbols[0] ?? null,
-    qp_prize: 0,
-    deadline: dataset.closes_at,
-    participants: numberOrNull(tournament.submission_count),
-    metric_label: "Spearman medio por era",
-    submission: null,
-    submissionState: "loading",
-  };
-}
-
-async function loadOpenMlRounds() {
-  const [tournaments, datasets] = await Promise.all([listTournaments({ type: "ml" }), listDatasets()]);
-  const latest = new Map<string, MlDataset>();
-  for (const dataset of datasets) {
-    if (dataset.kind !== "live" || dataset.score_version !== "spearman_era_v1") continue;
-    const previous = latest.get(dataset.tournament_id);
-    if (!previous || previous.round_number < dataset.round_number) latest.set(dataset.tournament_id, dataset);
-  }
-  return tournaments.flatMap((tournament) => {
-    const dataset = latest.get(tournament.id);
-    return dataset?.status === "ready" && dataset.closes_at && Date.parse(dataset.closes_at) > Date.now()
-      ? [toDashboardTournament(tournament, dataset)] : [];
-  }).sort((a, b) => Date.parse(a.deadline!) - Date.parse(b.deadline!));
+async function loadOpenMlRounds(): Promise<DashboardTournament[]> {
+  const { rounds } = await listStockRounds();
+  return rounds.filter(round => round.status === "open" && Date.parse(round.deadline) > Date.now()).map(round => ({
+    datasetId: round.id, datasetVersion: round.manifest_hash, id: round.id,
+    name: `Acciones Alpaca · ${round.target_date}`, type: "stock", asset_type: "stock",
+    symbol: null, qp_prize: 0, deadline: round.deadline, participants: null,
+    metric_label: "MAE frente a cero", submission: null, submissionState: "ready",
+  }));
 }
 
 function messageForFailedSources(labels: string[]): string | null {
@@ -318,6 +279,7 @@ export function useDashboardData(): DashboardData {
       setData((current) => ({
         ...current,
         tournaments: current.tournaments.map((tournament) => {
+          if (tournament.type === "stock") return tournament;
           if (tournament.type === "ml") {
             const lookup = mlSubmissions.get(tournament.id);
             if (!lookup) {

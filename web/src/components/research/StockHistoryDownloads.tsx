@@ -5,9 +5,9 @@ export function StockHistoryDownloads() {
   const archive = catalog.files["quantbattle-stock-history-v1.zip"];
   return (
     <section id="stock-history" aria-labelledby="stock-history-title" className="my-7 rounded-xl border border-line bg-white p-5 sm:p-6">
-      <h2 id="stock-history-title" className="text-xl font-semibold tracking-tight text-ink">Dataset histórico de acciones</h2>
+      <h2 id="stock-history-title" className="text-xl font-semibold tracking-tight text-ink">Histórico de Alpaca · train y validation</h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-        Entrena y valida con datos históricos de 50 acciones estadounidenses, 32 variables y el retorno real de la siguiente sesión.
+        Entrena y valida con datos de Alpaca de 50 acciones estadounidenses, 32 variables y el retorno real de la siguiente sesión.
         Ambos archivos incluyen el objetivo: apertura a cierre, en decimales. Un valor de 0.02 significa +2 %.
       </p>
       <a href={archive.url} className={buttonClasses("primary", "lg", "mt-5 h-auto min-h-11 whitespace-normal py-3 text-center")}>

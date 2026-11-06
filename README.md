@@ -1,17 +1,17 @@
 # QuantBattle · DeepFin / Universidad EIA
 
-Prototipo de investigación de Emilio Cardona Lopez para una comunidad de investigación cuantitativa en español. Incluye **práctica sintética con piloto reproducible** y un **torneo semanal de cuatro rondas prospectivas de retornos reales**, con validación de CSV, fuentes privadas y publicación de resultados solo al cierre completo.
+Prototipo de investigación de Emilio Cardona Lopez para una comunidad de investigación cuantitativa en español. El recorrido actual usa **histórico train/validation de acciones de Alpaca SIP** y **rondas diarias de retornos de apertura a cierre**, con validación de CSV y verificación SHA-256 de archivos. Conserva la evidencia de un piloto sintético reproducible.
 
 - Plataforma: https://www.quantbattle.co
 - Evaluación técnica y resultados: https://www.quantbattle.co/docs#evaluacion
 - [Protocolo ML](docs/ml-tournaments.md)
-- [Torneo semanal de retornos reales](docs/daily-return-tournaments.md)
+- [Datasets Alpaca y rondas diarias](docs/alpaca-datasets.md)
 - [Guía para evaluadores](docs/evaluation-guide.md)
 - [Proyectos ML, aprendizaje práctico y biblioteca de notebooks](docs/ml-learning-projects.md)
 
 ## Alcance de la entrega
 
-Las rondas de práctica son artificiales y gratuitas, sin premios QP ni pagos. Su ranking usa `spearman_era_v1`. El torneo semanal nuevo usa `daily_return_mae_v1`: predicciones de retornos decimales, score normalizado frente a cero y cuatro rondas obligatorias. No se comparan scores entre protocolos. Ninguno mide rentabilidad de una cartera. La automatización real requiere activar `ML_DAILY_TOURNAMENTS_ENABLED`; los modos reales anteriores a cinco días continúan separados.
+El catálogo actual publica el histórico `stocks-oc-v1.0.0` (un train y un validation) y sólo las rondas diarias registradas de Alpaca, protocolo `stocks_open_close_mae_v1`. Su score es (MAE cero − MAE modelo) / max(MAE cero, 0.005). El piloto sintético documentado usa `spearman_era_v1`; no se comparan sus scores. Ninguno mide rentabilidad de una cartera. La publicación diaria depende de `STOCK_DAILY_ENABLED` y de la verificación del generador; un catálogo vacío no se sustituye con datos anteriores. El recorrido de Binance queda retirado de la web y del MCP; se conservan registros y documentación históricos sin reetiquetar su origen.
 
 La entrega está en **piloto controlado**. La evidencia se organiza por recorrido en [la matriz de lanzamiento](docs/launch-readiness.md) y `release/scope.json`: web y autenticación, Academia, torneos, proyectos ML, biblioteca, backtesting e inicio de sesión. El piloto técnico publicado sigue teniendo el alcance ML que declara; las pruebas automatizadas adicionales no representan adopción externa ni rentabilidad.
 

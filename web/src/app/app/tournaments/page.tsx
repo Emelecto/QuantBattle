@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ReturnTournamentList } from "@/components/research/ReturnTournament";
+import { StockRoundList } from "@/components/research/StockRounds";
 import { StockHistoryDownloads } from "@/components/research/StockHistoryDownloads";
 
 export default function TournamentsPage() {
@@ -16,7 +16,7 @@ export default function TournamentsPage() {
         <Link href="/docs#evaluacion" className="text-accent underline underline-offset-4">Evidencia técnica del semillero</Link>
       </div>
       <StockHistoryDownloads />
-      <ReturnTournamentList />
+      <StockRoundList />
     </div>
   );
 }
