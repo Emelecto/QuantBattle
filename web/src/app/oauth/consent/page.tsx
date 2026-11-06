@@ -15,6 +15,18 @@ type AuthorizationDetails = {
   scope: string;
 };
 
+async function withDeadline<T>(operation: PromiseLike<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Promise.resolve(operation),
+      new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error("La autorización tardó demasiado. Inicia una nueva conexión desde tu agente y vuelve a intentarlo.")), 20_000); }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function ConsentContent() {
   const router = useRouter();
   const search = useSearchParams();
@@ -32,14 +44,14 @@ function ConsentContent() {
       }
       try {
         const supabase = createBrowserSupabaseClient();
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        const { data: sessionData, error: sessionError } = await withDeadline(supabase.auth.getSession());
         if (sessionError) throw sessionError;
         if (!sessionData.session) {
           const next = `/oauth/consent?authorization_id=${encodeURIComponent(authorizationId)}`;
           router.replace(`/login?next=${encodeURIComponent(next)}`);
           return;
         }
-        const { data, error: detailsError } = await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
+        const { data, error: detailsError } = await withDeadline(supabase.auth.oauth.getAuthorizationDetails(authorizationId));
         if (detailsError) throw detailsError;
         if (!cancelled) {
           if ("authorization_id" in data) setDetails(data);
@@ -60,8 +72,8 @@ function ConsentContent() {
     try {
       const supabase = createBrowserSupabaseClient();
       const result = action === "approve"
-        ? await supabase.auth.oauth.approveAuthorization(authorizationId, { skipBrowserRedirect: true })
-        : await supabase.auth.oauth.denyAuthorization(authorizationId, { skipBrowserRedirect: true });
+        ? await withDeadline(supabase.auth.oauth.approveAuthorization(authorizationId, { skipBrowserRedirect: true }))
+        : await withDeadline(supabase.auth.oauth.denyAuthorization(authorizationId, { skipBrowserRedirect: true }));
       if (result.error) throw result.error;
       window.location.assign(result.data.redirect_url);
     } catch (cause) {
@@ -109,7 +121,7 @@ function ConsentContent() {
         {error && (
           <div className="mt-5 rounded-lg border border-short/30 bg-short/10 p-4 text-sm text-short" role="alert">
             <p>{error}</p>
-            <p className="mt-2 text-xs">Revisa que hayas iniciado sesión y que OAuth esté activado para QuantBattle.</p>
+            <p className="mt-2 text-xs">Si el enlace venció o ya se utilizó, inicia una nueva autorización desde tu agente. Si estás en otro computador, verifica que el agente pueda recibir el retorno del navegador.</p>
           </div>
         )}
       </section>

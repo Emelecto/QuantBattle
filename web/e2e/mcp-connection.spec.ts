@@ -1,0 +1,21 @@
+import { test, expect } from "@playwright/test";
+test("account verification and anonymous access are separate", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/docs#mcp");
+  const section = page.getByRole("heading", { name: "Conecta tu agente a QuantBattle", exact: true }).locator("..");
+  await section.getByLabel("¿Qué agente usas?").selectOption("hermes");
+  await section.getByRole("button", { name: "Copiar mensaje para mi agente" }).click();
+  const message = await page.evaluate(() => navigator.clipboard.readText());
+  expect(message).toContain("--auth oauth");
+  expect(message).toContain("get_connection_status");
+  await section.getByText("Solo consultar torneos y datasets sin cuenta", { exact: true }).click();
+  await section.getByRole("button", { name: "Copiar URL pública" }).click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/quantbattle-mcp\/public$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+test("invalid consent links explain recovery", async ({ page }) => {
+  await page.goto("/oauth/consent");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("solicitud válida");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("inicia una nueva autorización");
+  await expect(page.getByText("Cargando solicitud…")).toHaveCount(0);
+});

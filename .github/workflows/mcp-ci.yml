@@ -1,0 +1,20 @@
+name: MCP authentication contracts
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/functions/quantbattle-mcp/**", ".github/workflows/mcp-ci.yml"]
+  pull_request:
+    paths: ["supabase/functions/quantbattle-mcp/**", ".github/workflows/mcp-ci.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mcp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check supabase/functions/quantbattle-mcp/index.ts
+      - run: deno test --allow-env --allow-net supabase/functions/quantbattle-mcp/index_test.ts

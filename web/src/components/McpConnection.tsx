@@ -25,7 +25,7 @@ export function McpConnection() {
     client !== "generic" ? `Cliente: ${selected.label}. Configuración:\n${selected.configuration}` : "Usa transporte HTTP.",
     "Para acciones de mi cuenta, usa OAuth y muéstrame el enlace para que yo inicie sesión y autorice el acceso. No me pidas una API key ni un token manual.",
     client === "hermes" ? "Si hace falta, inicia la autorización con hermes mcp login quantbattle." : "",
-    "Comprueba que puedes listar los torneos. Distingue esa consulta pública de la autorización de mi cuenta. Si OAuth no se completa, informa el error exacto sin cambiar a API key.",
+    "Ejecuta get_connection_status y confirma mi user_id para verificar la autorización de mi cuenta. Si OAuth no se completa, informa el error exacto sin cambiar a API key.",
   ].filter(Boolean).join("\n\n");
 
   async function copy(value: string, key: string) {
@@ -69,11 +69,17 @@ export function McpConnection() {
       <div role="status" aria-live="polite" className="mt-3 text-sm text-muted">{copied === "message" ? "Pega el mensaje en tu agente para continuar." : copied === "url" ? "URL copiada al portapapeles." : copied === "configuration" ? "Configuración copiada al portapapeles." : ""}</div>
       {copyError && <p role="alert" className="mt-2 text-sm text-short">No pudimos copiar el texto. Selecciónalo y cópialo manualmente.</p>}
 
-      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">Prueba la conexión preguntando: «¿Qué torneos están disponibles en QuantBattle?». Consultar torneos y obtener datasets públicos no requiere iniciar sesión. Para enviar predicciones o consultar tus comprobantes, el cliente debe admitir OAuth.</p>
+      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">Al conectar se abrirá QuantBattle para iniciar sesión y autorizar el agente. Después pídele: «Ejecuta get_connection_status y confirma que mi cuenta está conectada». No basta con que aparezca la lista de herramientas.</p>
       <details className="mt-4 border-t border-line pt-4">
         <summary className="cursor-pointer text-sm font-medium text-ink">¿Te pide una API key o no abre el inicio de sesión?</summary>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">Selecciona OAuth como método de autenticación. En Hermes, comprueba que el comando incluya <code className="font-mono">--auth oauth</code>. Si tu cliente no admite OAuth, puedes usar las consultas públicas, pero no las funciones de tu cuenta.</p>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Poder listar las herramientas confirma la conexión, pero no la autorización de tu cuenta. Si la autorización falla, conserva el mensaje de error para diagnosticarla.</p>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">Selecciona OAuth como método de autenticación. En Hermes, comprueba que el comando incluya <code className="font-mono">--auth oauth</code>. Si tu cliente no admite OAuth, usa el endpoint público de solo lectura que aparece abajo. Para acceder a tu cuenta necesitas un cliente con OAuth.</p>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Si el navegador está en otro computador, el regreso a localhost debe llegar al computador donde corre el agente. Usa el mecanismo de retorno remoto que admita tu cliente; no compartas contraseñas ni tokens. Si el enlace venció o rechazaste el permiso, inicia una nueva autorización desde el agente.</p>
+      </details>
+      <details className="mt-4 border-t border-line pt-4">
+        <summary className="cursor-pointer text-sm font-medium text-ink">Solo consultar torneos y datasets sin cuenta</summary>
+        <p className="mt-3 text-sm leading-relaxed text-muted">Este endpoint no permite enviar predicciones ni consultar información privada. Configúralo sin autenticación.</p>
+        <pre className="mt-3 overflow-auto whitespace-pre-wrap break-words rounded-md border border-line p-3 text-xs" tabIndex={0}>{MCP_URL}/public</pre>
+        <button type="button" onClick={() => void copy(`${MCP_URL}/public`, "public")} className={buttonClasses("secondary", "sm") + " mt-3"}>{copied === "public" ? "URL pública copiada" : "Copiar URL pública"}</button>
       </details>
     </section>
   );

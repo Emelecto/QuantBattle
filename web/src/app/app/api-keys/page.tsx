@@ -166,7 +166,7 @@ export default function ApiKeysPage() {
       <section className="qb-page flex-1">
         <h1 className="text-3xl font-semibold tracking-tight text-ink">API y MCP</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Conecta tu agente de IA a los torneos ML de QuantBattle. El servidor remoto inicia sesión mediante OAuth; no tienes que copiar claves API ni instalar Python.
+          Conecta tu agente de IA a los torneos ML de QuantBattle. El servidor remoto solicita autorización OAuth al conectar; no tienes que copiar claves API ni instalar Python.
         </p>
 
         <div className="mt-8"><McpConnection /></div>
