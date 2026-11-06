@@ -334,7 +334,7 @@ export function createServer(token: string, userId?: string, publicOnly = false)
 // Discovery remains accessible; every other request on the main endpoint is authenticated.
 // Public access is deliberately opt-in and never registers account or write tools.
 const authenticated = pipeline(
-  [withOAuthProtectedResource({ resourceServer: (req) => new URL(req.url).origin + "/functions/v1/quantbattle-mcp" }), withSupabase({ auth: "user" })],
+  [withOAuthProtectedResource({ resourceServer: () => `${(Deno.env.get("SUPABASE_PUBLIC_URL") ?? Deno.env.get("SUPABASE_URL") ?? "https://ejwusgwgezvyylepagpz.supabase.co").replace(/\/$/, "")}/functions/v1/quantbattle-mcp` }), withSupabase({ auth: "user" })],
   async (request, { supabase }) => {
     const token = bearerToken(request);
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -363,7 +363,7 @@ const authenticated = pipeline(
 export async function handleMcpRequest(request: Request): Promise<Response> {
   const path = new URL(request.url).pathname;
   let response: Response;
-  if (path === "/functions/v1/quantbattle-mcp/public") {
+  if (path.replace(/^\/functions\/v1(?=\/)/, "") === "/quantbattle-mcp/public") {
     if (request.method === "OPTIONS") {
       response = new Response(null, { status: 204 });
     } else {

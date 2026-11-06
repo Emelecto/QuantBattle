@@ -105,3 +105,14 @@ Deno.test("auth service outages request retry instead of asking for new credenti
     await response.body?.cancel();
   } finally { globalThis.fetch = originalFetch; }
 });
+
+Deno.test("Supabase proxy path and HTTP origin do not break public routing or HTTPS discovery", async () => {
+  const internal = "http://mcp-test.supabase.co/quantbattle-mcp";
+  const response = await handleMcpRequest(new Request(internal + "/oauth-protected-resource"));
+  assertEquals((await response.json()).resource, endpoint);
+  const externalRequest = request("tools/list", {}, undefined, true);
+  const publicResponse = await handleMcpRequest(new Request(internal + "/public", externalRequest));
+  assertEquals(publicResponse.status, 200);
+  const listed = await result(publicResponse);
+  assert(listed.result.tools.some((tool: { name: string }) => tool.name === "list_ml_tournaments"));
+});
