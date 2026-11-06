@@ -1,13 +1,24 @@
 import { test, expect } from "@playwright/test";
-test("account verification and anonymous access are separate", async ({ page, context }) => {
+test("account verification and anonymous access are separate", async ({ page, context }, info) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/docs#mcp");
   const section = page.getByRole("heading", { name: "Conecta tu agente a QuantBattle", exact: true }).locator("..");
+  await section.getByRole("button", { name: "Copiar mensaje para mi agente" }).click();
+  const generic = await page.evaluate(() => navigator.clipboard.readText());
+  expect(generic).toContain("quantbattle-mcp");
+  expect(generic).toContain("OAuth");
+  expect(generic).not.toContain("get_historical_dataset_download");
+  expect(generic.length).toBeLessThan(260);
+  await section.screenshot({ path: `../artifacts/mcp-short-copy/${info.project.name}.png` });
   await section.getByLabel("¿Qué agente usas?").selectOption("hermes");
   await section.getByRole("button", { name: "Copiar mensaje para mi agente" }).click();
   const message = await page.evaluate(() => navigator.clipboard.readText());
   expect(message).toContain("--auth oauth");
-  expect(message).toContain("get_connection_status");
+  expect(message).toContain("hermes mcp add quantbattle");
+  expect(message).toContain("OAuth");
+  expect(message.length).toBeLessThan(360);
+  await section.getByText("Configurar manualmente o copiar la URL", { exact: true }).click();
+  await expect(section.getByText(/Para verificar la conexión/)).toContainText("get_connection_status");
   await section.getByText("Descargar el histórico de Alpaca sin cuenta", { exact: true }).click();
   await section.getByRole("button", { name: "Copiar URL pública" }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/quantbattle-mcp\/public$/);
