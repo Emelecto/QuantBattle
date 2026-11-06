@@ -1,39 +1,17 @@
 """Lecturas públicas acotadas e historial autenticado de experimentos ML."""
 from concurrent.futures import ThreadPoolExecutor
-from functools import lru_cache
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from auth import require_user
-import ml_storage as store
-import ml_persist as persist
-import ml_protocol as protocol
 from ml_research import enrich_experiment
 
 router = APIRouter(prefix="/ml", tags=["ml-research"])
 
 
-@lru_cache(maxsize=2)
-def _public_index(path: str, data_hash: str):
-    frame = store.download_parquet(path)
-    if "target" in frame.columns or not {"id", "era"}.issubset(frame.columns) or not persist.verify_frame_hash(frame, data_hash):
-        raise HTTPException(503, "No se pudo verificar el índice público de la ronda")
-    return frame[["id", "era"]].astype(str).values.tolist()
-
-
 @router.get("/datasets/{dataset_id}/rows")
 def public_row_index(dataset_id: str):
-    from tournaments import get_supabase
-    result = get_supabase().table("ml_datasets").select("id,kind,status,score_version,bucket_path,data_hash,version").eq("id", dataset_id).execute()
-    if not result.data:
-        raise HTTPException(404, "Ronda no encontrada")
-    dataset = result.data[0]
-    if dataset.get("kind") != "live" or dataset.get("score_version") != protocol.SCORE_VERSION or dataset.get("status") not in ("ready", "closed", "awaiting_labels", "scoring", "scored"):
-        raise HTTPException(409, "El índice no está publicado bajo el protocolo actual")
-    if not dataset.get("bucket_path") or not dataset.get("data_hash"):
-        raise HTTPException(503, "Ronda sin archivo verificable")
-    return {"dataset_id": dataset_id, "version": dataset.get("version"),
-            "columns": ["id", "era"], "rows": _public_index(dataset["bucket_path"], dataset["data_hash"])}
+    raise HTTPException(410, "Este dataset fue retirado y ya no está disponible.")
 
 
 @router.get("/experiments")

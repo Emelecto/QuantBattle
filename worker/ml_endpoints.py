@@ -77,46 +77,9 @@ async def _read_limited_body(request: Request) -> bytes:
 # ---------------------------------------------------------------------------
 @router.get("/datasets")
 def list_datasets(tournament_id: str | None = None, round_number: int | None = None):
-    from tournaments import get_supabase
-    sb = get_supabase()
-    q = sb.table("ml_datasets").select(
-        "id,tournament_id,round_number,mode,kind,status,n_assets,n_eras,"
-        "n_features,row_count,feature_cols,closes_at,bucket_path,version,"
-        "round_type,score_version,published_at,target_available_at,finalized_at,"
-        "data_hash,benchmarks,params"
-    )
-    if tournament_id:
-        q = q.eq("tournament_id", tournament_id)
-    if round_number:
-        q = q.eq("round_number", round_number)
-    data = q.in_("status", ["ready", "closed", "awaiting_labels", "scoring", "scored"]).order(
-        "round_number", desc=True
-    ).execute()
-    # Las tres particiones tienen datos públicos; live no contiene target.
-    out = []
-    for d in data.data or []:
-        visible = {key: d.get(key) for key in (
-            "id", "tournament_id", "round_number", "mode", "kind", "status",
-            "n_assets", "n_eras", "n_features", "row_count", "feature_cols",
-            "closes_at", "version", "round_type", "score_version", "published_at",
-            "target_available_at", "finalized_at", "data_hash",
-        )}
-        params = d.get("params") or {}
-        for key in (
-            "data_source", "data_license", "data_attribution",
-            "data_attribution_url", "data_terms_url", "derived_data_license",
-            "commercial_use_allowed",
-        ):
-            if key in params:
-                visible[key] = params[key]
-        visible["benchmarks"] = d.get("benchmarks") if d.get("status") == "scored" else None
-        visible["download_url"] = (
-            store.public_url(d["bucket_path"])
-            if d.get("kind") in ("train", "validation", "live") and d.get("bucket_path")
-            else None
-        )
-        out.append(visible)
-    return {"datasets": out}
+    # Legacy ML datasets were retired from the user-facing product. Historical
+    # stock train/validation files and daily return datasets use separate feeds.
+    return {"datasets": []}
 
 
 # ---------------------------------------------------------------------------
@@ -124,29 +87,7 @@ def list_datasets(tournament_id: str | None = None, round_number: int | None = N
 # ---------------------------------------------------------------------------
 @router.get("/datasets/{dataset_id}/download")
 def download_dataset(dataset_id: str, kind: str = "train"):
-    from tournaments import get_supabase
-    sb = get_supabase()
-    rec = sb.table("ml_datasets").select(
-        "bucket_path,kind,status,params"
-    ).eq("id", dataset_id).execute()
-    if not rec.data:
-        raise HTTPException(404, "dataset no encontrado")
-    rec = rec.data[0]
-    if rec["kind"] != kind or kind not in ("train", "validation", "live"):
-        raise HTTPException(403, "tipo de dataset inválido")
-    if rec["status"] in ("building", "failed"):
-        raise HTTPException(404, "dataset aún no publicado")
-    if not rec.get("bucket_path"):
-        raise HTTPException(404, "ruta no disponible")
-    params = rec.get("params") or {}
-    license_metadata = {
-        key: params[key] for key in (
-            "data_source", "data_license", "data_attribution",
-            "data_attribution_url", "data_terms_url", "derived_data_license",
-            "commercial_use_allowed",
-        ) if key in params
-    }
-    return {"url": store.public_url(rec["bucket_path"]), **license_metadata}
+    raise HTTPException(410, "Este dataset fue retirado y ya no está disponible para descarga.")
 
 
 # ---------------------------------------------------------------------------
