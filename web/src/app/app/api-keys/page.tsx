@@ -7,16 +7,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/useAuth";
 import { call } from "@/lib/tournaments";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { McpConnection } from "@/components/McpConnection";
 
-const MCP_URL = "https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp";
-const MCP_CLIENTS = {
-  codex: { label: "Codex CLI", instruction: "Ejecuta esta línea en tu terminal:", value: `codex mcp add quantbattle --url ${MCP_URL}` },
-  claude: { label: "Claude Code", instruction: "Ejecuta esta línea en tu terminal. Si necesitas autenticarte, abre /mcp en Claude Code:", value: `claude mcp add --transport http quantbattle ${MCP_URL}` },
-  cursor: { label: "Cursor", instruction: "Añade esta configuración a .cursor/mcp.json en tu proyecto o a ~/.cursor/mcp.json para tu usuario:", value: JSON.stringify({ mcpServers: { quantbattle: { url: MCP_URL } } }, null, 2) },
-  vscode: { label: "VS Code / Copilot", instruction: "Añade esta configuración a .vscode/mcp.json en tu proyecto:", value: JSON.stringify({ servers: { quantbattle: { type: "http", url: MCP_URL } } }, null, 2) },
-  other: { label: "Otro agente MCP", instruction: "Añade esta URL como servidor MCP remoto con transporte HTTP en tu cliente:", value: MCP_URL },
-} as const;
-type McpClient = keyof typeof MCP_CLIENTS;
 
 type OAuthGrant = {
   client: { id: string; name: string; uri: string; logo_uri: string };
@@ -41,9 +33,6 @@ export default function ApiKeysPage() {
   const [keyName, setKeyName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [copiedCmd, setCopiedCmd] = useState(false);
-  const [mcpClient, setMcpClient] = useState<McpClient>("codex");
-  const [copyMcpError, setCopyMcpError] = useState(false);
   const [grants, setGrants] = useState<OAuthGrant[] | null>(null);
   const [grantsLoading, setGrantsLoading] = useState(true);
   const [grantsError, setGrantsError] = useState(false);
@@ -180,23 +169,7 @@ export default function ApiKeysPage() {
           Conecta tu agente de IA a los torneos ML de QuantBattle. El servidor remoto inicia sesión mediante OAuth; no tienes que copiar claves API ni instalar Python.
         </p>
 
-        <div className="qb-glass qb-elev-1 mt-8 rounded-xl p-5">
-          <h2 className="text-base font-semibold text-ink">Conecta tu agente MCP</h2>
-          <p className="mt-1 text-sm leading-relaxed text-muted">Añade el servidor una sola vez. Puedes consultar torneos y datasets públicos sin iniciar sesión; QuantBattle pedirá autorización al enviar predicciones o consultar tus comprobantes.</p>
-          <div className="mt-4 rounded-lg border border-line bg-surface-solid p-4">
-            <label htmlFor="mcp-client" className="text-xs font-medium text-muted">Elige tu agente</label>
-            <select id="mcp-client" value={mcpClient} onChange={(event) => { setMcpClient(event.target.value as McpClient); setCopiedCmd(false); setCopyMcpError(false); }} className="qb-input mt-2 block w-full rounded-md px-3 py-2 text-sm text-ink sm:max-w-xs">
-              {Object.entries(MCP_CLIENTS).map(([value, client]) => <option key={value} value={value}>{client.label}</option>)}
-            </select>
-            <p className="mt-4 text-sm leading-relaxed text-muted">{MCP_CLIENTS[mcpClient].instruction}</p>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
-              <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-md bg-bg p-3 font-mono text-xs leading-relaxed text-ink">{MCP_CLIENTS[mcpClient].value}</pre>
-              <button type="button" onClick={() => navigator.clipboard.writeText(MCP_CLIENTS[mcpClient].value).then(() => { setCopyMcpError(false); setCopiedCmd(true); setTimeout(() => setCopiedCmd(false), 2000); }).catch(() => setCopyMcpError(true))} className={buttonClasses("secondary", "sm") + " shrink-0"}>{copiedCmd ? "✓ Copiado" : "Copiar"}</button>
-            </div>
-            {copyMcpError && <p role="alert" className="mt-2 text-xs text-short">No se pudo copiar. Selecciona el texto y cópialo manualmente.</p>}
-            <p className="mt-3 text-xs leading-relaxed text-muted">Para las acciones de tu cuenta, inicia sesión y autoriza el acceso cuando tu cliente lo solicite. El flujo depende de que el cliente admita OAuth para servidores MCP remotos.</p>
-          </div>
-        </div>
+        <div className="mt-8"><McpConnection /></div>
 
         <div className="qb-glass mt-4 rounded-xl p-5">
           <h2 className="text-base font-semibold text-ink">Agentes autorizados</h2>

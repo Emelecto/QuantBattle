@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ResearchEvidence } from "@/components/research/ResearchEvidence";
+import { McpConnection } from "@/components/McpConnection";
 
 /**
  * /docs — Documentación técnica de QuantBattle.
@@ -241,19 +242,7 @@ curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
 
           {/* ---------------------------------------------------------- */}
           <Section id="mcp" title="MCP — QuantBattle desde tu asistente IA">
-            <p>
-              Conecta el servidor MCP remoto de QuantBattle. No necesitas instalar Python,
-              clonar el repositorio ni crear una clave API. Las consultas públicas funcionan
-              sin iniciar sesión. Para enviar predicciones o consultar tus comprobantes,
-              el agente abre QuantBattle y solicita tu autorización OAuth.
-            </p>
-            <Pre>{`codex mcp add quantbattle --url https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp`}</Pre>
-            <p>
-              En Claude Code usa{" "}
-              <Code>claude mcp add --transport http quantbattle https://ejwusgwgezvyylepagpz.supabase.co/functions/v1/quantbattle-mcp</Code>.
-              En Cursor u otro cliente, pega esa URL como servidor MCP remoto. Puedes revocar
-              el permiso después desde API y MCP. Ejemplos:
-            </p>
+            <McpConnection />
             <ul className="list-disc space-y-1.5 pl-5 marker:text-line">
               <li>&ldquo;¿Qué torneos ML y rondas están abiertos?&rdquo;</li>
               <li>&ldquo;Dame los enlaces de train, validation y live de esta ronda&rdquo;</li>
