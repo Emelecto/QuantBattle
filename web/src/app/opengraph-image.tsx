@@ -28,6 +28,8 @@ export default async function OgImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 28, color: "#245ce5", letterSpacing: 4 }}>
+          {/* ImageResponse renders this embedded image directly, without next/image. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={logoSrc} alt="" width={64} height={64} style={{ objectFit: "cover" }} />
           QUANTBATTLE
         </div>
