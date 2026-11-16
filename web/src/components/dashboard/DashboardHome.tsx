@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { StockHistoryDownloads } from "@/components/research/StockHistoryDownloads";
-import { StockRoundList } from "@/components/research/StockRounds";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDashboardData, type DashboardTournament } from "./useDashboardData";
 import { LESSONS } from "@/lib/academia/catalog";
@@ -52,7 +51,7 @@ function TournamentMini({ tournament }: { tournament: DashboardTournament }) {
 
   return (
     <Link
-      href={tournament.type === "stock" ? "/app/tournaments#rondas-diarias" : `/app/tournaments/${tournament.id}`}
+      href={`/app/tournaments/${tournament.id}`}
       className="qb-competencia-mini"
     >
       <div className="qb-competencia-mini-header">
@@ -228,6 +227,13 @@ function SkeletonProjects() {
 }
 
 function DashboardHome() {
+  const router = useRouter();
+  useEffect(() => {
+    const followLegacyLink = () => { if (window.location.hash === "#historial-ml") router.replace("/app/submissions"); };
+    followLegacyLink();
+    window.addEventListener("hashchange", followLegacyLink);
+    return () => window.removeEventListener("hashchange", followLegacyLink);
+  }, [router]);
   const { projects, tournaments, loading, error, retry, sources, authRequired } =
     useDashboardData();
 
@@ -302,15 +308,9 @@ function DashboardHome() {
 
       <header className="qb-home-intro">
         <span className="qb-home-intro-kicker">QUANTBATTLE / INICIO</span>
-        <h1 className="text-2xl font-semibold text-ink">Tu espacio de investigación</h1>
-        <p className="mt-2 max-w-2xl text-base text-muted">Continúa desde tus datos, envíos y resultados de torneos ML.</p>
-        <div className="mt-4 flex flex-wrap gap-4 text-sm">
-          <Link href="#historial-ml" className="text-accent underline underline-offset-4">Ir a mi historial ↗</Link>
-        </div>
+        <h1 className="text-2xl font-semibold text-ink">Tu actividad</h1>
+        <p className="mt-2 max-w-2xl text-base text-muted">Tus torneos, modelos y aprendizaje en un solo lugar.</p>
       </header>
-
-      <StockHistoryDownloads />
-      <StockRoundList compact />
 
       <div className="qb-bento-grid">
         {/* Competencias — fila 1 izquierda */}

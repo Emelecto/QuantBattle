@@ -4,7 +4,7 @@ export default function LibraryPage() {
   return (
     <div className="qb-page">
       <header className="qb-page-heading">
-        <h1>Datasets de acciones · Alpaca</h1>
+        <h1>Datos históricos de acciones</h1>
         <p>
           Un histórico para entrenar y validar; archivos nuevos para cada sesión
           del torneo.

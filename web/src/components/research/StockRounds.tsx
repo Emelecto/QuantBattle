@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buttonClasses } from "@/components/ui/Button";
 import {
   downloadStockFile,
@@ -25,7 +25,7 @@ const message = (e: unknown) =>
   e instanceof Error
     ? e.message
     : "No se pudo completar la solicitud. Vuelve a intentarlo.";
-function RoundFiles({ round }: { round: StockRound }) {
+export function RoundFiles({ round }: { round: StockRound }) {
   const [busy, setBusy] = useState<string | null>(null),
     [error, setError] = useState("");
   async function download(name: string) {
@@ -67,13 +67,14 @@ function RoundFiles({ round }: { round: StockRound }) {
     </div>
   );
 }
-function RoundSubmission({
+export function RoundSubmission({
   round,
   open,
 }: {
   round: StockRound;
   open: boolean;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [receipts, setReceipts] = useState<StockReceipt[] | null>(null),
     [error, setError] = useState(""),
     [feedback, setFeedback] = useState("");
@@ -95,7 +96,7 @@ function RoundSubmission({
     return () => {
       active = false;
     };
-  }, [round.id, retry]);
+  }, [round.id, round.status, retry]);
   async function send() {
     if (!file || busy) return;
     if (file.size > 1024 * 1024) {
@@ -108,6 +109,7 @@ function RoundSubmission({
     try {
       await submitStockFile(round.id, file);
       setFile(null);
+      if (inputRef.current) inputRef.current.value = "";
       setFeedback(
         "Predicciones registradas. El último envío válido antes del cierre es el seleccionado.",
       );
@@ -129,6 +131,7 @@ function RoundSubmission({
           <label className="mt-3 block text-sm font-medium">
             Archivo de predicciones
             <input
+              ref={inputRef}
               aria-label="CSV de predicciones de acciones"
               className="mt-2 block w-full text-sm"
               type="file"
@@ -235,7 +238,7 @@ export function StockRoundList({ compact = false }: { compact?: boolean }) {
             id={compact ? "daily-home-title" : "daily-title"}
             className="text-xl font-semibold text-ink"
           >
-            Rondas diarias de acciones · Alpaca
+            Rondas diarias
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
             Entrena con el histórico y predice el retorno de apertura a cierre
@@ -267,9 +270,9 @@ export function StockRoundList({ compact = false }: { compact?: boolean }) {
         </p>
       ) : rounds.length === 0 ? (
         <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted">
-          Todavía no hay rondas diarias publicadas. Puedes descargar train y
-          validation de Alpaca y preparar tu modelo. Los datos diarios
-          aparecerán aquí cuando termine su publicación y verificación.
+          Todavía no hay rondas diarias publicadas. Puedes descargar los datos
+          de entrenamiento y validación para preparar tu modelo. Cada ronda
+          aparecerá aquí cuando termine su publicación y verificación.
         </p>
       ) : (
         <ul className="mt-5 divide-y divide-line">

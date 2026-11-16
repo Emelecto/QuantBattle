@@ -53,3 +53,12 @@ Visible keyboard focus, named controls, native disclosure semantics and consiste
 The approved mockups are `artifacts/landing-mockups/06-institucional-v2.html` and `artifacts/dashboard-mockups/01-dashboard-light.html`. Screenshots and verification reports belong in `artifacts/visual-redesign`.
 
 The design skill's motion quota is subordinate to the user's functionality-first brief: do not add eight decorative animations to satisfy a counter. The four numbered stages represent a real ordered procedure, not ornamental labels. Public image assets must never contain session tokens, credentials or private account identifiers.
+
+## Competition catalog and submission history
+
+The scoped surface reference is `.impeccable/surfaces/competitions.md`. These patterns retain the institutional light identity and apply to the catalog, daily-round workspace and separate personal history.
+
+- **Catalog:** flat white cards with fine borders, modest corners (12px), pale blue icon tiles and blue actions. The grid has two columns and a 24px gap, becoming one column at 850px. Card footers pair the actual deadline with the primary action; at 580px the action fills the width.
+- **Status and selection:** written green open, blue evaluation, slate finalized and amber previous-attempt labels accompany their fills. Selected filters use blue fill and `aria-pressed`; status must remain legible without color.
+- **History:** page-scoped summary panels precede divider-separated records. Below 1100px, column headings give way to visible per-value labels; below 580px, summaries and receipt details stack. Inline receipts use a pale inset surface, wrapping monospace identifiers and tabular result figures.
+- **Controls and feedback:** controls are at least 44px tall, with a visible blue focus outline (3px, 3px offset). Brief background feedback (160ms) respects reduced motion. Loading, failed requests, empty results and pending scores have distinct written states; panels do not move on hover.

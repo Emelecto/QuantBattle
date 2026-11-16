@@ -81,8 +81,8 @@ export function McpConnection() {
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Si el navegador está en otro computador, el regreso a localhost debe llegar al computador donde corre el agente. Usa el mecanismo de retorno remoto que admita tu cliente; no compartas contraseñas ni tokens. Si el enlace venció o rechazaste el permiso, inicia una nueva autorización desde el agente.</p>
       </details>
       <details className="mt-4 border-t border-line pt-4">
-        <summary className="cursor-pointer text-sm font-medium text-ink">Descargar el histórico de Alpaca sin cuenta</summary>
-        <p className="mt-3 text-sm leading-relaxed text-muted">Permite obtener train y validation de Alpaca con sus sumas de verificación. Para consultar rondas y archivos diarios o enviar predicciones, autoriza el endpoint principal. Configura este endpoint público sin autenticación.</p>
+        <summary className="cursor-pointer text-sm font-medium text-ink">Descargar el histórico sin cuenta</summary>
+        <p className="mt-3 text-sm leading-relaxed text-muted">Permite obtener train y validation del histórico con sus sumas de verificación. Para consultar rondas y archivos diarios o enviar predicciones, autoriza el endpoint principal. Configura este endpoint público sin autenticación.</p>
         <pre className="mt-3 overflow-auto whitespace-pre-wrap break-words rounded-md border border-line p-3 text-xs" tabIndex={0}>{MCP_URL}/public</pre>
         <button type="button" onClick={() => void copy(`${MCP_URL}/public`, "public")} className={buttonClasses("secondary", "sm") + " mt-3"}>{copied === "public" ? "URL pública copiada" : "Copiar URL pública"}</button>
       </details>

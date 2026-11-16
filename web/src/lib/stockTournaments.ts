@@ -19,11 +19,23 @@ export type StockReceipt = {
   score?: number | null;
   mae?: number | null;
 };
-export const listStockRounds = () =>
-  call<{ rounds: StockRound[] }>("/ml/stock-rounds", undefined, {
+export type StockHistoryEntry = StockReceipt & {
+  round: Pick<StockRound, "id" | "target_date" | "deadline">;
+  round_status: StockRound["status"];
+};
+export type SubmissionFilter = "all" | "pending" | "evaluated" | "previous";
+export const listStockRounds = (offset = 0) =>
+  call<{ rounds: StockRound[]; has_more?: boolean }>(`/ml/stock-rounds${offset ? `?offset=${offset}` : ""}`, undefined, {
     timeoutMs: 25000,
     maxAttempts: 1,
   });
+export const getStockRound = (id: string) =>
+  call<{ round: StockRound }>(`/ml/stock-rounds/${encodeURIComponent(id)}`);
+export const listStockSubmissions = (offset = 0, state: SubmissionFilter = "all", days = 0) =>
+  call<{ entries: StockHistoryEntry[]; has_more: boolean }>(
+    `/ml/stock-submissions/mine?${new URLSearchParams({ offset: String(offset), state, days: String(days) })}`,
+    undefined, { timeoutMs: 25000, maxAttempts: 1 },
+  );
 export const stockReceipts = (id: string) =>
   call<{ attempts: StockReceipt[] }>(
     `/ml/stock-rounds/${encodeURIComponent(id)}/mine`,

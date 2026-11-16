@@ -20,7 +20,7 @@ test("account verification and anonymous access are separate", async ({ page, co
   expect(message.length).toBeLessThan(440);
   await section.getByText("Configurar manualmente o copiar la URL", { exact: true }).click();
   await expect(section.getByText(/Para verificar la conexión/)).toContainText("get_connection_status");
-  await section.getByText("Descargar el histórico de Alpaca sin cuenta", { exact: true }).click();
+  await section.getByText("Descargar el histórico sin cuenta", { exact: true }).click();
   await section.getByRole("button", { name: "Copiar URL pública" }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/quantbattle-mcp\/public$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

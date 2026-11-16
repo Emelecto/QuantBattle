@@ -94,7 +94,7 @@ async function loadOpenMlRounds(): Promise<DashboardTournament[]> {
   const { rounds } = await listStockRounds();
   return rounds.filter(round => round.status === "open" && Date.parse(round.deadline) > Date.now()).map(round => ({
     datasetId: round.id, datasetVersion: round.manifest_hash, id: round.id,
-    name: `Acciones Alpaca · ${round.target_date}`, type: "stock", asset_type: "stock",
+    name: `Ronda diaria · ${round.target_date}`, type: "stock", asset_type: "stock",
     symbol: null, qp_prize: 0, deadline: round.deadline, participants: null,
     metric_label: "MAE frente a cero", submission: null, submissionState: "ready",
   }));

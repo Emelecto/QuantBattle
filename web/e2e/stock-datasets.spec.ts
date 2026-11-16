@@ -15,13 +15,13 @@ async function login(page: Page) {
   await page.waitForURL("**/app", { timeout: 45000 });
 }
 
-test("public documentation explains Alpaca and retired download endpoints return 410", async ({
+test("public documentation explains the historical dataset and retired download endpoints return 410", async ({
   page,
   request,
 }) => {
   await page.goto("/docs#retornos-diarios");
   const section = page.locator("#retornos-diarios");
-  await expect(section).toContainText("Alpaca SIP");
+  await expect(section).toContainText("50 acciones estadounidenses");
   await expect(section).toContainText("stocks_open_close_mae_v1");
   for (const path of ["/api/datasets", "/api/datasets/download?id=btc"]) {
     const r = await request.get(path);
@@ -30,7 +30,7 @@ test("public documentation explains Alpaca and retired download endpoints return
   }
 });
 
-test("Alpaca history and honest empty daily state replace legacy links", async ({
+test("historical data and honest empty daily state replace legacy links", async ({
   page,
 }, info) => {
   await login(page);
@@ -49,7 +49,7 @@ test("Alpaca history and honest empty daily state replace legacy links", async (
   await page.goto("/app/library");
   await expect(
     page.getByRole("heading", {
-      name: "Histórico de Alpaca · train y validation",
+      name: "Datos históricos · train y validation",
     }),
   ).toBeVisible();
   for (const name of ["train.parquet", "validation.parquet"])

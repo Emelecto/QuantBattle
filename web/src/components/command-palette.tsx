@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 export const NAV = [
   { href: "/app", label: "Inicio", group: "General" },
   { href: "/app/tournaments", label: "Competencias", group: "General" },
+  { href: "/app/submissions", label: "Mis envíos", group: "General" },
   { href: "/app/strategies", label: "Mis proyectos ML", group: "General" },
   { href: "/app/marketplace", label: "Biblioteca ML", group: "General" },
   { href: "/app/learn", label: "Aprender practicando", group: "General" },

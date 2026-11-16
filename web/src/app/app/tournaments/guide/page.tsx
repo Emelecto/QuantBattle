@@ -7,7 +7,7 @@ export default function Guide() {
         Volver a torneos
       </Link>
       <h1 className="mt-6 text-3xl font-semibold">
-        Tu primer torneo con datos de Alpaca
+        Tu primer torneo con datos reales
       </h1>
       <p className="mt-3 text-muted">
         Predice retornos de acciones estadounidenses. No necesitas ejecutar
@@ -50,8 +50,8 @@ export default function Guide() {
       </ol>
       <p className="mt-8 text-sm text-muted">
         Verifica los SHA-256 de los archivos con el manifiesto. Las descargas
-        diarias se verifican antes de guardarse. El histórico usa Alpaca SIP; la
-        validación histórica no demuestra rentabilidad futura.
+        diarias se verifican antes de guardarse. La validación histórica no
+        demuestra rentabilidad futura.
       </p>
       <Link
         href="/app/tournaments#rondas-diarias"

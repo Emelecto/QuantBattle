@@ -79,8 +79,8 @@ export default function DocsPage() {
         </nav>
 
         <div className="mt-10 space-y-10">
-          <Section id="retornos-diarios" title="Datos de Alpaca y rondas diarias de acciones">
-            <p>Descarga una sola vez <Code>train.parquet</Code> y <Code>validation.parquet</Code>: 50 acciones estadounidenses, 32 variables y objetivo de retorno de apertura a cierre. Entrenamiento cubre objetivos de 2017 a 2023; validación, de 2024 a octubre de 2026. La fuente es Alpaca SIP.</p>
+          <Section id="retornos-diarios" title="Datos históricos y rondas diarias">
+            <p>Descarga una sola vez <Code>train.parquet</Code> y <Code>validation.parquet</Code>: 50 acciones estadounidenses, 32 variables y objetivo de retorno de apertura a cierre. Entrenamiento cubre objetivos de 2017 a 2023; validación, de 2024 a octubre de 2026.</p>
             <p>Cada ronda diaria publicada añade <Code>live.csv</Code> y <Code>live.parquet</Code>, dos formatos alternativos del mismo conjunto sin objetivo, junto con una plantilla de envío. Consulta su fecha objetivo y plazo: no se garantiza una ronda abierta cada día del calendario.</p>
             <p>El CSV <Code>id,prediction</Code> debe incluir todos los IDs de la ronda una vez, con retornos decimales entre −1 y 10 y un máximo de 1 MB. Sólo el último envío válido antes del cierre queda seleccionado. El protocolo <Code>stocks_open_close_mae_v1</Code> compara el MAE del modelo con predecir cero: (MAE cero − MAE modelo) / max(MAE cero, 0.005).</p>
             <p>Los archivos diarios se verifican mediante SHA-256 de sus bytes. El histórico publica su manifiesto y sumas de verificación. Los resultados diarios sólo están disponibles tras el cierre y la verificación de la sesión objetivo.</p>
@@ -93,9 +93,9 @@ export default function DocsPage() {
             <p>Abre <Link href="/app/tournaments" className="text-accent underline underline-offset-4">Torneos</Link> para consultar el estado y la fecha de cierre de la ronda vigente. La demostración técnica es una ronda sintética cerrada; sus resultados no representan usuarios externos.</p>
             <p>Descarga train y validation con target, y live sin target. Cada envío debe incluir exactamente las columnas <Code>id,prediction</Code>, todos los IDs de live una sola vez y números finitos entre 0 y 1. Cada era debe tener predicciones con variación.</p>
             <p>El servidor valida y guarda el archivo con un recibo SHA-256. Solo el último envío válido antes del cierre queda seleccionado. La puntuación y el ranking se publican después del plazo; la métrica oficial es la media de Spearman por era, versión <Code>spearman_era_v1</Code>.</p>
-            <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. Esta evidencia histórica se conserva separada de las rondas de acciones de Alpaca.</p>
+            <p>Las rondas de práctica usan datos totalmente artificiales, son gratuitas y no otorgan QP. Las variables se renombran y discretizan: la ofuscación no es cifrado. Esta evidencia histórica se conserva separada de las rondas diarias de acciones.</p>
             <div className="flex flex-wrap gap-4">
-              <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía actual de Alpaca</Link>
+              <Link href="/app/tournaments/guide" className="text-accent underline underline-offset-4">Guía de las rondas diarias</Link>
               <a href="/ml/ejemplo_quantbattle.ipynb" download className="text-accent underline underline-offset-4">Descargar notebook reproducible</a>
             </div>
           </Section>
@@ -245,8 +245,8 @@ curl -X POST https://quantlab2.onrender.com/marketplace/publish \\
           <Section id="mcp" title="MCP — QuantBattle desde tu asistente IA">
             <McpConnection />
             <ul className="list-disc space-y-1.5 pl-5 marker:text-line">
-              <li>&ldquo;¿Qué rondas diarias de acciones de Alpaca aceptan predicciones?&rdquo;</li>
-              <li>&ldquo;Descarga train y validation de Alpaca una sola vez y el live de la ronda diaria elegida&rdquo;</li>
+              <li>&ldquo;¿Qué rondas diarias aceptan predicciones?&rdquo;</li>
+              <li>&ldquo;Descarga train y validation una sola vez y el live de la ronda elegida&rdquo;</li>
               <li>&ldquo;Valida este CSV de predicciones y explícame los problemas antes de enviarlo&rdquo;</li>
             </ul>
             <p>

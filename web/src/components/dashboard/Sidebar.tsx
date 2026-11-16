@@ -17,7 +17,7 @@ export const DASHBOARD_NAV = [
   { href: "/app", label: "Inicio", icon: "home" },
   { href: "/app/tournaments", label: "Torneos ML", icon: "trophy" },
   { href: "/app/library", label: "Datasets", icon: "database" },
-  { href: "/app#historial-ml", label: "Mis envíos", icon: "strategies" },
+  { href: "/app/submissions", label: "Mis envíos", icon: "strategies" },
   { href: "/app/academia", label: "Academia", icon: "book" },
   { href: "/app/learn", label: "Aprender practicando", icon: "book" },
   { href: "/app/strategies", label: "Mis proyectos ML", icon: "strategies" },
@@ -52,6 +52,12 @@ export function Icon({ name, size = 18 }: { name: string; size?: number }) {
     strokeLinejoin: "round" as const,
   };
   switch (name) {
+    case "clock":
+      return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>;
+    case "check":
+      return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" /></svg>;
+    case "info":
+      return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 11v6m0-10v.2" /></svg>;
     case "user":
       return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0116 0v2" /></svg>;
     case "arrow-left":
@@ -184,7 +190,6 @@ export function Sidebar() {
   const [dragging, setDragging] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeHash, setActiveHash] = useState("");
   const [user, setUser] = useState<{
     id: string;
     email?: string;
@@ -197,13 +202,6 @@ export function Sidebar() {
   } | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const widthRef = useRef(width);
-
-  useEffect(() => {
-    const syncHash = () => setActiveHash(window.location.hash);
-    const frame = window.requestAnimationFrame(syncHash);
-    window.addEventListener("hashchange", syncHash);
-    return () => { window.cancelAnimationFrame(frame); window.removeEventListener("hashchange", syncHash); };
-  }, [pathname]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -331,9 +329,7 @@ export function Sidebar() {
   );
 
   const isActive = (href: string) =>
-    href === "/app#historial-ml" ? pathname === "/app" && activeHash === "#historial-ml"
-      : href === "/app" ? pathname === "/app" && activeHash !== "#historial-ml"
-        : pathname.startsWith(href);
+    href === "/app" ? pathname === "/app" : pathname.startsWith(href);
 
   const displayName =
     profile?.display_name ||

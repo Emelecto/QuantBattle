@@ -1,10 +1,10 @@
 """Authenticated stock CSV delivery/submission. Generation stays off Render."""
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 
 from auth import require_user
 from stocks_daily.protocol import MAX_BYTES, PROTOCOL, digest, instant, predictions
@@ -41,11 +41,43 @@ def receipt(row, released):
 
 
 @router.get('/stock-rounds')
-def rounds(request: Request):
+def rounds(request: Request, offset: int = Query(0, ge=0), limit: int = Query(30, ge=1, le=100)):
     require_user(request)
     repo = Repository()
-    rows = repo.request('GET', 'stock_return_rounds', params={'select': '*', 'order': 'target_date.desc', 'limit': 30})
-    return {'rounds': [public_round(row) for row in rows]}
+    rows = repo.request('GET', 'stock_return_rounds', params={'select': '*', 'order': 'target_date.desc', 'offset': offset, 'limit': limit + 1})
+    return {'rounds': [public_round(row) for row in rows[:limit]], 'has_more': len(rows) > limit}
+
+
+@router.get('/stock-submissions/mine')
+def submission_history(request: Request, offset: int = Query(0, ge=0), limit: int = Query(20, ge=1, le=100),
+                       state: str = Query('all', pattern='^(all|pending|evaluated|previous)$'),
+                       days: int = Query(0, ge=0, le=365)):
+    uid = require_user(request)
+    repo = Repository()
+    params = {'select': 'id,round_id,file_sha256,manifest_hash,row_count,submitted_at,is_selected,status,score,mae,baseline_mae,round:stock_return_rounds!inner(id,target_date,deadline,status)',
+              'user_id': 'eq.' + uid, 'order': 'submitted_at.desc,id.desc', 'offset': offset, 'limit': limit + 1}
+    if state == 'pending':
+        params.update({'is_selected': 'eq.true', 'round.status': 'neq.settled'})
+    elif state == 'evaluated':
+        params.update({'round.status': 'eq.settled', 'is_selected': 'eq.true', 'status': 'eq.scored'})
+    elif state == 'previous':
+        params.update({'is_selected': 'eq.false'})
+    if days:
+        params['submitted_at'] = 'gte.' + (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    rows = repo.request('GET', 'stock_return_submissions', params=params)
+    entries = []
+    for row in rows[:limit]:
+        context = row['round']
+        entries.append({**receipt(row, context['status'] == 'settled'),
+                        'round': {key: context[key] for key in ['id', 'target_date', 'deadline']},
+                        'round_status': 'settled' if context['status'] == 'settled' else 'open' if datetime.now(timezone.utc) < instant(context['deadline']) else 'closed'})
+    return {'entries': entries, 'has_more': len(rows) > limit}
+
+
+@router.get('/stock-rounds/{round_id}')
+def round_detail(round_id: str, request: Request):
+    require_user(request)
+    return {'round': public_round(lookup(Repository(), round_id))}
 
 
 @router.get('/stock-rounds/{round_id}/download/{filename}')

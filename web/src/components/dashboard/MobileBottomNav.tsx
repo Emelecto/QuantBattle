@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { DASHBOARD_NAV, Icon } from "./Sidebar";
 
 const ITEMS = [
   { href: "/app", label: "Inicio", icon: "home" },
   { href: "/app/tournaments", label: "Torneos", icon: "trophy" },
-  { href: "/app#historial-ml", label: "Envíos", icon: "strategies" },
+  { href: "/app/submissions", label: "Envíos", icon: "strategies" },
   { href: "/app/academia", label: "Academia", icon: "book" },
 ] as const;
 
@@ -16,14 +16,7 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [hash, setHash] = useState("");
-  useEffect(() => {
-    const update = () => setHash(window.location.hash);
-    update();
-    window.addEventListener("hashchange", update);
-    return () => window.removeEventListener("hashchange", update);
-  }, [pathname]);
-  const active = (href: string) => href.includes("#") ? pathname === "/app" && hash === "#historial-ml" : href === "/app" ? pathname === "/app" && hash !== "#historial-ml" : pathname.startsWith(href);
+  const active = (href: string) => href === "/app" ? pathname === "/app" : pathname.startsWith(href);
 
   const showBackArrow = pathname !== "/app";
 

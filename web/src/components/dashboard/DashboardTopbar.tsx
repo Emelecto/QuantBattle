@@ -8,6 +8,7 @@ import { QuantBattleLogo } from "./QuantBattleLogo";
 const labels: Record<string, string> = {
   "/app": "Inicio",
   "/app/tournaments": "Torneos ML",
+  "/app/submissions": "Mis envíos",
   "/app/library": "Datasets",
   "/app/academia": "Academia",
   "/app/strategies": "Mis proyectos ML",
