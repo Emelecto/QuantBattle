@@ -56,7 +56,7 @@ def main():
         for i in range(2):
             suffix = secrets.token_hex(8)
             email, password = f'ql-release-{suffix}@example.invalid', secrets.token_urlsafe(32)
-            metadata = {'username': f'release_{suffix}', 'is_technical': True}
+            metadata = {'username': f'release_{suffix[:12]}', 'is_technical': True}
             if i == 0:
                 user = admin.auth.admin.create_user({'email': email, 'password': password, 'email_confirm': True,
                     'user_metadata': metadata}).user
