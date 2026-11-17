@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
@@ -129,3 +130,66 @@ def test_round_catalog_pagination_and_detail(client):
         assert repo.request.call_args.kwargs['params']['offset'] == 30
         assert client.get('/ml/stock-rounds/stocks-oc-2026-11-05').status_code == 200
         assert client.get('/ml/stock-rounds/invalid-round').status_code == 404
+
+
+def error_report_fixture():
+    repo = MagicMock()
+    content = b'id,prediction\na,0.02\nb,-0.01\n'
+    row = {**sample(), 'status': 'settled', 'result_path': 'private/results.json'}
+    evidence = json.dumps({'round_id': row['id'], 'assets': [
+        {'id': 'a', 'ticker': 'AAPL', 'return': .04}, {'id': 'b', 'ticker': 'MSFT', 'return': -.02}]}).encode()
+    row['result_hash'] = api.digest(evidence)
+    sub = {'id': 'selected', 'file_path': 'private/own.csv', 'file_sha256': api.digest(content), 'manifest_hash': 'hash'}
+    repo.rows.side_effect = lambda table, **filters: [row] if table == 'stock_return_rounds' else [sub]
+    repo.storage.get.side_effect = lambda path: {'private/results.json': evidence, 'private/own.csv': content}[path]
+    return repo, row, sub
+
+
+def test_error_report_requires_auth_before_storage(client, monkeypatch):
+    monkeypatch.delenv('ALLOW_TEST_AUTH', raising=False)
+    with patch.object(api, 'Repository') as repo:
+        assert client.get('/ml/stock-rounds/stocks-oc-2026-11-05/error-report').status_code == 401
+        repo.assert_not_called()
+
+
+def test_error_report_uses_only_owned_selected_scored_submission(client):
+    repo, _, sub = error_report_fixture()
+    with patch.object(api, 'require_user', return_value='verified-owner'), patch.object(api, 'Repository', return_value=repo):
+        response = client.get('/ml/stock-rounds/stocks-oc-2026-11-05/error-report?user_id=another-user')
+    assert response.status_code == 200
+    assert repo.rows.call_args.kwargs == {'round_id': 'stocks-oc-2026-11-05', 'user_id': 'verified-owner', 'is_selected': True, 'status': 'scored'}
+    report = response.json()
+    assert report['submission_id'] == sub['id']
+    assert report['mae'] == pytest.approx(.015)
+    assert report['baseline_mae'] == pytest.approx(.03)
+    assert report['score'] == pytest.approx(.5)
+    assert report['mean_signed_error'] == pytest.approx(-.005)
+    assert [a['symbol'] for a in report['assets']] == ['AAPL', 'MSFT']
+    assert 'private/' not in response.text
+
+
+def test_error_report_does_not_read_unreleased_or_other_users_files(client):
+    repo, row, _ = error_report_fixture()
+    with patch.object(api, 'require_user', return_value='owner'), patch.object(api, 'Repository', return_value=repo):
+        row['status'] = 'closed'
+        assert client.get('/ml/stock-rounds/stocks-oc-2026-11-05/error-report').status_code == 409
+        row['status'] = 'settled'
+        repo.rows.side_effect = lambda table, **filters: [row] if table == 'stock_return_rounds' else []
+        assert client.get('/ml/stock-rounds/stocks-oc-2026-11-05/error-report').status_code == 404
+    repo.storage.get.assert_not_called()
+
+
+@pytest.mark.parametrize('field', ['result_hash', 'file_sha256', 'manifest_hash', 'coverage'])
+def test_error_report_rejects_unverified_or_incomplete_evidence(client, field):
+    repo, row, sub = error_report_fixture()
+    if field == 'result_hash':
+        row[field] = 'incorrect'
+    elif field == 'coverage':
+        row['assets'] = [{'id': 'a'}, {'id': 'missing'}]
+    else:
+        sub[field] = 'incorrect'
+    with patch.object(api, 'require_user', return_value='owner'), patch.object(api, 'Repository', return_value=repo):
+        response = client.get('/ml/stock-rounds/stocks-oc-2026-11-05/error-report')
+    assert response.status_code == 503
+    assert 'private/' not in response.text
+    assert 'assets' not in response.json()

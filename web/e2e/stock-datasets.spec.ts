@@ -1,18 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createHash } from "node:crypto";
+import { authenticatedSession } from "./fixtures/session";
 
 async function login(page: Page) {
-  test.skip(
-    !process.env.QB_TEST_EMAIL || !process.env.QB_TEST_PASSWORD,
-    "Requires a disposable authenticated test account; never bypass the server guard",
-  );
-  await page.goto("/login");
-  await page.locator("#email").fill(process.env.QB_TEST_EMAIL!);
-  await page.locator("#password").fill(process.env.QB_TEST_PASSWORD!);
-  await page
-    .getByRole("button", { name: "Iniciar sesión", exact: true })
-    .click();
-  await page.waitForURL("**/app", { timeout: 45000 });
+  await authenticatedSession(page);
 }
 
 test("public documentation explains the historical dataset and retired download endpoints return 410", async ({
@@ -129,6 +120,9 @@ test("daily files verify hashes, receipts display, and closed rounds cannot subm
           },
         ],
       });
+    if (url.pathname === `/ml/stock-rounds/${round.id}`) return json({ round });
+    if (url.pathname === "/ml/stock-rounds/stocks-oc-2020-01-02")
+      return json({ round: { ...round, id: "stocks-oc-2020-01-02", target_date: "2020-01-02", deadline: "2020-01-02T14:00:00Z" } });
     if (url.pathname.includes("/download/"))
       return json({
         url: "https://daily-fixture.invalid/live.csv",
@@ -152,17 +146,16 @@ test("daily files verify hashes, receipts display, and closed rounds cannot subm
     return json({});
   });
   await page.goto("/app/tournaments");
-  const daily = page.locator("#rondas-diarias");
+  const catalog = page.locator("#rondas-diarias");
   await expect(
-    daily.getByText("Recibiendo predicciones", { exact: true }),
+    catalog.getByText("Abierto", { exact: true }),
   ).toHaveCount(1);
-  await expect(daily.getByText("Envíos cerrados", { exact: true })).toHaveCount(
+  await expect(catalog.getByText("Envíos cerrados", { exact: true })).toHaveCount(
     1,
   );
-  await daily
-    .getByRole("button", { name: "Ver datos y mis envíos" })
-    .first()
-    .click();
+  await catalog.locator(`a[href="/app/tournaments/${round.id}"]`).click();
+  const daily = page.getByRole("region", { name: "Datos y envío de la ronda" });
+  await expect(page.getByRole("heading", { name: "Prepara y envía tus predicciones" })).toBeVisible();
   const download = page.waitForEvent("download");
   await daily
     .getByRole("button", { name: "Descargar live.csv", exact: true })
@@ -193,7 +186,8 @@ test("daily files verify hashes, receipts display, and closed rounds cannot subm
     path: `../artifacts/alpaca-ui/${info.project.name}-daily.png`,
     fullPage: true,
   });
-  await daily.getByRole("button", { name: "Ver datos y mis envíos" }).click();
+  await page.goto("/app/tournaments/stocks-oc-2020-01-02");
+  await expect(page.getByRole("heading", { name: "Esperando los resultados" })).toBeVisible();
   await expect(daily.getByLabel("CSV de predicciones de acciones")).toHaveCount(
     0,
   );

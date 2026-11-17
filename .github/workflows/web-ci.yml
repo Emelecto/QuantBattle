@@ -13,9 +13,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-placeholder
-      NEXT_PUBLIC_WORKER_URL: https://quantlab2.onrender.com
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:3331
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: isolated-release-fixture
+      NEXT_PUBLIC_WORKER_URL: http://127.0.0.2:3332
       NEXT_PUBLIC_SITE_URL: http://localhost:3100
     defaults:
       run:

@@ -166,7 +166,9 @@ export const getMissions = () =>
 export const sendMission = (id: string, answer: unknown) =>
   call<MissionResult>(`/ml/learning/missions/${id}/attempts`, post(answer));
 export const getErrorReport = (id: string) =>
-  call<ErrorReport>(`/ml/learning/error-lab/${id}`);
+  call<ErrorReport>(id.startsWith("stocks-oc-")
+    ? `/ml/stock-rounds/${encodeURIComponent(id)}/error-report`
+    : `/ml/learning/error-lab/${encodeURIComponent(id)}`);
 export function downloadJSON(value: unknown, name: string) {
   const url = URL.createObjectURL(
     new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }),

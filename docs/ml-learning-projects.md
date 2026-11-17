@@ -19,7 +19,7 @@ No hay una migración automática de hipótesis o modelos a partir de textos his
 - `/app/learn/first-tournament`: reglas, archivos reales de la ronda abierta, notebooks, revisión del CSV y comprobante. Preparación tiene tres confirmaciones declaradas por la persona; el envío es comprobado por el servidor. No se afirma que un clic pruebe una descarga o entrenamiento.
 - `/app/learn/missions`: tres misiones sintéticas versionadas. El servidor evalúa predicciones o respuestas; los intentos y finalizaciones son privados. No generan premios QP ni modifican rankings.
 - `/app/learn/glossary`: ejemplos interactivos, explícitamente ilustrativos, de MAE, purga temporal, volatilidad y puntuación semanal. Spearman se presenta por separado.
-- `/app/learn/errors`: reconstruye el error del CSV propio seleccionado después de la liberación completa de la semana. No usa símbolos/targets privados antes del cierre ni CSV de terceros.
+- `/app/learn/errors`: muestra los envíos propios evaluados de las rondas diarias y reconstruye sus errores después de verificar el resultado. No usa resultados pendientes ni CSV de terceros.
 
 ## Proyectos y versiones
 
@@ -44,7 +44,7 @@ Las publicaciones aprobadas se consultan y descargan mediante API; Storage sigue
 
 Todas las tablas nuevas tienen RLS. El cliente puede leer sus propios registros; no tiene políticas de escritura directa. Las mutaciones pasan por el worker autenticado, que determina notas de misiones, propiedad, estados y moderación. Las publicaciones públicas usan una lista explícita de campos; las rutas de Storage nunca salen en el JSON.
 
-El laboratorio verifica el mismo criterio de liberación completa que la API semanal, descarga el JSON liberado y el CSV propio comprobando sus hashes, y vuelve a calcular MAE, referencia cero y score. Los ejercicios descriptivos no diagnostican sobreajuste ni superioridad estadística. La lista inicial cubre las semanas/envíos recientes; también admite el ID de una ronda anterior.
+El laboratorio consulta el historial privado con el filtro `evaluated` y permite cargar páginas anteriores. Para las rondas actuales usa `/ml/stock-rounds/{id}/error-report`: exige estado `settled` y un envío seleccionado y puntuado del usuario autenticado. Comprueba las huellas del resultado y del CSV, la versión del manifiesto y la cobertura de activos antes de recalcular MAE, referencia cero y score. Un fallo de consulta se presenta como disponibilidad desconocida. Los IDs de rondas históricas conservan el endpoint anterior y su embargo semanal. Los ejercicios descriptivos no diagnostican sobreajuste ni superioridad estadística.
 
 Los archivos se escriben antes de registrar su versión; un fallo posterior de base de datos puede dejar objetos privados huérfanos, pero no una versión pública incompleta. No se hace borrado automático de archivos durante esta entrega.
 

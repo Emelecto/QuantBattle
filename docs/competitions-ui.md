@@ -36,8 +36,11 @@ de rondas y envíos de acciones de la migración 0034 ya existente.
 ## Verificación reproducible
 
 Desde `worker`: `python -m pytest tests/test_stock_api.py stocks_daily/test_tournament.py -q`.
-Desde `web`: `npx playwright test --config=playwright.competitions.config.ts`,
-`npx tsc --noEmit` y `npm run build`.
+Desde `web`: compilar primero con los valores aislados documentados en
+[launch-validation-2026-11-16.md](launch-validation-2026-11-16.md) y ejecutar
+`npx playwright test --config=playwright.competitions.config.ts`.
+Ambos conjuntos de navegador usan esa compilación de producción y conservan
+sus informes JSON separados.
 
 Las pruebas de navegador usan una identidad aislada y respuestas controladas;
 no envían archivos ni cambian cuentas o torneos de producción. Las pruebas del

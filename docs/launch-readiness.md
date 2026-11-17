@@ -29,6 +29,11 @@ Los navegadores se ejecutan en escritorio y móvil. Las simulaciones y servicios
 
 Los informes son artefactos de cada ejecución. Los informes locales indican si se generaron con cambios aún sin commit. No escribir una afirmación de “CI aprobada” en el README a partir de que el YAML existe.
 
+El diagnóstico y la reproducción de la corrección de los contratos de navegador
+de noviembre están en [launch-validation-2026-11-16.md](launch-validation-2026-11-16.md).
+La identidad aislada permite probar el proxy del servidor sin debilitar la
+autenticación publicada ni utilizar cuentas reales.
+
 ## Estados de publicación
 
 1. **Plataforma pública:** documentación y producto accesibles; no presume que todos los recorridos estén aprobados.

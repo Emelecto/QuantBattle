@@ -15,11 +15,11 @@ import {
   type Progress,
 } from "@/lib/ml-learning";
 import {
-  getReturnHistory,
   listReturnWeeks,
   type ReturnWeek,
 } from "@/lib/returnTournaments";
 import { Workspace, Feedback, messageOf } from "./Workspace";
+import { listStockSubmissions, type StockHistoryEntry } from "@/lib/stockTournaments";
 
 export function LearningHub() {
   return (
@@ -492,8 +492,8 @@ export function Missions() {
 }
 
 export function ErrorLaboratory() {
-  const [weeks, setWeeks] = useState<ReturnWeek[]>([]),
-    [own, setOwn] = useState<Set<string>>(new Set()),
+  const [entries, setEntries] = useState<StockHistoryEntry[]>([]),
+    [hasMore, setHasMore] = useState(false),
     [round, setRound] = useState(""),
     [report, setReport] = useState<ErrorReport | null>(null),
     [error, setError] = useState(""),
@@ -501,25 +501,21 @@ export function ErrorLaboratory() {
     [loading, setLoading] = useState(true),
     [availabilityKnown, setAvailabilityKnown] = useState(false),
     [errorSource, setErrorSource] = useState<"catalog" | "report">("catalog");
-  const load = useCallback(async () => {
+  const load = useCallback(async (offset = 0) => {
     setLoading(true);
     setError("");
     setErrorSource("catalog");
     setAvailabilityKnown(false);
-    const results = await Promise.allSettled([
-      listReturnWeeks(),
-      getReturnHistory(),
-    ]);
-    if (results[0].status === "fulfilled")
-      setWeeks(results[0].value.tournaments);
-    if (results[1].status === "fulfilled")
-      setOwn(new Set(results[1].value.entries.map((r) => r.round_id)));
-    for (const result of results)
-      if (result.status === "rejected") setError(messageOf(result.reason));
-    setAvailabilityKnown(
-      results.every((result) => result.status === "fulfilled"),
-    );
-    setLoading(false);
+    try {
+      const result = await listStockSubmissions(offset, "evaluated");
+      setEntries((old) => offset ? [...old, ...result.entries] : result.entries);
+      setHasMore(result.has_more);
+      setAvailabilityKnown(true);
+    } catch (e) {
+      setError(messageOf(e));
+    } finally {
+      setLoading(false);
+    }
   }, []);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -527,13 +523,9 @@ export function ErrorLaboratory() {
     });
     return () => cancelAnimationFrame(frame);
   }, [load]);
-  const available = weeks
-    .filter((w) => w.results_released)
-    .flatMap((w) =>
-      w.rounds
-        .filter((r) => r.status === "published" && own.has(r.id))
-        .map((r) => ({ id: r.id, label: `${w.name} · ronda ${r.ordinal}` })),
-    );
+  const available = entries
+    .filter((entry) => entry.is_selected && entry.status === "scored" && entry.round_status === "settled")
+    .map((entry) => ({ id: entry.round.id, label: `Ronda del ${entry.round.target_date}` }));
   async function analyze(e?: FormEvent) {
     e?.preventDefault();
     setBusy(true);
@@ -568,7 +560,7 @@ export function ErrorLaboratory() {
           </button>
         )}
         {loading ? (
-          <p role="status">Consultando semanas y comprobantes…</p>
+          <p role="status">Consultando tus envíos evaluados…</p>
         ) : (
           <>
             {!availabilityKnown && (
@@ -581,10 +573,13 @@ export function ErrorLaboratory() {
             {availabilityKnown && !available.length && (
               <p className="ml-notice">
                 No hay una ronda liberada con envío propio en el historial
-                reciente. Cuando termine y se verifique una semana en la que
+                reciente. Cuando termine y se verifique una ronda en la que
                 participaste, aparecerá aquí. También puedes indicar el ID de
                 una ronda anterior.
               </p>
+            )}
+            {availabilityKnown && hasMore && (
+              <button onClick={() => void load(entries.length)}>Ver más envíos evaluados</button>
             )}
             <form className="ml-form" onSubmit={analyze}>
               <label>

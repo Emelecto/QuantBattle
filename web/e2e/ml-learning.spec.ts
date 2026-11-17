@@ -144,6 +144,7 @@ async function setup(page: Page) {
     }
     if (path === "/ml/return-tournaments") return json({ tournaments: [] });
     if (path === "/ml/return-submissions/mine") return json({ entries: [] });
+    if (path === "/ml/stock-submissions/mine") return json({ entries: [], has_more: false });
     if (path.startsWith("/ml/learning/error-lab/"))
       return json(
         {
@@ -176,24 +177,21 @@ test.afterEach(async ({ page }, info) => {
   }
 });
 
-test("first tournament distinguishes preparation from a server-confirmed submission", async ({
+test("first tournament explains the current data, submission and result workflow", async ({
   page,
 }) => {
   await page.goto("/app/learn/first-tournament");
-  await expect(
-    page.getByText("0 de 4 hitos · preparación y primer envío"),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Ya revisé las reglas" }).click();
-  await expect(
-    page.getByText("1 de 4 hitos · preparación y primer envío"),
-  ).toBeVisible();
-  await expect(
-    page.getByText(/El paso se completará cuando el servidor registre/),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tu primer torneo con datos reales" })).toBeVisible();
+  const steps = page.locator("ol > li");
+  await expect(steps).toHaveCount(6);
+  await expect(steps.nth(0)).toContainText("train.parquet");
+  await expect(steps.nth(1)).toContainText("validation.parquet");
+  await expect(steps.nth(3)).toContainText("id,prediction");
+  await expect(steps.nth(4)).toContainText("último envío válido");
+  await expect(steps.nth(5)).toContainText("esperando evaluación");
+  await expect(page.getByRole("link", { name: "Ver rondas diarias y plazos" })).toHaveAttribute("href", "/app/tournaments#rondas-diarias");
   await page.reload();
-  await expect(
-    page.getByText("1 de 4 hitos · preparación y primer envío"),
-  ).toBeVisible();
+  await expect(steps).toHaveCount(6);
 });
 
 test("create a tournament ML project and save an immutable model version", async ({
@@ -268,22 +266,17 @@ test("error lab communicates retention and does not show future asset data", asy
 test("failed availability lookups stay unknown instead of claiming no rounds exist", async ({
   page,
 }) => {
-  await page.route("**/ml/return-tournaments?*", (route) =>
+  await page.route("**/ml/stock-rounds?*", (route) =>
     route.fulfill({
       status: 500,
       contentType: "application/json",
       body: JSON.stringify({ detail: "Consulta de rondas no disponible" }),
     }),
   );
-  await page.goto("/app/learn/first-tournament");
-  await expect(
-    page.getByText(
-      "No se pudo confirmar la disponibilidad de rondas. Reintenta la consulta.",
-    ),
-  ).toBeVisible();
-  await expect(
-    page.getByText(/No encontramos una ronda real abierta/),
-  ).toHaveCount(0);
+  await page.goto("/app/tournaments");
+  await expect(page.getByRole("alert").filter({ hasText: "No pudimos cargar los torneos" })).toBeVisible();
+  await expect(page.getByText("Aún no hay torneos publicados")).toHaveCount(0);
+  await page.route("**/ml/stock-submissions/mine?*", (route) => route.fulfill({ status: 500, json: { detail: "Consulta de envíos no disponible" } }));
   await page.goto("/app/learn/errors");
   await expect(
     page.getByText(/No se pudo determinar qué rondas están disponibles/),
@@ -291,6 +284,34 @@ test("failed availability lookups stay unknown instead of claiming no rounds exi
   await expect(
     page.getByText(/No hay una ronda liberada con envío propio/),
   ).toHaveCount(0);
+});
+
+test("error lab discovers current evaluated submissions and requests their verified report", async ({ page }) => {
+  const id = "stocks-oc-2026-11-05";
+  await page.route("**/ml/stock-submissions/mine?*", (route) => {
+    expect(new URL(route.request().url()).searchParams.get("state")).toBe("evaluated");
+    const offset = new URL(route.request().url()).searchParams.get("offset");
+    return route.fulfill({ json: { entries: offset === "0" ? [
+      { id: "receipt", round: { id, target_date: "2026-11-05" }, is_selected: true, status: "scored", round_status: "settled" },
+      { id: "pending", round: { id: "stocks-oc-2026-11-06", target_date: "2026-11-06" }, is_selected: true, status: "validated", round_status: "closed" },
+    ] : [{ id: "older", round: { id: "stocks-oc-2026-11-04", target_date: "2026-11-04" }, is_selected: true, status: "scored", round_status: "settled" }], has_more: offset === "0" } });
+  });
+  await page.route(`**/ml/stock-rounds/${id}/error-report*`, (route) => route.fulfill({ json: {
+    round_id: id, submission_id: "receipt", dataset_version: "verified-manifest", file_sha256: "verified-csv",
+    mae: .01, baseline_mae: .02, score: .5, mean_signed_error: -.01,
+    limitations: "Diagnóstico de una ronda.", exercises: [],
+    assets: [{ id: "asset", symbol: "AAPL", prediction: .01, actual: .02, error: -.01, absolute_error: .01 }],
+  } }));
+  await page.goto("/app/learn/errors");
+  await expect(page.locator(`#released-rounds option[value="${id}"]`)).toHaveCount(1);
+  await expect(page.locator('#released-rounds option[value="stocks-oc-2026-11-06"]')).toHaveCount(0);
+  await page.getByRole("button", { name: "Ver más envíos evaluados" }).click();
+  await expect(page.locator('#released-rounds option[value="stocks-oc-2026-11-04"]')).toHaveCount(1);
+  await expect(page.locator(`#released-rounds option[value="${id}"]`)).toHaveCount(1);
+  await page.getByLabel("ID de ronda con resultados liberados").fill(id);
+  await page.getByRole("button", { name: "Analizar mi envío" }).click();
+  await expect(page.getByRole("table")).toContainText("AAPL");
+  await expect(page.getByText("Tu diagnóstico de esta ronda", { exact: true })).toBeVisible();
 });
 
 test("visual glossary responds to controls and fits the viewport", async ({

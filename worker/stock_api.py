@@ -7,7 +7,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, HTTPException, Query, Request
 
 from auth import require_user
-from stocks_daily.protocol import MAX_BYTES, PROTOCOL, digest, instant, predictions
+from stocks_daily.protocol import MAX_BYTES, PROTOCOL, digest, instant, predictions, score
 from stocks_daily.tournament import Repository
 
 router = APIRouter(prefix='/ml', tags=['stock-return-tournaments'])
@@ -134,6 +134,50 @@ async def submit(round_id: str, request: Request):
             raise HTTPException(409, 'La ronda cerró durante la carga; no se seleccionó el CSV') from exc
         raise HTTPException(503, 'No se confirmó el envío. Consulta tu comprobante antes de reintentar.') from exc
     return {'submission': receipt(selected, False)}
+
+
+@router.get('/stock-rounds/{round_id}/error-report')
+def error_report(round_id: str, request: Request):
+    uid = require_user(request)
+    repo = Repository()
+    row = lookup(repo, round_id)
+    if row['status'] != 'settled':
+        raise HTTPException(409, 'El laboratorio se habilita cuando se verifica el resultado de la ronda')
+    found = repo.rows('stock_return_submissions', round_id=round_id, user_id=uid, is_selected=True, status='scored')
+    if not found:
+        raise HTTPException(404, 'No tienes un envío seleccionado y puntuado en esta ronda')
+    submission = found[0]
+    try:
+        evidence_raw = repo.storage.get(row['result_path'])
+        content = repo.storage.get(submission['file_path'])
+        if (digest(evidence_raw) != row['result_hash'] or digest(content) != submission['file_sha256']
+                or submission['manifest_hash'] != row['manifest_hash']):
+            raise ValueError('Integrity mismatch')
+        evidence = json.loads(evidence_raw)
+        assets = evidence['assets']
+        ids = [a['id'] for a in assets]
+        if (evidence['round_id'] != round_id or len(ids) != len(set(ids))
+                or set(ids) != {a['id'] for a in row['assets']}):
+            raise ValueError('Evidence coverage mismatch')
+        predicted = predictions(content, ids)
+        measured = score(predicted, {a['id']: a['return'] for a in assets})
+        details = [{'id': a['id'], 'symbol': a['ticker'], 'actual': a['return'], 'prediction': predicted[a['id']],
+                    'error': predicted[a['id']] - a['return'],
+                    'absolute_error': abs(predicted[a['id']] - a['return'])} for a in assets]
+        details.sort(key=lambda a: -a['absolute_error'])
+        bias = sum(a['error'] for a in details) / len(details)
+    except (RuntimeError, ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(503, 'No se pudo verificar el envío y sus resultados. Vuelve a intentarlo.') from exc
+    return {'round_id': round_id, 'submission_id': submission['id'], 'dataset_version': submission['manifest_hash'],
+            'file_sha256': submission['file_sha256'], **measured, 'mean_signed_error': bias, 'assets': details,
+            'exercises': [
+                {'question': '¿Qué activo tiene uno de los mayores errores absolutos?',
+                 'answer': f'{details[0]["symbol"]}: {details[0]["absolute_error"] * 100:.3f} puntos porcentuales',
+                 'lesson': '/app/academia/mates/2'},
+                {'question': '¿Tus predicciones sobreestimaron o subestimaron en promedio?',
+                 'answer': 'Sobreestimaron' if bias > 0 else 'Subestimaron' if bias < 0 else 'Sesgo medio cero',
+                 'lesson': '/app/academia/ml/3'}],
+            'limitations': 'Diagnóstico descriptivo de una ronda; no demuestra sobreajuste ni superioridad estadística.'}
 
 
 @router.get('/stock-rounds/{round_id}/results')

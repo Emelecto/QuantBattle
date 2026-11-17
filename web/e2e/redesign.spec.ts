@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { existsSync } from "node:fs";
+import { authenticatedSession } from "./fixtures/session";
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
@@ -7,7 +8,7 @@ test("la portada clara conserva navegación y no desborda", async ({ page }) => 
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /Crea modelos de machine learning.*aplicados en finanzas/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Machine learning\s*aplicado a finanzas/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Explorar torneos" }).first()).toHaveAttribute("href", "/app/tournaments");
   await expect(page.getByRole("link", { name: "Leer metodología y resultados" })).toHaveAttribute("href", "/docs#evaluacion");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -61,11 +62,11 @@ test("el dashboard comunica un fallo de datos sin inventar una ronda vacía", as
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/app");
   await page.getByRole("button", { name: "Saltar" }).click({ timeout: 3000 }).catch(() => {});
-  await expect(page.getByText("Consulta no disponible", { exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Estado de las rondas no disponible.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Resultado del piloto" })).toBeVisible();
-  await page.getByRole("link", { name: /^(Mis envíos|Envíos)$/ }).click();
-  await expect(page).toHaveURL(/\/app#historial-ml$/);
+  await expect(page.locator(".qb-dashboard-notice[role=alert]")).toContainText("No se pudo cargar", { timeout: 20_000 });
+  await expect(page.getByText("No se pudieron cargar las rondas.", { exact: false })).toBeVisible();
+  await expect(page.getByText("No hay rondas abiertas en este momento.", { exact: false })).toHaveCount(0);
+  await page.getByRole("link", { name: /^(Mis envíos|Envíos)$/ }).filter({ visible: true }).first().click();
+  await expect(page).toHaveURL(/\/app\/submissions$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(errors).toEqual([]);
 });
@@ -80,6 +81,7 @@ test("acceso y registro usan el tema claro", async ({ page }) => {
 });
 
 test("la lección y su quiz conservan contraste e interacción", async ({ page }) => {
+  await authenticatedSession(page);
   await page.goto("/app/academia/fundamentos/1");
   await expect(page.getByRole("heading", { name: "Edge y expectativa: el único juego que importa" })).toHaveCount(1);
   const questions = page.locator(".academia-quiz-q");
@@ -98,6 +100,7 @@ test("la lección y su quiz conservan contraste e interacción", async ({ page }
 });
 
 test("los bloques de código no desbordan la lectura", async ({ page }) => {
+  await authenticatedSession(page);
   for (const path of ["/blog/walk-forward-oos", "/app/academia/python/1"]) {
     await page.goto(path);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

@@ -1,4 +1,36 @@
 import { test, expect } from "@playwright/test";
+import { authenticatedSession } from "./fixtures/session";
+
+test("the server accepts the isolated authenticated account on protected pages", async ({ page }) => {
+  await authenticatedSession(page);
+  const response = await page.goto("/app/academia");
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { name: "Aprende midiendo", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/app\/academia$/);
+});
+
+test("the server rejects anonymous visits to every launch workspace", async ({ request }) => {
+  for (const path of ["/app", "/app/academia", "/app/strategies", "/app/submissions", "/app/tournaments"]) {
+    const response = await request.get(path, { maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    const destination = new URL(response.headers().location, "http://localhost:3100");
+    expect(destination.pathname).toBe("/login");
+    expect(destination.origin).toBe("http://localhost:3100");
+  }
+});
+
+test("a cached session with an unrecognized token cannot pass the server guard", async ({ page }) => {
+  await authenticatedSession(page);
+  const cookies = await page.context().cookies();
+  const name = `sb-${new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname.split(".")[0]}-auth-token`;
+  const cookie = cookies.find((entry) => entry.name === name)!;
+  const session = JSON.parse(cookie.value);
+  session.access_token = session.access_token.replace("test-signature", "rejected-signature");
+  await page.context().addCookies([{ ...cookie, value: JSON.stringify(session) }]);
+  const response = await page.goto("/app/submissions");
+  expect(response?.url()).toContain("/login");
+  await expect(page.getByRole("heading", { name: "Mis envíos", exact: true })).toHaveCount(0);
+});
 
 test("login allows retry when the authentication request does not respond", async ({ page }) => {
   let releaseRequest: (() => void) | undefined;
