@@ -108,3 +108,39 @@ def test_registration_checks_hash_and_never_replaces_existing_round():
     repo.rows.return_value = []
     with pytest.raises(ValueError, match='closed round'): register_latest(repo, NOW)
     repo.request.assert_not_called()
+
+
+def registration_fixture():
+    repo = MagicMock()
+    live = ('id,ticker,date,target_date\n' + ''.join(
+        f'asset-{i},STOCK{i},2026-11-04,2026-11-05\n' for i in range(40))).encode()
+    manifest = {'mode': 'live', 'target_date': '2026-11-05', 'observation_date': '2026-11-04',
+                'submission_deadline': '2026-11-05T14:00:00Z', 'target_open': '2026-11-05T14:30:00Z',
+                'target_close': '2026-11-05T21:00:00Z', 'rows': 40,
+                'files': {'live.csv': {'sha256': digest(live)}}}
+    raw = json.dumps(manifest).encode()
+    pointer = json.dumps({'manifest': 'daily/manifest.json', 'manifest_sha256': digest(raw)}).encode()
+    repo.storage.get.side_effect = lambda path, **kw: {
+        'daily/latest.json': pointer, 'daily/manifest.json': raw, 'daily/live.csv': live}[path]
+    return repo, manifest, raw
+
+
+def test_registration_recovers_committed_files_and_requires_database_confirmation():
+    repo, manifest, raw = registration_fixture()
+    now = datetime(2026, 11, 5, 10, tzinfo=timezone.utc)
+    repo.rows.side_effect = [[], [{'id': 'stocks-oc-2026-11-05', 'manifest_hash': digest(raw)}]]
+    assert register_latest(repo, now) is True
+    record = repo.request.call_args.kwargs['json']
+    assert record['deadline'] == manifest['submission_deadline']
+    assert record['manifest_hash'] == digest(raw)
+    assert len(record['assets']) == 40
+    repo.rows.side_effect = [[], []]
+    with pytest.raises(RuntimeError, match='not confirmed'):
+        register_latest(repo, now)
+
+
+def test_reconciliation_skips_missing_closed_round_without_opening_late_entries():
+    repo, _, _ = registration_fixture()
+    repo.rows.return_value = []
+    assert register_latest(repo, NOW, skip_closed=True) is False
+    repo.request.assert_not_called()

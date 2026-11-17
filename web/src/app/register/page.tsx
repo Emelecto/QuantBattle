@@ -74,19 +74,8 @@ function RegisterForm() {
         return;
       }
 
-      // Guardamos el username en la tabla profiles (el trigger ya creó la fila).
-      if (data.user) {
-        const { error: profErr } = await supabase
-          .from("profiles")
-          .upsert(
-            { id: data.user.id, username: cleanUser, display_name: cleanUser },
-            { onConflict: "id" },
-          );
-        if (profErr) {
-          // No bloquea el registro; el usuario puede editarlo luego.
-          console.warn("No se pudo guardar el username:", profErr.message);
-        }
-      }
+      // Auth creates the profile atomically from this metadata. An unconfirmed
+      // browser has no session to write it, and must not overwrite its alias.
 
       // Sesión presente => confirmación de email desactivada: entramos directo.
       if (data.session) {

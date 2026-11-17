@@ -81,9 +81,13 @@ test("login renders percent characters and recovery points to password form", as
 });
 
 test("confirmation resend failure allows a second successful attempt", async ({ page }) => {
-  await page.route("**/auth/v1/signup*", route=>route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({user:{id:"technical-confirmation",identities:[],email:"technical-confirmation@quantbattle.example"},session:null})}));
+  await page.route("**/auth/v1/signup*", route=> {
+    expect(route.request().postDataJSON().data.username).toBe("technical-confirmati");
+    return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({user:{id:"technical-confirmation",identities:[],email:"technical-confirmation@quantbattle.example"},session:null})});
+  });
   // Estas solicitudes son simuladas: no se crea una cuenta ni se envía correo.
-  await page.route("**/rest/v1/profiles*", route=>route.fulfill({status:201,contentType:"application/json",body:"[]"}));
+  let profileWrites = 0;
+  await page.route("**/rest/v1/profiles*", route=> { profileWrites++; return route.fulfill({status:401,json:{message:"No session before email confirmation"}}); });
   let attempts = 0;
   await page.route("**/auth/v1/resend*", route=>{
     attempts++;
@@ -96,6 +100,8 @@ test("confirmation resend failure allows a second successful attempt", async ({ 
   await page.getByLabel("Confirmar contraseña",{exact:true}).fill("mock-password-1234");
   await page.getByRole("button",{name:"Crear cuenta",exact:true}).click();
   const resend = page.getByRole("button",{name:"Reenviar enlace",exact:true});
+  await expect(resend).toBeVisible();
+  expect(profileWrites).toBe(0);
   await resend.click();
   await expect(page.getByRole("alert").filter({hasText:"No pudimos reenviar"})).toBeVisible();
   await expect(resend).toBeEnabled();

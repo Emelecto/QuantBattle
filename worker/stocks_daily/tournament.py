@@ -37,7 +37,7 @@ class Repository:
         return self.request('PATCH', table, params={'id': 'eq.' + identity}, json=data)
 
 
-def register_latest(repo, now=None):
+def register_latest(repo, now=None, *, skip_closed=False):
     now = now or datetime.now(timezone.utc)
     data = repo.storage.get('daily/latest.json', optional=True)
     if data is None:
@@ -53,7 +53,11 @@ def register_latest(repo, now=None):
         if existing[0]['manifest_hash'] != digest(payload):
             raise ValueError('A stock round cannot change after registration')
         return False
-    if manifest['mode'] != 'live' or now >= instant(manifest['submission_deadline']):
+    if manifest['mode'] != 'live':
+        raise ValueError('Cannot register a replay or a closed round')
+    if now >= instant(manifest['submission_deadline']):
+        if skip_closed:
+            return False
         raise ValueError('Cannot register a replay or a closed round')
     prefix = pointer['manifest'].rsplit('/', 1)[0]
     live = repo.storage.get(prefix + '/live.csv')
@@ -71,6 +75,9 @@ def register_latest(repo, now=None):
               'manifest_path': pointer['manifest'], 'manifest_hash': digest(payload),
               'manifest': manifest, 'assets': assets}
     repo.request('POST', 'stock_return_rounds', json=record)
+    confirmed = repo.rows('stock_return_rounds', id=identity)
+    if not confirmed or confirmed[0]['manifest_hash'] != digest(payload):
+        raise RuntimeError('Stock round registration was not confirmed')
     return True
 
 
@@ -155,7 +162,10 @@ def run():
     repo.request('POST', 'operation_runs', json={'job': 'stock_return_referee', 'run_id': run_id,
                  'commit_sha': os.environ.get('GITHUB_SHA'), 'started_at': datetime.now(timezone.utc).isoformat(), 'status': 'running'})
     try:
-        counts = {'settled_rounds': settle_due(repo)}
+        # Reconcile an already committed dataset before generation's evening
+        # window checks. Recovery keeps the original files and deadline.
+        registered = register_latest(repo, skip_closed=True)
+        counts = {'registered_rounds': int(registered), 'settled_rounds': settle_due(repo)}
     except Exception:
         repo.request('PATCH', 'operation_runs', params={'run_id': 'eq.' + run_id, 'job': 'eq.stock_return_referee'},
                      json={'status': 'failed', 'error_code': 'STOCK_REFEREE_FAILED', 'finished_at': datetime.now(timezone.utc).isoformat()})

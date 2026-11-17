@@ -65,6 +65,8 @@ def main():
                     'options': {'data': metadata}}).user
                 check('actual_public_signup', user is not None)
             users.append(user.id)
+            profile = admin.table('profiles').select('username').eq('id', user.id).single().execute().data
+            check('signup_profile_uses_requested_username_' + str(i), profile['username'] == metadata['username'])
             session = create_client(api, config['ANON_KEY']).auth.sign_in_with_password({'email': email, 'password': password}).session
             tokens.append(session.access_token)
         env = {**os.environ, 'SUPABASE_URL': api, 'SUPABASE_ANON_KEY': config['ANON_KEY'],

@@ -1,4 +1,6 @@
 import json
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 from pathlib import Path
 
 import numpy as np
@@ -112,6 +114,30 @@ class FakeStorage:
             raise RuntimeError('immutable object differs')
         self.objects[key]=data
         self.writes.append(key)
+
+
+def test_committed_retry_reconciles_database_registration(tmp_path, monkeypatch):
+    from . import run, tournament
+    from .protocol import digest
+    plan = {'observation_date': '2030-01-01', 'target_date': '2030-01-02',
+            'submission_deadline': '2030-01-02T14:00:00Z'}
+    store = FakeStorage()
+    live = b'id,feature\nasset,1\n'
+    manifest = json.dumps({'files': {'live.csv': {'sha256': digest(live)}}}).encode()
+    pointer = json.dumps({'manifest': 'committed/manifest.json', 'manifest_sha256': digest(manifest)}).encode()
+    store.objects.update({'rounds/2030-01-02/v1.json': pointer,
+                          'committed/manifest.json': manifest, 'committed/live.csv': live})
+    register = MagicMock(return_value=True)
+    repo = MagicMock()
+    monkeypatch.setattr(run, 'Storage', lambda: store)
+    monkeypatch.setattr(run, 'session_plan', lambda *a: (plan, None))
+    monkeypatch.setattr(tournament, 'Repository', lambda storage: repo)
+    monkeypatch.setattr(tournament, 'register_latest', register)
+    result = run.execute(SimpleNamespace(root=tmp_path, state=None, revision='v1', seed_cloud=False,
+                         replay=False, observation_date=None, due_only=False, cloud=True))
+    assert result['status'] == 'already_committed'
+    register.assert_called_once_with(repo)
+    assert store.objects['daily/latest.json'] == pointer
 
 
 def test_partial_upload_is_not_discoverable(bundle,setup):

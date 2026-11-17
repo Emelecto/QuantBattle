@@ -66,6 +66,8 @@ def execute(args):
             latest=storage.get('daily/latest.json',optional=True)
             if not latest or json.loads(latest)['target_date']<=plan['target_date']:
                 storage.put('daily/latest.json',remote,replace=True,content_type='application/json')
+            from .tournament import Repository, register_latest
+            register_latest(Repository(storage))
             return {'status':'already_committed',**plan}
         previous_pointer=storage.get('state/latest.json',optional=True)
         if previous_pointer is None:
